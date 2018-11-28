@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/tc.iml" filepath="$PROJECT_DIR$/tc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-company/tc-company.iml" filepath="$PROJECT_DIR$/tc-company/tc-company.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-security/tc-security.iml" filepath="$PROJECT_DIR$/tc-security/tc-security.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-security-app/tc-security-app.iml" filepath="$PROJECT_DIR$/tc-security-app/tc-security-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-security-browser/tc-security-browser.iml" filepath="$PROJECT_DIR$/tc-security-browser/tc-security-browser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-security-core/tc-security-core.iml" filepath="$PROJECT_DIR$/tc-security-core/tc-security-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tc-security-demo/tc-security-demo.iml" filepath="$PROJECT_DIR$/tc-security-demo/tc-security-demo.iml" />
+    </modules>
+  </component>
+</project>

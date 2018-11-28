@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="EntryPointsManager">
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="org.springframework.transaction.annotation.Transactional" />
+    </list>
+  </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/tcsecurity/pom.xml" />
+        <option value="$PROJECT_DIR$/tc-security-core/pom.xml" />
+        <option value="$PROJECT_DIR$/tc-security-app/pom.xml" />
+        <option value="$PROJECT_DIR$/tc-security-browser/pom.xml" />
+        <option value="$PROJECT_DIR$/tc-security-demo/pom.xml" />
+        <option value="$PROJECT_DIR$/tc-security/pom.xml" />
+        <option value="$PROJECT_DIR$/tc-company/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
