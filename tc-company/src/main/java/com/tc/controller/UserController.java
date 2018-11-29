@@ -6,6 +6,7 @@ import com.tc.dto.RegisterUser;
 import com.tc.exception.ValidException;
 import com.tc.service.UserService;
 import io.swagger.annotations.ApiOperation;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -21,7 +22,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
     /**
      * 用户注册
      * @param user

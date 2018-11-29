@@ -15,6 +15,9 @@ import java.util.Objects;
 @Entity
 public class Resource implements Serializable {
 
+    public static final String SORT_CREATETIME = "createTime";
+
+
     private Long id;
     private User creation;
     private String name;

@@ -5,6 +5,8 @@ import com.tc.db.repository.UserRepository;
 import com.tc.dto.LoginUser;
 import com.tc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,8 +14,10 @@ import org.springframework.social.security.SocialUserDetails;
 import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service(value = "userService")
-public class UserServiceImpl extends BasicServiceImpl<User,Long> implements UserService,UserDetailsService,SocialUserDetailsService {
+public class UserServiceImpl implements UserService,UserDetailsService,SocialUserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -58,4 +62,18 @@ public class UserServiceImpl extends BasicServiceImpl<User,Long> implements User
         return userRepository.queryFirstByUsername(username);
     }
 
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public List<User> findAll(Sort sort) {
+        return userRepository.findAll(sort);
+    }
 }

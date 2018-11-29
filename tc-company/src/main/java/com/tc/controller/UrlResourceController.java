@@ -1,6 +1,9 @@
 package com.tc.controller;
 
+import com.tc.db.entity.Resource;
+import com.tc.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,10 +26,37 @@ public class UrlResourceController {
     @Autowired
     private WebApplicationContext applicationContext;
 
-    @GetMapping("/urls")
-    public List<Map<String,String>> getAllUrl(@RequestParam(name = "hasTrue",required = false,value = "false") Boolean hasTrue){
+    @Autowired
+    private ResourceService resourceService;
 
-        return getAllUrl();
+    @GetMapping("/urls")
+    public List<Map<String,String>> getAllUrl(
+            @RequestParam(name = "hasTrue",required = false,defaultValue = "false") Boolean hasTrue){
+
+        List<Resource> list = resourceService.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,Resource.SORT_CREATETIME)));
+        List<Map<String,String>> urls = getAllUrl();
+        List<Map<String,String>> nonUrls = new ArrayList<>();
+        List<Map<String,String>> hasUrls = new ArrayList<>();
+
+        if (list == null || list.size() <= 0){
+            return urls;
+        }
+
+        for (Map<String, String> url : urls) {
+            for (Resource aList : list) {
+                if (url.get("className").equals(aList.getPath())) {
+                    hasUrls.add(url);
+                } else {
+                    nonUrls.add(url);
+                }
+            }
+        }
+
+        if (hasTrue){
+            return hasUrls;
+        }else {
+            return nonUrls;
+        }
     }
 
 
