@@ -65,6 +65,7 @@ public class User implements Serializable {
     /**
      * 创建时间
      */
+    @CreationTimestamp
     private Timestamp createTime;
     /**
      * 账户余额
@@ -105,7 +106,6 @@ public class User implements Serializable {
     /**
      * 生日
      */
-    @CreationTimestamp
     private Timestamp birthday;
     /**
      * 对应的管理员

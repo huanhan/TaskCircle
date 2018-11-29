@@ -1,5 +1,7 @@
 package com.tc.db.entity;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -18,11 +20,13 @@ public class Resource implements Serializable {
     private String name;
     private String path;
     private String info;
+    @CreationTimestamp
     private Timestamp createTime;
     private Collection<AuthorityResource> authorityResources;
 
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Long getId() {
         return id;
