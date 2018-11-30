@@ -25,4 +25,10 @@ public interface UserService extends BasicService<User> {
      */
     User update(User user);
 
+    /**
+     * 根据用户名获取对应的编号
+     * @param username
+     * @return
+     */
+    Long getIdByUsername(String username);
 }

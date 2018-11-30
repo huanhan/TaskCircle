@@ -3,10 +3,11 @@ package com.tc.service.impl;
 import com.tc.db.entity.User;
 import com.tc.db.repository.UserRepository;
 import com.tc.dto.LoginUser;
+import com.tc.exception.DBException;
 import com.tc.service.UserService;
+import com.tc.validator.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service(value = "userService")
-public class UserServiceImpl implements UserService,UserDetailsService,SocialUserDetailsService {
+public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements UserService,UserDetailsService,SocialUserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -33,7 +34,11 @@ public class UserServiceImpl implements UserService,UserDetailsService,SocialUse
 
     @Override
     public User getUserByUsername(String username) {
-        return userRepository.queryFirstByUsername(username);
+        User user = userRepository.queryFirstByUsername(username);
+        if (user == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        return user;
     }
 
     @Override
@@ -43,6 +48,12 @@ public class UserServiceImpl implements UserService,UserDetailsService,SocialUse
             return userRepository.findOne(user.getId());
         }
         return user;
+    }
+
+    @Override
+    public Long getIdByUsername(String username) {
+        User user = getUserByUsername(username);
+        return user.getId();
     }
 
     @Override
@@ -76,4 +87,5 @@ public class UserServiceImpl implements UserService,UserDetailsService,SocialUse
     public List<User> findAll(Sort sort) {
         return userRepository.findAll(sort);
     }
+
 }

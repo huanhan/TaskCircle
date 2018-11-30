@@ -25,4 +25,10 @@ public interface BasicService<T> {
      */
     List<T> findAll(Sort sort);
 
+
+    /**
+     * 是否已存在name
+     * @return
+     */
+    boolean isNullByName(String name);
 }

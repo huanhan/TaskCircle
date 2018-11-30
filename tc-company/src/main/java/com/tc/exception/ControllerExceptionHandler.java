@@ -27,12 +27,28 @@ public class ControllerExceptionHandler {
 
         Map<String,String> messages = new HashMap<>();
 
-        for (FieldError error :
-                ex.getErrors()) {
-            messages.put(error.getField(),error.getDefaultMessage());
-            logger.info(error.getField() + ":" + error.getDefaultMessage());
+        if (!ex.getErrors().isEmpty()) {
+
+            for (FieldError error :
+                    ex.getErrors()) {
+                messages.put(error.getField(), error.getDefaultMessage());
+                logger.info(error.getField() + ":" + error.getDefaultMessage());
+            }
+
+            return new MyResponse(messages);
         }
 
+
+        messages.put("message",ex.getMessage());
+        return new MyResponse(messages);
+    }
+
+    @ExceptionHandler(DBException.class)
+    @ResponseBody
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public MyResponse handlerDBException(DBException ex){
+        Map<String,String> messages = new HashMap<>();
+        messages.put("message",ex.getMessage());
         return new MyResponse(messages);
     }
 
@@ -44,6 +60,8 @@ public class ControllerExceptionHandler {
         public MyResponse(Map<String, String> messages) {
             this.messages = messages;
         }
+
+
 
         public Map<String, String> getMessages() {
             return messages;

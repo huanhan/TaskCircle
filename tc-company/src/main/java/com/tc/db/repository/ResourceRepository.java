@@ -9,7 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface ResourceRepository extends JpaRepository<Resource,Long> {
 
-
-
+    /**
+     * 根据name查询
+     * @param name
+     * @return
+     */
+    Resource queryFirstByName(String name);
 
 }
