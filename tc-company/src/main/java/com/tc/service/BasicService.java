@@ -28,7 +28,10 @@ public interface BasicService<T> {
 
     /**
      * 是否已存在name
+     * @param name
      * @return
      */
     boolean isNullByName(String name);
+
+
 }

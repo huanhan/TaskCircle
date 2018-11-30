@@ -15,5 +15,4 @@ public interface ResourceRepository extends JpaRepository<Resource,Long> {
      * @return
      */
     Resource queryFirstByName(String name);
-
 }

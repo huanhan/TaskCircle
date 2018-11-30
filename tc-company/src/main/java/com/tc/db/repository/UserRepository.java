@@ -31,7 +31,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
      * @return
      */
     @Modifying
-    @Transactional(rollbackFor = SQLException.class)
     @Query("update User u set " +
             "u.name = CASE WHEN :#{#user.name} IS NULL THEN u.name ELSE :#{#user.name} END ," +
             "u.category = CASE WHEN :#{#user.category.toString()} IS NULL THEN u.category ELSE :#{#user.category.toString()} END ," +
