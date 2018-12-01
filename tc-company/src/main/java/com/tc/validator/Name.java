@@ -1,6 +1,7 @@
 package com.tc.validator;
 
 import com.tc.service.BasicService;
+import com.tc.service.impl.AbstractBasicServiceImpl;
 import com.tc.validator.impl.NameValidator;
 
 import javax.validation.Constraint;
@@ -20,5 +21,5 @@ public @interface Name {
 
     Class<? extends Payload>[] payload() default {};
 
-    Class<? extends BasicService> service();
+    Class<? extends AbstractBasicServiceImpl> service();
 }

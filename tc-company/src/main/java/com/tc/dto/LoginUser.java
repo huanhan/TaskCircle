@@ -39,7 +39,7 @@ public class LoginUser implements UserDetails,SocialUserDetails {
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return user.getUsername();
     }
 
     @Override

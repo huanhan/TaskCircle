@@ -18,6 +18,7 @@ public class TcAuthorizeConfigProvider implements AuthorizeConfigProvider {
     @Override
     public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
         config.antMatchers(SecurityConstants.DEFAULT_UNAUTHENTICATION_URL,
+                SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_IMG,
                 SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_MOBILE,
                 SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_OPENID,
                 SecurityConstants.DEFAULT_VALIDATE_CODE_URL_PREFIX + "/*",

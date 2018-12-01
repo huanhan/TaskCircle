@@ -13,7 +13,8 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
     public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
 
         config.antMatchers(
-                "/user/register"
+                "/user/register",
+                "/login"
         ).permitAll()
                 .antMatchers("/swagger-ui.html","/doc.html")
                 .permitAll()

@@ -1,9 +1,7 @@
 package com.tc.validator.impl;
 
 import com.tc.service.UserService;
-import com.tc.validator.IDCard;
 import com.tc.validator.Username;
-import com.tc.validator.until.IDCardHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;

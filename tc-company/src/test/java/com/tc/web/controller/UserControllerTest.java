@@ -22,21 +22,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class UserControllerTest {
+public class UserControllerTest extends BasicControllerTest{
 
     private Logger logger = LoggerFactory.getLogger(UserControllerTest.class);
 
-    @Autowired
-    private WebApplicationContext wac;
 
-    private MockMvc mockMvc;
-
-    @Before
-    public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
 
     @Test
     public void whenRegisterSuccess() throws Exception {

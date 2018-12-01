@@ -85,7 +85,7 @@ public class UrlResourceController {
         if (result.hasErrors()){
             throw new ValidException(result.getFieldErrors());
         }
-        User user = userService.getUserByUsername((String)authentication.getPrincipal());
+        User user = userService.getUserByUsername(authentication.getPrincipal().toString());
         resource.setCreation(user);
         Resource ref = resourceService.save(resource);
         if (ref == null || ref.getId() == null || ref.getId() <= 0) {
