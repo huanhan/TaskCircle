@@ -30,6 +30,18 @@ public class User implements Serializable {
 
     public interface UserBasicDetailView extends UserBasicView{}
 
+    public User() {
+    }
+
+    public User(Long id) {
+        this.id = id;
+    }
+
+    public User(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     /**
      * 用户编号
      */

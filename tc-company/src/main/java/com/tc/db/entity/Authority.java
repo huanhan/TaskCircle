@@ -16,6 +16,14 @@ import java.util.Objects;
 @Entity
 public class Authority implements Serializable,GrantedAuthority {
 
+    public Authority() {
+    }
+
+    public Authority(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     private Long id;
     private String name;
     private String info;

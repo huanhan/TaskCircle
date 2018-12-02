@@ -26,4 +26,19 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
     public boolean isNullByName(String name) {
         return false;
     }
+
+    @Override
+    public boolean deleteById(Long id) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteByIds(List<Long> ids) {
+        return false;
+    }
+
+    @Override
+    public T findOne(Long id) {
+        return null;
+    }
 }

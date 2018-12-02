@@ -2,6 +2,7 @@ package com.tc.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.entity.User;
+import com.tc.dto.LoginUser;
 import com.tc.dto.RegisterUser;
 import com.tc.exception.ValidException;
 import com.tc.service.UserService;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 

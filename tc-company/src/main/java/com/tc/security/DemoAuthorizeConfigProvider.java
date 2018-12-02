@@ -29,7 +29,8 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
                 .antMatchers("/configuration/ui")
                 .permitAll()
                 .antMatchers("/configuration/security")
-                .permitAll();
+                .permitAll()
+        .anyRequest().authenticated();
 
     }
 }

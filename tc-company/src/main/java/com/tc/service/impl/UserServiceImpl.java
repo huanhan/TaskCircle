@@ -44,12 +44,12 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     }
 
 
-    @Transactional(rollbackFor = SQLException.class)
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public User update(User user) {
         int result = userRepository.update(user);
         if (result > 0) {
-            return userRepository.findOne(user.getId());
+            return getUserByUsername(user.getUsername());
         }
         return user;
     }

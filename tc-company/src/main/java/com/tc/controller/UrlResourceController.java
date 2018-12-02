@@ -1,7 +1,9 @@
 package com.tc.controller;
 
+import com.tc.db.entity.Authority;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
+import com.tc.dto.AddResource;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.ResourceService;
@@ -70,24 +72,41 @@ public class UrlResourceController {
         }
     }
 
+    @GetMapping(value = "{id:\\d+}")
+    public Resource detail(@PathVariable("id") Long id){
+        Resource resource = resourceService.findOne(id);
+        if (resource != null){
+            resource.setCreation(new User(resource.getCreation().getId(),resource.getCreation().getName()));
+            if (!resource.getAuthorityResources().isEmpty()){
+                resource.getAuthorityResources().forEach(ar -> {
+                    ar.setAuthority(new Authority(ar.getAuthority().getId(),ar.getAuthority().getName()));
+                    ar.setResource(null);
+                });
+            }
+        }
+        return resource;
+    }
+
 
     /**
      * 添加路由到数据库
-     * @param resource
+     * @param addResource
      * @param authentication
      * @param result
      * @return
      */
     @PostMapping
-    public Resource add(@Valid @RequestBody Resource resource,
-                    Authentication authentication,
+    public Resource add(@Valid @RequestBody AddResource addResource,
+                        Authentication authentication,
                     BindingResult result){
         if (result.hasErrors()){
             throw new ValidException(result.getFieldErrors());
         }
         User user = userService.getUserByUsername(authentication.getPrincipal().toString());
+        Resource resource = AddResource.toResource(addResource);
         resource.setCreation(user);
         Resource ref = resourceService.save(resource);
+        ref.setCreation(new User(ref.getCreation().getId()));
         if (ref == null || ref.getId() == null || ref.getId() <= 0) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
@@ -95,9 +114,24 @@ public class UrlResourceController {
     }
 
 
-    @DeleteMapping(value = "/{id:\\d+}")
-    public void delete(@PathVariable("id") Long id){
+    /**
+     * 删除单个资源
+     * @param id
+     */
+    @DeleteMapping
+    public void delete(@RequestBody Long id){
+        boolean delIsSuccess = resourceService.deleteById(id);
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
+    }
 
+    /**
+     * 删除多个资源
+     * @param ids
+     */
+    @DeleteMapping("/all")
+    public void delete(@RequestBody List<Long> ids){
+        boolean delIsSuccess = resourceService.deleteByIds(ids);
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
     /**

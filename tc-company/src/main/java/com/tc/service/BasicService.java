@@ -25,6 +25,12 @@ public interface BasicService<T> {
      */
     List<T> findAll(Sort sort);
 
+    /**
+     * 获取记录详情
+     * @param id
+     * @return
+     */
+    T findOne(Long id);
 
     /**
      * 是否已存在name
@@ -33,5 +39,16 @@ public interface BasicService<T> {
      */
     boolean isNullByName(String name);
 
+    /**
+     * 删除记录，根据编号
+     * @param id
+     * @return
+     */
+    boolean deleteById(Long id);
 
+    /**
+     * 删除记录，根据编号组
+     * @param ids
+     */
+    boolean deleteByIds(List<Long> ids);
 }

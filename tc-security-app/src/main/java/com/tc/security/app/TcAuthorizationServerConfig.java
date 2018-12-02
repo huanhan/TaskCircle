@@ -72,6 +72,7 @@ public class TcAuthorizationServerConfig extends AuthorizationServerConfigurerAd
                 builder.withClient(config.getClientId())
                     .secret(config.getClientSecret())
                     .accessTokenValiditySeconds(config.getAccessTokenValiditySeconds())
+                    .refreshTokenValiditySeconds(2592000)
                     .authorizedGrantTypes("refresh_token","password")
                     .scopes("all","read","write");
             }

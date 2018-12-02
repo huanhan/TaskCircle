@@ -1,12 +1,8 @@
 package com.tc.db.entity;
 
-import com.tc.service.impl.ResourceServiceImpl;
-import com.tc.validator.Name;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -23,26 +19,14 @@ public class Resource implements Serializable {
 
     private Long id;
     private User creation;
-    @NotBlank(message = "资源标识不能为空")
-    @Size(max = 30,message = "最大值30")
-    @Name(message = "存在相同标识",service = ResourceServiceImpl.class)
     private String name;
-    @NotBlank(message = "资源路径不能为空")
-    @Size(max = 100,message = "最大值100")
     private String path;
-    @Size(max = 100,message = "最大值100")
     private String info;
     @CreationTimestamp
     private Timestamp createTime;
     private Collection<AuthorityResource> authorityResources;
-    @NotBlank(message = "方法名不能为空")
-    @Size(max = 30,message = "最大值30")
     private String method;
-    @NotBlank(message = "类型不能为空")
-    @Size(max = 20,message = "最大值20")
     private String type;
-    @NotBlank(message = "类名不能为空")
-    @Size(max = 50,message = "最大值50")
     private String className;
 
     @Id
@@ -114,7 +98,7 @@ public class Resource implements Serializable {
         return Objects.hash(id, name, path, info, creation.getId(), createTime);
     }
 
-    @OneToMany(mappedBy = "resource")
+    @OneToMany(mappedBy = "resource",fetch = FetchType.EAGER)
     public Collection<AuthorityResource> getAuthorityResources() {
         return authorityResources;
     }
@@ -161,5 +145,9 @@ public class Resource implements Serializable {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public static Resource newResource(){
+        return new Resource();
     }
 }
