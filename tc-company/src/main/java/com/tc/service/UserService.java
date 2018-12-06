@@ -19,13 +19,6 @@ public interface UserService extends BasicService<User> {
     User getUserByUsername(String username);
 
     /**
-     * 更新用户信息
-     * @param user
-     * @return
-     */
-    User update(User user);
-
-    /**
      * 根据用户名获取对应的编号
      * @param username
      * @return

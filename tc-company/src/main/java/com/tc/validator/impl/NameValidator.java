@@ -22,18 +22,21 @@ public class NameValidator implements ConstraintValidator<Name,Object> {
     @Override
     public void initialize(Name name) {
 
+
         for (BasicService b :
                 basicServices) {
-            if (StringUtils.startsWithIgnoreCase(b.getClass().getName(),name.service().getName())){
+            if (StringUtils.startsWithIgnoreCase(b.getClass().getName(), name.service().getName())) {
                 basicService = b;
             }
         }
+
 
     }
 
     @Override
     public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) {
-        if (basicService.isNullByName((String)o)){return true;}
-        return false;
+
+        return basicService.isNullByName((String) o);
+
     }
 }

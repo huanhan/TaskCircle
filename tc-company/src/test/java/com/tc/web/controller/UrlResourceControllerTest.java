@@ -46,6 +46,30 @@ public class UrlResourceControllerTest extends BasicControllerTest{
     }
 
     @Test
+    public void whenModifySuccess() throws Exception {
+
+
+
+        Resource resource = new Resource();
+        resource.setId(3L);
+        resource.setType("GET");
+        resource.setPath("/user/me");
+        resource.setMethod("me");
+        resource.setClassName("UserController");
+        resource.setName("获取详情信息");
+        String content = new Gson().toJson(resource);
+        logger.info(content);
+        String result = mockMvc.perform(MockMvcRequestBuilders.put("/resource")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("Authorization","bearer " + accessToken)
+                .content(content))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+                .andReturn().getResponse().getContentAsString();
+        logger.info(result);
+    }
+
+    @Test
     public void whenDeleteAllSuccess() throws Exception {
 
         List<Long> lists = new ArrayList<>();

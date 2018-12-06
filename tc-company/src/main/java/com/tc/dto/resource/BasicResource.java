@@ -1,21 +1,14 @@
-package com.tc.dto;
+package com.tc.dto.resource;
 
-import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
-import com.tc.db.entity.User;
-import com.tc.service.impl.ResourceServiceImpl;
-import com.tc.validator.Name;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Size;
 
-public class AddResource {
-    @NotBlank(message = "资源标识不能为空")
-    @Size(max = 30,message = "最大值30")
-    @Name(message = "存在相同标识",service = ResourceServiceImpl.class)
-    private String name;
+/**
+ * @author Cyg
+ */
+public class BasicResource {
     @NotBlank(message = "资源路径不能为空")
     @Size(max = 100,message = "最大值100")
     private String path;
@@ -30,15 +23,6 @@ public class AddResource {
     @NotBlank(message = "类名不能为空")
     @Size(max = 50,message = "最大值50")
     private String className;
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getPath() {
         return path;
@@ -80,10 +64,8 @@ public class AddResource {
         this.className = className;
     }
 
-
-    public static Resource toResource(AddResource addResource){
+    public Resource toResource(BasicResource addResource){
         Resource resource = Resource.newResource();
-        resource.setName(addResource.name);
         resource.setClassName(addResource.className);
         resource.setMethod(addResource.method);
         resource.setPath(addResource.path);
@@ -91,4 +73,5 @@ public class AddResource {
         resource.setInfo(addResource.info);
         return resource;
     }
+
 }

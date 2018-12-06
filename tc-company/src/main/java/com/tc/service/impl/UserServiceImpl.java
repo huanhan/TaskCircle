@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * @author Cyg
+ */
 @Service(value = "userService")
 public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements UserService,UserDetailsService,SocialUserDetailsService {
 

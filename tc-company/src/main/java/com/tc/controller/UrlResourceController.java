@@ -3,7 +3,8 @@ package com.tc.controller;
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
-import com.tc.dto.AddResource;
+import com.tc.dto.resource.AddResource;
+import com.tc.dto.resource.ModifyResource;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.ResourceService;
@@ -28,6 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Cyg
+ * 路径资源控制器
+ */
 @RestController
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping(value = "/resource")
@@ -46,7 +51,12 @@ public class UrlResourceController {
     public List<Resource> getAllUrl(
             @RequestParam(name = "hasTrue",required = false,defaultValue = "false") Boolean hasTrue){
 
-        List<Resource> list = resourceService.findAll(new Sort(new Sort.Order(Sort.Direction.DESC,Resource.SORT_CREATETIME)));
+        List<Resource> list = resourceService.findAll(
+                new Sort(
+                        new Sort.Order(Sort.Direction.DESC,Resource.SORT_CLASSNAME),
+                        new Sort.Order(Sort.Direction.DESC,Resource.SORT_CREATETIME)
+                )
+        );
         List<Resource> urls = getAllUrl();
         List<Resource> nonUrls = new ArrayList<>();
         List<Resource> hasUrls = new ArrayList<>();
@@ -75,15 +85,7 @@ public class UrlResourceController {
     @GetMapping(value = "{id:\\d+}")
     public Resource detail(@PathVariable("id") Long id){
         Resource resource = resourceService.findOne(id);
-        if (resource != null){
-            resource.setCreation(new User(resource.getCreation().getId(),resource.getCreation().getName()));
-            if (!resource.getAuthorityResources().isEmpty()){
-                resource.getAuthorityResources().forEach(ar -> {
-                    ar.setAuthority(new Authority(ar.getAuthority().getId(),ar.getAuthority().getName()));
-                    ar.setResource(null);
-                });
-            }
-        }
+        initResource(resource);
         return resource;
     }
 
@@ -103,14 +105,31 @@ public class UrlResourceController {
             throw new ValidException(result.getFieldErrors());
         }
         User user = userService.getUserByUsername(authentication.getPrincipal().toString());
-        Resource resource = AddResource.toResource(addResource);
+        Resource resource = addResource.toResource(addResource);
         resource.setCreation(user);
         Resource ref = resourceService.save(resource);
         ref.setCreation(new User(ref.getCreation().getId()));
-        if (ref == null || ref.getId() == null || ref.getId() <= 0) {
+        if (ref.getId() == null || ref.getId() <= 0) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
         return ref;
+    }
+
+
+    /**
+     * 修改资源
+     * @param modifyResource
+     * @param result
+     * @return
+     */
+    @PutMapping
+    public Resource update(@Valid @RequestBody ModifyResource modifyResource, BindingResult result){
+        if (result.hasErrors()){
+            throw new ValidException(result.getFieldErrors());
+        }
+        Resource resource = resourceService.update(modifyResource.toResource(modifyResource));
+        initResource(resource);
+        return resource;
     }
 
 
@@ -139,7 +158,9 @@ public class UrlResourceController {
      * @return
      */
     private List<Resource> getAllUrl(){
-        AbstractHandlerMethodMapping<RequestMappingInfo> objHandlerMethodMapping = (AbstractHandlerMethodMapping<RequestMappingInfo>)applicationContext.getBean("requestMappingHandlerMapping");
+        AbstractHandlerMethodMapping<RequestMappingInfo> objHandlerMethodMapping =
+                (AbstractHandlerMethodMapping<RequestMappingInfo>)
+                        applicationContext.getBean("requestMappingHandlerMapping");
 
         Map<RequestMappingInfo,HandlerMethod> map = objHandlerMethodMapping.getHandlerMethods();
 
@@ -164,5 +185,19 @@ public class UrlResourceController {
         }
 
         return list;
+    }
+
+    private void initResource(Resource resource) {
+        if (resource != null){
+
+            resource.setCreation(new User(resource.getCreation().getId(), resource.getCreation().getName()));
+
+            if (!resource.getAuthorityResources().isEmpty()){
+                resource.getAuthorityResources().forEach(ar -> {
+                    ar.setAuthority(new Authority(ar.getAuthority().getId(),ar.getAuthority().getName()));
+                    ar.setResource(null);
+                });
+            }
+        }
     }
 }

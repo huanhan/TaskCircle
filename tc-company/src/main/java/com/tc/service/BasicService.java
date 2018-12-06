@@ -49,6 +49,14 @@ public interface BasicService<T> {
     /**
      * 删除记录，根据编号组
      * @param ids
+     * @return
      */
     boolean deleteByIds(List<Long> ids);
+
+    /**
+     * 更新用户信息
+     * @param t
+     * @return
+     */
+    T update(T t);
 }

@@ -22,6 +22,16 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
         return resourceRepository.save(resource);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Resource update(Resource resource) {
+        int count = resourceRepository.update(resource);
+        if (count > 0){
+            return findOne(resource.getId());
+        }
+        return resource;
+    }
+
     @Override
     public List<Resource> findAll() {
         return resourceRepository.findAll();

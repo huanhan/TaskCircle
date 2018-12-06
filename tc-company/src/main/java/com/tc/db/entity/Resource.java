@@ -16,6 +16,8 @@ import java.util.Objects;
 public class Resource implements Serializable {
 
     public static final String SORT_CREATETIME = "createTime";
+    public static final String SORT_CLASSNAME = "className";
+
 
     private Long id;
     private User creation;

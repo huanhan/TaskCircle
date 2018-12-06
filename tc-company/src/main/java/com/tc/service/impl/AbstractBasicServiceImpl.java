@@ -33,6 +33,11 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
     }
 
     @Override
+    public T update(T user) {
+        return null;
+    }
+
+    @Override
     public boolean deleteByIds(List<Long> ids) {
         return false;
     }
