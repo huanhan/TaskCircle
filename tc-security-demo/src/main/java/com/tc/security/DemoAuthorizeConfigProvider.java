@@ -12,6 +12,20 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
     @Override
     public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
         config.antMatchers("/user")
-                .hasRole("ADMIN");
+                .hasRole("ADMIN")
+                .antMatchers("/swagger-ui.html","/doc.html")
+                .permitAll()
+                .antMatchers("/swagger-resources/**")
+                .permitAll()
+                .antMatchers("/images/**")
+                .permitAll()
+                .antMatchers("/webjars/**")
+                .permitAll()
+                .antMatchers("/v2/api-docs")
+                .permitAll()
+                .antMatchers("/configuration/ui")
+                .permitAll()
+                .antMatchers("/configuration/security")
+                .permitAll();
     }
 }
