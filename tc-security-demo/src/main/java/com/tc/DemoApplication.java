@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
-@RestController
+//@RestController
 @EnableSwagger2
 public class DemoApplication {
     public static void main(String[] args){
         SpringApplication.run(DemoApplication.class);
     }
 
-    @GetMapping("/hello")
+    /*@GetMapping("/hello")
     public String hello(){
         return "hello spring security";
-    }
+    }*/
 }

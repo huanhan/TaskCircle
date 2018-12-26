@@ -14,8 +14,6 @@ public class MockServer {
         WireMock.removeAllMappings();
 
         mock("/order/1","01");
-
-
     }
 
     private static void mock(String url, String file) throws IOException {
