@@ -1,5 +1,6 @@
 package com.tc.db.entity;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
@@ -16,14 +17,6 @@ import java.util.Objects;
 @Entity
 public class Authority implements Serializable,GrantedAuthority {
 
-    public Authority() {
-    }
-
-    public Authority(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
     private Long id;
     private String name;
     private String info;
@@ -31,8 +24,21 @@ public class Authority implements Serializable,GrantedAuthority {
     private Admin admin;
     private Collection<UserAuthority> userAuthorities;
     private Collection<AuthorityResource> authorityResources;
+    private Collection<AdminAuthority> adminAuthorities;
+    public Authority() {
+    }
+
+    public Authority(Long id) {
+        this.id = id;
+    }
+
+    public Authority(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Long getId() {
         return id;
@@ -63,6 +69,7 @@ public class Authority implements Serializable,GrantedAuthority {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -71,8 +78,6 @@ public class Authority implements Serializable,GrantedAuthority {
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
-
-
 
     @OneToMany(mappedBy = "authority")
     public Collection<UserAuthority> getUserAuthorities() {
@@ -125,4 +130,15 @@ public class Authority implements Serializable,GrantedAuthority {
     public String getAuthority() {
         return this.name;
     }
+
+    @OneToMany(mappedBy = "authority")
+    public Collection<AdminAuthority> getAdminAuthorities() {
+        return adminAuthorities;
+    }
+
+    public void setAdminAuthorities(Collection<AdminAuthority> adminAuthorities) {
+        this.adminAuthorities = adminAuthorities;
+    }
+
+
 }

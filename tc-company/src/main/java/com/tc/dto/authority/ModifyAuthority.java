@@ -1,6 +1,8 @@
-package com.tc.dto.resource;
+package com.tc.dto.authority;
 
+import com.tc.db.entity.Authority;
 import com.tc.db.entity.Resource;
+import com.tc.service.AuthorityService;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
@@ -8,9 +10,9 @@ import javax.validation.constraints.Size;
 
 /**
  * @author Cyg
- * 修改资源交互
+ * 修改权限的交互
  */
-public class ModifyResource extends BasicResource{
+public class ModifyAuthority extends BasicAuthority {
 
     @NotNull(message = "标识不能为空")
     private Long id;
@@ -36,14 +38,14 @@ public class ModifyResource extends BasicResource{
     }
 
     @Override
-    public Resource toResource(BasicResource addResource) {
-        Resource resource = super.toResource(addResource);
-        resource.setId(id);
-        resource.setName(name);
-        return resource;
+    public Authority toAuthority(BasicAuthority addResource) {
+        Authority authority = super.toAuthority(addResource);
+        authority.setId(id);
+        authority.setName(name);
+        return authority;
     }
 
-    public static BasicResource newBasicResource(){
-        return new ModifyResource();
+    public static BasicAuthority newBasicResource(){
+        return new ModifyAuthority();
     }
 }

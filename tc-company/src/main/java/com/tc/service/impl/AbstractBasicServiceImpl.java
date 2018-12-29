@@ -1,5 +1,6 @@
 package com.tc.service.impl;
 
+import com.tc.dto.Show;
 import com.tc.service.BasicService;
 import org.springframework.data.domain.Sort;
 
@@ -13,12 +14,22 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
     }
 
     @Override
+    public List<T> save(List<T> ts) {
+        return null;
+    }
+
+    @Override
     public List<T> findAll() {
         return null;
     }
 
     @Override
     public List<T> findAll(Sort sort) {
+        return null;
+    }
+
+    @Override
+    public List<T> findByIds(List<Long> ids) {
         return null;
     }
 
@@ -46,4 +57,6 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
     public T findOne(Long id) {
         return null;
     }
+
+
 }

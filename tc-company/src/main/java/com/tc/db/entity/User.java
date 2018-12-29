@@ -177,11 +177,6 @@ public class User implements Serializable {
     private Collection<UserWithdraw> userWithdraws;
 
     /**
-     * 一个用户的多个权限
-     */
-    private Collection<UserAuthority> authorities;
-
-    /**
      * 一个用户接收多个消息
      */
     private Collection<UserMessage> userMessages;
@@ -545,15 +540,6 @@ public class User implements Serializable {
 
     public void setUserWithdraws(Collection<UserWithdraw> userWithdrawsById) {
         this.userWithdraws = userWithdrawsById;
-    }
-
-    @OneToMany(mappedBy = "user")
-    public Collection<UserAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Collection<UserAuthority> authorities) {
-        this.authorities = authorities;
     }
 
     @OneToMany(mappedBy = "user")

@@ -24,12 +24,24 @@ public class Resource implements Serializable {
     private String name;
     private String path;
     private String info;
-    @CreationTimestamp
     private Timestamp createTime;
     private Collection<AuthorityResource> authorityResources;
     private String method;
     private String type;
     private String className;
+
+
+    public Resource() {
+    }
+
+    public Resource(Long id) {
+        this.id = id;
+    }
+
+    public Resource(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,6 +85,7 @@ public class Resource implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;

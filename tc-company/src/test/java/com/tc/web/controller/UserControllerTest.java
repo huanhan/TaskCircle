@@ -65,7 +65,7 @@ public class UserControllerTest extends BasicControllerTest{
 
     @Test
     public void whenRegisterSuccess() throws Exception {
-        RegisterUser registerUser = new RegisterUser("test1234","123456");
+        RegisterUser registerUser = new RegisterUser("test12345","123456");
         String content = new Gson().toJson(registerUser);
         logger.info(content);
         String result = mockMvc.perform(MockMvcRequestBuilders.post("/user/register")

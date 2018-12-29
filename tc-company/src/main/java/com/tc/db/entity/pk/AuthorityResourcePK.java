@@ -1,50 +1,53 @@
 package com.tc.db.entity.pk;
 
-import com.tc.db.entity.Authority;
-import com.tc.db.entity.Resource;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class AuthorityResourcePK implements Serializable {
 
-    private Authority authority;
-    private Resource resource;
+public class AuthorityResourcePK implements Serializable {
+    private long authorityId;
+    private long resourceId;
 
     @Column(name = "authority_id")
     @Id
-    public Authority getAuthority() {
-        return authority;
+    public long getAuthorityId() {
+        return authorityId;
     }
 
-    public void setAuthority(Authority authorityByAuthorityId) {
-        this.authority = authorityByAuthorityId;
+    public void setAuthorityId(long authorityId) {
+        this.authorityId = authorityId;
     }
 
     @Column(name = "resource_id")
     @Id
-    public Resource getResource() {
-        return resource;
+    public long getResourceId() {
+        return resourceId;
     }
 
-    public void setResource(Resource resourceByResourceId) {
-        this.resource = resourceByResourceId;
+    public void setResourceId(long resourceId) {
+        this.resourceId = resourceId;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AuthorityResourcePK that = (AuthorityResourcePK) o;
-        return authority.getId().equals(that.getAuthority().getId()) &&
-                resource.getId().equals(that.getResource().getId());
+        return authorityId == that.authorityId &&
+                resourceId == that.resourceId;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(authority.getId(), resource.getId());
+        return Objects.hash(authorityId, resourceId);
     }
 }
+

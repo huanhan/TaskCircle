@@ -1,6 +1,7 @@
 package com.tc.dto.resource;
 
 import com.tc.db.entity.Resource;
+import com.tc.db.entity.User;
 import com.tc.service.impl.ResourceServiceImpl;
 import com.tc.validator.Name;
 import org.hibernate.validator.constraints.NotBlank;
@@ -16,7 +17,6 @@ public class AddResource extends BasicResource{
     @Size(max = 30,message = "最大值30")
     @Name(message = "存在相同标识",service = ResourceServiceImpl.class)
     private String name;
-
 
     public String getName() {
         return name;

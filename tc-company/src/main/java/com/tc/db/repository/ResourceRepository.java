@@ -32,6 +32,13 @@ public interface ResourceRepository extends JpaRepository<Resource,Long> {
     int deleteByIds(@Param("ids") List<Long> ids);
 
     /**
+     * 根据ID列表获取资源
+     * @param ids
+     * @return
+     */
+    List<Resource> findByIdIn(List<Long> ids);
+
+    /**
      * 修改路径资源
      * @param resource
      * @return

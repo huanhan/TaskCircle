@@ -3,6 +3,7 @@ package com.tc.controller;
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
+import com.tc.dto.Ids;
 import com.tc.dto.resource.AddResource;
 import com.tc.dto.resource.ModifyResource;
 import com.tc.exception.DBException;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
+import javax.persistence.Id;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,8 +150,8 @@ public class UrlResourceController {
      * @param ids
      */
     @DeleteMapping("/all")
-    public void delete(@RequestBody List<Long> ids){
-        boolean delIsSuccess = resourceService.deleteByIds(ids);
+    public void delete(@RequestBody Ids ids){
+        boolean delIsSuccess = resourceService.deleteByIds(ids.getIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
@@ -189,7 +191,6 @@ public class UrlResourceController {
 
     private void initResource(Resource resource) {
         if (resource != null){
-
             resource.setCreation(new User(resource.getCreation().getId(), resource.getCreation().getName()));
 
             if (!resource.getAuthorityResources().isEmpty()){

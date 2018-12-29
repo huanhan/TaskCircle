@@ -56,7 +56,7 @@ public class UrlResourceControllerTest extends BasicControllerTest{
         resource.setPath("/user/me");
         resource.setMethod("me");
         resource.setClassName("UserController");
-        resource.setName("获取详情信息");
+        resource.setName("获取fei详情信息");
         String content = new Gson().toJson(resource);
         logger.info(content);
         String result = mockMvc.perform(MockMvcRequestBuilders.put("/resource")

@@ -19,6 +19,17 @@ public class Admin implements Serializable {
     private Collection<Audit> audits;
     private Collection<TaskClassify> taskClassities;
     private Collection<Message> messages;
+    private Collection<AdminAuthority> adminAuthorities;
+
+    public Admin() {
+    }
+
+
+
+    public Admin(Long uid){
+        this.user = new User(uid);
+    }
+
     @Id
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
@@ -26,8 +37,8 @@ public class Admin implements Serializable {
         return user;
     }
 
-    public void setUser(User userByUserId) {
-        this.user = userByUserId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @ManyToOne
@@ -90,7 +101,12 @@ public class Admin implements Serializable {
         return Objects.hash(user.getId(),creation.getUser().getId());
     }
 
+    @OneToMany(mappedBy = "admin")
+    public Collection<AdminAuthority> getAdminAuthorities() {
+        return adminAuthorities;
+    }
 
-
-
+    public void setAdminAuthorities(Collection<AdminAuthority> adminAuthorities) {
+        this.adminAuthorities = adminAuthorities;
+    }
 }

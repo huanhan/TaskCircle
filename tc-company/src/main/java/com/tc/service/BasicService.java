@@ -13,6 +13,13 @@ public interface BasicService<T> {
     T save(T t);
 
     /**
+     * 添加列表中的所有新记录
+     * @param ts
+     * @return
+     */
+    List<T> save(List<T> ts);
+
+    /**
      * 获取表中所有记录
      * @return
      */
@@ -24,6 +31,13 @@ public interface BasicService<T> {
      * @return
      */
     List<T> findAll(Sort sort);
+
+    /**
+     * 根据编号列表查询
+     * @param ids
+     * @return
+     */
+    List<T> findByIds(List<Long> ids);
 
     /**
      * 获取记录详情

@@ -1,58 +1,64 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserAuthorityPK;
-import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * @author Cyg
- * 用户与权限关系实体
- */
 @Entity
 @Table(name = "user_authority", schema = "tc-company")
 @IdClass(UserAuthorityPK.class)
-public class UserAuthority implements Serializable {
-
+public class UserAuthority {
+    private long authorityId;
+    private String category;
     private Authority authority;
-    private User user;
+
+    @Id
+    @Column(name = "authority_id")
+    public long getAuthorityId() {
+        return authorityId;
+    }
+
+    public void setAuthorityId(long authorityId) {
+        this.authorityId = authorityId;
+    }
+
+    @Id
+    @Column(name = "category")
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UserAuthority that = (UserAuthority) o;
-        return authority.getId().equals(that.getAuthority().getId()) &&
-                user.getId().equals(that.getUser().getId());
+        return authorityId == that.authorityId &&
+                Objects.equals(category, that.category);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(authority.getId(), user.getId());
+        return Objects.hash(authorityId, category);
     }
 
-    @Id
     @ManyToOne
-    @JoinColumn(name = "authority_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "authority_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public Authority getAuthority() {
         return authority;
     }
 
-    public void setAuthority(Authority authorityByAuthorityId) {
-        this.authority = authorityByAuthorityId;
-    }
-
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
+    public void setAuthority(Authority authority) {
+        this.authority = authority;
     }
 }

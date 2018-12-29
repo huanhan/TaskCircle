@@ -16,7 +16,6 @@ import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -28,6 +27,7 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Autowired
     private UserRepository userRepository;
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public boolean isNullByUsername(String username) {
         User user = userRepository.queryFirstByUsername(username);
@@ -37,6 +37,7 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return false;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public User getUserByUsername(String username) {
         User user = userRepository.queryFirstByUsername(username);
@@ -57,18 +58,21 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return user;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Long getIdByUsername(String username) {
         User user = getUserByUsername(username);
         return user.getId();
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = getUser(s);
         return new LoginUser(user);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public SocialUserDetails loadUserByUserId(String s) throws UsernameNotFoundException {
         User user = getUser(s);
@@ -80,16 +84,19 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return userRepository.queryFirstByUsername(username);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public User save(User user) {
         return userRepository.save(user);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public List<User> findAll(Sort sort) {
         return userRepository.findAll(sort);

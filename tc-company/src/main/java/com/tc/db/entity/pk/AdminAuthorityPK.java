@@ -5,9 +5,9 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class UserAuthorityPK implements Serializable {
+public class AdminAuthorityPK implements Serializable {
     private long authorityId;
-    private String category;
+    private long userId;
 
     @Column(name = "authority_id")
     @Id
@@ -19,14 +19,14 @@ public class UserAuthorityPK implements Serializable {
         this.authorityId = authorityId;
     }
 
-    @Column(name = "category")
+    @Column(name = "user_id")
     @Id
-    public String getCategory() {
-        return category;
+    public long getUserId() {
+        return userId;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     @Override
@@ -37,14 +37,14 @@ public class UserAuthorityPK implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        UserAuthorityPK that = (UserAuthorityPK) o;
+        AdminAuthorityPK that = (AdminAuthorityPK) o;
         return authorityId == that.authorityId &&
-                Objects.equals(category, that.category);
+                userId == that.userId;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(authorityId, category);
+        return Objects.hash(authorityId, userId);
     }
 }

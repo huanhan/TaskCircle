@@ -11,12 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Cyg
+ *
+ * url资源服务的具体实现
+ *
+ */
 @Service
 public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> implements ResourceService {
 
     @Autowired
     private ResourceRepository resourceRepository;
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Resource save(Resource resource) {
         return resourceRepository.save(resource);
@@ -32,16 +39,25 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
         return resource;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public List<Resource> findAll() {
         return resourceRepository.findAll();
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public List<Resource> findAll(Sort sort) {
         return resourceRepository.findAll(sort);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Resource> findByIds(List<Long> ids) {
+        return resourceRepository.findByIdIn(ids);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public boolean isNullByName(String name) {
         Resource resource = resourceRepository.queryFirstByName(name);
@@ -64,6 +80,7 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
         return count == ids.size();
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Resource findOne(Long id) {
         return resourceRepository.findOne(id);
