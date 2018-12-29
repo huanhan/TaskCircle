@@ -10,7 +10,7 @@ import java.util.Objects;
  * 用户操作错误日志记录实体
  */
 @Entity
-@Table(name = "user_operation_log", schema = "tc-company", catalog = "")
+@Table(name = "user_operation_log", schema = "tc-company")
 public class UserOperationLog implements Serializable {
     private String id;
     private Timestamp operationTime;
