@@ -79,14 +79,7 @@ public class Authority implements Serializable,GrantedAuthority {
         this.createTime = createTime;
     }
 
-    @OneToMany(mappedBy = "authority")
-    public Collection<UserAuthority> getUserAuthorities() {
-        return userAuthorities;
-    }
 
-    public void setUserAuthorities(Collection<UserAuthority> userAuthorities) {
-        this.userAuthorities = userAuthorities;
-    }
 
     @ManyToOne
     @JoinColumn(name = "creation", referencedColumnName = "user_id", nullable = false)
@@ -98,14 +91,7 @@ public class Authority implements Serializable,GrantedAuthority {
         this.admin = creation;
     }
 
-    @OneToMany(mappedBy = "authority")
-    public Collection<AuthorityResource> getAuthorityResources() {
-        return authorityResources;
-    }
 
-    public void setAuthorityResources(Collection<AuthorityResource> authorityResourcesById) {
-        this.authorityResources = authorityResourcesById;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -131,7 +117,26 @@ public class Authority implements Serializable,GrantedAuthority {
         return this.name;
     }
 
-    @OneToMany(mappedBy = "authority")
+
+    @OneToMany(mappedBy = "authority",cascade = CascadeType.REMOVE)
+    public Collection<UserAuthority> getUserAuthorities() {
+        return userAuthorities;
+    }
+
+    public void setUserAuthorities(Collection<UserAuthority> userAuthorities) {
+        this.userAuthorities = userAuthorities;
+    }
+
+    @OneToMany(mappedBy = "authority",cascade = CascadeType.REMOVE)
+    public Collection<AuthorityResource> getAuthorityResources() {
+        return authorityResources;
+    }
+
+    public void setAuthorityResources(Collection<AuthorityResource> authorityResourcesById) {
+        this.authorityResources = authorityResourcesById;
+    }
+
+    @OneToMany(mappedBy = "authority",cascade = CascadeType.REMOVE)
     public Collection<AdminAuthority> getAdminAuthorities() {
         return adminAuthorities;
     }

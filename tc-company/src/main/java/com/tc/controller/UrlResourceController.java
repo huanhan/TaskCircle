@@ -4,6 +4,7 @@ import com.tc.db.entity.Authority;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
 import com.tc.dto.Ids;
+import com.tc.dto.Show;
 import com.tc.dto.resource.AddResource;
 import com.tc.dto.resource.ModifyResource;
 import com.tc.exception.DBException;
@@ -11,6 +12,7 @@ import com.tc.exception.ValidException;
 import com.tc.service.ResourceService;
 import com.tc.service.UserService;
 import com.tc.validator.until.StringResourceCenter;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -153,6 +155,27 @@ public class UrlResourceController {
     public void delete(@RequestBody Ids ids){
         boolean delIsSuccess = resourceService.deleteByIds(ids.getIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
+    }
+
+    /**
+     * 获取权限列表
+     * @param id url资源编号
+     * @return
+     */
+    @GetMapping("/authority/{id:\\d+}")
+    @ApiOperation(value = "获取使用指定url资源的权限列表")
+    public List<Show> urlResourceAuthority(@PathVariable("id") Long id){
+        return new ArrayList<>();
+    }
+
+    /**
+     * 从权限详情的使用者列表中，移除一个或多个使用者
+     * @param id url资源编号
+     * @param ids 权限编号列表
+     */
+    @DeleteMapping("/authority/{id:\\d+}")
+    public void removeAuthority(@PathVariable("id") Long id,@RequestBody Ids ids){
+
     }
 
     /**

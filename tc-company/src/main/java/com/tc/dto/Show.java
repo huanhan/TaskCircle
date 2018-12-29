@@ -1,5 +1,10 @@
 package com.tc.dto;
 
+/**
+ * @author Cyg
+ *
+ * {id:name}的记录信息
+ */
 public class Show {
     private Long id;
     private String name;

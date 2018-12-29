@@ -2,8 +2,8 @@ package com.tc.web.controller;
 
 import com.google.gson.Gson;
 import com.tc.db.entity.User;
-import com.tc.dto.LoginUser;
-import com.tc.dto.RegisterUser;
+import com.tc.dto.user.LoginUser;
+import com.tc.dto.user.RegisterUser;
 import com.tc.dto.TokenResult;
 import org.junit.Test;
 import org.springframework.security.test.context.support.WithMockUser;

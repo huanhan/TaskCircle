@@ -1,4 +1,4 @@
-package com.tc.dto;
+package com.tc.dto.user;
 
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;

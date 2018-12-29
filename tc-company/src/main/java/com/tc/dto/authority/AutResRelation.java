@@ -1,10 +1,14 @@
-package com.tc.dto;
+package com.tc.dto.authority;
 
 import com.tc.db.entity.AuthorityResource;
+import com.tc.dto.Show;
 
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @author Cyg
+ */
 public class AutResRelation implements Serializable {
     private List<Show> resources;
     private List<Show> authorities;

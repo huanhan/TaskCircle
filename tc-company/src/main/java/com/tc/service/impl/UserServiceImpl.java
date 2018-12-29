@@ -2,7 +2,7 @@ package com.tc.service.impl;
 
 import com.tc.db.entity.User;
 import com.tc.db.repository.UserRepository;
-import com.tc.dto.LoginUser;
+import com.tc.dto.user.LoginUser;
 import com.tc.exception.DBException;
 import com.tc.service.UserService;
 import com.tc.validator.until.StringResourceCenter;

@@ -1,10 +1,11 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
-import com.tc.dto.AutResRelation;
+import com.tc.dto.authority.AutResRelation;
 import com.tc.dto.Ids;
 import com.tc.dto.Show;
 import com.tc.dto.authority.AddAuthority;
+import com.tc.dto.authority.AuthorityDetail;
 import com.tc.dto.authority.ModifyAuthority;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -47,6 +48,18 @@ public class AuthorityController {
 
     @Autowired
     private UserService userService;
+
+    /**
+     * 查询权限详情
+     * @param id 权限编号
+     * @return
+     */
+    @GetMapping(value = "{id:\\d+}")
+    @ApiOperation(value = "查看权限的详情")
+    public AuthorityDetail detail(@PathVariable("id") Long id){
+
+        return new AuthorityDetail();
+    }
 
     @GetMapping
     @ApiOperation(value = "在权限与资源关系管理界面中，获取一次性获取所有权限，所有资源与两者之间的关联关系")
@@ -148,11 +161,21 @@ public class AuthorityController {
      */
     @DeleteMapping("/all")
     @ApiOperation(value = "删除多个权限")
-    public void delete(@RequestBody Ids ids){
+    public void delete(@Valid @RequestBody Ids ids, BindingResult result){
+        if (result.hasErrors()){
+            throw new ValidException(result.getFieldErrors());
+        }
         boolean delIsSuccess = authorityService.deleteByIds(ids.getIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
+    /**
+     * 设置权限对应资源
+     * 该功能模块，通过url中的权限编号获取数据库中所有对应的资源
+     * 根据输入的资源编号列表与权限编号对应的资源来判断哪些需要移除，哪些需要新增
+     * @param aid 权限编号
+     * @param ids 资源编号列表
+     */
     @PostMapping("/{aid:\\d+}")
     @ApiOperation(value = "设置权限对应的资源")
     public void setAuthorityResource(@PathVariable("aid") Long aid, @RequestBody Ids ids){
@@ -174,6 +197,27 @@ public class AuthorityController {
         if (!authorityOPClassify.getInDelete().isEmpty()){
             authorityResourceService.deleteByResourceIds(AuthorityOPClassify.toResourceLong(authorityOPClassify.getInDelete()));
         }
+
+    }
+
+    /**
+     * 获取权限使用者列表
+     * @param id 权限编号
+     * @return
+     */
+    @GetMapping("/users/{id:\\d+}")
+    @ApiOperation(value = "获取权限的使用者列表")
+    public List<Show> authorityUsers(@PathVariable("id") Long id){
+        return new ArrayList<>();
+    }
+
+    /**
+     * 从权限详情的使用者列表中，移除一个或多个使用者
+     * @param id 权限编号
+     * @param ids 使用者编号列表
+     */
+    @DeleteMapping("/user/{id:\\d+}")
+    public void removeUsers(@PathVariable("id") Long id,@RequestBody Ids ids){
 
     }
 
