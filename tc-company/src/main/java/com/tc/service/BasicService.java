@@ -4,6 +4,10 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
+/**
+ * 公用的一些服务接口
+ * @author Cyg
+ */
 public interface BasicService<T> {
     /**
      * 添加新记录
