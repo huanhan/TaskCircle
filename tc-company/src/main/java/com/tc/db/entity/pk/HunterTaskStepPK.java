@@ -7,18 +7,21 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * @author Cyg
+ */
 public class HunterTaskStepPK implements Serializable {
-    private HunterTask hunterTask;
+    private String hunterTaskId;
     private Integer step;
 
     @Column(name = "hunter_task_id")
     @Id
-    public HunterTask getHunterTask() {
-        return hunterTask;
+    public String getHunterTaskId() {
+        return hunterTaskId;
     }
 
-    public void setHunterTask(HunterTask hunterTaskByHunterTaskId) {
-        this.hunterTask = hunterTaskByHunterTaskId;
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
     }
 
     @Column(name = "step")
@@ -37,11 +40,11 @@ public class HunterTaskStepPK implements Serializable {
         if (o == null || getClass() != o.getClass()) {return false;}
         HunterTaskStepPK that = (HunterTaskStepPK) o;
         return step.equals(that.getStep()) &&
-                Objects.equals(hunterTask.getId(), that.getHunterTask().getId());
+                hunterTaskId.equals(that.getHunterTaskId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(hunterTask.getId(), step);
+        return Objects.hash(hunterTaskId, step);
     }
 }

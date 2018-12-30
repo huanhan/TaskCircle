@@ -15,6 +15,7 @@ import java.util.Objects;
 @Table(name = "hunter_task_step", schema = "tc-company")
 @IdClass(value = HunterTaskStepPK.class)
 public class HunterTaskStep implements Serializable {
+    private String hunterTaskId;
     private Integer step;
     private Timestamp finishTime;
     private String context;
@@ -22,8 +23,17 @@ public class HunterTaskStep implements Serializable {
     private HunterTask hunterTask;
 
     @Id
+    @Column(name = "hunter_task_id")
+    public String getHunterTaskId() {
+        return hunterTaskId;
+    }
+
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
+    }
+
     @ManyToOne
-    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public HunterTask getHunterTask() {
         return hunterTask;
     }

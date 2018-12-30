@@ -1,53 +1,74 @@
 package com.tc.db.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * 猎刃审核记录
  * @author Cyg
- * 猎刃审核提示
  */
 @Entity
 @Table(name = "audit_hunter", schema = "tc-company")
-public class AuditHunter implements Serializable {
-
+public class AuditHunter {
+    private String auditId;
+    private Long userId;
     private Audit audit;
     private User user;
 
+    @Id
+    @Column(name = "audit_id")
+    public String getAuditId() {
+        return auditId;
+    }
+
+    public void setAuditId(String auditId) {
+        this.auditId = auditId;
+    }
+
+    @Basic
+    @Column(name = "user_id")
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AuditHunter that = (AuditHunter) o;
-        return user.getId().equals(that.user.getId()) &&
-                Objects.equals(audit.getId(), that.getAudit().getId());
+        return userId.equals(that.userId) &&
+                Objects.equals(auditId, that.auditId);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(audit.getId(), user.getId());
+        return Objects.hash(auditId, userId);
     }
 
-    @Id
-    @OneToOne
-    @JoinColumn(name = "audit_id", referencedColumnName = "id", nullable = false)
+    @OneToOne(mappedBy = "auditHunter")
     public Audit getAudit() {
         return audit;
     }
 
-    public void setAudit(Audit auditByAuditId) {
-        this.audit = auditByAuditId;
+    public void setAudit(Audit audit) {
+        this.audit = audit;
     }
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public User getUser() {
         return user;
     }
 
-    public void setUser(User userByUserId) {
-        this.user = userByUserId;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

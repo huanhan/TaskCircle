@@ -1,30 +1,28 @@
 package com.tc.db.entity;
 
-import com.tc.db.enums.AuditType;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-
 /**
+ * 审核记录
  * @author Cyg
- * 审核记录表
  */
 @Entity
-public class Audit implements Serializable {
-
+public class Audit {
     private String id;
+    private Long adminId;
     private String idea;
     private String result;
     private String reason;
-    private AuditType type;
+    private String type;
     private Timestamp createTime;
-    private Admin creation;
     private AuditHunter auditHunter;
     private AuditTask auditTask;
     private AuditWithdraw auditWithdraw;
+    private Admin admin;
 
     @Id
     @Column(name = "id")
@@ -34,6 +32,16 @@ public class Audit implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Basic
+    @Column(name = "admin_id")
+    public Long getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
 
     @Basic
@@ -67,17 +75,17 @@ public class Audit implements Serializable {
     }
 
     @Basic
-    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    public AuditType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(AuditType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -87,49 +95,16 @@ public class Audit implements Serializable {
         this.createTime = createTime;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id", referencedColumnName = "user_id", nullable = false)
-    public Admin getCreation() {
-        return creation;
-    }
-
-    public void setCreation(Admin adminByAdminId) {
-        this.creation = adminByAdminId;
-    }
-
-    @OneToOne(mappedBy = "audit")
-    public AuditHunter getAuditHunter() {
-        return auditHunter;
-    }
-
-    public void setAuditHunter(AuditHunter auditHunterById) {
-        this.auditHunter = auditHunterById;
-    }
-
-    @OneToOne(mappedBy = "audit")
-    public AuditTask getAuditTask() {
-        return auditTask;
-    }
-
-    public void setAuditTask(AuditTask auditTaskById) {
-        this.auditTask = auditTaskById;
-    }
-
-    @OneToOne(mappedBy = "audit")
-    public AuditWithdraw getAuditWithdraw() {
-        return auditWithdraw;
-    }
-
-    public void setAuditWithdraw(AuditWithdraw auditWithdrawById) {
-        this.auditWithdraw = auditWithdrawById;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Audit audit = (Audit) o;
-        return creation.getUser().getId().equals(audit.creation.getUser().getId()) &&
+        return adminId.equals(audit.adminId) &&
                 Objects.equals(id, audit.id) &&
                 Objects.equals(idea, audit.idea) &&
                 Objects.equals(result, audit.result) &&
@@ -140,6 +115,47 @@ public class Audit implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, creation.getUser().getId(), idea, result, reason, type, createTime);
+
+        return Objects.hash(id, adminId, idea, result, reason, type, createTime);
+    }
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
+    public AuditHunter getAuditHunter() {
+        return auditHunter;
+    }
+
+    public void setAuditHunter(AuditHunter auditHunter) {
+        this.auditHunter = auditHunter;
+    }
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
+    public AuditTask getAuditTask() {
+        return auditTask;
+    }
+
+    public void setAuditTask(AuditTask auditTask) {
+        this.auditTask = auditTask;
+    }
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
+    public AuditWithdraw getAuditWithdraw() {
+        return auditWithdraw;
+    }
+
+    public void setAuditWithdraw(AuditWithdraw auditWithdraw) {
+        this.auditWithdraw = auditWithdraw;
+    }
+
+    @ManyToOne
+    @JoinColumns(@JoinColumn(name = "admin_id", referencedColumnName = "user_id", nullable = false, insertable = false, updatable = false))
+    public Admin getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 }

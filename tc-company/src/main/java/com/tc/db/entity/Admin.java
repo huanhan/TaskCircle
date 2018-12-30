@@ -1,36 +1,73 @@
 package com.tc.db.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
-
 /**
+ * 管理员
  * @author Cyg
- * 管理员实体
  */
 @Entity
-public class Admin implements Serializable {
-
+public class Admin {
+    private Long userId;
+    private Long createId;
     private User user;
-    private Admin creation;
+    private Admin admin;
     private Collection<Admin> admins;
-    private Collection<Audit> audits;
-    private Collection<TaskClassify> taskClassities;
-    private Collection<Message> messages;
     private Collection<AdminAuthority> adminAuthorities;
+    private Collection<Audit> audits;
+    private Collection<Authority> authorities;
+    private Collection<Message> messages;
+    private Collection<TaskClassify> taskClassifies;
 
     public Admin() {
     }
 
-
-
-    public Admin(Long uid){
-        this.user = new User(uid);
+    public Admin(Long userId) {
+        this.userId = userId;
+        this.setUser(new User(userId));
     }
 
     @Id
+    @Column(name = "user_id")
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    @Basic
+    @Column(name = "create_id")
+    public Long getCreateId() {
+        return createId;
+    }
+
+    public void setCreateId(Long createId) {
+        this.createId = createId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Admin admin = (Admin) o;
+        return userId.equals(admin.userId) &&
+                createId.equals(admin.createId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(userId, createId);
+    }
+
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     public User getUser() {
@@ -42,40 +79,49 @@ public class Admin implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "create_id", referencedColumnName = "user_id", nullable = false)
-    public Admin getCreation() {
-        return creation;
+    @JoinColumn(name = "create_id", referencedColumnName = "user_id", nullable = false,insertable = false,updatable = false)
+    public Admin getAdmin() {
+        return admin;
     }
 
-    public void setCreation(Admin adminByCreateId) {
-        this.creation = adminByCreateId;
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 
-    @OneToMany(mappedBy = "creation")
+    @OneToMany(mappedBy = "admin")
     public Collection<Admin> getAdmins() {
         return admins;
     }
 
-    public void setAdmins(Collection<Admin> adminsByUserId) {
-        this.admins = adminsByUserId;
+    public void setAdmins(Collection<Admin> admins) {
+        this.admins = admins;
     }
 
-    @OneToMany(mappedBy = "creation")
+    @OneToMany(mappedBy = "admin")
+    public Collection<AdminAuthority> getAdminAuthorities() {
+        return adminAuthorities;
+    }
+
+    public void setAdminAuthorities(Collection<AdminAuthority> adminAuthorities) {
+        this.adminAuthorities = adminAuthorities;
+    }
+
+    @OneToMany(mappedBy = "admin")
     public Collection<Audit> getAudits() {
         return audits;
     }
 
-    public void setAudits(Collection<Audit> auditsByUserId) {
-        this.audits = auditsByUserId;
+    public void setAudits(Collection<Audit> audits) {
+        this.audits = audits;
     }
 
-    @OneToMany(mappedBy = "creation")
-    public Collection<TaskClassify> getTaskClassities() {
-        return taskClassities;
+    @OneToMany(mappedBy = "admin")
+    public Collection<Authority> getAuthorities() {
+        return authorities;
     }
 
-    public void setTaskClassities(Collection<TaskClassify> taskClassities) {
-        this.taskClassities = taskClassities;
+    public void setAuthorities(Collection<Authority> authorities) {
+        this.authorities = authorities;
     }
 
     @OneToMany(mappedBy = "creation")
@@ -87,26 +133,12 @@ public class Admin implements Serializable {
         this.messages = messages;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
-        Admin admin = (Admin) o;
-        return user.getId().equals(admin.getUser().getId()) &&
-                creation.getUser().getId().equals(admin.getUser().getId());
+    @OneToMany(mappedBy = "creation")
+    public Collection<TaskClassify> getTaskClassifies() {
+        return taskClassifies;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(user.getId(),creation.getUser().getId());
-    }
-
-    @OneToMany(mappedBy = "admin")
-    public Collection<AdminAuthority> getAdminAuthorities() {
-        return adminAuthorities;
-    }
-
-    public void setAdminAuthorities(Collection<AdminAuthority> adminAuthorities) {
-        this.adminAuthorities = adminAuthorities;
+    public void setTaskClassifies(Collection<TaskClassify> taskClassifies) {
+        this.taskClassifies = taskClassifies;
     }
 }

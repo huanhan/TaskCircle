@@ -2,8 +2,8 @@ package com.tc.controller;
 
 import com.tc.db.entity.UserWithdraw;
 import com.tc.dto.withdraw.QueryWithdraw;
-import com.tc.dto.withdraw.WithdrawStatistics;
-import com.tc.dto.withdraw.WithdrawStatisticsCondition;
+import com.tc.dto.withdraw.IEStatistics;
+import com.tc.dto.withdraw.IEStatisticsCondition;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -37,15 +37,15 @@ public class WithdrawController {
 
     /**
      * 获取收支统计
-     * @param withdrawStatisticsCondition 统计条件
+     * @param ieStatisticsCondition 统计条件
      * @param result 异常结果
      * @return
      */
     @GetMapping("/statistics")
     @ApiOperation(value = "所有用户收支统计信息")
-    public WithdrawStatistics getWithdrawStatistics(@Valid @RequestBody WithdrawStatisticsCondition withdrawStatisticsCondition,
-                                                    BindingResult result){
-        return new WithdrawStatistics();
+    public IEStatistics getIEStatistics(@Valid @RequestBody IEStatisticsCondition ieStatisticsCondition,
+                                              BindingResult result){
+        return new IEStatistics();
     }
 
     /**

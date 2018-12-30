@@ -7,18 +7,22 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * 用户联系方式主键
+ * @author Cyg
+ */
 public class UserContactPK implements Serializable {
-    private User user;
+    private Long userId;
     private String contactName;
 
     @Column(name = "user_id")
     @Id
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User userByUserId) {
-        this.user = userByUserId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     @Column(name = "contact_name")
@@ -36,13 +40,13 @@ public class UserContactPK implements Serializable {
         if (this == o) {return true;}
         if (o == null || getClass() != o.getClass()) {return false;}
         UserContactPK that = (UserContactPK) o;
-        return user.getId().equals(that.getUser().getId()) &&
+        return userId.equals(that.getUserId()) &&
                 Objects.equals(contactName, that.getContactName());
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(user.getId(), contactName);
+        return Objects.hash(userId, contactName);
     }
 }

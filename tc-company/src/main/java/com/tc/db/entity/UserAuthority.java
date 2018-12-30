@@ -5,21 +5,25 @@ import com.tc.db.entity.pk.UserAuthorityPK;
 import javax.persistence.*;
 import java.util.Objects;
 
+/**
+ * 用户与权限关系
+ * @author Cyg
+ */
 @Entity
 @Table(name = "user_authority", schema = "tc-company")
 @IdClass(UserAuthorityPK.class)
 public class UserAuthority {
-    private long authorityId;
+    private Long authorityId;
     private String category;
     private Authority authority;
 
     @Id
     @Column(name = "authority_id")
-    public long getAuthorityId() {
+    public Long getAuthorityId() {
         return authorityId;
     }
 
-    public void setAuthorityId(long authorityId) {
+    public void setAuthorityId(Long authorityId) {
         this.authorityId = authorityId;
     }
 
@@ -42,7 +46,7 @@ public class UserAuthority {
             return false;
         }
         UserAuthority that = (UserAuthority) o;
-        return authorityId == that.authorityId &&
+        return authorityId.equals(that.authorityId) &&
                 Objects.equals(category, that.category);
     }
 

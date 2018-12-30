@@ -1,25 +1,31 @@
 package com.tc.db.entity.pk;
 
-import com.tc.db.entity.Task;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * 任务步骤主键
+ * @author Cyg
+ */
 public class TaskStepPK implements Serializable {
-    private Task task;
+    private String taskId;
     private Integer step;
 
     @Column(name = "task_id")
     @Id
-    public Task getTask() {
-        return task;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setTask(Task taskByTaskId) {
-        this.task = taskByTaskId;
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
+
+
+
 
     @Column(name = "step")
     @Id
@@ -37,12 +43,12 @@ public class TaskStepPK implements Serializable {
         if (o == null || getClass() != o.getClass()) {return false;}
         TaskStepPK that = (TaskStepPK) o;
         return step.equals(that.getStep()) &&
-                Objects.equals(task.getId(), that.getTask().getId());
+                taskId.equals(that.getTaskId());
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(task.getId(), step);
+        return Objects.hash(taskId, step);
     }
 }

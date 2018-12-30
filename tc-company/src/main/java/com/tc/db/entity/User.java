@@ -27,22 +27,6 @@ import java.util.Objects;
 @Entity
 public class User implements Serializable {
 
-    public interface UserBasicView {}
-
-    public interface UserBasicDetailView extends UserBasicView{}
-
-    public User() {
-    }
-
-    public User(Long id) {
-        this.id = id;
-    }
-
-    public User(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
     /**
      * 用户编号
      */
@@ -180,12 +164,21 @@ public class User implements Serializable {
      * 用户的提现记录
      */
     private Collection<UserWithdraw> userWithdraws;
-
     /**
      * 一个用户接收多个消息
      */
     private Collection<UserMessage> userMessages;
+    private Admin adminById;
+    public User() {
+    }
+    public User(Long id) {
+        this.id = id;
+    }
 
+    public User(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -569,5 +562,16 @@ public class User implements Serializable {
         this.userMessages = userMessages;
     }
 
+    @OneToOne(mappedBy = "user")
+    public Admin getAdminById() {
+        return adminById;
+    }
 
+    public void setAdminById(Admin adminById) {
+        this.adminById = adminById;
+    }
+
+    public interface UserBasicView {}
+
+    public interface UserBasicDetailView extends UserBasicView{}
 }

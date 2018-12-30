@@ -36,9 +36,9 @@ public class ASController {
      * @param result 结果
      * @return
      */
-    @GetMapping("/task")
+    @GetMapping("/user")
     @ApiOperation(value = "用户分析")
-    public UserAnalyze getTaskAnalyz(@Valid @RequestBody UserAnalyzeCondition userAnalyzeCondition,
+    public UserAnalyze getUserAnalyz(@Valid @RequestBody UserAnalyzeCondition userAnalyzeCondition,
                                      BindingResult result){
         return new UserAnalyze();
     }
@@ -49,9 +49,9 @@ public class ASController {
      * @param result 结果
      * @return
      */
-    @GetMapping("/task")
+    @GetMapping("/finance")
     @ApiOperation(value = "财务分析")
-    public FinanceAnalyze getTaskAnalyz(@Valid @RequestBody FinanceAnalyzeCondition financeAnalyzeCondition,
+    public FinanceAnalyze getFinanceAnalyz(@Valid @RequestBody FinanceAnalyzeCondition financeAnalyzeCondition,
                                      BindingResult result){
         return new FinanceAnalyze();
     }

@@ -16,6 +16,8 @@ import java.util.Objects;
 @Table(name = "hunter_task", schema = "tc-company")
 public class HunterTask implements Serializable {
     private String id;
+    private String taskId;
+    private Long hunterId;
     private Task task;
     private Hunter hunter;
     private Timestamp acceptTime;
@@ -38,6 +40,29 @@ public class HunterTask implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
+
+    @Basic
+    @Column(name = "task_id")
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
+    @Basic
+    @Column(name = "hunter_id")
+    public Long getHunterId() {
+        return hunterId;
+    }
+
+    public void setHunterId(Long hunterId) {
+        this.hunterId = hunterId;
+    }
+
+
+
 
     @Basic
     @Column(name = "accept_time")
@@ -139,7 +164,7 @@ public class HunterTask implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public Task getTask() {
         return task;
     }
@@ -149,7 +174,7 @@ public class HunterTask implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "hunter_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "hunter_id", referencedColumnName = "user_id", nullable = false,insertable = false,updatable = false)
     public Hunter getHunter() {
         return hunter;
     }

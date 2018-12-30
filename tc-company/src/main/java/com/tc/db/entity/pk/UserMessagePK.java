@@ -1,49 +1,55 @@
 package com.tc.db.entity.pk;
 
-import com.tc.db.entity.Message;
-import com.tc.db.entity.User;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * 用户与消息关系主键
+ * @author Cyg
+ */
 public class UserMessagePK implements Serializable {
-    private Message message;
-    private User user;
+    private Long userId;
+    private Long messageId;
 
-    @Column(name = "message_id")
     @Id
-    public Message getMessage() {
-        return message;
-    }
-
-    public void setMessage(Message messageByMessageId) {
-        this.message = messageByMessageId;
-    }
-
     @Column(name = "user_id")
-    @Id
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    @Id
+    @Column(name = "message_id")
+    public Long getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UserMessagePK that = (UserMessagePK) o;
-        return message.getId().equals(that.getMessage().getId()) &&
-                user.getId().equals(that.getUser().getId());
+        return messageId.equals(that.getMessageId()) &&
+                userId.equals(that.getUserId());
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(message.getId(), user.getId());
+        return Objects.hash(messageId, userId);
     }
 }

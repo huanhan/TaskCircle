@@ -13,6 +13,7 @@ import java.util.Objects;
 @Table(name = "user_withdraw", schema = "tc-company")
 public class UserWithdraw implements Serializable {
     private String id;
+    private Long userId;
     private Float money;
     private String state;
     private Collection<AuditWithdraw> auditWithdraws;
@@ -26,6 +27,16 @@ public class UserWithdraw implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Basic
+    @Column(name = "user_id")
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     @Basic
@@ -75,7 +86,7 @@ public class UserWithdraw implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public User getUser() {
         return user;
     }

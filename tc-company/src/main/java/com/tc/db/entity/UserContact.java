@@ -7,15 +7,30 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * 用户联系方式
+ * @author Cyg
+ */
 @Entity
 @Table(name = "user_contact", schema = "tc-company")
 @IdClass(UserContactPK.class)
 public class UserContact implements Serializable {
 
+    private Long userId;
     private UserContactName contactName;
     private String contact;
     private Boolean isDefault;
     private User user;
+
+    @Id
+    @Column(name = "user_id")
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     @Id
     @Enumerated(EnumType.STRING)
@@ -28,9 +43,9 @@ public class UserContact implements Serializable {
         this.contactName = contactName;
     }
 
-    @Id
+
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public User getUser() {
         return user;
     }

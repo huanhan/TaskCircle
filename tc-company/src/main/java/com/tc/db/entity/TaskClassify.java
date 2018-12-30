@@ -11,7 +11,7 @@ import java.util.Objects;
  * 任务分类实体
  */
 @Entity
-@Table(name = "task_classify", schema = "tc-company")
+@Table(name = "task_classify", schema = "tc-company", catalog = "")
 public class TaskClassify implements Serializable {
     private Long id;
     private String name;
@@ -108,9 +108,8 @@ public class TaskClassify implements Serializable {
         this.taskClassifies = taskClassifies;
     }
 
-
     @ManyToOne
-    @JoinColumn(name = "creation",referencedColumnName = "user_id",nullable = false)
+    @JoinColumn(name = "creation",referencedColumnName = "user_id",nullable = false,insertable = false,updatable = false)
     public Admin getCreation() {
         return creation;
     }
@@ -118,9 +117,4 @@ public class TaskClassify implements Serializable {
     public void setCreation(Admin creation) {
         this.creation = creation;
     }
-
-
-
-
-
 }

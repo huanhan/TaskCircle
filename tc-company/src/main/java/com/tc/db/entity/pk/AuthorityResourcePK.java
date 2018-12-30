@@ -7,27 +7,31 @@ import java.io.Serializable;
 import java.util.Objects;
 
 
+/**
+ * 权限与资源关系主键
+ * @author Cyg
+ */
 public class AuthorityResourcePK implements Serializable {
-    private long authorityId;
-    private long resourceId;
+    private Long authorityId;
+    private Long resourceId;
 
     @Column(name = "authority_id")
     @Id
-    public long getAuthorityId() {
+    public Long getAuthorityId() {
         return authorityId;
     }
 
-    public void setAuthorityId(long authorityId) {
+    public void setAuthorityId(Long authorityId) {
         this.authorityId = authorityId;
     }
 
     @Column(name = "resource_id")
     @Id
-    public long getResourceId() {
+    public Long getResourceId() {
         return resourceId;
     }
 
-    public void setResourceId(long resourceId) {
+    public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
     }
 
@@ -40,8 +44,8 @@ public class AuthorityResourcePK implements Serializable {
             return false;
         }
         AuthorityResourcePK that = (AuthorityResourcePK) o;
-        return authorityId == that.authorityId &&
-                resourceId == that.resourceId;
+        return authorityId.equals(that.authorityId) &&
+                resourceId.equals(that.resourceId);
     }
 
     @Override

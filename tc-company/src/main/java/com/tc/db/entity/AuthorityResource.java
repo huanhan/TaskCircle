@@ -17,8 +17,8 @@ public class AuthorityResource implements Serializable {
 
     private Authority authority;
     private Resource resource;
-    private long authorityId;
-    private long resourceId;
+    private Long authorityId;
+    private Long resourceId;
 
 
 
@@ -44,21 +44,21 @@ public class AuthorityResource implements Serializable {
 
     @Id
     @Column(name = "authority_id")
-    public long getAuthorityId() {
+    public Long getAuthorityId() {
         return authorityId;
     }
 
-    public void setAuthorityId(long authorityId) {
+    public void setAuthorityId(Long authorityId) {
         this.authorityId = authorityId;
     }
 
     @Id
     @Column(name = "resource_id")
-    public long getResourceId() {
+    public Long getResourceId() {
         return resourceId;
     }
 
-    public void setResourceId(long resourceId) {
+    public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
     }
 
@@ -88,7 +88,7 @@ public class AuthorityResource implements Serializable {
         if (o == null || getClass() != o.getClass()) {return false;}
         AuthorityResource that = (AuthorityResource) o;
         return authority.getId().equals(that.getAuthority().getId()) &&
-                resource.getId() == that.getResource().getId();
+                resource.getId().equals(that.getResource().getId());
     }
 
     @Override

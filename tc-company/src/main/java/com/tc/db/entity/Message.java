@@ -62,7 +62,7 @@ public class Message implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "creation", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "creation", referencedColumnName = "user_id", nullable = false,insertable = false,updatable = false)
     public Admin getCreation() {
         return creation;
     }

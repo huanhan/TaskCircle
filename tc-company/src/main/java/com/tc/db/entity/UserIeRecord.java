@@ -12,13 +12,15 @@ import java.util.Objects;
  * 用户收支记录实体
  */
 @Entity
-@Table(name = "user_ie_record", schema = "tc-company", catalog = "")
+@Table(name = "user_ie_record", schema = "tc-company")
 public class UserIeRecord implements Serializable {
     private String id;
     private Timestamp createTime;
     private Float money;
     private String context;
     private IECategory ieCategory;
+    private Long me;
+    private Long to;
     private User userByMe;
     private User userByTo;
 
@@ -71,6 +73,26 @@ public class UserIeRecord implements Serializable {
 
     public void setIeCategory(IECategory ieCategory) {
         this.ieCategory = ieCategory;
+    }
+
+    @Basic
+    @Column(name = "me")
+    public Long getMe() {
+        return me;
+    }
+
+    public void setMe(Long me) {
+        this.me = me;
+    }
+
+    @Basic
+    @Column(name = "to")
+    public Long getTo() {
+        return to;
+    }
+
+    public void setTo(Long to) {
+        this.to = to;
     }
 
     @Override

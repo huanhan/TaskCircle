@@ -1,53 +1,75 @@
 package com.tc.db.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * 审核用户提现
  * @author Cyg
- * 提现审核
  */
 @Entity
 @Table(name = "audit_withdraw", schema = "tc-company")
-public class AuditWithdraw implements Serializable {
-
+public class AuditWithdraw {
+    private String auditId;
+    private String withdrawId;
     private Audit audit;
     private UserWithdraw userWithdraw;
 
     @Id
-    @OneToOne
-    @JoinColumn(name = "audit_id", referencedColumnName = "id", nullable = false)
-    public Audit getAudit() {
-        return audit;
+    @Column(name = "audit_id")
+    public String getAuditId() {
+        return auditId;
     }
 
-    public void setAudit(Audit auditByAuditId) {
-        this.audit = auditByAuditId;
+    public void setAuditId(String auditId) {
+        this.auditId = auditId;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "withdraw_id", referencedColumnName = "id", nullable = false)
-    public UserWithdraw getUserWithdraw() {
-        return userWithdraw;
+    @Basic
+    @Column(name = "withdraw_id")
+    public String getWithdrawId() {
+        return withdrawId;
     }
 
-    public void setUserWithdraw(UserWithdraw userWithdrawByWithdrawId) {
-        this.userWithdraw = userWithdrawByWithdrawId;
+    public void setWithdrawId(String withdrawId) {
+        this.withdrawId = withdrawId;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AuditWithdraw that = (AuditWithdraw) o;
-        return Objects.equals(audit.getId(), that.getAudit().getId()) &&
-                Objects.equals(userWithdraw.getId(), that.getUserWithdraw().getId());
+        return Objects.equals(auditId, that.auditId) &&
+                Objects.equals(withdrawId, that.withdrawId);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(audit.getId(), userWithdraw.getId());
+        return Objects.hash(auditId, withdrawId);
+    }
+
+    @OneToOne(mappedBy = "auditWithdraw")
+    public Audit getAudit() {
+        return audit;
+    }
+
+    public void setAudit(Audit audit) {
+        this.audit = audit;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "withdraw_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    public UserWithdraw getUserWithdraw() {
+        return userWithdraw;
+    }
+
+    public void setUserWithdraw(UserWithdraw userWithdraw) {
+        this.userWithdraw = userWithdraw;
     }
 }

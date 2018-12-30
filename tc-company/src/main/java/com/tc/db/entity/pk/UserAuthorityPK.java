@@ -6,16 +6,16 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class UserAuthorityPK implements Serializable {
-    private long authorityId;
+    private Long authorityId;
     private String category;
 
     @Column(name = "authority_id")
     @Id
-    public long getAuthorityId() {
+    public Long getAuthorityId() {
         return authorityId;
     }
 
-    public void setAuthorityId(long authorityId) {
+    public void setAuthorityId(Long authorityId) {
         this.authorityId = authorityId;
     }
 

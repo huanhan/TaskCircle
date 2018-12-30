@@ -14,6 +14,7 @@ import java.util.Objects;
 @Table(name = "task_step", schema = "tc-company")
 @IdClass(TaskStepPK.class)
 public class TaskStep implements Serializable {
+    private String taskId;
     private Integer step;
     private String title;
     private String context;
@@ -21,8 +22,18 @@ public class TaskStep implements Serializable {
     private Task task;
 
     @Id
+    @Column(name = "task_id")
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
+
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public Task getTask() {
         return task;
     }

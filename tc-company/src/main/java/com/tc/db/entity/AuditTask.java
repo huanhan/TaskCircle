@@ -1,63 +1,83 @@
 package com.tc.db.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * 审核需发布的任务
  * @author Cyg
- * 任务审核
  */
 @Entity
 @Table(name = "audit_task", schema = "tc-company")
-public class AuditTask implements Serializable {
-    private Float money;
+public class AuditTask {
+    private String auditId;
+    private String taskId;
+    private Double money;
     private Audit audit;
     private Task task;
 
+    @Id
+    @Column(name = "audit_id")
+    public String getAuditId() {
+        return auditId;
+    }
+
+    public void setAuditId(String auditId) {
+        this.auditId = auditId;
+    }
+
+    @Basic
+    @Column(name = "task_id")
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
 
     @Basic
     @Column(name = "money")
-    public Float getMoney() {
+    public Double getMoney() {
         return money;
     }
 
-    public void setMoney(Float money) {
+    public void setMoney(Double money) {
         this.money = money;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         AuditTask auditTask = (AuditTask) o;
-        return Float.compare(auditTask.money, money) == 0;
+        return Double.compare(auditTask.money, money) == 0 &&
+                Objects.equals(auditId, auditTask.auditId) &&
+                Objects.equals(taskId, auditTask.taskId);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(audit.getId(), task.getId(), money);
+        return Objects.hash(auditId, taskId, money);
     }
 
-    @Id
-    @OneToOne
-    @JoinColumn(name = "audit_id", referencedColumnName = "id", nullable = false)
+    @OneToOne(mappedBy = "auditTask")
     public Audit getAudit() {
         return audit;
     }
 
-    public void setAudit(Audit auditByAuditId) {
-        this.audit = auditByAuditId;
+    public void setAudit(Audit audit) {
+        this.audit = audit;
     }
 
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public Task getTask() {
         return task;
     }
 
-    public void setTask(Task taskByTaskId) {
-        this.task = taskByTaskId;
+    public void setTask(Task task) {
+        this.task = task;
     }
 }

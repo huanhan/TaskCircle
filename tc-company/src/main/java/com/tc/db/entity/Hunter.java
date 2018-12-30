@@ -13,11 +13,22 @@ import java.util.Objects;
  */
 @Entity
 public class Hunter implements Serializable {
+    private Long userId;
     private User user;
     private AuditState state;
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTask> hunterTasks;
     private Collection<UserHunterInterflow> userHunterInterflows;
+
+    @Id
+    @Column(name = "user_id")
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     @Basic
     @Enumerated(EnumType.STRING)
@@ -39,7 +50,6 @@ public class Hunter implements Serializable {
         this.commentHunters = commentHuntersByUserId;
     }
 
-    @Id
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     public User getUser() {

@@ -1,64 +1,98 @@
 package com.tc.db.entity;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * @author Cyg
  * 评论猎刃
+ * @author Cyg
  */
 @Entity
 @Table(name = "comment_hunter", schema = "tc-company")
-public class CommentHunter implements Serializable {
-
+public class CommentHunter {
+    private Long commentId;
+    private Long hunterId;
+    private String hunterTaskId;
     private Comment comment;
     private Hunter hunter;
     private HunterTask hunterTask;
 
     @Id
-    @OneToOne
-    @JoinColumn(name = "comment_id", referencedColumnName = "id", nullable = false)
-    public Comment getComment() {
-        return comment;
+    @Column(name = "comment_id")
+    public Long getCommentId() {
+        return commentId;
     }
 
-    public void setComment(Comment commentByCommentId) {
-        this.comment = commentByCommentId;
+    public void setCommentId(Long commentId) {
+        this.commentId = commentId;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "hunter_id", referencedColumnName = "user_id", nullable = false)
-    public Hunter getHunter() {
-        return hunter;
+    @Basic
+    @Column(name = "hunter_id")
+    public Long getHunterId() {
+        return hunterId;
     }
 
-    public void setHunter(Hunter hunterByHunterId) {
-        this.hunter = hunterByHunterId;
+    public void setHunterId(Long hunterId) {
+        this.hunterId = hunterId;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false)
-    public HunterTask getHunterTask() {
-        return hunterTask;
+    @Basic
+    @Column(name = "hunter_task_id")
+    public String getHunterTaskId() {
+        return hunterTaskId;
     }
 
-    public void setHunterTask(HunterTask hunterTaskByHunterTaskId) {
-        this.hunterTask = hunterTaskByHunterTaskId;
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         CommentHunter that = (CommentHunter) o;
-        return comment.getId().equals(that.getComment().getId()) &&
-                hunter.getUser().getId().equals(that.getHunter().getUser().getId()) &&
-                Objects.equals(hunterTask.getId(), that.getHunterTask().getId());
+        return commentId.equals(that.commentId) &&
+                hunterId.equals(that.hunterId) &&
+                Objects.equals(hunterTaskId, that.hunterTaskId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(comment.getId(), hunter.getUser().getId(), hunterTask.getId());
+
+        return Objects.hash(commentId, hunterId, hunterTaskId);
+    }
+
+    @OneToOne(mappedBy = "commentHunter")
+    public Comment getComment() {
+        return comment;
+    }
+
+    public void setComment(Comment comment) {
+        this.comment = comment;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "hunter_id", referencedColumnName = "user_id", nullable = false,insertable = false,updatable = false)
+    public Hunter getHunter() {
+        return hunter;
+    }
+
+    public void setHunter(Hunter hunter) {
+        this.hunter = hunter;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    public HunterTask getHunterTask() {
+        return hunterTask;
+    }
+
+    public void setHunterTask(HunterTask hunterTask) {
+        this.hunterTask = hunterTask;
     }
 }

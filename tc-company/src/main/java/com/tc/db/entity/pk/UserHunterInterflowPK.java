@@ -1,8 +1,5 @@
 package com.tc.db.entity.pk;
 
-import com.tc.db.entity.Hunter;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.User;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -10,41 +7,47 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
 
+
+/**
+ * 用户猎刃针对任务交流的主键
+ * @author Cyg
+ */
 public class UserHunterInterflowPK implements Serializable {
-    private Task task;
-    private User user;
-    private Hunter hunter;
+    private String taskId;
+    private Long userId;
+    private Long hunterId;
     private Timestamp createTime;
 
     @Column(name = "task_id")
     @Id
-    public Task getTask() {
-        return task;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setTask(Task task) {
-        this.task = task;
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     @Column(name = "user_id")
     @Id
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     @Column(name = "hunter_id")
     @Id
-    public Hunter getHunter() {
-        return hunter;
+    public Long getHunterId() {
+        return hunterId;
     }
 
-    public void setHunter(Hunter hunter) {
-        this.hunter = hunter;
+    public void setHunterId(Long hunterId) {
+        this.hunterId = hunterId;
     }
+
 
     @Column(name = "create_time")
     @Id
@@ -61,15 +64,15 @@ public class UserHunterInterflowPK implements Serializable {
         if (this == o) {return true;}
         if (o == null || getClass() != o.getClass()) {return false;}
         UserHunterInterflowPK that = (UserHunterInterflowPK) o;
-        return user.getId().equals(that.getUser().getId()) &&
-                hunter.getUser().getId().equals(that.getHunter().getUser().getId()) &&
-                Objects.equals(task.getId(), that.getTask().getId()) &&
+        return userId.equals(that.getUserId()) &&
+                hunterId.equals(that.getHunterId()) &&
+                taskId.equals(that.getTaskId()) &&
                 Objects.equals(createTime, that.getCreateTime());
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(task.getId(), user.getId(), hunter.getUser().getId(), createTime);
+        return Objects.hash(taskId, userId, hunterId, createTime);
     }
 }

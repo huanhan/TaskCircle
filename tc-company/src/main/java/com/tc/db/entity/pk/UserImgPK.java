@@ -1,25 +1,29 @@
 package com.tc.db.entity.pk;
 
-import com.tc.db.entity.User;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * 用户图片主键
+ * @author Cyg
+ */
 public class UserImgPK implements Serializable {
-    private User user;
+    private Long userId;
     private String imgName;
 
     @Column(name = "user_id")
     @Id
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User userByUserId) {
-        this.user = userByUserId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
+
 
     @Column(name = "img_name")
     @Id
@@ -36,12 +40,12 @@ public class UserImgPK implements Serializable {
         if (this == o) {return true;}
         if (o == null || getClass() != o.getClass()) {return false;}
         UserImgPK userImgPK = (UserImgPK) o;
-        return user.getId().equals(userImgPK.getUser().getId()) &&
+        return userId.equals(userImgPK.getUserId()) &&
                 Objects.equals(imgName, userImgPK.imgName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user.getId(), imgName);
+        return Objects.hash(userId, imgName);
     }
 }
