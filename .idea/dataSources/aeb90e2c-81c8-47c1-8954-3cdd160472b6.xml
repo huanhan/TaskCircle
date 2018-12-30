@@ -2253,30 +2253,36 @@ step</ColNames>
       <DataType>timestamp|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="452" parent="235" name="PRIMARY">
+    <column id="452" parent="235" name="state">
+      <Position>19</Position>
+      <DataType>varchar(30)|0s</DataType>
+      <NotNull>1</NotNull>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <key id="453" parent="235" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="453" parent="236" name="authority_id">
+    <column id="454" parent="236" name="authority_id">
       <Position>1</Position>
       <DataType>bigint(11)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="454" parent="236" name="category">
+    <column id="455" parent="236" name="category">
       <Position>2</Position>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="455" parent="236" name="PRIMARY">
+    <key id="456" parent="236" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>authority_id
 category</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="456" parent="236" name="authority_userAuthority">
+    <foreign-key id="457" parent="236" name="authority_userAuthority">
       <ColNames>authority_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>authority</RefTableName>
@@ -2284,28 +2290,28 @@ category</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <column id="457" parent="237" name="user_id">
+    <column id="458" parent="237" name="user_id">
       <Position>1</Position>
       <Comment>所属用户</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="458" parent="237" name="contact_name">
+    <column id="459" parent="237" name="contact_name">
       <Position>2</Position>
       <Comment>联系名称</Comment>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="459" parent="237" name="contact">
+    <column id="460" parent="237" name="contact">
       <Position>3</Position>
       <Comment>联系方式</Comment>
       <DataType>varchar(16)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="460" parent="237" name="is_default">
+    <column id="461" parent="237" name="is_default">
       <Position>4</Position>
       <Comment>是否默认</Comment>
       <DataType>tinyint(1)|0s</DataType>
@@ -2313,13 +2319,13 @@ category</ColNames>
       <DefaultExpression>&apos;0&apos;</DefaultExpression>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="461" parent="237" name="PRIMARY">
+    <key id="462" parent="237" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>user_id
 contact_name</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="462" parent="237" name="user_userContact">
+    <foreign-key id="463" parent="237" name="user_userContact">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
@@ -2327,28 +2333,28 @@ contact_name</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <column id="463" parent="238" name="task_id">
+    <column id="464" parent="238" name="task_id">
       <Position>1</Position>
       <Comment>交流针对的任务</Comment>
       <DataType>varchar(32)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="464" parent="238" name="user_id">
+    <column id="465" parent="238" name="user_id">
       <Position>2</Position>
       <Comment>交流的用户方</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="465" parent="238" name="hunter_id">
+    <column id="466" parent="238" name="hunter_id">
       <Position>3</Position>
       <Comment>交流的猎刃方</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="466" parent="238" name="create_time">
+    <column id="467" parent="238" name="create_time">
       <Position>4</Position>
       <Comment>创建时间</Comment>
       <DataType>timestamp|0s</DataType>
@@ -2357,20 +2363,20 @@ contact_name</ColNames>
       <ColumnKind>normal</ColumnKind>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="467" parent="238" name="context">
+    <column id="468" parent="238" name="context">
       <Position>5</Position>
       <Comment>内容</Comment>
       <DataType>varchar(50)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="468" parent="238" name="user_UHIF">
+    <index id="469" parent="238" name="user_UHIF">
       <ColNames>user_id</ColNames>
     </index>
-    <index id="469" parent="238" name="hunter_UHIF">
+    <index id="470" parent="238" name="hunter_UHIF">
       <ColNames>hunter_id</ColNames>
     </index>
-    <key id="470" parent="238" name="PRIMARY">
+    <key id="471" parent="238" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>task_id
 user_id
@@ -2378,7 +2384,7 @@ hunter_id
 create_time</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="471" parent="238" name="task_UHIF">
+    <foreign-key id="472" parent="238" name="task_UHIF">
       <ColNames>task_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>task</RefTableName>
@@ -2386,7 +2392,7 @@ create_time</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <foreign-key id="472" parent="238" name="user_UHIF">
+    <foreign-key id="473" parent="238" name="user_UHIF">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
@@ -2394,7 +2400,7 @@ create_time</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <foreign-key id="473" parent="238" name="hunter_UHIF">
+    <foreign-key id="474" parent="238" name="hunter_UHIF">
       <ColNames>hunter_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>hunter</RefTableName>
@@ -2402,21 +2408,21 @@ create_time</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <column id="474" parent="239" name="id">
+    <column id="475" parent="239" name="id">
       <Position>1</Position>
       <Comment>收支单号</Comment>
       <DataType>varchar(32)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="475" parent="239" name="me">
+    <column id="476" parent="239" name="me">
       <Position>2</Position>
       <Comment>记录的创建者</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="476" parent="239" name="create_time">
+    <column id="477" parent="239" name="create_time">
       <Position>3</Position>
       <Comment>创建时间</Comment>
       <DataType>timestamp|0s</DataType>
@@ -2425,46 +2431,46 @@ create_time</ColNames>
       <ColumnKind>normal</ColumnKind>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="477" parent="239" name="money">
+    <column id="478" parent="239" name="money">
       <Position>4</Position>
       <Comment>金额</Comment>
       <DataType>float|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="478" parent="239" name="context">
+    <column id="479" parent="239" name="context">
       <Position>5</Position>
       <Comment>备注内容</Comment>
       <DataType>varchar(100)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="479" parent="239" name="to">
+    <column id="480" parent="239" name="to">
       <Position>6</Position>
       <Comment>收支的对象</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="480" parent="239" name="ie_category">
+    <column id="481" parent="239" name="ie_category">
       <Position>7</Position>
       <Comment>收支的类别</Comment>
       <DataType>varchar(32)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="481" parent="239" name="user_userIERecord_me">
+    <index id="482" parent="239" name="user_userIERecord_me">
       <ColNames>me</ColNames>
     </index>
-    <index id="482" parent="239" name="user_userIERecord_to">
+    <index id="483" parent="239" name="user_userIERecord_to">
       <ColNames>to</ColNames>
     </index>
-    <key id="483" parent="239" name="PRIMARY">
+    <key id="484" parent="239" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="484" parent="239" name="user_userIERecord_me">
+    <foreign-key id="485" parent="239" name="user_userIERecord_me">
       <ColNames>me</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
@@ -2472,40 +2478,40 @@ create_time</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <foreign-key id="485" parent="239" name="user_userIERecord_to">
+    <foreign-key id="486" parent="239" name="user_userIERecord_to">
       <ColNames>to</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="486" parent="240" name="user_id">
+    <column id="487" parent="240" name="user_id">
       <Position>1</Position>
       <Comment>所属用户</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="487" parent="240" name="img_name">
+    <column id="488" parent="240" name="img_name">
       <Position>2</Position>
       <Comment>图片标识名称</Comment>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="488" parent="240" name="url_location">
+    <column id="489" parent="240" name="url_location">
       <Position>3</Position>
       <Comment>图片的资源地址</Comment>
       <DataType>varchar(200)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="489" parent="240" name="PRIMARY">
+    <key id="490" parent="240" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>user_id
 img_name</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="490" parent="240" name="user_userImg">
+    <foreign-key id="491" parent="240" name="user_userImg">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
@@ -2513,34 +2519,34 @@ img_name</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <column id="491" parent="241" name="message_id">
+    <column id="492" parent="241" name="message_id">
       <Position>1</Position>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="492" parent="241" name="user_id">
+    <column id="493" parent="241" name="user_id">
       <Position>2</Position>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="493" parent="241" name="is_look">
+    <column id="494" parent="241" name="is_look">
       <Position>3</Position>
       <DataType>tinyint(1)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="494" parent="241" name="user_userMessage">
+    <index id="495" parent="241" name="user_userMessage">
       <ColNames>user_id</ColNames>
     </index>
-    <key id="495" parent="241" name="PRIMARY">
+    <key id="496" parent="241" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>message_id
 user_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="496" parent="241" name="message_userMessage">
+    <foreign-key id="497" parent="241" name="message_userMessage">
       <ColNames>message_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>message</RefTableName>
@@ -2548,7 +2554,7 @@ user_id</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <foreign-key id="497" parent="241" name="user_userMessage">
+    <foreign-key id="498" parent="241" name="user_userMessage">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
@@ -2556,21 +2562,21 @@ user_id</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <column id="498" parent="242" name="id">
+    <column id="499" parent="242" name="id">
       <Position>1</Position>
       <Comment>操作日志编号</Comment>
       <DataType>varchar(32)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="499" parent="242" name="user_id">
+    <column id="500" parent="242" name="user_id">
       <Position>2</Position>
       <Comment>对应的用户</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="500" parent="242" name="operation_time">
+    <column id="501" parent="242" name="operation_time">
       <Position>3</Position>
       <Comment>操作的时间</Comment>
       <DataType>timestamp|0s</DataType>
@@ -2579,36 +2585,36 @@ user_id</ColNames>
       <ColumnKind>normal</ColumnKind>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="501" parent="242" name="form">
+    <column id="502" parent="242" name="form">
       <Position>4</Position>
       <Comment>操作的来源</Comment>
       <DataType>varchar(100)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="502" parent="242" name="context">
+    <column id="503" parent="242" name="context">
       <Position>5</Position>
       <Comment>内容</Comment>
       <DataType>varchar(100)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="503" parent="242" name="operation_mode">
+    <column id="504" parent="242" name="operation_mode">
       <Position>6</Position>
       <Comment>操作的方式</Comment>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="504" parent="242" name="user_userOperationLog">
+    <index id="505" parent="242" name="user_userOperationLog">
       <ColNames>user_id</ColNames>
     </index>
-    <key id="505" parent="242" name="PRIMARY">
+    <key id="506" parent="242" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="506" parent="242" name="user_userOperationLog">
+    <foreign-key id="507" parent="242" name="user_userOperationLog">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>
@@ -2616,21 +2622,21 @@ user_id</ColNames>
       <OnUpdate>cascade</OnUpdate>
       <OnDelete>cascade</OnDelete>
     </foreign-key>
-    <column id="507" parent="243" name="id">
+    <column id="508" parent="243" name="id">
       <Position>1</Position>
       <Comment>提现单号</Comment>
       <DataType>varchar(32)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="508" parent="243" name="user_id">
+    <column id="509" parent="243" name="user_id">
       <Position>2</Position>
       <Comment>所属用户</Comment>
       <DataType>bigint(20)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="509" parent="243" name="money">
+    <column id="510" parent="243" name="money">
       <Position>3</Position>
       <Comment>提现金额</Comment>
       <DataType>float|0s</DataType>
@@ -2638,22 +2644,22 @@ user_id</ColNames>
       <DefaultExpression>&apos;0&apos;</DefaultExpression>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="510" parent="243" name="state">
+    <column id="511" parent="243" name="state">
       <Position>4</Position>
       <Comment>提现状态</Comment>
       <DataType>varchar(30)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="511" parent="243" name="user_userWithdraw">
+    <index id="512" parent="243" name="user_userWithdraw">
       <ColNames>user_id</ColNames>
     </index>
-    <key id="512" parent="243" name="PRIMARY">
+    <key id="513" parent="243" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="513" parent="243" name="user_userWithdraw">
+    <foreign-key id="514" parent="243" name="user_userWithdraw">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>

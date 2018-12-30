@@ -37,7 +37,7 @@ public class TaskClassifyController {
      * @param id 分类编号
      * @return
      */
-    @GetMapping("/{id:\\d+}")
+    @GetMapping("/detail/{id:\\d+}")
     @ApiOperation(value = "获取分类详情信息")
     public TaskClassify detail(@PathVariable("id") Long id){
         return new TaskClassify();
@@ -104,5 +104,15 @@ public class TaskClassifyController {
 
     }
 
-    
+    /**
+     * 从分类中移除所属的任务
+     * @param id 分类编号
+     * @param ids 任务编号列表
+     * @param bindingResult 校验异常结果
+     */
+    @DeleteMapping("/task/{id:\\d+}")
+    @ApiOperation(value = "从分类中移除所属的任务")
+    public void removeTask(@PathVariable("id") Long id,@Valid @RequestBody Ids ids,BindingResult bindingResult){
+
+    }
 }

@@ -3,6 +3,7 @@ package com.tc.db.entity;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
+import com.tc.db.enums.UserState;
 import io.swagger.annotations.ApiModel;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
@@ -124,6 +125,10 @@ public class User implements Serializable {
      */
     private Admin admin;
     /**
+     * 用户状态
+     */
+    private UserState state;
+    /**
      * 猎刃审核记录
      */
     private Collection<AuditHunter> auditHunters;
@@ -180,6 +185,7 @@ public class User implements Serializable {
      * 一个用户接收多个消息
      */
     private Collection<UserMessage> userMessages;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -382,6 +388,18 @@ public class User implements Serializable {
 
     public void setBirthday(Timestamp birthday) {
         this.birthday = birthday;
+    }
+
+    @Basic
+    @Column(name = "state")
+    @Enumerated(EnumType.STRING)
+    @JsonView(UserBasicDetailView.class)
+    public UserState getState() {
+        return state;
+    }
+
+    public void setState(UserState state) {
+        this.state = state;
     }
 
     @Override
