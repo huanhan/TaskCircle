@@ -1,0 +1,12 @@
+package com.tc.db.repository;
+
+import com.tc.db.entity.UserHunterInterflow;
+import com.tc.db.entity.pk.UserHunterInterflowPK;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+/**
+ * 评论仓库
+ * @author Cyg
+ */
+public interface UserHunterInterflowRepository extends JpaRepository<UserHunterInterflow,UserHunterInterflowPK> {
+}

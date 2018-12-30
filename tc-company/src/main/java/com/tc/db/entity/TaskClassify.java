@@ -11,7 +11,7 @@ import java.util.Objects;
  * 任务分类实体
  */
 @Entity
-@Table(name = "task_classify", schema = "tc-company", catalog = "")
+@Table(name = "task_classify", schema = "tc-company")
 public class TaskClassify implements Serializable {
     private Long id;
     private String name;
