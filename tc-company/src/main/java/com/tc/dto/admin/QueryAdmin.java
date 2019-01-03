@@ -1,6 +1,6 @@
 package com.tc.dto.admin;
 
-import com.tc.dto.Page;
+import com.tc.dto.MyPage;
 
-public class QueryAdmin extends Page {
+public class QueryAdmin extends MyPage {
 }

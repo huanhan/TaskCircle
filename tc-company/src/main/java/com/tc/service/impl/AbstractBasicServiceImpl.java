@@ -1,6 +1,7 @@
 package com.tc.service.impl;
 
 import com.tc.service.BasicService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -24,6 +25,11 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
 
     @Override
     public List<T> findAll(Sort sort) {
+        return null;
+    }
+
+    @Override
+    public List<T> findAll(Pageable pageable) {
         return null;
     }
 

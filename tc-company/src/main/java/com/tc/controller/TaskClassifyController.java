@@ -28,7 +28,7 @@ public class TaskClassifyController {
      */
     @GetMapping("/all")
     @ApiOperation(value = "获取任务类别列表")
-    public List<TaskClassifyResult> all(){
+    public List<TaskClassifyResult> all(@RequestBody QueryTaskClassify queryTaskClassify){
         return new ArrayList<>();
     }
 

@@ -1,4 +1,4 @@
-package com.tc.validator.until;
+package com.tc.until;
 
 public abstract class CreateIDAbstract {
 

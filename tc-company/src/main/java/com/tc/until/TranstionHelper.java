@@ -1,4 +1,4 @@
-package com.tc.validator.until;
+package com.tc.until;
 
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.AuthorityResource;

@@ -2,8 +2,11 @@ package com.tc.service.impl;
 
 import com.tc.db.entity.Resource;
 import com.tc.db.repository.ResourceRepository;
+import com.tc.dto.resource.QueryResource;
 import com.tc.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +30,12 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
     @Override
     public Resource save(Resource resource) {
         return resourceRepository.save(resource);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public List<Resource> save(List<Resource> resources) {
+        return resourceRepository.save(resources);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -84,5 +93,10 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
     @Override
     public Resource findOne(Long id) {
         return resourceRepository.findOne(id);
+    }
+
+    @Override
+    public List<Resource> findByQuery(QueryResource queryResource) {
+        return resourceRepository.findByQuery(queryResource,queryResource.toPageRequest()).getContent();
     }
 }

@@ -1,8 +1,6 @@
 package com.tc.dto.user;
 
-import com.tc.db.entity.Authority;
 import com.tc.db.entity.User;
-import com.tc.db.entity.UserAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class LoginUser implements UserDetails,SocialUserDetails {
+public class LoginUser implements UserDetails ,SocialUserDetails {
 
     private User user;
 

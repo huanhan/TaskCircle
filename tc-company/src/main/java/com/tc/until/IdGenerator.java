@@ -1,4 +1,4 @@
-package com.tc.validator.until;
+package com.tc.until;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 

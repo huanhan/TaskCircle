@@ -1,19 +1,17 @@
 package com.tc.controller;
 
 import com.tc.db.entity.Admin;
+import com.tc.db.entity.Audit;
+import com.tc.db.entity.UserOperationLog;
 import com.tc.dto.Ids;
 import com.tc.dto.Show;
-import com.tc.dto.admin.AdminDetail;
-import com.tc.dto.admin.ModifyAdmin;
-import com.tc.dto.admin.QueryAdmin;
-import com.tc.dto.admin.RegisterAdmin;
-import com.tc.dto.authority.AuthorityDetail;
+import com.tc.dto.admin.*;
+import com.tc.dto.user.QueryUserOPLog;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.Query;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +67,17 @@ public class AdminController {
         return new ArrayList<>();
     }
 
+    /**
+     * 获取管理员操作日志
+     * @param id 管理员编号
+     * @param queryUserOPLog 操作日志查询条件
+     * @return
+     */
+    @GetMapping("/op/{id:\\d+}")
+    @ApiOperation(value = "获取管理员操作日志")
+    public List<UserOperationLog> getAdminOPLog(@PathVariable("id") Long id, @RequestBody QueryUserOPLog queryUserOPLog){
+        return new ArrayList<>();
+    }
 
     /**
      * 移除管理员权限
@@ -112,4 +121,21 @@ public class AdminController {
     public Admin update(@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult result){
         return new Admin();
     }
+
+    /**
+     * 获取管理员审核列表
+     * @param id 管理员编号
+     * @param queryAdminAudit 审核查询条件
+     * @param result
+     * @return
+     */
+    @GetMapping("/audit/{id:\\d+}")
+    @ApiOperation(value = "获取管理员审核列表")
+    public List<Audit> getAuditByAdmin(@PathVariable("id") Long id,
+                                       @Valid @RequestBody QueryAdminAudit queryAdminAudit,
+                                       BindingResult result){
+        return new ArrayList<>();
+    }
+
+
 }

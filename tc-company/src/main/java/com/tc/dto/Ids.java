@@ -7,13 +7,23 @@ import java.util.List;
 public class Ids {
 
     @NotBlank(message = "集合必须存在元素")
-    private List<Long> ids;
+    private List<Long> lIds;
 
-    public List<Long> getIds() {
-        return ids;
+    private List<String> sIds;
+
+    public List<Long> getlIds() {
+        return lIds;
     }
 
-    public void setIds(List<Long> ids) {
-        this.ids = ids;
+    public void setlIds(List<Long> lIds) {
+        this.lIds = lIds;
+    }
+
+    public List<String> getsIds() {
+        return sIds;
+    }
+
+    public void setsIds(List<String> sIds) {
+        this.sIds = sIds;
     }
 }

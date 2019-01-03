@@ -40,7 +40,7 @@ public class AuthorityControllerTest extends BasicControllerTest {
         del.add(4L);
 
         Ids ids = new Ids();
-        ids.setIds(del);
+        ids.setlIds(del);
 
         String content = new Gson().toJson(ids);
         logger.info(content);

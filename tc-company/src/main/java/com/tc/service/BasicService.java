@@ -1,5 +1,6 @@
 package com.tc.service;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -35,6 +36,13 @@ public interface BasicService<T> {
      * @return
      */
     List<T> findAll(Sort sort);
+
+    /**
+     * 获取分页记录
+     * @param pageable
+     * @return
+     */
+    List<T> findAll(Pageable pageable);
 
     /**
      * 根据编号列表查询

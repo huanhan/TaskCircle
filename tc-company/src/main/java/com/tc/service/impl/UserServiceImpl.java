@@ -5,7 +5,7 @@ import com.tc.db.repository.UserRepository;
 import com.tc.dto.user.LoginUser;
 import com.tc.exception.DBException;
 import com.tc.service.UserService;
-import com.tc.validator.until.StringResourceCenter;
+import com.tc.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;

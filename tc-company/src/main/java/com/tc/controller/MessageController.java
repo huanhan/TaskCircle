@@ -59,7 +59,7 @@ public class MessageController {
 
     /**
      * 修改消息
-     * @param modifyMessage 新的消息信息
+     * @param modifyMessage 修改后的消息信息
      * @param result 检查异常信息
      * @return
      */

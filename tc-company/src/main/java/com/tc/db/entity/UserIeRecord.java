@@ -1,6 +1,5 @@
 package com.tc.db.entity;
 
-import com.tc.db.enums.IECategory;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -18,7 +17,6 @@ public class UserIeRecord implements Serializable {
     private Timestamp createTime;
     private Float money;
     private String context;
-    private IECategory ieCategory;
     private Long me;
     private Long to;
     private User userByMe;
@@ -65,17 +63,6 @@ public class UserIeRecord implements Serializable {
     }
 
     @Basic
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ie_category")
-    public IECategory getIeCategory() {
-        return ieCategory;
-    }
-
-    public void setIeCategory(IECategory ieCategory) {
-        this.ieCategory = ieCategory;
-    }
-
-    @Basic
     @Column(name = "me")
     public Long getMe() {
         return me;
@@ -105,13 +92,12 @@ public class UserIeRecord implements Serializable {
                 userByTo.getId().equals(that.getUserByTo().getId()) &&
                 Objects.equals(id, that.getId()) &&
                 Objects.equals(createTime, that.getCreateTime()) &&
-                Objects.equals(context, that.getContext()) &&
-                Objects.equals(ieCategory, that.getIeCategory());
+                Objects.equals(context, that.getContext());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userByMe.getId(), createTime, money, context, userByTo.getId(), ieCategory);
+        return Objects.hash(id, userByMe.getId(), createTime, money, context, userByTo.getId());
     }
 
     @ManyToOne

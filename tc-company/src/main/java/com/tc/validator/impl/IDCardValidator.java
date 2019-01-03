@@ -1,7 +1,7 @@
 package com.tc.validator.impl;
 
 import com.tc.validator.IDCard;
-import com.tc.validator.until.IDCardHelper;
+import com.tc.until.IDCardHelper;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

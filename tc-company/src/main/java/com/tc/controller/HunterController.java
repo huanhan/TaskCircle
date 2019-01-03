@@ -13,6 +13,10 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 猎刃控制器
+ * @author Cyg
+ */
 @RestController
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping("/hunter")

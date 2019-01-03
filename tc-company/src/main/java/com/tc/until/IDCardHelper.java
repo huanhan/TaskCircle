@@ -1,4 +1,4 @@
-package com.tc.validator.until;
+package com.tc.until;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

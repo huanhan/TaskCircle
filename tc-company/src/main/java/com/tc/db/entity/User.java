@@ -4,12 +4,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
-import io.swagger.annotations.ApiModel;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.social.security.SocialUser;
 
 import javax.persistence.*;
@@ -169,8 +166,10 @@ public class User implements Serializable {
      */
     private Collection<UserMessage> userMessages;
     private Admin adminById;
+    private Collection<UserPay> userPaysById;
     public User() {
     }
+
     public User(Long id) {
         this.id = id;
     }
@@ -178,6 +177,12 @@ public class User implements Serializable {
     public User(Long id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public User(Long id, String name, String username) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
     }
 
     @Id
@@ -569,6 +574,15 @@ public class User implements Serializable {
 
     public void setAdminById(Admin adminById) {
         this.adminById = adminById;
+    }
+
+    @OneToMany(mappedBy = "user")
+    public Collection<UserPay> getUserPaysById() {
+        return userPaysById;
+    }
+
+    public void setUserPaysById(Collection<UserPay> userPaysById) {
+        this.userPaysById = userPaysById;
     }
 
     public interface UserBasicView {}

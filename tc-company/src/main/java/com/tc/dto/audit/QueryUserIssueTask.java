@@ -1,6 +1,6 @@
 package com.tc.dto.audit;
 
-import com.tc.dto.Page;
+import com.tc.dto.MyPage;
 
 
 /**
@@ -8,5 +8,5 @@ import com.tc.dto.Page;
  * @author Cyg
  *
  */
-public class QueryUserIssueTask extends Page {
+public class QueryUserIssueTask extends MyPage {
 }

@@ -1,9 +1,9 @@
 package com.tc.db.entity;
 
-import com.tc.db.enums.AuditState;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -15,7 +15,7 @@ import java.util.Objects;
 public class Hunter implements Serializable {
     private Long userId;
     private User user;
-    private AuditState state;
+    private Timestamp createTime;
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTask> hunterTasks;
     private Collection<UserHunterInterflow> userHunterInterflows;
@@ -31,15 +31,16 @@ public class Hunter implements Serializable {
     }
 
     @Basic
-    @Enumerated(EnumType.STRING)
-    @Column(name = "state")
-    public AuditState getState() {
-        return state;
+    @Column(name = "create_time")
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setState(AuditState state) {
-        this.state = state;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
+
+
 
     @OneToMany(mappedBy = "hunter")
     public Collection<CommentHunter> getCommentHunters() {
@@ -80,15 +81,19 @@ public class Hunter implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Hunter hunter = (Hunter) o;
         return user.getId().equals(hunter.getUser().getId()) &&
-                Objects.equals(state, hunter.state);
+                Objects.equals(createTime, hunter.getCreateTime());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user.getId(), state);
+        return Objects.hash(user.getId(), createTime);
     }
 }

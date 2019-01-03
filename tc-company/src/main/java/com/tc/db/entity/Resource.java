@@ -15,8 +15,8 @@ import java.util.Objects;
 @Entity
 public class Resource implements Serializable {
 
-    public static final String SORT_CREATETIME = "createTime";
-    public static final String SORT_CLASSNAME = "className";
+    public static final String SORT_CREATETIME = "create_time";
+    public static final String SORT_CLASSNAME = "class_name";
 
 
     private Long id;
@@ -164,5 +164,17 @@ public class Resource implements Serializable {
 
     public static Resource newResource(){
         return new Resource();
+    }
+
+    public void initResource() {
+
+        this.setCreation(new User(this.getCreation().getId(), this.getCreation().getName()));
+        if (!this.getAuthorityResources().isEmpty()){
+            this.getAuthorityResources().forEach(ar -> {
+                ar.setAuthority(new Authority(ar.getAuthority().getId(),ar.getAuthority().getName()));
+                ar.setResource(null);
+            });
+        }
+
     }
 }

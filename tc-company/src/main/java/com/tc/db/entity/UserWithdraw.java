@@ -1,7 +1,10 @@
 package com.tc.db.entity;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -16,6 +19,7 @@ public class UserWithdraw implements Serializable {
     private Long userId;
     private Float money;
     private String state;
+    private Timestamp timestamp;
     private Collection<AuditWithdraw> auditWithdraws;
     private User user;
 
@@ -57,6 +61,17 @@ public class UserWithdraw implements Serializable {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    @Basic
+    @CreationTimestamp
+    @Column(name = "create_time")
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

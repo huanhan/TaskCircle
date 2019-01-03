@@ -1,9 +1,11 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
+import com.tc.dto.admin.QueryAdminAudit;
 import com.tc.dto.audit.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -122,16 +124,39 @@ public class AuditController {
     }
 
     /**
-     * 添加任务审核结果
+     * 添加提现审核结果
      * @param addWithdrawAudit 提现审核信息
      * @param bindingResult 检查校验结果
      * @return
      */
     @PostMapping("/withdraw")
-    @ApiOperation(value = "添加任务审核结果")
+    @ApiOperation(value = "添加提现审核结果")
     public AuditWithdraw addHunterAudit(@Valid @RequestBody AddWithdrawAudit addWithdrawAudit,BindingResult bindingResult){
         return new AuditWithdraw();
     }
 
+    /**
+     * 我的审核列表
+     * @param authentication 当前登陆的用户
+     * @param queryAdminAudit 查询条件
+     * @return
+     */
+    @GetMapping("/me")
+    @ApiOperation(value = "我的审核列表")
+    public List<Audit> auditByMe(Authentication authentication,
+                                 @Valid @RequestBody QueryAdminAudit queryAdminAudit,
+                                 BindingResult bindingResult){
+        return new ArrayList<>();
+    }
 
+    /**
+     * 查看审核详情信息
+     * @param id 审核编号
+     * @return
+     */
+    @GetMapping("/detail/{id:\\d+}")
+    @ApiOperation(value = "查看审核详情信息")
+    public Audit detail(@PathVariable("id") Long id){
+        return new Audit();
+    }
 }

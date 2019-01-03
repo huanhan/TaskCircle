@@ -2,10 +2,9 @@ package com.tc.dto.Task;
 
 import com.tc.dto.MyPage;
 
-
 /**
- * 任务查询条件
+ * 查询任务分类
  * @author Cyg
  */
-public class QueryTask extends MyPage {
+public class QueryTaskClassify extends MyPage {
 }

@@ -1,4 +1,4 @@
-package com.tc.dto.withdraw;
+package com.tc.dto.finance;
 
 /**
  * 收支统计条件

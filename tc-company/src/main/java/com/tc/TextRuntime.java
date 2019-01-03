@@ -1,6 +1,6 @@
 package com.tc;
 
-import com.tc.validator.until.IdGenerator;
+import com.tc.until.IdGenerator;
 
 public class TextRuntime {
     public static void main(String[] object){

@@ -1,8 +1,6 @@
 package com.tc.filter;
 
-import com.tc.security.core.properties.SecurityProperties;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+//import com.tc.security.core.properties.SecurityProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,8 +17,8 @@ public class TokenFilter implements Filter {
     @Autowired
     private RedisTemplate<Object,Object> redisTemplate;
 
-    @Autowired
-    private SecurityProperties securityProperties;
+   // @Autowired
+    //private SecurityProperties securityProperties;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

@@ -13,9 +13,9 @@ import com.tc.service.AuthorityResourceService;
 import com.tc.service.AuthorityService;
 import com.tc.service.ResourceService;
 import com.tc.service.UserService;
-import com.tc.validator.until.AuthorityOPClassify;
-import com.tc.validator.until.StringResourceCenter;
-import com.tc.validator.until.TranstionHelper;
+import com.tc.until.AuthorityOPClassify;
+import com.tc.until.StringResourceCenter;
+import com.tc.until.TranstionHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -165,7 +165,7 @@ public class AuthorityController {
         if (result.hasErrors()){
             throw new ValidException(result.getFieldErrors());
         }
-        boolean delIsSuccess = authorityService.deleteByIds(ids.getIds());
+        boolean delIsSuccess = authorityService.deleteByIds(ids.getlIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
@@ -179,7 +179,7 @@ public class AuthorityController {
     @PostMapping("/{aid:\\d+}")
     @ApiOperation(value = "设置权限对应的资源")
     public void setAuthorityResource(@PathVariable("aid") Long aid, @RequestBody Ids ids){
-        List<AuthorityResource> news = AuthorityOPClassify.create(aid,ids.getIds());
+        List<AuthorityResource> news = AuthorityOPClassify.create(aid,ids.getlIds());
         List<AuthorityResource> oldies = authorityResourceService.findByAuthorityID(aid);
 
         Authority authority = authorityService.findOne(aid);
@@ -201,18 +201,39 @@ public class AuthorityController {
     }
 
     /**
-     * 获取权限使用者列表
+     * 获取权限使用者列表（管理员）
      * @param id 权限编号
      * @return
      */
-    @GetMapping("/users/{id:\\d+}")
+    @GetMapping("/admin/{id:\\d+}")
+    @ApiOperation(value = "获取权限的使用者列表")
+    public List<Show> authorityAdmins(@PathVariable("id") Long id){
+        return new ArrayList<>();
+    }
+
+    /**
+     * 从权限详情的使用者列表中，移除一个或多个使用者（管理员）
+     * @param id 权限编号
+     * @param ids 使用者编号列表
+     */
+    @DeleteMapping("/admin/{id:\\d+}")
+    public void removeAdmins(@PathVariable("id") Long id,@RequestBody Ids ids){
+
+    }
+
+    /**
+     * 获取权限使用者列表（用户）
+     * @param id 权限编号
+     * @return
+     */
+    @GetMapping("/user/{id:\\d+}")
     @ApiOperation(value = "获取权限的使用者列表")
     public List<Show> authorityUsers(@PathVariable("id") Long id){
         return new ArrayList<>();
     }
 
     /**
-     * 从权限详情的使用者列表中，移除一个或多个使用者
+     * 从权限详情的使用者列表中，移除一个或多个使用者（用户）
      * @param id 权限编号
      * @param ids 使用者编号列表
      */
