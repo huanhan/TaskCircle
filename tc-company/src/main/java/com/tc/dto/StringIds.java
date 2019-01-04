@@ -6,19 +6,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-/**
- * @author Cyg
- */
-public class Ids {
-
+public class StringIds {
     @NotNull
     @Min(value = 1)
     private Long id;
 
     @NotEmpty(message = "集合必须存在元素")
-    private List<Long> lIds;
-
-    private List<String> sIds;
+    private List<String> ids;
 
     public Long getId() {
         return id;
@@ -28,19 +22,11 @@ public class Ids {
         this.id = id;
     }
 
-    public List<Long> getlIds() {
-        return lIds;
+    public List<String> getIds() {
+        return ids;
     }
 
-    public void setlIds(List<Long> lIds) {
-        this.lIds = lIds;
-    }
-
-    public List<String> getsIds() {
-        return sIds;
-    }
-
-    public void setsIds(List<String> sIds) {
-        this.sIds = sIds;
+    public void setIds(List<String> ids) {
+        this.ids = ids;
     }
 }

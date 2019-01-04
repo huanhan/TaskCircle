@@ -1,9 +1,8 @@
 package com.tc.controller;
 
 import com.tc.db.entity.TaskClassify;
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
 import com.tc.dto.Task.*;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -100,7 +99,7 @@ public class TaskClassifyController {
      */
     @PutMapping("/parent/{pid:\\d+}")
     @ApiOperation(value = "修改子分类的父分类")
-    public void modifyClassifyParent(@PathVariable("pid") Long pid,@RequestBody Ids ids){
+    public void modifyClassifyParent(@PathVariable("pid") Long pid,@RequestBody LongIds ids){
 
     }
 
@@ -112,7 +111,7 @@ public class TaskClassifyController {
      */
     @DeleteMapping("/task/{id:\\d+}")
     @ApiOperation(value = "从分类中移除所属的任务")
-    public void removeTask(@PathVariable("id") Long id,@Valid @RequestBody Ids ids,BindingResult bindingResult){
+    public void removeTask(@PathVariable("id") Long id, @Valid @RequestBody LongIds ids, BindingResult bindingResult){
 
     }
 }

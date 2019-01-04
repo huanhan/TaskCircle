@@ -22,4 +22,5 @@ public enum UserCategory {
     public String getCategory() {
         return category;
     }
+
 }

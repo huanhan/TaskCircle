@@ -3,7 +3,7 @@ package com.tc.controller;
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.Audit;
 import com.tc.db.entity.UserOperationLog;
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
 import com.tc.dto.Show;
 import com.tc.dto.admin.*;
 import com.tc.dto.user.QueryUserOPLog;
@@ -86,7 +86,7 @@ public class AdminController {
      */
     @DeleteMapping("/authority/{id:\\d+}")
     @ApiOperation(value = "移除管理员权限")
-    public void removeAdminAuthority(@PathVariable("id") Long id, @RequestBody Ids ids){
+    public void removeAdminAuthority(@PathVariable("id") Long id, @RequestBody LongIds ids){
 
     }
 
@@ -106,7 +106,7 @@ public class AdminController {
      */
     @DeleteMapping
     @ApiOperation(value = "删除管理员")
-    public void removeAdmin(@Valid @RequestBody Ids ids, BindingResult result){
+    public void removeAdmin(@Valid @RequestBody LongIds ids, BindingResult result){
 
     }
 

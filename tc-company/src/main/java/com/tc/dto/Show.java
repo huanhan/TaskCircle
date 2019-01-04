@@ -7,10 +7,16 @@ package com.tc.dto;
  */
 public class Show {
     private Long id;
+    private String sid;
     private String name;
     private Long queryId;
 
     public Show() {
+    }
+
+    public Show(String sid, String name) {
+        this.sid = sid;
+        this.name = name;
     }
 
     public Show(Long id, String name) {
@@ -22,6 +28,14 @@ public class Show {
         this.id = id;
         this.name = name;
         this.queryId = queryId;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
     }
 
     public Long getId() {

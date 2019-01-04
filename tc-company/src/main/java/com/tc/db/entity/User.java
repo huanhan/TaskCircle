@@ -24,6 +24,27 @@ import java.util.Objects;
 @Entity
 public class User implements Serializable {
 
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String USERNAME = "username";
+    public static final String CATEGORY = "category";
+    public static final String GENDER = "gender";
+    public static final String LAST_LOGIN = "lastLogin";
+    public static final String CREATE_TIME = "createTime";
+    public static final String ID_CARD = "idCard";
+    public static final String ADDRESS = "address";
+    public static final String SCHOOL = "school";
+    public static final String MAJOR = "major";
+    public static final String INTEREST = "interest";
+    public static final String INTRO = "intro";
+    public static final String HEIGHT = "height";
+    public static final String WEIGHT = "weight";
+    public static final String BIRTHDAY = "birthday";
+    public static final String STATE = "state";
+    public static final String MONEY = "money";
+
+
+
     /**
      * 用户编号
      */

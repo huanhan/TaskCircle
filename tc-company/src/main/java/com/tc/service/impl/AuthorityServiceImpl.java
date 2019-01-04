@@ -42,7 +42,7 @@ public class AuthorityServiceImpl extends AbstractBasicServiceImpl<Authority> im
     @Override
     public boolean deleteByIds(List<Long> ids) {
         int count = authorityRepository.deleteByIds(ids);
-        return count == ids.size();
+        return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -78,7 +78,7 @@ public class AuthorityServiceImpl extends AbstractBasicServiceImpl<Authority> im
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
-    public List<Authority> findByQuery(QueryAuthority queryAuthority) {
+    public List<Authority> findByQueryAuthority(QueryAuthority queryAuthority) {
         return authorityRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 

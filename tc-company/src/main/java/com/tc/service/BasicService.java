@@ -1,6 +1,7 @@
 package com.tc.service;
 
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
+import com.tc.dto.StringIds;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -86,7 +87,7 @@ public interface BasicService<T> {
      * @param ids
      * @return
      */
-    boolean deleteByIds(Ids ids);
+    boolean deleteByIds(LongIds ids);
 
 
     /**
@@ -95,4 +96,11 @@ public interface BasicService<T> {
      * @return
      */
     T update(T t);
+
+    /**
+     * 删除记录，根据编号组与指定ID
+     * @param ids
+     * @return
+     */
+    boolean deleteByIds(StringIds ids);
 }

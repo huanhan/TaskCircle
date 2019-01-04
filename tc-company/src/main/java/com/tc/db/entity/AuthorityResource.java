@@ -127,8 +127,24 @@ public class AuthorityResource implements Serializable {
         List<AuthorityResourcePK> result = new ArrayList<>();
         if (!authorityResources.isEmpty()){
             authorityResources.forEach(authorityResource -> {
-                result.add(new AuthorityResourcePK(authorityResource.authorityId,authorityResource.authorityId));
+                result.add(new AuthorityResourcePK(authorityResource.authorityId,authorityResource.resourceId));
             });
+        }
+        return result;
+    }
+
+    public static List<Long> toKey(List<AuthorityResource> authorityResources,QueryEnum queryEnum){
+        List<Long> result = new ArrayList<>();
+        if (!authorityResources.isEmpty()){
+            if (queryEnum.equals(QueryEnum.RESOURCE)){
+                authorityResources.forEach(authorityResource -> {
+                    result.add(authorityResource.resourceId);
+                });
+            }else if (queryEnum.equals(QueryEnum.AUTHORITY)){
+                authorityResources.forEach(authorityResource -> {
+                    result.add(authorityResource.authorityId);
+                });
+            }
         }
         return result;
     }

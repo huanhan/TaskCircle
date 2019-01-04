@@ -1,7 +1,11 @@
 package com.tc.db.entity;
 
+import com.tc.dto.Show;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,6 +14,14 @@ import java.util.Objects;
  */
 @Entity
 public class Admin {
+
+    public static final String USER = "user";
+    public static final String ADMIN = "admin";
+    public static final String USER_ID = "userId";
+    public static final String CREATE_ID = "createId";
+    public static final String ADMIN_AUTHORITIES = "adminAuthorities";
+
+
     private Long userId;
     private Long createId;
     private User user;
@@ -146,4 +158,15 @@ public class Admin {
     public void setTaskClassifies(Collection<TaskClassify> taskClassifies) {
         this.taskClassifies = taskClassifies;
     }
+
+    public static List<Show> toShows(List<Admin> admins){
+        List<Show> result = new ArrayList<>();
+        if (!admins.isEmpty()){
+            admins.forEach(admin ->{
+                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
+            });
+        }
+        return result;
+    }
+
 }

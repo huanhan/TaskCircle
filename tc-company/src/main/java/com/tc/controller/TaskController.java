@@ -2,7 +2,7 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.db.enums.TaskState;
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
 import com.tc.dto.Task.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -64,7 +64,7 @@ public class TaskController {
      */
     @DeleteMapping("/tcl/{id:\\d+}")
     @ApiOperation(value = "从任务中移除任务拥有的分类")
-    public void removeTaskClassify(@PathVariable("id") Long id, @Valid @RequestBody Ids ids,BindingResult bindingResult){
+    public void removeTaskClassify(@PathVariable("id") Long id, @Valid @RequestBody LongIds ids, BindingResult bindingResult){
 
     }
 

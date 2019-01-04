@@ -2,28 +2,26 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.dto.Result;
+import com.tc.dto.StringIds;
+import com.tc.dto.admin.QueryAdmin;
 import com.tc.dto.authority.*;
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
 import com.tc.dto.Show;
+import com.tc.dto.enums.QueryEnum;
 import com.tc.dto.enums.ResourceState;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
-import com.tc.service.AuthorityResourceService;
-import com.tc.service.AuthorityService;
-import com.tc.service.ResourceService;
-import com.tc.service.UserService;
+import com.tc.service.*;
 import com.tc.until.*;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,7 +44,13 @@ public class AuthorityController {
     private AuthorityService authorityService;
 
     @Autowired
+    private AdminService adminService;
+
+    @Autowired
     private AuthorityResourceService authorityResourceService;
+
+    @Autowired
+    private UserAuthorityService userAuthorityService;
 
     @Autowired
     private UserService userService;
@@ -65,83 +69,75 @@ public class AuthorityController {
 
     }
 
-    @PostMapping(value = "/query")
+    @PostMapping(value = "/all/query")
     @ApiOperation(value = "在权限与资源关系管理界面中，获取一次性获取所有权限，所有资源与两者之间的关联关系")
     public Result all(@RequestBody QueryAuthority queryAuthority){
         //根据条件查询权限列表
-        List<Authority> authorities = authorityService.findByQuery(queryAuthority);
-        if (ArrayUtils.isEmpty(authorities.toArray())){
-            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
-        }
+        List<Authority> authorities = authorityService.findByQueryAuthority(queryAuthority);
         //获取所有数据库中的资源(需要全部展示出来)
         List<Resource> resources = resourceService.findAll();
-        //获取系统中的资源
-        List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
-        //与系统资源对比判断哪些有异常（比如原有资源被移动，被删除等）
-        resources.forEach(dbr -> controllerList.forEach(clr -> {
-            if (dbr.getPath().equals(clr.getPath()) ||
-                    dbr.getType().equals(clr.getType())){
-                dbr.setResourceState(ResourceState.NORMAL.getState());
-                dbr.setNormal(true);
-            }
-        }));
-        //去除异常的资源
-        resources.removeIf(resource -> !resource.isNormal());
+        if (!resources.isEmpty()) {
+            //获取系统中的资源
+            List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
+            //与系统资源对比判断哪些有异常（比如原有资源被移动，被删除等）
+            resources.forEach(dbr -> controllerList.forEach(clr -> {
+                if (dbr.getPath().equals(clr.getPath()) ||
+                        dbr.getType().equals(clr.getType())) {
+                    dbr.setResourceState(ResourceState.NORMAL.getState());
+                    dbr.setNormal(true);
+                }
+            }));
+            //去除异常的资源
+            resources.removeIf(resource -> !resource.isNormal());
+        }
         //获取权限与资源之间的关系
         List<AuthorityResource> authorityResources = authorityResourceService.findByKeys(
                 Resource.toKeys(resources),
                 Authority.toKeys(authorities)
         );
+        //将获取的数据结果转成界面需要的内容
         List<Show> showResources = TranstionHelper.toShowByResources(resources);
         List<Show> showAuthorities = TranstionHelper.toShowByAuthorities(authorities);
         List<AuthorityResource> autResIds = TranstionHelper.toAuthorityResourceID(authorityResources);
         return Result.init(AutResRelation.init(showResources,showAuthorities,autResIds),queryAuthority);
     }
 
-    @GetMapping("/aut")
+    @PostMapping("/aut/query")
     @ApiOperation(value = "在权限与资源关系管理界面中，获取所有权限")
-    public List<Show> allAuthority(){
-        List<Authority> authorities = authorityService.findAll();
-        return TranstionHelper.toShowByAuthorities(authorities);
+    public Result allAuthority(@RequestBody QueryAuthority queryAuthority){
+        //根据条件查询权限列表
+        List<Authority> authorities = authorityService.findByQueryAuthority(queryAuthority);
+        return Result.init(TranstionHelper.toShowByAuthorities(authorities),queryAuthority);
     }
 
     @GetMapping("/aut/{id:\\d+}")
     @ApiOperation(value = "在权限与资源关系管理界面中，获取权限对应的资源")
     public List<Long> getResourcesByAuthority(@PathVariable("id") Long id){
-        List<Long> resourceIds = new ArrayList<>();
         List<AuthorityResource> authorityResources = authorityResourceService.findByAuthorityID(id);
-        if (!resourceIds.isEmpty()){
-            authorityResources.forEach(authorityResource -> resourceIds.add(authorityResource.getResource().getId()));
-        }
-        return resourceIds;
+        return AuthorityResource.toKey(authorityResources,QueryEnum.RESOURCE);
     }
 
     /**
      * 添加权限基本信息
      * @param addAuthority
-     * @param authentication
      * @param result
      * @return
      */
     @PostMapping
     @ApiOperation(value = "添加权限基本信息")
     public Authority add(@Valid @RequestBody AddAuthority addAuthority,
-                        Authentication authentication,
                         BindingResult result){
         if (result.hasErrors()){
             throw new ValidException(result.getFieldErrors());
         }
-        User user = userService.getUserByUsername(authentication.getPrincipal().toString());
+        User user = userService.findOne(addAuthority.getCreation());
         Authority authority = addAuthority.toAuthority(addAuthority);
         authority.setAdmin(user.getAdmin());
         Authority ref = authorityService.save(authority);
-        ref.setAdmin(new Admin(ref.getAdmin().getUser().getId()));
         if (ref.getId() == null || ref.getId() <= 0) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
-
-
-        return ref;
+        return Authority.reset(ref);
     }
 
 
@@ -158,33 +154,32 @@ public class AuthorityController {
             throw new ValidException(result.getFieldErrors());
         }
         Authority authority = authorityService.update(modifyAuthority.toAuthority(modifyAuthority));
-        initAuthority(authority);
-        return authority;
+        return Authority.reset(authority);
     }
 
     /**
      * 删除单个权限
      * @param id
      */
-    @DeleteMapping
+    @DeleteMapping("{id:\\d+}")
     @ApiOperation(value = "删除单个权限")
-    public void delete(@RequestBody Long id){
+    public void delete(@PathVariable("id") Long id){
         boolean delIsSuccess = authorityService.deleteById(id);
-        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
     }
 
     /**
      * 删除多个权限
      * @param ids
      */
-    @DeleteMapping("/all")
+    @PostMapping("/select/delete")
     @ApiOperation(value = "删除多个权限")
-    public void delete(@Valid @RequestBody Ids ids, BindingResult result){
+    public void delete(@Valid @RequestBody LongIds ids, BindingResult result){
         if (result.hasErrors()){
             throw new ValidException(result.getFieldErrors());
         }
-        boolean delIsSuccess = authorityService.deleteByIds(ids.getlIds());
-        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
+        boolean delIsSuccess = authorityService.deleteByIds(ids.getIds());
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
     }
 
     /**
@@ -196,19 +191,19 @@ public class AuthorityController {
      */
     @PostMapping("/{aid:\\d+}")
     @ApiOperation(value = "设置权限对应的资源")
-    public void setAuthorityResource(@PathVariable("aid") Long aid, @RequestBody Ids ids){
-        List<AuthorityResource> news = AuthorityOPClassify.create(aid,ids.getlIds());
+    public void setAuthorityResource(@PathVariable("aid") Long aid, @Valid @RequestBody LongIds ids, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        List<AuthorityResource> news = AuthorityOPClassify.create(aid,ids.getIds());
         List<AuthorityResource> oldies = authorityResourceService.findByAuthorityID(aid);
-
-        Authority authority = authorityService.findOne(aid);
 
         //将用户选中的内容进行比较
         AuthorityOPClassify authorityOPClassify = AuthorityOPClassify.init(news,oldies);
 
         //保存新的
         if (!authorityOPClassify.getInAdd().isEmpty()){
-            List<Resource> resources = resourceService.findByIds(authorityOPClassify.getInAddId());
-            authorityResourceService.save(AuthorityOPClassify.toAuthorityResource(authority,resources));
+            authorityResourceService.save(authorityOPClassify.getInAdd());
         }
 
         //删除旧的
@@ -220,23 +215,28 @@ public class AuthorityController {
 
     /**
      * 获取权限使用者列表（管理员）
-     * @param id 权限编号
+     * @param queryAdmin 权限编号
      * @return
      */
-    @GetMapping("/admin/{id:\\d+}")
-    @ApiOperation(value = "获取权限的使用者列表")
-    public List<Show> authorityAdmins(@PathVariable("id") Long id){
-        return new ArrayList<>();
+    @PostMapping("/admin/query/{id:\\d+}")
+    @ApiOperation(value = "获取权限的使用者列表（管理员）")
+    public Result authorityAdmins(@RequestBody QueryAdmin queryAdmin, @PathVariable("id") Long id){
+        Page<Admin> admins = adminService.findByQueryAdminAndAuthority(queryAdmin,id);
+        return Result.init(Admin.toShows(admins.getContent()),queryAdmin);
     }
 
     /**
-     * 从权限详情的使用者列表中，移除一个或多个使用者（管理员）
-     * @param id 权限编号
+     * 移除一个或多个使用者（管理员）
      * @param ids 使用者编号列表
      */
-    @DeleteMapping("/admin/{id:\\d+}")
-    public void removeAdmins(@PathVariable("id") Long id,@RequestBody Ids ids){
-
+    @PostMapping("/admin/select/delete")
+    @ApiOperation(value = "移除一个或多个使用者（管理员）")
+    public void removeAdmins(@Valid @RequestBody LongIds ids,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        boolean delIsSuccess = resourceService.deleteByIds(ids);
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
     /**
@@ -245,34 +245,23 @@ public class AuthorityController {
      * @return
      */
     @GetMapping("/user/{id:\\d+}")
-    @ApiOperation(value = "获取权限的使用者列表")
-    public List<Show> authorityUsers(@PathVariable("id") Long id){
-        return new ArrayList<>();
+    @ApiOperation(value = "获取权限的使用者列表（用户分类）")
+    public Result authorityUsers(@PathVariable("id") Long id){
+        List<UserAuthority> queryList = userAuthorityService.findByAuthorityId(id);
+        return Result.init(UserAuthority.toShows(queryList));
     }
 
     /**
      * 从权限详情的使用者列表中，移除一个或多个使用者（用户）
-     * @param id 权限编号
      * @param ids 使用者编号列表
      */
-    @DeleteMapping("/user/{id:\\d+}")
-    public void removeUsers(@PathVariable("id") Long id,@RequestBody Ids ids){
-
-    }
-
-    /**
-     * 初始化要返回的权限信息
-     * @param authority
-     */
-    private void initAuthority(Authority authority) {
-        if (authority != null){
-            authority.setAdmin(null);
-            if (!authority.getAuthorityResources().isEmpty()){
-                authority.getAuthorityResources().forEach(ar -> {
-                    ar.setAuthority(null);
-                    ar.setResource(new Resource(ar.getResource().getId(),ar.getResource().getName()));
-                });
-            }
+    @PostMapping("/user/select/delete")
+    @ApiOperation(value = "移除一个或多个使用者（用户分类）")
+    public void removeUsers(@Valid @RequestBody StringIds ids,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
         }
+        boolean delIsSuccess = userAuthorityService.deleteByIds(ids);
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 }

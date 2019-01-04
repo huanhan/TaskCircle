@@ -13,6 +13,10 @@ import java.util.Objects;
 @Table(name = "admin_authority", schema = "tc-company")
 @IdClass(AdminAuthorityPK.class)
 public class AdminAuthority {
+
+    public static final String AUTHORITY_ID = "authorityId";
+    public static final String USER_ID = "userId";
+
     private Long authorityId;
     private Long userId;
     private Authority authority;

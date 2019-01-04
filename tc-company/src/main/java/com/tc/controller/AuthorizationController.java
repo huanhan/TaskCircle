@@ -1,7 +1,6 @@
 package com.tc.controller;
 
-import com.tc.dto.Ids;
-import com.tc.dto.authority.AutResRelation;
+import com.tc.dto.LongIds;
 import com.tc.dto.authorization.AdminAutRelation;
 import com.tc.dto.authorization.UserAutRelation;
 import io.swagger.annotations.ApiOperation;
@@ -36,7 +35,7 @@ public class AuthorizationController {
      */
     @PostMapping("/users/{name}")
     @ApiOperation(value = "设置用户类别对应的权限")
-    public void setUserCategoryAuthority(@PathVariable("name") String name, @RequestBody Ids ids){
+    public void setUserCategoryAuthority(@PathVariable("name") String name, @RequestBody LongIds ids){
 
     }
 
@@ -57,7 +56,7 @@ public class AuthorizationController {
      */
     @PostMapping("/admins/{id:\\d+}")
     @ApiOperation(value = "设置用户类别对应的权限")
-    public void setAdminAuthority(@PathVariable("id") Long id, @RequestBody Ids ids){
+    public void setAdminAuthority(@PathVariable("id") Long id, @RequestBody LongIds ids){
 
     }
 }

@@ -3,7 +3,7 @@ package com.tc.controller;
 import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
 import com.tc.dto.MyPage;
 import com.tc.dto.Result;
 import com.tc.dto.Show;
@@ -12,7 +12,6 @@ import com.tc.dto.enums.QueryEnum;
 import com.tc.dto.enums.ResourceState;
 import com.tc.dto.resource.ModifyResource;
 import com.tc.dto.resource.QueryResource;
-import com.tc.dto.resource.ResourceDetail;
 import com.tc.dto.resource.SelectAddResource;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -260,8 +259,8 @@ public class UrlResourceController {
      */
     @PostMapping("/delete/select")
     @ApiOperation(value = "根据资源标识数组删除资源")
-    public void delete(@RequestBody Ids ids){
-        boolean delIsSuccess = resourceService.deleteByIds(ids.getlIds());
+    public void delete(@RequestBody LongIds ids){
+        boolean delIsSuccess = resourceService.deleteByIds(ids.getIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
@@ -287,7 +286,7 @@ public class UrlResourceController {
      */
     @PostMapping("/authority/delete")
     @ApiOperation(value = "从资源详情的使用者列表中移除使用者")
-    public void removeAuthority(@Valid @RequestBody Ids ids,BindingResult bindingResult){
+    public void removeAuthority(@Valid @RequestBody LongIds ids, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }

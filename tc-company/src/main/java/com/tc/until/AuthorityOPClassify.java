@@ -38,26 +38,42 @@ public class AuthorityOPClassify {
         return inAddId;
     }
 
-    public static AuthorityOPClassify init(List<AuthorityResource> news, List<AuthorityResource> olds){
+    public static AuthorityOPClassify init(List<AuthorityResource> news, List<AuthorityResource> oldies){
         List<AuthorityResource> inDefault = null;
         List<AuthorityResource> inDelete = null;
         List<AuthorityResource> inAdd = null;
 
-        if (!news.isEmpty() && !olds.isEmpty()){
-            List<AuthorityResource> middle = new ArrayList<>(news);
-            boolean hasRetain = middle.retainAll(olds);
-            if (hasRetain){
-                news.removeAll(middle);
-                olds.removeAll(middle);
+        if (!news.isEmpty() && !oldies.isEmpty()){
+            List<AuthorityResource> middle = new ArrayList<>();
+            //取交集
+            news.forEach(nar -> oldies.forEach(oar ->{
+                if (nar.getResourceId().equals(oar.getResourceId()) && nar.getAuthorityId().equals(oar.getAuthorityId())){
+                    middle.add(nar);
+                }
+            }));
+            if (!middle.isEmpty()){
+                //存在交集
+                //新和旧的分别移出交集
+                for (AuthorityResource mar:
+                     middle) {
+                    news.removeIf(authorityResource ->
+                            authorityResource.getAuthorityId().equals(mar.getAuthorityId())
+                            && authorityResource.getResourceId().equals(mar.getResourceId())
+                    );
+                    oldies.removeIf(authorityResource ->
+                            authorityResource.getAuthorityId().equals(mar.getAuthorityId())
+                            && authorityResource.getResourceId().equals(mar.getResourceId())
+                    );
+                }
                 inDefault = new ArrayList<>(middle);
             }else {
                 inDefault = new ArrayList<>();
             }
-            inDelete = new ArrayList<>(olds);
+            inDelete = new ArrayList<>(oldies);
             inAdd = new ArrayList<>(news);
-        } else if (news.isEmpty() && !olds.isEmpty()){
+        } else if (news.isEmpty() && !oldies.isEmpty()){
             inDefault = new ArrayList<>();
-            inDelete = new ArrayList<>(olds);
+            inDelete = new ArrayList<>(oldies);
             inAdd = new ArrayList<>();
         } else if (!news.isEmpty()){
             inDefault = new ArrayList<>();

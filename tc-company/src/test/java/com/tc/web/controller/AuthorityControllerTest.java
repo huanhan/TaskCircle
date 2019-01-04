@@ -1,7 +1,7 @@
 package com.tc.web.controller;
 
 import com.google.gson.Gson;
-import com.tc.dto.Ids;
+import com.tc.dto.LongIds;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +39,8 @@ public class AuthorityControllerTest extends BasicControllerTest {
         del.add(5L);
         del.add(4L);
 
-        Ids ids = new Ids();
-        ids.setlIds(del);
+        LongIds ids = new LongIds();
+        ids.setIds(del);
 
         String content = new Gson().toJson(ids);
         logger.info(content);

@@ -7,6 +7,7 @@ public class StringResourceCenter {
     public static final String DB_INSERT_FAILED = "数据库插入失败";
     public static final String DB_INSERT_ABNORMAL = "数据库插入异常，未全部成功插入";
     public static final String DB_DELETE_FAILED = "数据库删除失败";
+    public static final String DB_DELETE_ABNORMAL = "数据库删除异常，没有删掉任何数据";
     public static final String DB_RESOURCE_ABNORMAL = "数据库资源异常";
     public static final String VALIDATOR_INSERT_FAILED = "请不要添加异常数据";
     public static final String VALIDATOR_INSERT_ABNORMAL = "要添加的数据在数据库中已存在";

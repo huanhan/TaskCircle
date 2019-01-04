@@ -1,8 +1,12 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserAuthorityPK;
+import com.tc.db.enums.UserCategory;
+import com.tc.dto.Show;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -14,7 +18,7 @@ import java.util.Objects;
 @IdClass(UserAuthorityPK.class)
 public class UserAuthority {
     private Long authorityId;
-    private String category;
+    private UserCategory category;
     private Authority authority;
 
     @Id
@@ -29,11 +33,12 @@ public class UserAuthority {
 
     @Id
     @Column(name = "category")
-    public String getCategory() {
+    @Enumerated(EnumType.STRING)
+    public UserCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(UserCategory category) {
         this.category = category;
     }
 
@@ -64,5 +69,15 @@ public class UserAuthority {
 
     public void setAuthority(Authority authority) {
         this.authority = authority;
+    }
+
+    public static List<Show> toShows(List<UserAuthority> list){
+        List<Show> result = new ArrayList<>();
+        if (!list.isEmpty()){
+            list.forEach(userAuthority -> {
+                result.add(new Show(userAuthority.getCategory().name(),userAuthority.getCategory().getCategory()));
+            });
+        }
+        return result;
     }
 }

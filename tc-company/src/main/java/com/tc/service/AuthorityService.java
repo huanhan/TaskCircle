@@ -2,6 +2,7 @@ package com.tc.service;
 
 import com.tc.db.entity.Authority;
 import com.tc.dto.authority.QueryAuthority;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,5 +11,13 @@ import java.util.List;
  * @author Cyg
  */
 public interface AuthorityService extends BasicService<Authority> {
-    List<Authority> findByQuery(QueryAuthority queryAuthority);
+
+    /**
+     * 根据权限查询条件获取权限列表
+     * @param queryAuthority
+     * @return
+     */
+    List<Authority> findByQueryAuthority(QueryAuthority queryAuthority);
+
+
 }
