@@ -1,6 +1,8 @@
 package com.tc.service;
 
 import com.tc.db.entity.AuthorityResource;
+import com.tc.dto.authority.QueryAR;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -28,4 +30,18 @@ public interface AuthorityResourceService extends BasicService<AuthorityResource
      */
     boolean deleteByResourceIds(List<Long> ids);
 
+    /**
+     * 根据查询条件，获取权限或者资源信息
+     * @param queryAR
+     * @return
+     */
+    Page<AuthorityResource> findByQuery(QueryAR queryAR);
+
+    /**
+     * 根据关键字的编号组获取对应的权限与资源关系
+     * @param resources
+     * @param authorities
+     * @return
+     */
+    List<AuthorityResource> findByKeys(List<Long> resources,List<Long> authorities);
 }

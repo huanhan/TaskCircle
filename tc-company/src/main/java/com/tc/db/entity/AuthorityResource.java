@@ -1,9 +1,15 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.AuthorityResourcePK;
+import com.tc.dto.Show;
+import com.tc.dto.enums.QueryEnum;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -96,5 +102,34 @@ public class AuthorityResource implements Serializable {
         return Objects.hash(authority.getId(), resource.getId());
     }
 
+    public static List<Show> toShows(List<AuthorityResource> ars, QueryEnum queryEnum){
+        List<Show> result = new ArrayList<>();
+        if (!ArrayUtils.isEmpty(ars.toArray())){
+            if (queryEnum.equals(QueryEnum.AUTHORITY)) {
+                ars.forEach(authorityResource -> result.add(
+                        new Show(authorityResource.getAuthorityId(),
+                                authorityResource.getAuthority().getName(),
+                                authorityResource.getResourceId())
+                ));
+            }else if (queryEnum.equals(QueryEnum.RESOURCE)){
+                ars.forEach(authorityResource -> result.add(
+                        new Show(authorityResource.getResourceId(),
+                                authorityResource.getAuthority().getName(),
+                                authorityResource.getAuthorityId())
+                ));
+            }
+        }
+        return result;
+    }
 
+
+    public static List<AuthorityResourcePK> toKeys(List<AuthorityResource> authorityResources){
+        List<AuthorityResourcePK> result = new ArrayList<>();
+        if (!authorityResources.isEmpty()){
+            authorityResources.forEach(authorityResource -> {
+                result.add(new AuthorityResourcePK(authorityResource.authorityId,authorityResource.authorityId));
+            });
+        }
+        return result;
+    }
 }

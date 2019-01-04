@@ -1,15 +1,32 @@
 package com.tc.dto;
 
-import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * @author Cyg
+ */
 public class Ids {
 
-    @NotBlank(message = "集合必须存在元素")
+    @NotNull
+    @Min(value = 1)
+    private Long id;
+
+    @NotEmpty(message = "集合必须存在元素")
     private List<Long> lIds;
 
     private List<String> sIds;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public List<Long> getlIds() {
         return lIds;

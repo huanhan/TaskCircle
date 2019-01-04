@@ -1,27 +1,26 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
-import com.tc.dto.authority.AutResRelation;
+import com.tc.dto.Result;
+import com.tc.dto.authority.*;
 import com.tc.dto.Ids;
 import com.tc.dto.Show;
-import com.tc.dto.authority.AddAuthority;
-import com.tc.dto.authority.AuthorityDetail;
-import com.tc.dto.authority.ModifyAuthority;
+import com.tc.dto.enums.ResourceState;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.AuthorityResourceService;
 import com.tc.service.AuthorityService;
 import com.tc.service.ResourceService;
 import com.tc.service.UserService;
-import com.tc.until.AuthorityOPClassify;
-import com.tc.until.StringResourceCenter;
-import com.tc.until.TranstionHelper;
+import com.tc.until.*;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -36,6 +35,9 @@ import java.util.List;
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping(value = "/authority")
 public class AuthorityController {
+
+    @Autowired
+    private WebApplicationContext applicationContext;
 
     @Autowired
     private ResourceService resourceService;
@@ -56,28 +58,44 @@ public class AuthorityController {
      */
     @GetMapping(value = "{id:\\d+}")
     @ApiOperation(value = "查看权限的详情")
-    public AuthorityDetail detail(@PathVariable("id") Long id){
+    public Authority detail(@PathVariable("id") Long id){
 
-        return new AuthorityDetail();
+        Authority authority = authorityService.findOne(id);
+        return Authority.reset(authority);
+
     }
 
-    @GetMapping
+    @PostMapping(value = "/query")
     @ApiOperation(value = "在权限与资源关系管理界面中，获取一次性获取所有权限，所有资源与两者之间的关联关系")
-    public AutResRelation all(){
+    public Result all(@RequestBody QueryAuthority queryAuthority){
+        //根据条件查询权限列表
+        List<Authority> authorities = authorityService.findByQuery(queryAuthority);
+        if (ArrayUtils.isEmpty(authorities.toArray())){
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        //获取所有数据库中的资源(需要全部展示出来)
         List<Resource> resources = resourceService.findAll();
-        List<Authority> authorities = authorityService.findAll();
-        List<AuthorityResource> authorityResources = authorityResourceService.findAll();
+        //获取系统中的资源
+        List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
+        //与系统资源对比判断哪些有异常（比如原有资源被移动，被删除等）
+        resources.forEach(dbr -> controllerList.forEach(clr -> {
+            if (dbr.getPath().equals(clr.getPath()) ||
+                    dbr.getType().equals(clr.getType())){
+                dbr.setResourceState(ResourceState.NORMAL.getState());
+                dbr.setNormal(true);
+            }
+        }));
+        //去除异常的资源
+        resources.removeIf(resource -> !resource.isNormal());
+        //获取权限与资源之间的关系
+        List<AuthorityResource> authorityResources = authorityResourceService.findByKeys(
+                Resource.toKeys(resources),
+                Authority.toKeys(authorities)
+        );
         List<Show> showResources = TranstionHelper.toShowByResources(resources);
         List<Show> showAuthorities = TranstionHelper.toShowByAuthorities(authorities);
         List<AuthorityResource> autResIds = TranstionHelper.toAuthorityResourceID(authorityResources);
-        return AutResRelation.init(showResources,showAuthorities,autResIds);
-    }
-
-    @GetMapping("/res")
-    @ApiOperation(value = "在权限与资源关系管理界面中，获取所有资源")
-    public List<Show> allResources(){
-        List<Resource> resources = resourceService.findAll();
-        return TranstionHelper.toShowByResources(resources);
+        return Result.init(AutResRelation.init(showResources,showAuthorities,autResIds),queryAuthority);
     }
 
     @GetMapping("/aut")

@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+/**
+ * @author Cyg
+ */
 public class UsernameValidator implements ConstraintValidator<Username,Object> {
 
 

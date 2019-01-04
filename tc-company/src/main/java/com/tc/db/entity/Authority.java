@@ -6,7 +6,9 @@ import org.springframework.security.core.GrantedAuthority;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -21,6 +23,7 @@ public class Authority implements Serializable,GrantedAuthority {
     private String name;
     private String info;
     private Timestamp createTime;
+    private Long creation;
     private Admin admin;
     private Collection<UserAuthority> userAuthorities;
     private Collection<AuthorityResource> authorityResources;
@@ -79,10 +82,18 @@ public class Authority implements Serializable,GrantedAuthority {
         this.createTime = createTime;
     }
 
+    @Basic
+    @Column(name = "creation")
+    public Long getCreation() {
+        return creation;
+    }
 
+    public void setCreation(Long creation) {
+        this.creation = creation;
+    }
 
     @ManyToOne
-    @JoinColumn(name = "creation", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "creation", referencedColumnName = "user_id", nullable = false,insertable = false,updatable = false)
     public Admin getAdmin() {
         return admin;
     }
@@ -145,5 +156,40 @@ public class Authority implements Serializable,GrantedAuthority {
         this.adminAuthorities = adminAuthorities;
     }
 
+    public static Authority reset(Authority authority){
+        authority.setAdmin(new Admin(authority.getAdmin().getUserId(),authority.getAdmin().getUser().getName(),authority.getAdmin().getUser().getUsername()));
+        authority.setAdminAuthorities(null);
+        authority.setAuthorityResources(null);
+        authority.setUserAuthorities(null);
+        return authority;
+//        if (!userAuthorities.isEmpty()){
+//            userAuthorities.forEach(userAuthority -> userAuthority.setAuthority(new Authority(userAuthority.getAuthorityId(),userAuthority.getAuthority().getName())));
+//        }
+//        if (!authorityResources.isEmpty()){
+//            authorityResources.forEach(authorityResource -> {
+//                authorityResource.setResource(new Resource(authorityResource.getResourceId(),authorityResource.getResource().getName()));
+//                authorityResource.setAuthority(new Authority(authorityResource.getAuthorityId(),authorityResource.getAuthority().getName()));
+//            });
+//        }
+//        if (!adminAuthorities.isEmpty()){
+//            adminAuthorities.forEach(adminAuthority -> {
+//                adminAuthority.setAdmin(new Admin(adminAuthority.getUserId(),
+//                        adminAuthority.getAdmin().getUser().getName(),
+//                        adminAuthority.getAdmin().getUser().getUsername()
+//                        )
+//                );
+//                adminAuthority.setAuthority(new Authority(adminAuthority.getAuthorityId(),adminAuthority.getAuthority().getName()));
+//            });
+//        }
+    }
+
+
+    public static List<Long> toKeys(List<Authority> authorities){
+        List<Long> result = new ArrayList<>();
+        if (!authorities.isEmpty()){
+            authorities.forEach(authority -> result.add(authority.getId()));
+        }
+        return result;
+    }
 
 }

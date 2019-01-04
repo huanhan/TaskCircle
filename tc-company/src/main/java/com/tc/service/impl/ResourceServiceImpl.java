@@ -4,13 +4,13 @@ import com.tc.db.entity.Resource;
 import com.tc.db.repository.ResourceRepository;
 import com.tc.dto.resource.QueryResource;
 import com.tc.service.ResourceService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,8 +95,42 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
         return resourceRepository.findOne(id);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public List<Resource> findByQuery(QueryResource queryResource) {
-        return resourceRepository.findByQuery(queryResource,queryResource.toPageRequest()).getContent();
+
+        return resourceRepository.findAll(
+                (root, query, cb) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    if (!StringUtils.isEmpty(queryResource.getName())){
+                        predicates.add(cb.like(root.get(QueryResource.NAME),"%" + queryResource.getName() + "%"));
+                    }
+                    if (!StringUtils.isEmpty(queryResource.getClassName())){
+                        predicates.add(cb.like(root.get(QueryResource.CLASSNAME),"%" + queryResource.getClassName() + "%"));
+                    }
+                    if (!StringUtils.isEmpty(queryResource.getInfo())){
+                        predicates.add(cb.like(root.get(QueryResource.INFO),"%" + queryResource.getInfo() + "%"));
+                    }
+                    if (!StringUtils.isEmpty(queryResource.getMethod())){
+                        predicates.add(cb.like(root.get(QueryResource.METHOD),"%" + queryResource.getMethod() + "%"));
+                    }
+                    if (!StringUtils.isEmpty(queryResource.getType())){
+                        predicates.add(cb.equal(root.get(QueryResource.TYPE),queryResource.getType()));
+                    }
+                    if (queryResource.getBegin() != null || queryResource.getEnd() != null){
+                        if (queryResource.getBegin() != null && queryResource.getEnd() != null){
+                            predicates.add(cb.between(root.get(QueryResource.CREATE_TIME),queryResource.getBegin(),queryResource.getEnd()));
+                        }else if (queryResource.getBegin() != null){
+                            predicates.add(cb.greaterThan(root.get(QueryResource.CREATE_TIME),queryResource.getBegin()));
+                        }else if (queryResource.getEnd() != null){
+                            predicates.add(cb.lessThan(root.get(QueryResource.CREATE_TIME),queryResource.getEnd()));
+                        }
+                    }
+                    return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+                },queryResource.toPageRequest()
+        ).getContent();
+
+
+        //return resourceRepository.findByQuery(queryResource,queryResource.toPageRequest()).getContent();
     }
 }

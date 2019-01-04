@@ -10,6 +10,16 @@ import java.sql.Timestamp;
  */
 public class QueryResource extends MyPage {
 
+    public static final String NAME = "name";
+    public static final String INFO = "info";
+    public static final String BEGIN = "begin";
+    public static final String END = "end";
+    public static final String CREATE_TIME = "createTime";
+    public static final String METHOD = "method";
+    public static final String CLASSNAME = "className";
+    public static final String TYPE = "type";
+
+
     /**
      * 资源名
      */

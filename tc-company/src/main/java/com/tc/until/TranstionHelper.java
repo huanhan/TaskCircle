@@ -32,12 +32,10 @@ public class TranstionHelper {
     public static List<AuthorityResource> toAuthorityResourceID(List<AuthorityResource> authorityResources){
         List<AuthorityResource> result = new ArrayList<>();
         if (!authorityResources.isEmpty()){
-            authorityResources.forEach(authorityResource -> result.add(
-                    new AuthorityResource(
-                            authorityResource.getAuthority().getId(),
-                            authorityResource.getResource().getId()
-                    )
-                )
+            authorityResources.forEach(authorityResource -> {
+                authorityResource.setAuthority(null);
+                authorityResource.setResource(null);
+                }
             );
         }
         return result;

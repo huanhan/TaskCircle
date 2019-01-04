@@ -1,22 +1,28 @@
 package com.tc.db.entity;
 
+import com.tc.dto.enums.ResourceState;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @author Cyg
  * 资源表
  */
+@NamedEntityGraph(name = "resource.all",attributeNodes = {
+        @NamedAttributeNode("creation")
+})
 @Entity
 public class Resource implements Serializable {
 
-    public static final String SORT_CREATETIME = "create_time";
-    public static final String SORT_CLASSNAME = "class_name";
+    public static final String SORT_CREATETIME = "createTime";
+    public static final String SORT_CLASSNAME = "className";
 
 
     private Long id;
@@ -30,6 +36,8 @@ public class Resource implements Serializable {
     private String type;
     private String className;
 
+    private String resourceState = ResourceState.CONTROLLER_HAS_NONE.getState();
+    private boolean isNormal = false;
 
     public Resource() {
     }
@@ -113,7 +121,7 @@ public class Resource implements Serializable {
         return Objects.hash(id, name, path, info, creation.getId(), createTime);
     }
 
-    @OneToMany(mappedBy = "resource",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "resource")
     public Collection<AuthorityResource> getAuthorityResources() {
         return authorityResources;
     }
@@ -162,9 +170,29 @@ public class Resource implements Serializable {
         this.className = className;
     }
 
+    @Transient
+    public String getResourceState() {
+        return resourceState;
+    }
+
+    public void setResourceState(String resourceState) {
+        this.resourceState = resourceState;
+    }
+
+    @Transient
+    public boolean isNormal() {
+        return isNormal;
+    }
+
+    public void setNormal(boolean normal) {
+        isNormal = normal;
+    }
+
+
     public static Resource newResource(){
         return new Resource();
     }
+
 
     public void initResource() {
 
@@ -177,4 +205,13 @@ public class Resource implements Serializable {
         }
 
     }
+
+    public static List<Long> toKeys(List<Resource> resources){
+        List<Long> result = new ArrayList<>();
+        if (!resources.isEmpty()){
+            resources.forEach(resource -> result.add(resource.getId()));
+        }
+        return result;
+    }
+
 }

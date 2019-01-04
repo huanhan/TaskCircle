@@ -8,6 +8,7 @@ package com.tc.dto;
 public class Show {
     private Long id;
     private String name;
+    private Long queryId;
 
     public Show() {
     }
@@ -15,6 +16,12 @@ public class Show {
     public Show(Long id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Show(Long id, String name,Long queryId) {
+        this.id = id;
+        this.name = name;
+        this.queryId = queryId;
     }
 
     public Long getId() {
@@ -31,5 +38,13 @@ public class Show {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getQueryId() {
+        return queryId;
+    }
+
+    public void setQueryId(Long queryId) {
+        this.queryId = queryId;
     }
 }

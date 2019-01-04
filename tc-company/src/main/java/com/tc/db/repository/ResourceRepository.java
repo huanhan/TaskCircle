@@ -2,12 +2,11 @@ package com.tc.db.repository;
 
 import com.tc.db.entity.Resource;
 import com.tc.dto.resource.QueryResource;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.List;
  * @author Cyg
  * url资源仓库
  */
-public interface ResourceRepository extends JpaRepository<Resource,Long> {
+public interface ResourceRepository extends JpaRepository<Resource,Long>,JpaSpecificationExecutor<Resource> {
 
     /**
      * 根据name查询
@@ -75,6 +74,13 @@ public interface ResourceRepository extends JpaRepository<Resource,Long> {
             "CASE WHEN :#{#queryResource.className == null ? null : #queryResource.className.length() <= 0 ? null : #queryResource.className} IS NULL OR :#{#queryResource.className.length() <= 0} THEN TRUE ELSE r.class_name = :#{#queryResource.className} END AND " +
             "CASE WHEN :#{#queryResource.type == null ? null : #queryResource.type.length() <= 0 ? null : #queryResource.type} IS NULL OR :#{#queryResource.type.length() <= 0} THEN TRUE ELSE r.type = :#{#queryResource.type} END " +
             "ORDER BY :#{#pageable.sort} ",nativeQuery = true)
+    @EntityGraph(value = "resource.all")
     Page<Resource> findByQuery(@Param("queryResource") QueryResource queryResource, @Param("pageable") Pageable pageable);
+
+    @Override
+    @EntityGraph(value = "resource.all")
+    Page<Resource> findAll(Specification<Resource> specification, Pageable pageable);
+
+
 
 }

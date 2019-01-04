@@ -15,6 +15,14 @@ public class AuthorityResourcePK implements Serializable {
     private Long authorityId;
     private Long resourceId;
 
+    public AuthorityResourcePK() {
+    }
+
+    public AuthorityResourcePK(Long authorityId, Long resourceId) {
+        this.authorityId = authorityId;
+        this.resourceId = resourceId;
+    }
+
     @Column(name = "authority_id")
     @Id
     public Long getAuthorityId() {

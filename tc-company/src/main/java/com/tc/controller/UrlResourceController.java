@@ -1,17 +1,23 @@
 package com.tc.controller;
 
+import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
 import com.tc.dto.Ids;
 import com.tc.dto.MyPage;
 import com.tc.dto.Result;
 import com.tc.dto.Show;
+import com.tc.dto.authority.QueryAR;
+import com.tc.dto.enums.QueryEnum;
 import com.tc.dto.enums.ResourceState;
-import com.tc.dto.resource.*;
+import com.tc.dto.resource.ModifyResource;
+import com.tc.dto.resource.QueryResource;
+import com.tc.dto.resource.ResourceDetail;
+import com.tc.dto.resource.SelectAddResource;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
+import com.tc.service.AuthorityResourceService;
 import com.tc.service.ResourceService;
-import com.tc.service.UserService;
 import com.tc.until.ControllerHelper;
 import com.tc.until.ListHelper;
 import com.tc.until.StringResourceCenter;
@@ -20,16 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Cyg
@@ -47,7 +50,7 @@ public class UrlResourceController {
     private ResourceService resourceService;
 
     @Autowired
-    private UserService userService;
+    private AuthorityResourceService authorityResourceService;
 
     @PostMapping("/urls/db")
     @ApiOperation(value = "获取数据库中的url资源")
@@ -57,19 +60,18 @@ public class UrlResourceController {
                 new Sort.Order(Sort.Direction.DESC,Resource.SORT_CREATETIME)
         ));
         List<Resource> list = resourceService.findByQuery(queryResource);
-        List<ResourceDetail> detailList = new ArrayList<>();
-        list.forEach(resource -> detailList.add(ResourceDetail.byResource(resource)));
+        list.forEach(Resource::initResource);
         //获取系统中的资源
         List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
         //与系统资源对比判断哪些有异常（比如原有资源被移动，被删除等）
-        detailList.forEach(dbr -> controllerList.forEach(clr -> {
+        list.forEach(dbr -> controllerList.forEach(clr -> {
             if (dbr.getPath().equals(clr.getPath()) ||
                     dbr.getType().equals(clr.getType())){
                 dbr.setResourceState(ResourceState.NORMAL.getState());
                 dbr.setNormal(true);
             }
         }));
-        return Result.init(detailList,queryResource);
+        return Result.init(list,queryResource);
     }
 
     @PostMapping("/urls/controller")
@@ -167,55 +169,77 @@ public class UrlResourceController {
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        Iterator<Resource> list = selectAddResource.getList().iterator();
+        List<Resource> queryList = selectAddResource.getList();
+        List<Resource> newQueryList = new ArrayList<>();
+        //获取系统中的资源
         List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
-
-
-
-
-    }
-
-
-    /**
-     * 添加路由到数据库
-     * @param addResource
-     * @param authentication
-     * @param result
-     * @return
-     */
-    @PostMapping
-    public Resource add(@Valid @RequestBody AddResource addResource,
-                        Authentication authentication,
-                    BindingResult result){
-        if (result.hasErrors()){
-            throw new ValidException(result.getFieldErrors());
+        //根据用户传入的资源标识获取系统中的资源
+        queryList.forEach(qrl -> controllerList.forEach(
+                crl -> {
+                    if (qrl.getPath().equals(crl.getPath()) &&
+                            qrl.getType().equals(crl.getType())){
+                        crl.setCreation(new User(selectAddResource.getCreation()));
+                        newQueryList.add(crl);
+                    }
+                }
+            )
+        );
+        if (newQueryList.size() <= 0){
+            throw new DBException(StringResourceCenter.VALIDATOR_INSERT_FAILED);
         }
-        User user = userService.getUserByUsername(authentication.getPrincipal().toString());
-        Resource resource = addResource.toResource(addResource);
-        resource.setCreation(user);
-        Resource ref = resourceService.save(resource);
-        ref.setCreation(new User(ref.getCreation().getId()));
-        if (ref.getId() == null || ref.getId() <= 0) {
+        //获取数据库中的资源
+        List<Resource> dblList = resourceService.findAll();
+        //从查询中，移除数据库中已经存在的
+        dblList.forEach(
+            drl -> newQueryList.removeIf(
+                qrl -> qrl.getPath().equals(drl.getPath()) &&
+                qrl.getType().equals(drl.getType())
+            )
+        );
+        if (newQueryList.size() <= 0){
+            throw new DBException(StringResourceCenter.VALIDATOR_INSERT_ABNORMAL);
+        }
+
+        //保存用户选择的资源
+        List<Resource> result = resourceService.save(newQueryList);
+
+        //判断保存是否成功
+        if (result == null || result.size() <= 0){
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }else {
+            if (result.size() != queryList.size()){
+                throw new DBException(StringResourceCenter.DB_INSERT_ABNORMAL);
+            }
         }
-        return ref;
-    }
 
+    }
 
     /**
      * 修改资源
      * @param modifyResource
-     * @param result
+     * @param bindingresult
      * @return
      */
     @PutMapping
-    public Resource update(@Valid @RequestBody ModifyResource modifyResource, BindingResult result){
-        if (result.hasErrors()){
-            throw new ValidException(result.getFieldErrors());
+    @ApiOperation("根据资源标识来修改资源")
+    public Resource update(@Valid @RequestBody ModifyResource modifyResource, BindingResult bindingresult){
+        if (bindingresult.hasErrors()){
+            throw new ValidException(bindingresult.getFieldErrors());
         }
-        Resource resource = resourceService.update(modifyResource.toResource(modifyResource));
-        resource.initResource();
-        return resource;
+        Resource oldResource = resourceService.findOne(modifyResource.getId());
+        if (oldResource == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        Resource updateResource = modifyResource.toResource(oldResource);
+
+        //判断是否发生更新
+        if (!modifyResource.isModify()){
+            throw new ValidException(StringResourceCenter.VALIDATOR_UPDATE_ABNORMAL);
+        }
+
+        Resource result = resourceService.update(updateResource);
+        result.initResource();
+        return result;
     }
 
 
@@ -223,8 +247,9 @@ public class UrlResourceController {
      * 删除单个资源
      * @param id
      */
-    @DeleteMapping
-    public void delete(@RequestBody Long id){
+    @DeleteMapping("/{id:\\d+}")
+    @ApiOperation(value = "根据资源标识删除资源")
+    public void delete(@PathVariable("id") Long id){
         boolean delIsSuccess = resourceService.deleteById(id);
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
@@ -233,7 +258,8 @@ public class UrlResourceController {
      * 删除多个资源
      * @param ids
      */
-    @DeleteMapping("/all")
+    @PostMapping("/delete/select")
+    @ApiOperation(value = "根据资源标识数组删除资源")
     public void delete(@RequestBody Ids ids){
         boolean delIsSuccess = resourceService.deleteByIds(ids.getlIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
@@ -241,23 +267,34 @@ public class UrlResourceController {
 
     /**
      * 获取权限列表
-     * @param id url资源编号
+     * @param queryAR 资源查询信息
      * @return
      */
-    @GetMapping("/authority/{id:\\d+}")
+    @PostMapping("/authority/query")
     @ApiOperation(value = "获取使用指定url资源的权限列表")
-    public List<Show> urlResourceAuthority(@PathVariable("id") Long id){
-        return new ArrayList<>();
+    public Result urlResourceAuthority(@RequestBody QueryAR queryAR){
+        Page<AuthorityResource> queryResult = authorityResourceService.findByQuery(queryAR);
+        if (queryResult.getContent() == null || queryResult.getContent().size() <= 0){
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        List<Show> resultList = AuthorityResource.toShows(queryResult.getContent(),QueryEnum.AUTHORITY);
+        return Result.init(resultList,queryAR);
     }
 
     /**
-     * 从权限详情的使用者列表中，移除一个或多个使用者
-     * @param id url资源编号
+     * 从资源详情的使用者列表中，移除一个或多个使用者
      * @param ids 权限编号列表
      */
-    @DeleteMapping("/authority/{id:\\d+}")
-    public void removeAuthority(@PathVariable("id") Long id,@RequestBody Ids ids){
-
+    @PostMapping("/authority/delete")
+    @ApiOperation(value = "从资源详情的使用者列表中移除使用者")
+    public void removeAuthority(@Valid @RequestBody Ids ids,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        boolean success = authorityResourceService.deleteByIds(ids);
+        if (!success) {
+            throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
+        }
     }
 
 

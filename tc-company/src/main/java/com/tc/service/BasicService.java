@@ -1,5 +1,6 @@
 package com.tc.service;
 
+import com.tc.dto.Ids;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -51,6 +52,7 @@ public interface BasicService<T> {
      */
     List<T> findByIds(List<Long> ids);
 
+
     /**
      * 获取记录详情
      * @param id
@@ -78,6 +80,14 @@ public interface BasicService<T> {
      * @return
      */
     boolean deleteByIds(List<Long> ids);
+
+    /**
+     * 删除记录，根据编号组与指定ID
+     * @param ids
+     * @return
+     */
+    boolean deleteByIds(Ids ids);
+
 
     /**
      * 更新用户信息

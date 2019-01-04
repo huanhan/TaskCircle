@@ -3,6 +3,7 @@ package com.tc.db.repository;
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.Authority;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +14,7 @@ import java.util.List;
  * @author Cyg
  * 权限资源仓库
  */
-public interface AuthorityRepository extends JpaRepository<Authority,Long> {
+public interface AuthorityRepository extends JpaRepository<Authority,Long>,JpaSpecificationExecutor<Authority> {
 
     List<Authority> findByAdmin(Admin admin);
 

@@ -1,5 +1,6 @@
 package com.tc.service.impl;
 
+import com.tc.dto.Ids;
 import com.tc.service.BasicService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -55,6 +56,11 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
 
     @Override
     public boolean deleteByIds(List<Long> ids) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteByIds(Ids ids) {
         return false;
     }
 

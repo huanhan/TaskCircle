@@ -2,6 +2,7 @@ package com.tc.dto.resource;
 
 import com.tc.db.entity.Resource;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.List;
 
@@ -10,8 +11,19 @@ import java.util.List;
  * @author Cyg
  */
 public class SelectAddResource {
-    @NotBlank
+
+    private Long creation;
+
+    @NotEmpty
     private List<Resource> list;
+
+    public Long getCreation() {
+        return creation;
+    }
+
+    public void setCreation(Long creation) {
+        this.creation = creation;
+    }
 
     public List<Resource> getList() {
         return list;

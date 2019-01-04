@@ -29,6 +29,11 @@ public class Admin {
         this.setUser(new User(userId));
     }
 
+    public Admin(Long userId,String name,String username){
+        this.userId = userId;
+        this.setUser(new User(userId,name,username));
+    }
+
     @Id
     @Column(name = "user_id")
     public Long getUserId() {
