@@ -2,10 +2,12 @@ package com.tc.dto.admin;
 
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.User;
+import com.tc.db.enums.UserCategory;
+import com.tc.db.enums.UserGender;
+import com.tc.db.enums.UserState;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -30,11 +32,11 @@ public class QueryAdmin extends PageRequest {
     /**
      * 用户分类
      */
-    private String category;
+    private UserCategory category;
     /**
      * 用户性别
      */
-    private String gender;
+    private UserGender gender;
     /**
      * 最后一次登陆时间开始
      */
@@ -110,7 +112,7 @@ public class QueryAdmin extends PageRequest {
     /**
      * 用户状态
      */
-    private String state;
+    private UserState state;
 
 
     public QueryAdmin() {
@@ -146,19 +148,19 @@ public class QueryAdmin extends PageRequest {
         this.username = username;
     }
 
-    public String getCategory() {
+    public UserCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(UserCategory category) {
         this.category = category;
     }
 
-    public String getGender() {
+    public UserGender getGender() {
         return gender;
     }
 
-    public void setGender(String gender) {
+    public void setGender(UserGender gender) {
         this.gender = gender;
     }
 
@@ -306,15 +308,15 @@ public class QueryAdmin extends PageRequest {
         this.birthdayEnd = birthdayEnd;
     }
 
-    public String getState() {
+    public UserState getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(UserState state) {
         this.state = state;
     }
 
-    public static List<Predicate> initPredicates(QueryAdmin queryAdmin,Root<Admin> root, CriteriaQuery<?> query, CriteriaBuilder cb){
+    public static List<Predicate> initPredicates(QueryAdmin queryAdmin, Root<Admin> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
         if (!StringUtils.isEmpty(queryAdmin.getName())){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.NAME),queryAdmin.getName()));
@@ -322,13 +324,13 @@ public class QueryAdmin extends PageRequest {
         if (!StringUtils.isEmpty(queryAdmin.getUsername())){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.USERNAME),queryAdmin.getUsername()));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getGender())){
+        if (queryAdmin.getGender() != null){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.GENDER),queryAdmin.getGender()));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getCategory())){
+        if (queryAdmin.getCategory() != null){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.CATEGORY),queryAdmin.getCategory()));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getState())){
+        if (queryAdmin.getState() != null){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.STATE),queryAdmin.getState()));
         }
         if (!StringUtils.isEmpty(queryAdmin.getAddress())){

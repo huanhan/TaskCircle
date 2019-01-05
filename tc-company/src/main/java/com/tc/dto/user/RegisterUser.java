@@ -3,6 +3,7 @@ package com.tc.dto.user;
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
+import com.tc.db.enums.UserState;
 import com.tc.validator.Username;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -57,6 +58,7 @@ public class RegisterUser implements Serializable {
         user.setName(username.length() > 10 ? username.substring(0,9) : username);
         user.setCategory(UserCategory.NORMAL);
         user.setGender(UserGender.MAN);
+        user.setState(UserState.NORMAL);
         return user;
     }
 }

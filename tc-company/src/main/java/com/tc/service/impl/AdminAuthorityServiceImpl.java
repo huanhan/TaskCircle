@@ -6,6 +6,7 @@ import com.tc.dto.LongIds;
 import com.tc.service.AdminAuthorityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 管理员与权限关系服务的实现
@@ -17,8 +18,9 @@ public class AdminAuthorityServiceImpl extends AbstractBasicServiceImpl<AdminAut
     @Autowired
     private AdminAuthorityRepository adminAuthorityRepository;
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean deleteByIds(LongIds ids) {
-        return adminAuthorityRepository.deleteByAdminIsInAndAuthorityIdEquals(ids.getIds(),ids.getId()) == ids.getIds().size();
+        return adminAuthorityRepository.deleteByUserIdIsInAndAuthorityIdEquals(ids.getIds(),ids.getId()) == ids.getIds().size();
     }
 }

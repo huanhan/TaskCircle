@@ -1,13 +1,17 @@
 package com.tc.db.entity.pk;
 
+import com.tc.db.enums.UserCategory;
+
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class UserAuthorityPK implements Serializable {
     private Long authorityId;
-    private String category;
+    private UserCategory category;
 
     @Column(name = "authority_id")
     @Id
@@ -20,14 +24,18 @@ public class UserAuthorityPK implements Serializable {
     }
 
     @Column(name = "category")
+    @Enumerated(EnumType.STRING)
     @Id
-    public String getCategory() {
+    public UserCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(UserCategory category) {
         this.category = category;
     }
+
+
+
 
     @Override
     public boolean equals(Object o) {

@@ -3,9 +3,11 @@ package com.tc.service.impl;
 import com.tc.db.entity.UserAuthority;
 import com.tc.db.repository.UserAuthorityRepository;
 import com.tc.dto.StringIds;
+import com.tc.dto.authority.RemoveUser;
 import com.tc.service.UserAuthorityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,9 +26,10 @@ public class UserAuthorityServiceImpl extends AbstractBasicServiceImpl<UserAutho
         return userAuthorityRepository.findByAuthorityIdEquals(authorityId);
     }
 
-
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean deleteByIds(StringIds ids) {
+    public boolean deleteByIds(RemoveUser ids) {
         return userAuthorityRepository.deleteByCategoryIsInAndAuthorityIdEquals(ids.getIds(),ids.getId()) == ids.getIds().size();
     }
+
 }

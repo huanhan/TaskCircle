@@ -50,6 +50,9 @@ public class AuthorityController {
     private AuthorityResourceService authorityResourceService;
 
     @Autowired
+    private AdminAuthorityService adminAuthorityService;
+
+    @Autowired
     private UserAuthorityService userAuthorityService;
 
     @Autowired
@@ -235,7 +238,7 @@ public class AuthorityController {
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        boolean delIsSuccess = resourceService.deleteByIds(ids);
+        boolean delIsSuccess = adminAuthorityService.deleteByIds(ids);
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }
 
@@ -257,7 +260,7 @@ public class AuthorityController {
      */
     @PostMapping("/user/select/delete")
     @ApiOperation(value = "移除一个或多个使用者（用户分类）")
-    public void removeUsers(@Valid @RequestBody StringIds ids,BindingResult bindingResult){
+    public void removeUsers(@Valid @RequestBody RemoveUser ids,BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }

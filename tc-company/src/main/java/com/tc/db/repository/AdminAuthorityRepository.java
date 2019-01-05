@@ -20,6 +20,6 @@ public interface AdminAuthorityRepository extends JpaRepository<AdminAuthority,A
      * @param authorityId
      * @return
      */
-    int deleteByAdminIsInAndAuthorityIdEquals(List<Long> ids,Long authorityId);
+    int deleteByUserIdIsInAndAuthorityIdEquals(List<Long> ids,Long authorityId);
 
 }

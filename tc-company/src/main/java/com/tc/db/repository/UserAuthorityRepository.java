@@ -2,6 +2,7 @@ package com.tc.db.repository;
 
 import com.tc.db.entity.UserAuthority;
 import com.tc.db.entity.pk.UserAuthorityPK;
+import com.tc.db.enums.UserCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -27,5 +28,5 @@ public interface UserAuthorityRepository extends JpaRepository<UserAuthority,Use
      * @param authorityId
      * @return
      */
-    int deleteByCategoryIsInAndAuthorityIdEquals(List<String> categories,Long authorityId);
+    int deleteByCategoryIsInAndAuthorityIdEquals(List<UserCategory> categories, Long authorityId);
 }

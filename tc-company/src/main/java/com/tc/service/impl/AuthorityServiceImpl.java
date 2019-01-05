@@ -5,6 +5,7 @@ import com.tc.db.entity.Resource;
 import com.tc.db.repository.AuthorityRepository;
 import com.tc.dto.Show;
 import com.tc.dto.authority.QueryAuthority;
+import com.tc.dto.authority.RemoveUser;
 import com.tc.service.AuthorityService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,4 +104,6 @@ public class AuthorityServiceImpl extends AbstractBasicServiceImpl<Authority> im
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
     }
+
+
 }
