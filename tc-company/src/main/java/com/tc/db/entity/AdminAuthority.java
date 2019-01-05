@@ -1,8 +1,12 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.AdminAuthorityPK;
+import com.tc.db.enums.UserCategory;
+import com.tc.dto.Show;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,11 +20,20 @@ public class AdminAuthority {
 
     public static final String AUTHORITY_ID = "authorityId";
     public static final String USER_ID = "userId";
+    public static final String ADMIN = "admin";
 
     private Long authorityId;
     private Long userId;
     private Authority authority;
     private Admin admin;
+
+    public AdminAuthority() {
+    }
+
+    public AdminAuthority(Long authorityId, Long userId) {
+        this.authorityId = authorityId;
+        this.userId = userId;
+    }
 
     @Id
     @Column(name = "authority_id")
@@ -80,5 +93,16 @@ public class AdminAuthority {
     @Override
     public int hashCode() {
         return Objects.hash(authorityId, userId);
+    }
+
+    public static List<AdminAuthority> reset(List<AdminAuthority> list) {
+        if (!list.isEmpty()){
+            list.forEach(authorityResource -> {
+                    authorityResource.setAuthority(null);
+                    authorityResource.setAdmin(null);
+                }
+            );
+        }
+        return list;
     }
 }

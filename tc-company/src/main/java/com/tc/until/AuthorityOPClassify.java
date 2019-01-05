@@ -17,7 +17,6 @@ public class AuthorityOPClassify {
         this.inDefault = inDefault;
         this.inDelete = inDelete;
         this.inAdd = inAdd;
-
         this.inAddId = new ArrayList<>();
         inAdd.forEach(authorityResource -> inAddId.add(authorityResource.getResource().getId()));
     }

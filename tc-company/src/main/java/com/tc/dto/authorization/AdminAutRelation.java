@@ -1,5 +1,6 @@
 package com.tc.dto.authorization;
 
+import com.tc.db.entity.AdminAuthority;
 import com.tc.db.entity.AuthorityResource;
 import com.tc.dto.Show;
 
@@ -10,25 +11,25 @@ import java.util.List;
  * @author Cyg
  */
 public class AdminAutRelation implements Serializable {
-    private List<Show> resources;
+    private List<Show> admins;
     private List<Show> authorities;
-    private List<AuthorityResource> autResIds;
+    private List<AdminAuthority> adminAuthorities;
 
     public AdminAutRelation() {
     }
 
-    public AdminAutRelation(List<Show> resources, List<Show> authorities, List<AuthorityResource> autResIds) {
-        this.resources = resources;
+    public AdminAutRelation(List<Show> admins, List<Show> authorities, List<AdminAuthority> adminAuthorities) {
+        this.admins = admins;
         this.authorities = authorities;
-        this.autResIds = autResIds;
+        this.adminAuthorities = adminAuthorities;
     }
 
-    public List<Show> getResources() {
-        return resources;
+    public List<Show> getAdmins() {
+        return admins;
     }
 
-    public void setResources(List<Show> resources) {
-        this.resources = resources;
+    public void setAdmins(List<Show> admins) {
+        this.admins = admins;
     }
 
     public List<Show> getAuthorities() {
@@ -39,15 +40,15 @@ public class AdminAutRelation implements Serializable {
         this.authorities = authorities;
     }
 
-    public List<AuthorityResource> getAutResIds() {
-        return autResIds;
+    public List<AdminAuthority> getAdminAuthorities() {
+        return adminAuthorities;
     }
 
-    public void setAutResIds(List<AuthorityResource> autResIds) {
-        this.autResIds = autResIds;
+    public void setAdminAuthorities(List<AdminAuthority> adminAuthorities) {
+        this.adminAuthorities = adminAuthorities;
     }
 
-    public static AdminAutRelation init(List<Show> resources, List<Show> authorities, List<AuthorityResource> autResIds){
-        return new AdminAutRelation(resources,authorities,autResIds);
+    public static AdminAutRelation init(List<Show> admins, List<Show> authorities, List<AdminAuthority> adminAuthorities){
+        return new AdminAutRelation(admins,authorities,adminAuthorities);
     }
 }

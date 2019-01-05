@@ -22,4 +22,18 @@ public interface AdminAuthorityRepository extends JpaRepository<AdminAuthority,A
      */
     int deleteByUserIdIsInAndAuthorityIdEquals(List<Long> ids,Long authorityId);
 
+    /**
+     * 根据管理员编号获取对应的权限
+     * @param userId
+     * @return
+     */
+    List<AdminAuthority> findByUserIdEquals(Long userId);
+
+    /**
+     * 删除权限与管理员关系，根据管理员编号与对应的权限编号组
+     * @param authorityIds
+     * @param id
+     * @return
+     */
+    int deleteByAuthorityIdIsInAndUserIdEquals(List<Long> authorityIds, Long id);
 }

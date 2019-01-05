@@ -1,10 +1,12 @@
 package com.tc.dto.admin;
 
 import com.tc.db.entity.Admin;
+import com.tc.db.entity.AdminAuthority;
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
+import com.tc.dto.enums.AuthorityState;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -114,6 +116,10 @@ public class QueryAdmin extends PageRequest {
      */
     private UserState state;
 
+    /**
+     * 是否拥有权限
+     */
+    private Boolean isAuthority;
 
     public QueryAdmin() {
         super(0, 10);
@@ -316,6 +322,14 @@ public class QueryAdmin extends PageRequest {
         this.state = state;
     }
 
+    public Boolean isAuthority() {
+        return isAuthority;
+    }
+
+    public void setAuthority(Boolean authority) {
+        isAuthority = authority;
+    }
+
     public static List<Predicate> initPredicates(QueryAdmin queryAdmin, Root<Admin> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
         if (!StringUtils.isEmpty(queryAdmin.getName())){
@@ -408,5 +422,96 @@ public class QueryAdmin extends PageRequest {
         return predicates;
     }
 
+    public static List<Predicate> initPredicatesByAdminAuthority(QueryAdmin queryAdmin, Root<AdminAuthority> root, CriteriaQuery<?> query, CriteriaBuilder cb){
+        List<Predicate> predicates = new ArrayList<>();
+        if (!StringUtils.isEmpty(queryAdmin.getName())){
+            predicates.add(cb.equal(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.NAME),queryAdmin.getName()));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getUsername())){
+            predicates.add(cb.equal(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.USERNAME),queryAdmin.getUsername()));
+        }
+        if (queryAdmin.getGender() != null){
+            predicates.add(cb.equal(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.GENDER),queryAdmin.getGender()));
+        }
+        if (queryAdmin.getCategory() != null){
+            predicates.add(cb.equal(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.CATEGORY),queryAdmin.getCategory()));
+        }
+        if (queryAdmin.getState() != null){
+            predicates.add(cb.equal(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.STATE),queryAdmin.getState()));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getAddress())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.ADDRESS),"%" + queryAdmin.getAddress() + "%"));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getIdCard())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.ID_CARD),"%" + queryAdmin.getIdCard() + "%"));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getSchool())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.SCHOOL),"%" + queryAdmin.getSchool() + "%"));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getMajor())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.MAJOR),"%" + queryAdmin.getMajor() + "%"));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getInterest())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTEREST),"%" + queryAdmin.getInterest() + "%"));
+        }
+        if (!StringUtils.isEmpty(queryAdmin.getInterest())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getInterest() + "%"));
+        }
+        if (queryAdmin.getLastLoginBegin() != null || queryAdmin.getLastLoginEnd() != null){
+            if (queryAdmin.getLastLoginBegin() != null && queryAdmin.getLastLoginEnd() != null){
+                predicates.add(cb.between(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.LAST_LOGIN),queryAdmin.getLastLoginBegin(),queryAdmin.getLastLoginEnd()));
+            }else if (queryAdmin.getLastLoginBegin() != null){
+                predicates.add(cb.greaterThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.LAST_LOGIN),queryAdmin.getLastLoginBegin()));
+            }else if (queryAdmin.getLastLoginEnd() != null){
+                predicates.add(cb.lessThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.LAST_LOGIN),queryAdmin.getLastLoginEnd()));
+            }
+        }
+        if (queryAdmin.getCreateTimeBegin() != null || queryAdmin.getCreateTimeEnd() != null){
+            if (queryAdmin.getCreateTimeBegin()  != null && queryAdmin.getCreateTimeEnd() != null){
+                predicates.add(cb.between(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.CREATE_TIME),queryAdmin.getCreateTimeBegin() ,queryAdmin.getCreateTimeEnd()));
+            }else if (queryAdmin.getCreateTimeBegin()  != null){
+                predicates.add(cb.greaterThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.CREATE_TIME),queryAdmin.getCreateTimeBegin() ));
+            }else if (queryAdmin.getCreateTimeEnd() != null){
+                predicates.add(cb.lessThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.CREATE_TIME),queryAdmin.getCreateTimeEnd()));
+            }
+        }
+        if (queryAdmin.getHeightBegin() != null || queryAdmin.getHeightEnd() != null){
+            if (queryAdmin.getHeightBegin()  != null && queryAdmin.getHeightEnd() != null && queryAdmin.getHeightBegin() >= 0 && queryAdmin.getHeightEnd() >= 0){
+                predicates.add(cb.between(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.HEIGHT),queryAdmin.getHeightBegin() ,queryAdmin.getHeightEnd()));
+            }else if (queryAdmin.getHeightBegin()  != null && queryAdmin.getHeightBegin() >= 0){
+                predicates.add(cb.greaterThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.HEIGHT),queryAdmin.getHeightBegin() ));
+            }else if (queryAdmin.getHeightEnd() != null && queryAdmin.getHeightEnd() >= 0){
+                predicates.add(cb.lessThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.HEIGHT),queryAdmin.getHeightEnd()));
+            }
+        }
+        if (queryAdmin.getWeightBegin() != null || queryAdmin.getWeightEnd() != null){
+            if (queryAdmin.getWeightBegin()  != null && queryAdmin.getWeightEnd() != null && queryAdmin.getWeightBegin() >= 0 && queryAdmin.getWeightEnd() >= 0){
+                predicates.add(cb.between(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.WEIGHT),queryAdmin.getWeightBegin() ,queryAdmin.getWeightEnd()));
+            }else if (queryAdmin.getWeightBegin()  != null && queryAdmin.getWeightBegin() >= 0){
+                predicates.add(cb.greaterThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.WEIGHT),queryAdmin.getWeightBegin() ));
+            }else if (queryAdmin.getWeightEnd() != null && queryAdmin.getWeightEnd() >= 0){
+                predicates.add(cb.lessThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.WEIGHT),queryAdmin.getWeightEnd()));
+            }
+        }
+        if (queryAdmin.getBirthdayBegin() != null || queryAdmin.getBirthdayEnd() != null){
+            if (queryAdmin.getBirthdayBegin()  != null && queryAdmin.getBirthdayEnd() != null){
+                predicates.add(cb.between(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getBirthdayBegin() ,queryAdmin.getBirthdayEnd()));
+            }else if (queryAdmin.getBirthdayBegin()  != null){
+                predicates.add(cb.greaterThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getBirthdayBegin() ));
+            }else if (queryAdmin.getBirthdayEnd() != null){
+                predicates.add(cb.lessThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getBirthdayEnd()));
+            }
+        }
+        if (queryAdmin.getMoneyBegin() != null || queryAdmin.getMoneyEnd() != null){
+            if (queryAdmin.getMoneyBegin()  != null && queryAdmin.getMoneyEnd() != null && queryAdmin.getMoneyBegin() >= 0 && queryAdmin.getMoneyEnd() >= 0){
+                predicates.add(cb.between(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getMoneyBegin() ,queryAdmin.getMoneyEnd()));
+            }else if (queryAdmin.getMoneyBegin()  != null && queryAdmin.getMoneyBegin() >= 0){
+                predicates.add(cb.greaterThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getMoneyBegin() ));
+            }else if (queryAdmin.getMoneyEnd() != null && queryAdmin.getMoneyEnd() >= 0){
+                predicates.add(cb.lessThan(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getMoneyEnd()));
+            }
+        }
+        return predicates;
+    }
 
 }

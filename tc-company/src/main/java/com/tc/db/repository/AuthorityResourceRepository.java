@@ -31,11 +31,11 @@ public interface AuthorityResourceRepository extends JpaRepository<AuthorityReso
     /**
      * 根据资源ID组删除权限与资源关系
      * @param ids
+     * @param authorityId
      * @return
      */
     @Modifying
-    @Query(value = "delete from AuthorityResource ar where ar.resourceId in (:ids)")
-    int deleteByResource_Id(@Param("ids") List<Long> ids);
+    int deleteByResourceIdIsInAndAuthorityIdEquals(List<Long> ids,Long authorityId);
 
     /**
      * 根据资源编号与权限编号组删除资源与权限的关系

@@ -1,6 +1,8 @@
 package com.tc.db.entity;
 
 import com.tc.dto.Show;
+import com.tc.dto.admin.QueryAdmin;
+import org.springframework.data.domain.Page;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -45,6 +47,8 @@ public class Admin {
         this.userId = userId;
         this.setUser(new User(userId,name,username));
     }
+
+
 
     @Id
     @Column(name = "user_id")
@@ -168,5 +172,14 @@ public class Admin {
         }
         return result;
     }
+
+    public static List<Long> toKeys(List<Admin> list) {
+        List<Long> result = new ArrayList<>();
+        if (!list.isEmpty()){
+            list.forEach(admin -> result.add(admin.getUserId()));
+        }
+        return result;
+    }
+
 
 }

@@ -259,7 +259,10 @@ public class UrlResourceController {
      */
     @PostMapping("/delete/select")
     @ApiOperation(value = "根据资源标识数组删除资源")
-    public void delete(@RequestBody LongIds ids){
+    public void delete(@Valid @RequestBody LongIds ids,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
         boolean delIsSuccess = resourceService.deleteByIds(ids.getIds());
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_FAILED);}
     }

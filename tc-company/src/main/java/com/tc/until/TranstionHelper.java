@@ -3,6 +3,7 @@ package com.tc.until;
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
+import com.tc.db.entity.UserAuthority;
 import com.tc.dto.Show;
 
 import java.util.ArrayList;
@@ -40,4 +41,6 @@ public class TranstionHelper {
         }
         return result;
     }
+
+
 }

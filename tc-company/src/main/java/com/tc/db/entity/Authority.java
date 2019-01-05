@@ -1,5 +1,6 @@
 package com.tc.db.entity;
 
+import com.tc.dto.Show;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -39,6 +40,8 @@ public class Authority implements Serializable,GrantedAuthority {
         this.id = id;
         this.name = name;
     }
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -156,7 +159,7 @@ public class Authority implements Serializable,GrantedAuthority {
         this.adminAuthorities = adminAuthorities;
     }
 
-    public static Authority reset(Authority authority){
+    public static Authority toShows(Authority authority){
         authority.setAdmin(new Admin(authority.getAdmin().getUserId(),authority.getAdmin().getUser().getName(),authority.getAdmin().getUser().getUsername()));
         authority.setAdminAuthorities(null);
         authority.setAuthorityResources(null);
@@ -192,4 +195,11 @@ public class Authority implements Serializable,GrantedAuthority {
         return result;
     }
 
+    public static List<Show> toShows(List<Authority> authorities){
+        List<Show> result = new ArrayList<>();
+        if (!authorities.isEmpty()){
+            authorities.forEach(authority -> result.add(new Show(authority.getId(),authority.getName())));
+        }
+        return result;
+    }
 }

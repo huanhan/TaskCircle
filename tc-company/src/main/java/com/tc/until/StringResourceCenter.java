@@ -1,5 +1,6 @@
 package com.tc.until;
 
+
 public class StringResourceCenter {
     public static final String SERVICE_INIT_FAILED = "初始化服务失败";
     public static final String DB_QUERY_FAILED = "数据库查询失败";
@@ -13,5 +14,6 @@ public class StringResourceCenter {
     public static final String VALIDATOR_INSERT_ABNORMAL = "要添加的数据在数据库中已存在";
     public static final String VALIDATOR_AUTHORITY_FAILED = "你没有权限";
     public static final String VALIDATOR_UPDATE_ABNORMAL = "没有需要更新的内容";
+    public static final String VALIDATOR_QUERY_FAILED = "请输入正确的查询内容";
 
 }

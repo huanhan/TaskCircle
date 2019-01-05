@@ -2,7 +2,6 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.dto.Result;
-import com.tc.dto.StringIds;
 import com.tc.dto.admin.QueryAdmin;
 import com.tc.dto.authority.*;
 import com.tc.dto.LongIds;
@@ -68,7 +67,7 @@ public class AuthorityController {
     public Authority detail(@PathVariable("id") Long id){
 
         Authority authority = authorityService.findOne(id);
-        return Authority.reset(authority);
+        return Authority.toShows(authority);
 
     }
 
@@ -140,7 +139,7 @@ public class AuthorityController {
         if (ref.getId() == null || ref.getId() <= 0) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
-        return Authority.reset(ref);
+        return Authority.toShows(ref);
     }
 
 
@@ -157,7 +156,7 @@ public class AuthorityController {
             throw new ValidException(result.getFieldErrors());
         }
         Authority authority = authorityService.update(modifyAuthority.toAuthority(modifyAuthority));
-        return Authority.reset(authority);
+        return Authority.toShows(authority);
     }
 
     /**
@@ -194,10 +193,8 @@ public class AuthorityController {
      */
     @PostMapping("/{aid:\\d+}")
     @ApiOperation(value = "设置权限对应的资源")
-    public void setAuthorityResource(@PathVariable("aid") Long aid, @Valid @RequestBody LongIds ids, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
+    public void setAuthorityResource(@PathVariable("aid") Long aid, @RequestBody LongIds ids){
+
         List<AuthorityResource> news = AuthorityOPClassify.create(aid,ids.getIds());
         List<AuthorityResource> oldies = authorityResourceService.findByAuthorityID(aid);
 
@@ -211,7 +208,7 @@ public class AuthorityController {
 
         //删除旧的
         if (!authorityOPClassify.getInDelete().isEmpty()){
-            authorityResourceService.deleteByResourceIds(AuthorityOPClassify.toResourceLong(authorityOPClassify.getInDelete()));
+            authorityResourceService.deleteByResourceIds(AuthorityOPClassify.toResourceLong(authorityOPClassify.getInDelete()),aid);
         }
 
     }

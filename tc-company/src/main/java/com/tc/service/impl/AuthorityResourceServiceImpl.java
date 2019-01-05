@@ -39,8 +39,8 @@ public class AuthorityResourceServiceImpl extends AbstractBasicServiceImpl<Autho
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean deleteByResourceIds(List<Long> ids) {
-        int count = authorityResourceRepository.deleteByResource_Id(ids);
+    public boolean deleteByResourceIds(List<Long> ids,Long authorityId) {
+        int count = authorityResourceRepository.deleteByResourceIdIsInAndAuthorityIdEquals(ids,authorityId);
         return count == ids.size();
     }
 

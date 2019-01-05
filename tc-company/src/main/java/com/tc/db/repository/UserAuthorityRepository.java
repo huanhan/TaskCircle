@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 
 /**
- * 评论仓库
+ * 用户与权限关系仓库
  * @author Cyg
  */
 public interface UserAuthorityRepository extends JpaRepository<UserAuthority,UserAuthorityPK>,JpaSpecificationExecutor<UserAuthority> {
@@ -29,4 +29,18 @@ public interface UserAuthorityRepository extends JpaRepository<UserAuthority,Use
      * @return
      */
     int deleteByCategoryIsInAndAuthorityIdEquals(List<UserCategory> categories, Long authorityId);
+
+    /**
+     * 根据用户分类查询
+     * @param userCategory
+     * @return
+     */
+    List<UserAuthority> findByCategoryEquals(UserCategory userCategory);
+
+    /**
+     * 根据权限组删除关系
+     * @param ids
+     * @return
+     */
+    int deleteByAuthorityIdIsInAndCategoryEquals(List<Long> ids,UserCategory userCategory);
 }

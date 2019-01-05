@@ -17,9 +17,20 @@ import java.util.Objects;
 @Table(name = "user_authority", schema = "tc-company")
 @IdClass(UserAuthorityPK.class)
 public class UserAuthority {
+
+    public static final String CATEGORY = "category";
+
     private Long authorityId;
     private UserCategory category;
     private Authority authority;
+
+    public UserAuthority() {
+    }
+
+    public UserAuthority(Long authorityId, UserCategory category) {
+        this.authorityId = authorityId;
+        this.category = category;
+    }
 
     @Id
     @Column(name = "authority_id")
@@ -79,5 +90,14 @@ public class UserAuthority {
             });
         }
         return result;
+    }
+
+    public static List<UserAuthority> reset(List<UserAuthority> userAuthorities){
+        if (!userAuthorities.isEmpty()){
+            userAuthorities.forEach(userAuthority -> {
+                userAuthority.setAuthority(null);
+            });
+        }
+        return userAuthorities;
     }
 }

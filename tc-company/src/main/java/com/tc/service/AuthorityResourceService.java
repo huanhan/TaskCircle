@@ -26,9 +26,10 @@ public interface AuthorityResourceService extends BasicService<AuthorityResource
     /**
      * 根据resource的ID组来删除权限资源对应关系
      * @param ids
+     * @param authorityId
      * @return
      */
-    boolean deleteByResourceIds(List<Long> ids);
+    boolean deleteByResourceIds(List<Long> ids,Long authorityId);
 
     /**
      * 根据查询条件，获取权限或者资源信息
