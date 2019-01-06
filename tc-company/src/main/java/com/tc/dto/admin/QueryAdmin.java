@@ -3,6 +3,7 @@ package com.tc.dto.admin;
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.AdminAuthority;
 import com.tc.db.entity.User;
+import com.tc.db.enums.AdminState;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
@@ -115,11 +116,19 @@ public class QueryAdmin extends PageRequest {
      * 用户状态
      */
     private UserState state;
-
+    /**
+     * 创建者
+     */
+    private Long creation;
     /**
      * 是否拥有权限
      */
     private Boolean isAuthority;
+
+    /**
+     * 管理员状态，默认(在岗)
+     */
+    private AdminState adminState = AdminState.ON_GUARD;
 
     public QueryAdmin() {
         super(0, 10);
@@ -318,8 +327,24 @@ public class QueryAdmin extends PageRequest {
         return state;
     }
 
+    public AdminState getAdminState() {
+        return adminState;
+    }
+
+    public void setAdminState(AdminState adminState) {
+        this.adminState = adminState;
+    }
+
     public void setState(UserState state) {
         this.state = state;
+    }
+
+    public Long getCreation() {
+        return creation;
+    }
+
+    public void setCreation(Long creation) {
+        this.creation = creation;
     }
 
     public Boolean isAuthority() {
@@ -346,6 +371,9 @@ public class QueryAdmin extends PageRequest {
         }
         if (queryAdmin.getState() != null){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.STATE),queryAdmin.getState()));
+        }
+        if (queryAdmin.getAdminState() != null){
+            predicates.add(cb.equal(root.get(Admin.STATE),queryAdmin.getAdminState()));
         }
         if (!StringUtils.isEmpty(queryAdmin.getAddress())){
             predicates.add(cb.like(root.get(Admin.USER).get(User.ADDRESS),"%" + queryAdmin.getAddress() + "%"));
@@ -412,11 +440,11 @@ public class QueryAdmin extends PageRequest {
         }
         if (queryAdmin.getMoneyBegin() != null || queryAdmin.getMoneyEnd() != null){
             if (queryAdmin.getMoneyBegin()  != null && queryAdmin.getMoneyEnd() != null && queryAdmin.getMoneyBegin() >= 0 && queryAdmin.getMoneyEnd() >= 0){
-                predicates.add(cb.between(root.get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getMoneyBegin() ,queryAdmin.getMoneyEnd()));
+                predicates.add(cb.between(root.get(Admin.USER).get(User.MONEY),queryAdmin.getMoneyBegin() ,queryAdmin.getMoneyEnd()));
             }else if (queryAdmin.getMoneyBegin()  != null && queryAdmin.getMoneyBegin() >= 0){
-                predicates.add(cb.greaterThan(root.get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getMoneyBegin() ));
+                predicates.add(cb.greaterThan(root.get(Admin.USER).get(User.MONEY),queryAdmin.getMoneyBegin() ));
             }else if (queryAdmin.getMoneyEnd() != null && queryAdmin.getMoneyEnd() >= 0){
-                predicates.add(cb.lessThan(root.get(Admin.USER).get(User.BIRTHDAY),queryAdmin.getMoneyEnd()));
+                predicates.add(cb.lessThan(root.get(Admin.USER).get(User.MONEY),queryAdmin.getMoneyEnd()));
             }
         }
         return predicates;

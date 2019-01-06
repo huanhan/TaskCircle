@@ -15,6 +15,10 @@ import java.util.Objects;
  */
 @Entity
 public class Task implements Serializable {
+
+    public static final String MONEY = "money";
+
+
     private String id;
     private User user;
     private String name;

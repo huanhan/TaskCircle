@@ -1,9 +1,13 @@
 package com.tc.db.entity;
 
+import com.tc.db.enums.AuditState;
+import com.tc.db.enums.AuditType;
+import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,12 +16,26 @@ import java.util.Objects;
  */
 @Entity
 public class Audit {
+
+    public static final String ID = "id";
+    public static final String ADMIN_ID = "adminId";
+    public static final String IDEA = "idea";
+    public static final String RESULT = "result";
+    public static final String REASON = "reason";
+    public static final String TYPE = "type";
+    public static final String CREATE_TIME = "createTime";
+    public static final String AUDIT_HUNTER = "auditHunter";
+    public static final String AUDIT_TASK = "auditTask";
+    public static final String AUDIT_WITHDRAW = "auditWithdraw";
+    public static final String ADMIN = "admin";
+
+
     private String id;
     private Long adminId;
     private String idea;
-    private String result;
+    private AuditState result;
     private String reason;
-    private String type;
+    private AuditType type;
     private Timestamp createTime;
     private AuditHunter auditHunter;
     private AuditTask auditTask;
@@ -55,12 +73,13 @@ public class Audit {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "result")
-    public String getResult() {
+    public AuditState getResult() {
         return result;
     }
 
-    public void setResult(String result) {
+    public void setResult(AuditState result) {
         this.result = result;
     }
 
@@ -75,12 +94,13 @@ public class Audit {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    public String getType() {
+    public AuditType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(AuditType type) {
         this.type = type;
     }
 
@@ -157,5 +177,23 @@ public class Audit {
 
     public void setAdmin(Admin admin) {
         this.admin = admin;
+    }
+
+
+    /**
+     * 权限审核列表
+     * @param audits
+     * @return
+     */
+    public static List<Audit> toListInIndex(List<Audit> audits) {
+        if (!ListUtils.isEmpty(audits)){
+            audits.forEach(audit ->{
+                audit.setAuditHunter(null);
+                audit.setAdmin(new Admin(audit.getAdminId(),audit.getAdmin().getUser().getName(),audit.getAdmin().getUser().getUsername()));
+                audit.setAuditHunter(null);
+                audit.setAuditWithdraw(null);
+            });
+        }
+        return audits;
     }
 }

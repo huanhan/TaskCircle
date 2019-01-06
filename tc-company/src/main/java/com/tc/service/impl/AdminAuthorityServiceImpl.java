@@ -67,7 +67,7 @@ public class AdminAuthorityServiceImpl extends AbstractBasicServiceImpl<AdminAut
     @Override
     public boolean deleteByAuthorityIds(List<Long> authorityIds, Long id) {
         int count = adminAuthorityRepository.deleteByAuthorityIdIsInAndUserIdEquals(authorityIds,id);
-        return count == authorityIds.size();
+        return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

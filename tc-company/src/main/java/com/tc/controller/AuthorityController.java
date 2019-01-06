@@ -67,7 +67,7 @@ public class AuthorityController {
     public Authority detail(@PathVariable("id") Long id){
 
         Authority authority = authorityService.findOne(id);
-        return Authority.toShows(authority);
+        return Authority.toDetail(authority);
 
     }
 
@@ -139,7 +139,7 @@ public class AuthorityController {
         if (ref.getId() == null || ref.getId() <= 0) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
-        return Authority.toShows(ref);
+        return Authority.toDetail(ref);
     }
 
 
@@ -156,7 +156,7 @@ public class AuthorityController {
             throw new ValidException(result.getFieldErrors());
         }
         Authority authority = authorityService.update(modifyAuthority.toAuthority(modifyAuthority));
-        return Authority.toShows(authority);
+        return Authority.toDetail(authority);
     }
 
     /**

@@ -15,6 +15,7 @@ import java.util.Objects;
 public class TaskClassify implements Serializable {
     private Long id;
     private String name;
+    private String classifyImg;
     private Admin creation;
     private Timestamp createTime;
     private TaskClassify parents;
@@ -40,6 +41,16 @@ public class TaskClassify implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Basic
+    @Column(name = "classify_img")
+    public String getClassifyImg() {
+        return classifyImg;
+    }
+
+    public void setClassifyImg(String classifyImg) {
+        this.classifyImg = classifyImg;
     }
 
     @Basic

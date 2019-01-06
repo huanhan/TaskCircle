@@ -1,5 +1,10 @@
 package com.tc.db.enums;
 
+/**
+ * 审核类别
+ * @author Cyg
+ */
+
 public enum  AuditType {
 
     HUNTER("猎刃审核"),

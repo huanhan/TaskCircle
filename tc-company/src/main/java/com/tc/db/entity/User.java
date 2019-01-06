@@ -7,7 +7,6 @@ import com.tc.db.enums.UserState;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.social.security.SocialUser;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -131,6 +130,14 @@ public class User implements Serializable {
      */
     private UserState state;
     /**
+     * 用户手机号码
+     */
+    private String phone;
+    /**
+     * 用户头像
+     */
+    private String headImg;
+    /**
      * 猎刃审核记录
      */
     private Collection<AuditHunter> auditHunters;
@@ -186,8 +193,10 @@ public class User implements Serializable {
      * 一个用户接收多个消息
      */
     private Collection<UserMessage> userMessages;
-    private Admin adminById;
-    private Collection<UserPay> userPaysById;
+    /**
+     * 用户支出
+     */
+    private Collection<UserPay> userPays;
     public User() {
     }
 
@@ -205,6 +214,8 @@ public class User implements Serializable {
         this.name = name;
         this.username = username;
     }
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -421,6 +432,28 @@ public class User implements Serializable {
         this.state = state;
     }
 
+    @Basic
+    @Column(name = "phone")
+    @JsonView(UserBasicDetailView.class)
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    @Basic
+    @Column(name = "head_img")
+    @JsonView(UserBasicDetailView.class)
+    public String getHeadImg() {
+        return headImg;
+    }
+
+    public void setHeadImg(String headImg) {
+        this.headImg = headImg;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -443,13 +476,15 @@ public class User implements Serializable {
                 Objects.equals(intro, user.intro) &&
                 Objects.equals(height, user.height) &&
                 Objects.equals(weight, user.weight) &&
-                Objects.equals(birthday, user.birthday);
+                Objects.equals(birthday, user.birthday) &&
+                Objects.equals(phone, user.phone) &&
+                Objects.equals(headImg, user.headImg);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, name, username, password, category, gender, lastLogin, createTime, money, idCard, address, school, major, interest, intro, height, weight, birthday);
+        return Objects.hash(id, name, username, password, category, gender, lastLogin, createTime, money, idCard, address, school, major, interest, intro, height, weight, birthday,phone,headImg);
     }
 
     @OneToOne(mappedBy = "user")
@@ -588,25 +623,37 @@ public class User implements Serializable {
         this.userMessages = userMessages;
     }
 
-    @OneToOne(mappedBy = "user")
-    public Admin getAdminById() {
-        return adminById;
-    }
-
-    public void setAdminById(Admin adminById) {
-        this.adminById = adminById;
-    }
-
     @OneToMany(mappedBy = "user")
-    public Collection<UserPay> getUserPaysById() {
-        return userPaysById;
+    public Collection<UserPay> getUserPays() {
+        return userPays;
     }
 
-    public void setUserPaysById(Collection<UserPay> userPaysById) {
-        this.userPaysById = userPaysById;
+    public void setUserPays(Collection<UserPay> userPaysById) {
+        this.userPays = userPaysById;
     }
 
     public interface UserBasicView {}
 
     public interface UserBasicDetailView extends UserBasicView{}
+
+    public static User toDetail(User user) {
+        user.setPassword(null);
+        user.setAdmin(null);
+        user.setAuditHunters(null);
+        user.setComments(null);
+        user.setCommentUsers(null);
+        user.setResources(null);
+        user.setUserContacts(null);
+        user.setTasks(null);
+        user.setUserExpense(null);
+        user.setUserHunterInterflows(null);
+        user.setUserImgs(null);
+        user.setUserIncome(null);
+        user.setUserMessages(null);
+        user.setUserOperationLogs(null);
+        user.setUserPays(null);
+        user.setUserWithdraws(null);
+        user.setHunter(null);
+        return user;
+    }
 }

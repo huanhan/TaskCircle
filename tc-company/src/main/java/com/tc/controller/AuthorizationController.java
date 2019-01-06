@@ -59,7 +59,7 @@ public class AuthorizationController {
     @ApiOperation(value = "在用户与权限关系管理界面中，一次性获取所有用户类别，所有权限与两者之间的关联关系")
     public Result allByUser(){
         //所有用户类别
-        List<UserCategory> queryUserCategories = UserCategory.all();
+        List<UserCategory> queryUserCategories = UserCategory.allByUser();
         //所有权限
         List<Authority> queryAuthorities = authorityService.findAll();
         //两者关系

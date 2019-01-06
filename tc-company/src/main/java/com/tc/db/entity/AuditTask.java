@@ -10,6 +10,9 @@ import java.util.Objects;
 @Entity
 @Table(name = "audit_task", schema = "tc-company")
 public class AuditTask {
+
+    public static final String TASK = "task";
+
     private String auditId;
     private String taskId;
     private Double money;

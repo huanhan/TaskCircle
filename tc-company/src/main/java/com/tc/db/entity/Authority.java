@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.dto.Show;
+import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -19,6 +20,8 @@ import java.util.Objects;
  */
 @Entity
 public class Authority implements Serializable,GrantedAuthority {
+
+    public static final String ADMIN_AUTHORITY = "adminAuthorities";
 
     private Long id;
     private String name;
@@ -40,6 +43,7 @@ public class Authority implements Serializable,GrantedAuthority {
         this.id = id;
         this.name = name;
     }
+
 
 
 
@@ -159,31 +163,19 @@ public class Authority implements Serializable,GrantedAuthority {
         this.adminAuthorities = adminAuthorities;
     }
 
-    public static Authority toShows(Authority authority){
+    public static Authority toDetail(Authority authority) {
         authority.setAdmin(new Admin(authority.getAdmin().getUserId(),authority.getAdmin().getUser().getName(),authority.getAdmin().getUser().getUsername()));
         authority.setAdminAuthorities(null);
         authority.setAuthorityResources(null);
         authority.setUserAuthorities(null);
         return authority;
-//        if (!userAuthorities.isEmpty()){
-//            userAuthorities.forEach(userAuthority -> userAuthority.setAuthority(new Authority(userAuthority.getAuthorityId(),userAuthority.getAuthority().getName())));
-//        }
-//        if (!authorityResources.isEmpty()){
-//            authorityResources.forEach(authorityResource -> {
-//                authorityResource.setResource(new Resource(authorityResource.getResourceId(),authorityResource.getResource().getName()));
-//                authorityResource.setAuthority(new Authority(authorityResource.getAuthorityId(),authorityResource.getAuthority().getName()));
-//            });
-//        }
-//        if (!adminAuthorities.isEmpty()){
-//            adminAuthorities.forEach(adminAuthority -> {
-//                adminAuthority.setAdmin(new Admin(adminAuthority.getUserId(),
-//                        adminAuthority.getAdmin().getUser().getName(),
-//                        adminAuthority.getAdmin().getUser().getUsername()
-//                        )
-//                );
-//                adminAuthority.setAuthority(new Authority(adminAuthority.getAuthorityId(),adminAuthority.getAuthority().getName()));
-//            });
-//        }
+    }
+
+    public static List<Authority> toDetail(List<Authority> queryAuthorities) {
+        if (!ListUtils.isEmpty(queryAuthorities)){
+            queryAuthorities.forEach(Authority::toDetail);
+        }
+        return queryAuthorities;
     }
 
 

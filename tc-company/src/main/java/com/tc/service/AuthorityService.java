@@ -21,5 +21,11 @@ public interface AuthorityService extends BasicService<Authority> {
      */
     List<Authority> findByQueryAuthority(QueryAuthority queryAuthority);
 
-
+    /**
+     * 查询管理员权限
+     * @param id
+     * @param queryAuthority
+     * @return
+     */
+    Page<Authority> findByAdmin(Long id, QueryAuthority queryAuthority);
 }

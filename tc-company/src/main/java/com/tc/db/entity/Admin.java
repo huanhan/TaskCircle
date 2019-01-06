@@ -1,10 +1,14 @@
 package com.tc.db.entity;
 
+import com.sun.org.apache.regexp.internal.RE;
+import com.tc.db.enums.AdminState;
 import com.tc.dto.Show;
 import com.tc.dto.admin.QueryAdmin;
+import com.tc.until.ListUtils;
 import org.springframework.data.domain.Page;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,15 +23,19 @@ public class Admin {
 
     public static final String USER = "user";
     public static final String ADMIN = "admin";
+    public static final String STATE = "adminState";
     public static final String USER_ID = "userId";
     public static final String CREATE_ID = "createId";
+    public static final String ENTRY_TIME = "entryTime";
     public static final String ADMIN_AUTHORITIES = "adminAuthorities";
 
 
     private Long userId;
     private Long createId;
+    private AdminState adminState;
     private User user;
     private Admin admin;
+    private Timestamp entryTime;
     private Collection<Admin> admins;
     private Collection<AdminAuthority> adminAuthorities;
     private Collection<Audit> audits;
@@ -47,7 +55,6 @@ public class Admin {
         this.userId = userId;
         this.setUser(new User(userId,name,username));
     }
-
 
 
     @Id
@@ -70,6 +77,27 @@ public class Admin {
         this.createId = createId;
     }
 
+    @Basic
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state")
+    public AdminState getAdminState() {
+        return adminState;
+    }
+
+    public void setAdminState(AdminState adminState) {
+        this.adminState = adminState;
+    }
+
+    @Basic
+    @Column(name = "entry_time")
+    public Timestamp getEntryTime() {
+        return entryTime;
+    }
+
+    public void setEntryTime(Timestamp entryTime) {
+        this.entryTime = entryTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -89,7 +117,7 @@ public class Admin {
         return Objects.hash(userId, createId);
     }
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     public User getUser() {
         return user;
@@ -181,5 +209,43 @@ public class Admin {
         return result;
     }
 
+    /**
+     * 管理员管理列表
+     * @param admins
+     * @return
+     */
+    public static List<Admin> toListInIndex(List<Admin> admins) {
+        if (!ListUtils.isEmpty(admins)){
+            admins.forEach(admin ->{
+                User user = new User(admin.getUserId(),admin.getUser().getName());
+                user.setUsername(admin.getUser().getUsername());
+                user.setPhone(admin.getUser().getPhone());
+                user.setAddress(admin.getUser().getAddress());
+                admin.setUser(user);
+                admin.setAdmin(null);
+                admin.setAdmins(null);
+                admin.setAdminAuthorities(null);
+                admin.setAudits(null);
+                admin.setAuthorities(null);
+                admin.setMessages(null);
+                admin.setTaskClassifies(null);
+            });
+        }
+        return admins;
+    }
+
+    public static Admin toDetail(Admin admin){
+        if (admin != null){
+            admin.setUser(User.toDetail(admin.getUser()));
+            admin.setAdmin(new Admin(admin.getCreateId()));
+            admin.setAdmins(null);
+            admin.setAdminAuthorities(null);
+            admin.setAudits(null);
+            admin.setAuthorities(null);
+            admin.setMessages(null);
+            admin.setTaskClassifies(null);
+        }
+        return admin;
+    }
 
 }

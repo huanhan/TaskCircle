@@ -15,6 +15,9 @@ import java.util.Objects;
 @Entity
 @Table(name = "user_withdraw", schema = "tc-company")
 public class UserWithdraw implements Serializable {
+
+    public static final String MONEY = "money";
+
     private String id;
     private Long userId;
     private Float money;

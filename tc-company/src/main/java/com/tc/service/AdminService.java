@@ -26,4 +26,18 @@ public interface AdminService extends BasicService<Admin> {
      * @return
      */
     List<Admin> findByQueryAdminAndAuthorityState(QueryAdmin queryAdmin);
+
+    /**
+     * 根据管理员查询条件获取管理员列表
+     * @param queryAdmin
+     * @return
+     */
+    Page<Admin> findByQueryAdmin(QueryAdmin queryAdmin);
+
+    /**
+     * 管理员设置离职
+     * @param id
+     * @return
+     */
+    boolean leaveOffice(Long id);
 }

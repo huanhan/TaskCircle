@@ -10,6 +10,9 @@ import java.util.Objects;
 @Entity
 @Table(name = "audit_withdraw", schema = "tc-company")
 public class AuditWithdraw {
+
+    public static final String USER_WITHDRAW = "userWithdraw";
+
     private String auditId;
     private String withdrawId;
     private Audit audit;

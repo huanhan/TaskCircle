@@ -1,7 +1,7 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
-import com.tc.dto.admin.QueryAdminAudit;
+import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.audit.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -138,13 +138,13 @@ public class AuditController {
     /**
      * 我的审核列表
      * @param authentication 当前登陆的用户
-     * @param queryAdminAudit 查询条件
+     * @param queryAudit 查询条件
      * @return
      */
     @GetMapping("/me")
     @ApiOperation(value = "我的审核列表")
     public List<Audit> auditByMe(Authentication authentication,
-                                 @Valid @RequestBody QueryAdminAudit queryAdminAudit,
+                                 @Valid @RequestBody QueryAudit queryAudit,
                                  BindingResult bindingResult){
         return new ArrayList<>();
     }

@@ -2,12 +2,20 @@ package com.tc.controller;
 
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.Audit;
-import com.tc.db.entity.UserOperationLog;
+import com.tc.db.entity.Authority;
+import com.tc.db.entity.User;
 import com.tc.dto.LongIds;
-import com.tc.dto.Show;
+import com.tc.dto.Result;
 import com.tc.dto.admin.*;
-import com.tc.dto.user.QueryUserOPLog;
+import com.tc.dto.audit.QueryAudit;
+import com.tc.dto.authority.QueryAuthority;
+import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
+import com.tc.service.*;
+import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +32,21 @@ import java.util.List;
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping(value = "/admin")
 public class AdminController {
+
+    @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private AuthorityService authorityService;
+
+    @Autowired
+    private AdminAuthorityService adminAuthorityService;
+
+    @Autowired
+    private AuditService auditService;
     /**
      * 查询管理员详情
      * @param id 管理员
@@ -31,8 +54,9 @@ public class AdminController {
      */
     @GetMapping(value = "{id:\\d+}")
     @ApiOperation(value = "查看管理员的详情")
-    public AdminDetail detail(@PathVariable("id") Long id){
-        return new AdminDetail();
+    public Admin detail(@PathVariable("id") Long id){
+        Admin resultAdmin = adminService.findOne(id);
+        return Admin.toDetail(resultAdmin);
     }
 
     /**
@@ -40,102 +64,100 @@ public class AdminController {
      * @param queryAdmin 查询条件
      * @return
      */
-    @GetMapping
+    @PostMapping("/query")
     @ApiOperation(value = "获取管理员列表，根据查询条件")
-    public List<Admin> all(@Valid @RequestBody QueryAdmin queryAdmin){
-        return new ArrayList<>();
+    public Result all(@Valid @RequestBody QueryAdmin queryAdmin){
+        Page<Admin> queryAdmins = adminService.findByQueryAdmin(queryAdmin);
+        List<Admin> resultAdmins = Admin.toListInIndex(queryAdmins.getContent());
+        return Result.init(resultAdmins,queryAdmin);
     }
 
     /**
      * 添加管理员
      * @param registerAdmin 管理员信息
      */
-    @PostMapping
+    @PostMapping("/add")
     @ApiOperation(value = "添加管理员")
-    public Admin add(@Valid @RequestBody RegisterAdmin registerAdmin){
-        return new Admin();
+    public Admin add(@Valid @RequestBody RegisterAdmin registerAdmin,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        Admin saveAdmin = RegisterAdmin.toAdmin(registerAdmin);
+        Admin resultAdmin = adminService.save(saveAdmin);
+        return Admin.toDetail(resultAdmin);
     }
 
     /**
      * 查看管理员拥有的所有权限
-     * @param id 管理员编号
      * @return
      */
-    @GetMapping("/authority/{id:\\d+}")
+    @PostMapping("/authority/query")
     @ApiOperation(value = "管理员权限列表")
-    public List<Show> adminAuthority(@PathVariable("id") Long id){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 获取管理员操作日志
-     * @param id 管理员编号
-     * @param queryUserOPLog 操作日志查询条件
-     * @return
-     */
-    @GetMapping("/op/{id:\\d+}")
-    @ApiOperation(value = "获取管理员操作日志")
-    public List<UserOperationLog> getAdminOPLog(@PathVariable("id") Long id, @RequestBody QueryUserOPLog queryUserOPLog){
-        return new ArrayList<>();
+    public Result adminAuthority(@RequestBody QueryAuthority queryAuthority){
+        Page<Authority> queryAuthorities = authorityService.findByAdmin(queryAuthority.getAdminId(),queryAuthority);
+        return Result.init(Authority.toDetail(queryAuthorities.getContent()),queryAuthority);
     }
 
     /**
      * 移除管理员权限
-     * @param id 管理员编号
      * @param ids 管理员权限列表
      */
-    @DeleteMapping("/authority/{id:\\d+}")
+    @PostMapping("/authority/delete")
     @ApiOperation(value = "移除管理员权限")
-    public void removeAdminAuthority(@PathVariable("id") Long id, @RequestBody LongIds ids){
-
+    public void removeAdminAuthority(@Valid @RequestBody LongIds ids, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        boolean delIsSuccess = adminAuthorityService.deleteByAuthorityIds(ids.getIds(),ids.getId());
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
     }
 
     /**
-     * 删除管理员
+     * 管理员离职
      * @param id 管理员编号
      */
     @DeleteMapping("/{id:\\d+}")
-    @ApiOperation(value = "删除管理员")
+    @ApiOperation(value = "管理员离职")
     public void removeAdmin(@PathVariable("id") Long id){
-
-    }
-
-    /**
-     * 删除多个管理员
-     * @param ids 管理员编号列表
-     */
-    @DeleteMapping
-    @ApiOperation(value = "删除管理员")
-    public void removeAdmin(@Valid @RequestBody LongIds ids, BindingResult result){
-
+        boolean isLeave = adminService.leaveOffice(id);
+        if (!isLeave){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
     }
 
     /**
      * 修改管理员信息
      * @param modifyAdmin 管理员信息
-     * @param result
+     * @param bindingResult
      * @return
      */
     @PutMapping
     @ApiOperation(value = "修改管理员信息")
-    public Admin update(@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult result){
-        return new Admin();
+    public Admin update(@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        Admin admin = adminService.findOne(modifyAdmin.getId());
+        if (admin == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        Admin result = adminService.save(ModifyAdmin.toAdmin(admin,modifyAdmin));
+        return Admin.toDetail(result);
     }
 
     /**
-     * 获取管理员审核列表
-     * @param id 管理员编号
-     * @param queryAdminAudit 审核查询条件
-     * @param result
+     * 查看管理员审核列表
+     * @param queryAudit 审核查询条件
      * @return
      */
-    @GetMapping("/audit/{id:\\d+}")
+    @PostMapping("/audit/query")
     @ApiOperation(value = "获取管理员审核列表")
-    public List<Audit> getAuditByAdmin(@PathVariable("id") Long id,
-                                       @Valid @RequestBody QueryAdminAudit queryAdminAudit,
-                                       BindingResult result){
-        return new ArrayList<>();
+    public Result getAuditByAdmin(@RequestBody QueryAudit queryAudit){
+        if (queryAudit.getAdminId() == null || queryAudit.getAdminId() <= 0){
+            throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_ADMIN_FAILED);
+        }
+        Page<Audit> queryAudits = auditService.findByQueryAudit(queryAudit);
+        return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit);
     }
-
 
 }

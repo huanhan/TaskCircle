@@ -1,5 +1,6 @@
 package com.tc.db.enums;
 
+import com.tc.db.entity.UserAuthority;
 import com.tc.dto.Show;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -32,8 +33,13 @@ public enum UserCategory {
     }
 
 
-    public static List<UserCategory> all(){
-        return Arrays.asList(UserCategory.values());
+    public static List<UserCategory> allByUser(){
+
+        List<UserCategory> userCategories = new ArrayList<>();
+        userCategories.add(UserCategory.NORMAL);
+        userCategories.add(UserCategory.HUNTER);
+
+        return userCategories;
     }
 
     public static List<Show> toShows(List<UserCategory> list){

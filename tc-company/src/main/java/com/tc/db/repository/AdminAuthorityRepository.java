@@ -30,9 +30,10 @@ public interface AdminAuthorityRepository extends JpaRepository<AdminAuthority,A
     List<AdminAuthority> findByUserIdEquals(Long userId);
 
     /**
-     * 删除权限与管理员关系，根据管理员编号与对应的权限编号组
+     * 删除权限与管理员关系，根据管理员编号与对应的权限编号组,
      * @param authorityIds
      * @param id
+     * @param createID
      * @return
      */
     int deleteByAuthorityIdIsInAndUserIdEquals(List<Long> authorityIds, Long id);
