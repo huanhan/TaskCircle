@@ -1,4 +1,4 @@
-package com.tc.dto.Task;
+package com.tc.dto.task;
 
 /**
  * @author Cyg

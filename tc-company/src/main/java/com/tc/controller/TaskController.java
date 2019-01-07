@@ -3,7 +3,7 @@ package com.tc.controller;
 import com.tc.db.entity.*;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.LongIds;
-import com.tc.dto.Task.*;
+import com.tc.dto.task.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;

@@ -1,4 +1,4 @@
-package com.tc.dto.Task;
+package com.tc.dto.task;
 
 /**
  * 查询任务聊天记录

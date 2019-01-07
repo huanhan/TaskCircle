@@ -1,10 +1,13 @@
 package com.tc.db.entity;
 
+import com.tc.dto.Show;
+import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Cyg
@@ -13,8 +16,20 @@ import java.util.Objects;
 @Entity
 @Table(name = "task_classify", schema = "tc-company")
 public class TaskClassify implements Serializable {
+
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String CLASSIFY_IMG = "classifyImg";
+    public static final String INFO = "info";
+    public static final String CREATION = "creation";
+    public static final String CREATE_TIME = "createTime";
+    public static final String PARENTS = "parents";
+    public static final String TASK_CLASSIFY_RELATIONS = "taskClassifyRelations";
+
     private Long id;
     private String name;
+    private Long parentsId;
+    private Long creationId;
     private String classifyImg;
     private Admin creation;
     private Timestamp createTime;
@@ -23,7 +38,23 @@ public class TaskClassify implements Serializable {
     private Collection<TaskClassifyRelation> taskClassifyRelations;
     private Collection<TaskClassify> taskClassifies;
 
+    private Integer taskNum = 0;
+    private Integer childNum = 0;
+
+    public TaskClassify() {
+    }
+
+    public TaskClassify(Long id) {
+        this.id = id;
+    }
+
+    public TaskClassify(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Long getId() {
         return id;
@@ -44,6 +75,26 @@ public class TaskClassify implements Serializable {
     }
 
     @Basic
+    @Column(name = "parents_id")
+    public Long getParentsId() {
+        return parentsId;
+    }
+
+    public void setParentsId(Long parentsId) {
+        this.parentsId = parentsId;
+    }
+
+    @Basic
+    @Column(name = "creation")
+    public Long getCreationId() {
+        return creationId;
+    }
+
+    public void setCreationId(Long creationId) {
+        this.creationId = creationId;
+    }
+
+    @Basic
     @Column(name = "classify_img")
     public String getClassifyImg() {
         return classifyImg;
@@ -54,6 +105,7 @@ public class TaskClassify implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -64,7 +116,7 @@ public class TaskClassify implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "parents_id",referencedColumnName = "id",nullable = false)
+    @JoinColumn(name = "parents_id",referencedColumnName = "id",insertable = false,updatable = false)
     public TaskClassify getParents() {
         return parents;
     }
@@ -83,22 +135,14 @@ public class TaskClassify implements Serializable {
         this.info = info;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
-        TaskClassify that = (TaskClassify) o;
-        return id.equals(that.getId()) &&
-                creation.getUser().getId().equals(that.getCreation().getUser().getId()) &&
-                parents.getId().equals(that.getParents().getId()) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(createTime, that.createTime) &&
-                Objects.equals(info, that.info);
+    @ManyToOne
+    @JoinColumn(name = "creation",referencedColumnName = "user_id",nullable = false,insertable = false,updatable = false)
+    public Admin getCreation() {
+        return creation;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, createTime, creation, parents.getId(), info);
+    public void setCreation(Admin creation) {
+        this.creation = creation;
     }
 
     @OneToMany(mappedBy = "taskClassify")
@@ -119,13 +163,108 @@ public class TaskClassify implements Serializable {
         this.taskClassifies = taskClassifies;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "creation",referencedColumnName = "user_id",nullable = false,insertable = false,updatable = false)
-    public Admin getCreation() {
-        return creation;
+    @Transient
+    public Integer getTaskNum() {
+        return taskNum;
     }
 
-    public void setCreation(Admin creation) {
-        this.creation = creation;
+    public void setTaskNum(Integer taskNum) {
+        this.taskNum = taskNum;
+    }
+
+    @Transient
+    public Integer getChildNum() {
+        return childNum;
+    }
+
+    public void setChildNum(Integer childNum) {
+        this.childNum = childNum;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
+        TaskClassify that = (TaskClassify) o;
+        return id.equals(that.getId()) &&
+                creationId.equals(that.creationId) &&
+                parentsId.equals(that.parentsId) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(createTime, that.createTime) &&
+                Objects.equals(info, that.info);
+    }
+
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, createTime, creation, parentsId, creationId, info);
+    }
+
+    public static List<TaskClassify> toListInIndex(List<TaskClassify> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(parent -> {
+                parent.setCreation(null);
+                parent.setInfo(null);
+                parent.setTaskClassifyRelations(null);
+                parent.setParents(null);
+                List<TaskClassify> list = new ArrayList<>(parent.getTaskClassifies());
+                parent.setTaskClassifies(toListInIndex(list));
+            });
+        }
+        return content;
+    }
+
+    public static TaskClassify reset(TaskClassify taskClassify) {
+        if (taskClassify != null){
+            if (taskClassify.getParents() != null) {
+                taskClassify.setParents(new TaskClassify(taskClassify.getParents().id, taskClassify.getParents().name));
+            }
+
+            if (!ListUtils.isEmpty(taskClassify.getTaskClassifies())){
+                taskClassify.getTaskClassifies().forEach(child -> taskClassify.setChildNum(taskClassify.getChildNum() + 1));
+                taskClassify.setTaskClassifies(null);
+            }
+            if (!ListUtils.isEmpty(taskClassify.getTaskClassifyRelations())){
+                taskClassify.getTaskClassifyRelations().forEach(tcr -> taskClassify.setTaskNum(taskClassify.getTaskNum() + 1));
+                taskClassify.setTaskClassifyRelations(null);
+            }
+            if (taskClassify.getCreation() != null){
+                Admin admin;
+                if (taskClassify.getCreation().getUser() != null){
+                    admin = new Admin(taskClassify.getCreation().getUserId(),
+                            taskClassify.getCreation().getUser().getName(),
+                            taskClassify.getCreation().getUser().getUsername());
+                }else {
+                    admin = new Admin(taskClassify.getCreation().getUserId());
+                }
+                taskClassify.setCreation(admin);
+            }
+        }
+        return taskClassify;
+    }
+
+    public static List<String> toNames(List<TaskClassify> queryTcs) {
+        List<String> names = new ArrayList<>();
+        if (!ListUtils.isEmpty(queryTcs)){
+            queryTcs.forEach(tc -> names.add(tc.name));
+        }
+        return names;
+    }
+
+    public static List<Long> toIds(List<TaskClassify> queryTcs) {
+        List<Long> ids = new ArrayList<>();
+        if (!ListUtils.isEmpty(queryTcs)){
+            queryTcs.forEach(tc -> ids.add(tc.getId()));
+        }
+        return ids;
+    }
+
+    public static List<Show> toShows(List<TaskClassify> queryTcs) {
+        List<Show> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(queryTcs)){
+            queryTcs.forEach(tc -> result.add(new Show(tc.id,tc.name)));
+        }
+        return result;
     }
 }

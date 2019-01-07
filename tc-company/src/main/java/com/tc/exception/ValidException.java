@@ -25,4 +25,6 @@ public class ValidException extends RuntimeException {
     public void setErrors(List<FieldError> errors) {
         this.errors = errors;
     }
+
+
 }
