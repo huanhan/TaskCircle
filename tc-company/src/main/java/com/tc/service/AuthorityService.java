@@ -1,9 +1,7 @@
 package com.tc.service;
 
 import com.tc.db.entity.Authority;
-import com.tc.dto.StringIds;
 import com.tc.dto.authority.QueryAuthority;
-import com.tc.dto.authority.RemoveUser;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
+import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +15,7 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -41,6 +43,7 @@ public class User implements Serializable {
     public static final String BIRTHDAY = "birthday";
     public static final String STATE = "state";
     public static final String MONEY = "money";
+    public static final String TASKS = "tasks";
 
 
 
@@ -215,6 +218,12 @@ public class User implements Serializable {
         this.username = username;
     }
 
+    public User(Long id, String name, String username,String headImg) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.headImg = headImg;
+    }
 
 
     @Id
@@ -655,5 +664,12 @@ public class User implements Serializable {
         user.setUserWithdraws(null);
         user.setHunter(null);
         return user;
+    }
+
+    public static List<User> toIndexAsList(List<User> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(User::toDetail);
+        }
+        return content;
     }
 }

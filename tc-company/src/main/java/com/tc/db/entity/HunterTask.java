@@ -26,8 +26,7 @@ public class HunterTask implements Serializable {
     private Integer hunterRejectCount;
     private Integer userRejectCount;
     private HunterTaskState state;
-    private Boolean isTaskRework;
-    private Boolean isCompensate;
+
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
 
@@ -125,25 +124,7 @@ public class HunterTask implements Serializable {
         this.state = state;
     }
 
-    @Basic
-    @Column(name = "is_task_rework")
-    public Boolean getTaskRework() {
-        return isTaskRework;
-    }
 
-    public void setTaskRework(Boolean taskRework) {
-        isTaskRework = taskRework;
-    }
-
-    @Basic
-    @Column(name = "is_compensate")
-    public Boolean getCompensate() {
-        return isCompensate;
-    }
-
-    public void setCompensate(Boolean compensate) {
-        isCompensate = compensate;
-    }
 
     @OneToMany(mappedBy = "hunterTask")
     public Collection<CommentHunter> getCommentHunters() {
@@ -189,8 +170,6 @@ public class HunterTask implements Serializable {
         if (o == null || getClass() != o.getClass()) {return false;}
         HunterTask that = (HunterTask) o;
         return hunter.getUser().getId().equals(that.getHunter().getUser().getId()) &&
-                isTaskRework.equals(that.getTaskRework()) &&
-                isCompensate.equals(that.getCompensate()) &&
                 Objects.equals(id, that.getId()) &&
                 Objects.equals(task.getId(), that.getTask().getId()) &&
                 Objects.equals(acceptTime, that.getAcceptTime()) &&
@@ -203,6 +182,6 @@ public class HunterTask implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, task.getId(), hunter.getUser().getId(), acceptTime, finishTime, context, hunterRejectCount, userRejectCount, state, isTaskRework, isCompensate);
+        return Objects.hash(id, task.getId(), hunter.getUser().getId(), acceptTime, finishTime, context, hunterRejectCount, userRejectCount, state);
     }
 }

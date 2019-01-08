@@ -9,27 +9,24 @@ import java.util.List;
 public class StringIds {
     @NotNull
     @Min(value = 1)
-    private Long id;
+    private String id;
 
     @NotEmpty(message = "集合必须存在元素")
-    private List<String> ids;
+    private List<Long> ids;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public List<String> getIds() {
+    public List<Long> getIds() {
         return ids;
     }
 
-    public void setIds(List<String> ids) {
+    public void setIds(List<Long> ids) {
         this.ids = ids;
     }
-
-
-
 }

@@ -10,11 +10,16 @@ import java.util.Objects;
  */
 @Entity
 public class Comment {
+
+    public static String NUMBER = "number";
+    public static String CREATION_ID = "creationId";
+
+
     private Long id;
     private String type;
     private String context;
     private Timestamp createTime;
-    private Double number;
+    private Float number;
     private Long creationId;
     private CommentHunter commentHunter;
     private CommentTask commentTask;
@@ -63,11 +68,11 @@ public class Comment {
 
     @Basic
     @Column(name = "number")
-    public Double getNumber() {
+    public Float getNumber() {
         return number;
     }
 
-    public void setNumber(Double number) {
+    public void setNumber(Float number) {
         this.number = number;
     }
 

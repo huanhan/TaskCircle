@@ -62,6 +62,13 @@ public interface BasicService<T> {
     T findOne(Long id);
 
     /**
+     * 获取记录详情
+     * @param id
+     * @return
+     */
+    T findOne(String id);
+
+    /**
      * 是否已存在name
      * @param name
      * @return

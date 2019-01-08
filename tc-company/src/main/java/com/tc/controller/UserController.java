@@ -1,10 +1,12 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
+import com.tc.dto.Result;
 import com.tc.dto.user.*;
 import com.tc.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +32,13 @@ public class UserController {
      * @param queryUser 用户查询条件
      * @return
      */
-    @GetMapping
+    @PostMapping
     @ApiOperation(value = "根据查询条件获取用户列表")
-    public List<User> all(@Valid @RequestBody QueryUser queryUser, BindingResult result){
-        return new ArrayList<>();
+    public Result all(@RequestBody QueryUser queryUser){
+
+        Page<User> queryUsers = userService.findByQueryUser(queryUser);
+        List<User> result = User.toIndexAsList(queryUsers.getContent());
+        return Result.init(result,queryUser);
     }
 
     /**
@@ -44,20 +49,11 @@ public class UserController {
     @GetMapping("/{id:\\+d}")
     @ApiOperation(value = "获取用户详情信息")
     public User detail(@PathVariable("id") Long id){
-        return new User();
-    }
 
-    /**
-     * 根据用户分类获取用户统计信息
-     * @param name 用户分类
-     * @return
-     */
-    @GetMapping("/statistics/{name}")
-    @ApiOperation(value = "根据用户分类获取用户统计信息")
-    public UserCategoryStatistics getUserStatisticsByCategory(@PathVariable("name") String name){
-        return new UserCategoryStatistics();
-    }
+        User user = userService.findOne(id);
+        return User.toDetail(user);
 
+    }
 
     /**
      * 根据用户编号获取用户的任务统计信息
@@ -183,25 +179,5 @@ public class UserController {
         return new ArrayList<>();
     }
 
-    /**
-     * 修改用户信息
-     * @param modifyUser
-     * @param result
-     * @return
-     */
-    @PutMapping
-    @ApiOperation(value = "修改用户信息")
-    public User update(@Valid @RequestBody ModifyUser modifyUser,BindingResult result){
-        return new User();
-    }
 
-    /**
-     * 删除用户
-     * @param id 用户编号
-     */
-    @DeleteMapping("/{id:\\d+}")
-    @ApiOperation(value = "删除用户")
-    public void delete(@PathVariable("id") Long id){
-
-    }
 }

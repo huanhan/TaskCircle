@@ -1,16 +1,11 @@
 package com.tc.dto.task;
 
-import com.tc.db.entity.Admin;
-import com.tc.db.entity.TaskClassify;
-import com.tc.db.entity.User;
+import com.tc.db.entity.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +17,19 @@ import java.util.List;
 public class QueryTaskClassify extends PageRequest {
 
     private String name;
+    private String taskId;
     private String info;
     private String creationName;
     private String parentName;
     private Boolean existTask;
     private Timestamp createTimeBegin;
     private Timestamp createTimeEnd;
+    private Boolean children;
+
+    public QueryTaskClassify(String taskId) {
+        super(0, 100);
+        this.taskId = taskId;
+    }
 
     public QueryTaskClassify() {
         super(0,10);
@@ -51,6 +53,14 @@ public class QueryTaskClassify extends PageRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public String getInfo() {
@@ -101,8 +111,27 @@ public class QueryTaskClassify extends PageRequest {
         this.createTimeEnd = createTimeEnd;
     }
 
+    public Boolean getChildren() {
+        return children;
+    }
+
+    public void setChildren(Boolean children) {
+        this.children = children;
+    }
+
     public static List<Predicate> initPredicates(QueryTaskClassify queryTaskClassify, Root<TaskClassify> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
+        if (!StringUtils.isEmpty(queryTaskClassify.taskId)){
+
+            Subquery<TaskClassifyRelation> tcr = query.subquery(TaskClassifyRelation.class);
+            Root<TaskClassifyRelation> xRoot = tcr.from(TaskClassifyRelation.class);
+            tcr.select(xRoot.get(TaskClassifyRelation.TASK_CLASSIFY_ID));
+            Predicate predicate = cb.equal(xRoot.get(TaskClassifyRelation.TASK_ID),queryTaskClassify.taskId);
+            tcr.where(predicate);
+
+            predicates.add(cb.in(root.get(TaskClassify.ID)).value(tcr));
+        }
+
         if (!StringUtils.isEmpty(queryTaskClassify.name)){
             predicates.add(cb.equal(root.get(TaskClassify.NAME),queryTaskClassify.name));
         }
@@ -131,6 +160,18 @@ public class QueryTaskClassify extends PageRequest {
                 predicates.add(cb.lessThan(root.get(TaskClassify.CREATE_TIME),queryTaskClassify.getCreateTimeEnd()));
             }
         }
+        if (queryTaskClassify.getChildren() != null){
+            if (!queryTaskClassify.getChildren()) {
+                predicates.add(cb.isNull(root.get(TaskClassify.PARENTS)));
+            }else {
+                predicates.add(cb.isNotNull(root.get(TaskClassify.PARENTS)));
+            }
+        }
         return predicates;
+    }
+
+
+    public static QueryTaskClassify init(String taskId){
+        return new QueryTaskClassify(taskId);
     }
 }

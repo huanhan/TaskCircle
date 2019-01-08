@@ -21,6 +21,15 @@ public interface TaskClassifyRelationRepository extends JpaRepository<TaskClassi
      */
     int deleteByTaskIdIsInAndTaskClassifyIdEquals(List<Long> ids,Long id);
 
+
+    /**
+     * 删除任务与分类关系
+     * @param ids 分类编号组
+     * @param id 任务编号
+     * @return
+     */
+    int deleteByTaskClassifyIdIsInAndTaskIdEquals(List<Long> ids,String id);
+
     /**
      * 根据分类编号获取
      * @param id

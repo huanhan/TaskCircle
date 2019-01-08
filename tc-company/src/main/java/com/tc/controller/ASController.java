@@ -1,6 +1,8 @@
 package com.tc.controller;
 
 import com.tc.dto.as.*;
+import com.tc.dto.user.UserCategoryStatistics;
+import com.tc.dto.user.UserTaskStatistics;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -75,5 +77,20 @@ public class ASController {
     public void saveReportToWPF(@RequestBody String context){
 
     }
+
+
+    /**
+     * 根据用户分类获取用户统计信息
+     * @param name 用户分类
+     * @return
+     */
+    @GetMapping("/statistics/{name}")
+    @ApiOperation(value = "根据用户分类获取用户统计信息")
+    public UserCategoryStatistics getUserStatisticsByCategory(@PathVariable("name") String name){
+        return new UserCategoryStatistics();
+    }
+
+
+
 
 }

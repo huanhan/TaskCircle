@@ -3,6 +3,7 @@ package com.tc.db.repository;
 import com.tc.db.entity.User;
 import com.tc.exception.DBException;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ import java.sql.SQLException;
  * @author Cyg
  * 用户资源
  */
-public interface UserRepository extends JpaRepository<User,Long> {
+public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificationExecutor<User> {
 
     /**
      * 根据用户名查询

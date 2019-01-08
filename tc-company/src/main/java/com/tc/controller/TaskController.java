@@ -2,9 +2,20 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.db.enums.TaskState;
-import com.tc.dto.LongIds;
+import com.tc.dto.Result;
+import com.tc.dto.StringIds;
 import com.tc.dto.task.*;
+import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
+import com.tc.service.TaskClassifyRelationService;
+import com.tc.service.TaskClassifyService;
+import com.tc.service.TaskService;
+import com.tc.service.TaskStepService;
+import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +33,49 @@ import java.util.List;
 @RequestMapping("/task")
 public class TaskController {
 
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private TaskStepService taskStepService;
+
+    @Autowired
+    private TaskClassifyService taskClassifyService;
+
+    @Autowired
+    private TaskClassifyRelationService taskClassifyRelationService;
+
+    @PostMapping()
+    @ApiOperation("添加任务")
+    public Task add(@Valid @RequestBody AddTask addTask,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        Task task = taskService.save(AddTask.toTask(addTask));
+        return Task.toDetail(task);
+    }
+
+    @PostMapping("/step")
+    @ApiOperation("添加任务步骤")
+    public TaskStep add(@Valid @RequestBody AddTaskStep addTaskStep,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        TaskStep taskStep = taskStepService.save(AddTaskStep.toTaskStep(addTaskStep));
+        return TaskStep.toDetail(taskStep);
+    }
+
     /**
      * 根据查询条件获取任务列表
      * @param queryTask 查询条件
-     * @param bindingResult 校验异常结果
      * @return
      */
-    @GetMapping("/all")
+    @PostMapping("/query")
     @ApiOperation(value = "获取任务列表")
-    public List<Task> all(@Valid @RequestBody QueryTask queryTask, BindingResult bindingResult){
-        return new ArrayList<>();
+    public Result all(@RequestBody QueryTask queryTask){
+        Page<Task> queryTasks = taskService.findByQueryTask(queryTask);
+        List<Task> result = Task.toIndexAsList(queryTasks.getContent());
+        return Result.init(result,queryTask);
     }
 
     /**
@@ -41,8 +85,9 @@ public class TaskController {
      */
     @GetMapping("/detail/{id:\\d+}")
     @ApiOperation(value = "获取任务详情")
-    public Task detail(@PathVariable("id") Long id){
-        return new Task();
+    public Task detail(@PathVariable("id") String id){
+        Task queryTask = taskService.findOne(id);
+        return Task.toDetail(queryTask);
     }
 
     /**
@@ -52,20 +97,152 @@ public class TaskController {
      */
     @GetMapping("/tcl/{id:\\d+}")
     @ApiOperation(value = "根据任务来获取该任务所属的分类列表信息")
-    public List<TaskClassifyResult> getTaskClassifyResultByTask(@PathVariable("id") Long id){
-        return new ArrayList<>();
+    public Result getTaskClassifyResultByTask(@PathVariable("id") String id){
+        Page<TaskClassify> result = taskClassifyService.queryByQueryTaskClassify(QueryTaskClassify.init(id));
+        return Result.init(TaskClassify.reset(result.getContent()));
     }
 
     /**
      * 从任务中移除任务拥有的分类
-     * @param id 任务编号
-     * @param ids 分类列表
+     * @param ids 分类列表(包括任务编号)
      * @param bindingResult 检查异常结果
      */
-    @DeleteMapping("/tcl/{id:\\d+}")
+    @PostMapping("/delete/tcl")
     @ApiOperation(value = "从任务中移除任务拥有的分类")
-    public void removeTaskClassify(@PathVariable("id") Long id, @Valid @RequestBody LongIds ids, BindingResult bindingResult){
+    public void removeTaskClassify(@Valid @RequestBody StringIds ids, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        boolean delIsSuccess = taskClassifyRelationService.deleteByIds(ids);
+        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
+    }
 
+    /**
+     * 获取任务的步骤列表
+     * @param id 任务编号
+     * @return
+     */
+    @GetMapping("/step/{id:\\d+}")
+    @ApiOperation(value = "获取任务的步骤列表")
+    public List<TaskStep> getTaskSteps(@PathVariable("id") String id){
+        List<TaskStep> queryTss = taskStepService.findByTaskId(id,new Sort(Sort.Direction.ASC,TaskStep.STEP));
+        return TaskStep.toIndexByList(queryTss);
+    }
+
+    /**
+     * 根据查询条件，获取本任务的评论情况
+     * @param id 任务编号
+     * @param queryTaskComment 评论查询条件
+     * @param result 检查异常结果
+     * @return
+     */
+    @GetMapping("/comment/{id:\\d+}")
+    @ApiOperation(value = "根据查询条件，获取本任务的评论情况")
+    public List<CommentTask> getCommentTasks(@PathVariable("id") Long id,
+                                             @Valid @RequestBody QueryTaskComment queryTaskComment,
+                                             BindingResult result){
+        return new ArrayList<>();
+    }
+
+
+
+    /**
+     * 获取任务中单个步骤的执行情况
+     * @param tid 任务编号
+     * @param sid 任务步骤
+     * @return
+     */
+    @GetMapping("/step/detail/{tid:\\d+}/{sid:\\d+}")
+    @ApiOperation(value = "获取任务中单个步骤的执行情况")
+    public TaskStepDetail getTaskStepDetail(@PathVariable("tid") Long tid, @PathVariable("sid") Long sid){
+        return new TaskStepDetail();
+    }
+
+    /**
+     * 管理员设置任务状态
+     * @param id 任务编号
+     * @param state 新状态
+     */
+    @PutMapping("/state/{id}")
+    @ApiOperation(value = "管理员设置任务状态")
+    public void updateTaskState(@PathVariable("id") String id,@RequestBody TaskState state){
+        if (state == null){
+            throw new ValidException(StringResourceCenter.CONTEXT_NOT_NULL);
+        }
+        Task task = taskService.findOne(id);
+        if (task.getState().equals(state)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_ADD_TITLE_FAILED);
+        }
+        boolean has = hasUpdate(task.getState(),state);
+        if (has) {
+            boolean isUpdateSuccess = taskService.updateState(id,state);
+            if (!isUpdateSuccess){
+                throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+            }
+        }else {
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+    }
+
+    private boolean hasUpdate(TaskState old, TaskState news) {
+        switch (old) {
+            case NEW_CREATE:
+                return false;
+            case AWAIT_AUDIT:
+                break;
+            case AUDIT:
+                break;
+            case AUDIT_FAILUER:
+                break;
+            case AUDIT_SUCCESS:
+                break;
+            case OK_ISSUE:
+                break;
+            case ISSUE:
+                break;
+            case RECEIVE:
+                break;
+            case FORBID_RECEIVE:
+                break;
+            case FINISH:
+                break;
+            case DELETE_OK:
+                break;
+            case DELETE:
+                break;
+            case ABANDON_OK:
+                break;
+            case ABANDON:
+                break;
+            case USER_HUNTER_NEGOTIATE:
+                break;
+            case HUNTER_REJECT:
+                break;
+            case ADMIN_NEGOTIATE:
+                break;
+            case USER_COMPENSATION:
+                break;
+            case DEPOSIT:
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * 获取指定任务与猎刃的聊天记录
+     * @param id 猎刃接任务的单号
+     * @param queryTaskInterflow 查询条件
+     * @param result 检查异常结果
+     * @return
+     */
+    @GetMapping("/interflow/{id:\\d+}")
+    @ApiOperation(value = "获取指定任务与猎刃的聊天记录")
+    public List<UserHunterInterflow> getUserHunterInterflows(@PathVariable("id") Long id,
+                                                             @Valid @RequestBody QueryTaskInterflow queryTaskInterflow,
+                                                             BindingResult result){
+        return new ArrayList<>();
     }
 
     /**
@@ -93,70 +270,4 @@ public class TaskController {
     public List<HunterTaskStep> getHunterTaskSteps(@PathVariable("id") Long id){
         return new ArrayList<>();
     }
-
-    /**
-     * 根据查询条件，获取本任务的评论情况
-     * @param id 任务编号
-     * @param queryTaskComment 评论查询条件
-     * @param result 检查异常结果
-     * @return
-     */
-    @GetMapping("/comment/{id:\\d+}")
-    @ApiOperation(value = "根据查询条件，获取本任务的评论情况")
-    public List<CommentTask> getCommentTasks(@PathVariable("id") Long id,
-                                             @Valid @RequestBody QueryTaskComment queryTaskComment,
-                                             BindingResult result){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 获取本任务的步骤列表
-     * @param id 任务编号
-     * @return
-     */
-    @GetMapping("/step/{id:\\d+}")
-    @ApiOperation(value = "获取本任务的步骤列表")
-    public List<TaskStep> getTaskSteps(@PathVariable("id") Long id){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 获取任务中单个步骤的执行情况
-     * @param tid 任务编号
-     * @param sid 任务步骤
-     * @return
-     */
-    @GetMapping("/step/detail/{tid:\\d+}/{sid:\\d+}")
-    @ApiOperation(value = "获取任务中单个步骤的执行情况")
-    public TaskStepDetail getTaskStepDetail(@PathVariable("tid") Long tid, @PathVariable("sid") Long sid){
-        return new TaskStepDetail();
-    }
-
-    /**
-     * 管理员设置任务状态
-     * @param id 任务编号
-     * @param state 新状态
-     */
-    @PutMapping("/state/{id:\\d+}")
-    @ApiOperation(value = "管理员设置任务状态")
-    public void updateTaskState(@PathVariable("id") Long id,@RequestBody TaskState state){
-
-    }
-
-    /**
-     * 获取指定任务与猎刃的聊天记录
-     * @param id 猎刃接任务的单号
-     * @param queryTaskInterflow 查询条件
-     * @param result 检查异常结果
-     * @return
-     */
-    @GetMapping("/interflow/{id:\\d+}")
-    @ApiOperation(value = "获取指定任务与猎刃的聊天记录")
-    public List<UserHunterInterflow> getUserHunterInterflows(@PathVariable("id") Long id,
-                                                             @Valid @RequestBody QueryTaskInterflow queryTaskInterflow,
-                                                             BindingResult result){
-        return new ArrayList<>();
-    }
-
-
 }

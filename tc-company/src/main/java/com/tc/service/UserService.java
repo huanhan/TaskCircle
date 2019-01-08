@@ -1,6 +1,8 @@
 package com.tc.service;
 
 import com.tc.db.entity.User;
+import com.tc.dto.user.QueryUser;
+import org.springframework.data.domain.Page;
 
 /**
  * 用户服务接口，在BasicService中以有基本的服务，可以在这里额外添加
@@ -28,4 +30,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     Long getIdByUsername(String username);
+
+    /**
+     * 根据查询条件获取用户信息
+     * @param queryUser
+     * @return
+     */
+    Page<User> findByQueryUser(QueryUser queryUser);
 }

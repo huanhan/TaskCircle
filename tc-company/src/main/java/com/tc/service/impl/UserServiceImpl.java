@@ -1,12 +1,17 @@
 package com.tc.service.impl;
 
+import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
+import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserRepository;
+import com.tc.dto.authority.QueryAuthority;
 import com.tc.dto.user.LoginUser;
+import com.tc.dto.user.QueryUser;
 import com.tc.exception.DBException;
 import com.tc.service.UserService;
 import com.tc.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,6 +21,10 @@ import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.List;
 
 /**
@@ -26,6 +35,9 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
@@ -67,6 +79,17 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
+    public Page<User> findByQueryUser(QueryUser queryUser) {
+
+
+        return userRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryUser.initPredicates(queryUser,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },queryUser);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = getUser(s);
         return new LoginUser(user);
@@ -79,8 +102,8 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return new LoginUser(user);
     }
 
-
-    private User getUser(String username){
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    User getUser(String username){
         return userRepository.queryFirstByUsername(username);
     }
 
@@ -102,4 +125,9 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return userRepository.findAll(sort);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public User findOne(Long id) {
+        return userRepository.findOne(id);
+    }
 }

@@ -18,11 +18,12 @@ import com.tc.exception.ValidException;
 import com.tc.service.AuthorityResourceService;
 import com.tc.service.ResourceService;
 import com.tc.until.ControllerHelper;
-import com.tc.until.ListHelper;
+import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -75,7 +76,7 @@ public class UrlResourceController {
 
     @PostMapping("/urls/controller")
     @ApiOperation(value = "获取控制器中所有的url资源")
-    public Result allUrl(@RequestBody MyPage myPage){
+    public Result allUrl(@RequestBody PageRequest myPage){
         List<Resource> list = resourceService.findAll();
         //获取系统中的资源
         List<Resource> urls = ControllerHelper.allUrl(applicationContext);
@@ -89,7 +90,7 @@ public class UrlResourceController {
                             resource.getType().equals(has.getType())
             );
         }
-        Page pageList = new ListHelper<Resource>().paging(urls, myPage.getPageIndex(), myPage.getPageSize());
+        Page pageList = ListUtils.paging(urls, myPage.getPageNumber(), myPage.getPageSize());
         return Result.init(pageList);
     }
 

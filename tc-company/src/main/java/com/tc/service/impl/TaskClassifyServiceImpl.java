@@ -39,7 +39,7 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
     public Page<TaskClassify> queryByQueryTaskClassify(QueryTaskClassify queryTaskClassify) {
         return taskClassifyRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryTaskClassify.initPredicates(queryTaskClassify,root,query,cb);
-            predicates.add(cb.isNull(root.get(TaskClassify.PARENTS)));
+
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryTaskClassify);
     }

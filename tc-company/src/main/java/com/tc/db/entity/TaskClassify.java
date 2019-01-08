@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Cyg
@@ -207,13 +208,63 @@ public class TaskClassify implements Serializable {
                 parent.setCreation(null);
                 parent.setInfo(null);
                 parent.setTaskClassifyRelations(null);
-                parent.setParents(null);
-                List<TaskClassify> list = new ArrayList<>(parent.getTaskClassifies());
-                parent.setTaskClassifies(toListInIndex(list));
+                if (parent.getParents() != null){
+                    parent.setParents(new TaskClassify(parent.getParents().getId(),parent.getParents().getName()));
+                }else {
+                    if (!ListUtils.isEmpty(parent.getTaskClassifies())) {
+                        List<TaskClassify> list = new ArrayList<>(parent.getTaskClassifies());
+                        parent.setTaskClassifies(toListInIndex(list));
+                    }
+                }
             });
         }
         return content;
     }
+
+    public static List<TaskClassify> reset(List<TaskClassify> content){
+        List<TaskClassify> indexList = toListInIndex(content);
+        if (!ListUtils.isEmpty(indexList)){
+            List<TaskClassify> parents = new ArrayList<>();
+            List<TaskClassify> children = new ArrayList<>();
+            indexList.forEach(tc ->{
+                if (tc.getParents() == null){
+                    parents.add(tc);
+                }else {
+                    children.add(tc);
+                }
+            });
+
+            //从孩子中移除父亲中已有的孩子
+            parents.forEach(p -> p.getTaskClassifies().forEach(c -> children.removeIf(cc -> c.getId().equals(cc.getId()))));
+
+            //遍历没有挂载在父亲列表中的孩子，根据孩子已有父亲挂载到父亲列表中
+            if (!ListUtils.isEmpty(children)){
+                children.forEach(c ->{
+                    AtomicBoolean hasLike = new AtomicBoolean(false);
+                    parents.forEach(p ->{
+                        if (c.getParentsId().equals(p.getId())){
+                            hasLike.set(true);
+                            p.getTaskClassifies().add(c);
+                        }
+                    });
+                    if (!hasLike.get()){
+                        //反转两者的主次关系
+                        TaskClassify p = c.getParents();
+                        List<TaskClassify> tcs = new ArrayList<>();
+                        c.setParents(null);
+                        tcs.add(c);
+                        p.setTaskClassifies(tcs);
+                        parents.add(p);
+                    }
+                    hasLike.set(false);
+                });
+            }
+
+            return parents;
+        }
+        return indexList;
+    }
+
 
     public static TaskClassify reset(TaskClassify taskClassify) {
         if (taskClassify != null){

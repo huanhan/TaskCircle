@@ -2,11 +2,14 @@ package com.tc.db.entity;
 
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
+import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,10 +19,28 @@ import java.util.Objects;
 @Entity
 public class Task implements Serializable {
 
+    public static final String ID = "id";
+    public static final String USER_ID = "userId";
+    public static final String NAME = "name";
     public static final String MONEY = "money";
+    public static final String TASK_STATE = "state";
+    public static final String TASK_TYPE = "type";
+    public static final String PEOPLE_NUMBER = "peopleNumber";
+    public static final String CONTEXT = "context";
+    public static final String CREATE_TIME = "createTime";
+    public static final String BEGIN_TIME = "beginTime";
+    public static final String DEADLINE = "deadline";
+    public static final String PERMIT_ABANDON_MINUTE = "permitAbandonMinute";
+    public static final String LONGITUDE = "longitude";
+    public static final String LATITUDE = "latitude";
+    public static final String IS_TASK_REWORK = "isTaskRework";
+    public static final String IS_COMPENSATE = "isCompensate";
+
+    public static final String USER = "user";
 
 
     private String id;
+    private Long userId;
     private User user;
     private String name;
     private Float money;
@@ -28,13 +49,13 @@ public class Task implements Serializable {
     private Integer peopleNumber;
     private String context;
     private Timestamp createTime;
-    private Timestamp issueTime;
-    private Boolean isDelay;
     private Timestamp beginTime;
     private Timestamp deadline;
     private Integer permitAbandonMinute;
     private Double longitude;
     private Double latitude;
+    private Boolean isTaskRework;
+    private Boolean isCompensate;
     private Collection<AuditTask> auditTasks;
     private Collection<CommentTask> commentTasks;
     private Collection<CommentUser> commentUsers;
@@ -42,6 +63,16 @@ public class Task implements Serializable {
     private Collection<TaskClassifyRelation> taskClassifyRelations;
     private Collection<TaskStep> taskSteps;
     private Collection<UserHunterInterflow> userHunterInterflows;
+
+    public Task() {
+    }
+
+    public Task(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+
 
     @Id
     @Column(name = "id")
@@ -51,6 +82,16 @@ public class Task implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Basic
+    @Column(name = "user_id")
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     @Basic
@@ -114,6 +155,7 @@ public class Task implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -121,26 +163,6 @@ public class Task implements Serializable {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
-    }
-
-    @Basic
-    @Column(name = "issue_time")
-    public Timestamp getIssueTime() {
-        return issueTime;
-    }
-
-    public void setIssueTime(Timestamp issueTime) {
-        this.issueTime = issueTime;
-    }
-
-    @Basic
-    @Column(name = "is_delay")
-    public Boolean getDelay() {
-        return isDelay;
-    }
-
-    public void setDelay(Boolean delay) {
-        isDelay = delay;
     }
 
     @Basic
@@ -193,6 +215,26 @@ public class Task implements Serializable {
         this.latitude = latitude;
     }
 
+    @Basic
+    @Column(name = "is_rework")
+    public Boolean getTaskRework() {
+        return isTaskRework;
+    }
+
+    public void setTaskRework(Boolean taskRework) {
+        isTaskRework = taskRework;
+    }
+
+    @Basic
+    @Column(name = "is_compensate")
+    public Boolean getCompensate() {
+        return isCompensate;
+    }
+
+    public void setCompensate(Boolean compensate) {
+        isCompensate = compensate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -207,19 +249,19 @@ public class Task implements Serializable {
                 Objects.equals(type, task.getType()) &&
                 Objects.equals(context, task.getContext()) &&
                 Objects.equals(createTime, task.getCreateTime()) &&
-                Objects.equals(issueTime, task.getIssueTime()) &&
-                Objects.equals(isDelay, task.getDelay()) &&
                 Objects.equals(beginTime, task.getBeginTime()) &&
                 Objects.equals(deadline, task.getDeadline()) &&
                 Objects.equals(permitAbandonMinute, task.getPermitAbandonMinute()) &&
                 Objects.equals(longitude, task.getLongitude()) &&
-                Objects.equals(latitude, task.getLatitude());
+                Objects.equals(latitude, task.getLatitude()) &&
+                isTaskRework.equals(task.getTaskRework()) &&
+                isCompensate.equals(task.getCompensate()) ;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, user.getId(), name, money, state, type, peopleNumber, context, createTime, issueTime, isDelay, beginTime, deadline, permitAbandonMinute, longitude, latitude);
+        return Objects.hash(id, user.getId(), name, money, state, type, peopleNumber, context, createTime, isTaskRework, isCompensate, beginTime, deadline, permitAbandonMinute, longitude, latitude);
     }
 
     @OneToMany(mappedBy = "task")
@@ -259,7 +301,7 @@ public class Task implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public User getUser() {
         return user;
     }
@@ -268,7 +310,7 @@ public class Task implements Serializable {
         this.user = userByUserId;
     }
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task",cascade = {CascadeType.MERGE})
     public Collection<TaskClassifyRelation> getTaskClassifyRelations() {
         return taskClassifyRelations;
     }
@@ -277,7 +319,7 @@ public class Task implements Serializable {
         this.taskClassifyRelations = taskClassifyRelationsById;
     }
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task",cascade = {CascadeType.MERGE})
     public Collection<TaskStep> getTaskSteps() {
         return taskSteps;
     }
@@ -293,5 +335,46 @@ public class Task implements Serializable {
 
     public void setUserHunterInterflows(Collection<UserHunterInterflow> userHunterInterflowsById) {
         this.userHunterInterflows = userHunterInterflowsById;
+    }
+
+    public static Task toDetail(Task task){
+        if (task != null){
+            if (task.getUser() != null){
+                task.setUser(new User(task.getUser().getId(),task.getUser().getName(),task.getUser().getUsername()));
+            }
+            task.setAuditTasks(null);
+            task.setCommentTasks(null);
+            task.setCommentUsers(null);
+            task.setHunterTasks(null);
+            if (task.getTaskClassifyRelations() != null){
+                task.getTaskClassifyRelations().forEach(tcr ->{
+                    tcr.setTask(null);
+                    if (tcr.getTaskClassify() != null) {
+                        tcr.setTaskClassify(new TaskClassify(tcr.getTaskClassify().getId(), tcr.getTaskClassify().getName()));
+                    }
+                });
+            }
+            task.setTaskSteps(null);
+            task.setUserHunterInterflows(null);
+        }
+        return task;
+    }
+
+    public static List<Task> toIndexAsList(List<Task> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(task -> {
+                if (task.getUser() != null){
+                    task.setUser(new User(task.getUser().getId(),task.getUser().getName(),task.getUser().getUsername(),task.getUser().getHeadImg()));
+                }
+                task.setUserHunterInterflows(null);
+                task.setTaskSteps(null);
+                task.setTaskClassifyRelations(null);
+                task.setHunterTasks(null);
+                task.setCommentUsers(null);
+                task.setCommentTasks(null);
+                task.setAuditTasks(null);
+            });
+        }
+        return content;
     }
 }

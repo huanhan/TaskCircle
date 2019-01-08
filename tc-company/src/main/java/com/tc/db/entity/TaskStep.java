@@ -1,9 +1,14 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.TaskStepPK;
+import com.tc.dto.task.AddTaskStep;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -14,12 +19,18 @@ import java.util.Objects;
 @Table(name = "task_step", schema = "tc-company")
 @IdClass(TaskStepPK.class)
 public class TaskStep implements Serializable {
+
+    public static final String STEP = "step";
+
     private String taskId;
     private Integer step;
     private String title;
     private String context;
     private String img;
     private Task task;
+
+
+
 
     @Id
     @Column(name = "task_id")
@@ -99,5 +110,36 @@ public class TaskStep implements Serializable {
         return Objects.hash(task.getId(), step, title, context, img);
     }
 
+    public static TaskStep toDetail(TaskStep taskStep) {
+        if (taskStep != null){
+            if (taskStep.getTask() != null){
+                taskStep.setTask(new Task(taskStep.getTask().getId(),taskStep.getTask().getName()));
+            }
+        }
+        return taskStep;
+    }
 
+    public static List<TaskStep> toIndexByList(List<TaskStep> queryTss) {
+        if (!ListUtils.isEmpty(queryTss)){
+            queryTss.forEach(ts -> {
+                if (ts.getTask() != null){
+                    ts.setTask(new Task(ts.getTask().getId(),ts.getTask().getName()));
+                }
+            });
+        }
+        return queryTss;
+    }
+
+    public static Collection<TaskStep> toList(String id, List<AddTaskStep> taskSteps) {
+        List<TaskStep> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(taskSteps)){
+
+            taskSteps.forEach(ts -> {
+                ts.setTaskId(id);
+                result.add(AddTaskStep.toTaskStep(ts));
+            });
+
+        }
+        return result;
+    }
 }

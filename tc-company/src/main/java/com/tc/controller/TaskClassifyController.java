@@ -45,7 +45,7 @@ public class TaskClassifyController {
     @ApiOperation(value = "获取任务类别列表")
     public Result all(@RequestBody QueryTaskClassify queryTaskClassify){
         Page<TaskClassify> queryTcs = taskClassifyService.queryByQueryTaskClassify(queryTaskClassify);
-        return Result.init(TaskClassify.toListInIndex(queryTcs.getContent()),queryTaskClassify);
+        return Result.init(TaskClassify.reset(queryTcs.getContent()),queryTaskClassify);
     }
 
     /**

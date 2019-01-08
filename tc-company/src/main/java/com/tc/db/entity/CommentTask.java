@@ -10,6 +10,11 @@ import java.util.Objects;
 @Entity
 @Table(name = "comment_task", schema = "tc-company")
 public class CommentTask {
+
+    public static final String TASK_ID = "taskId";
+    public static final String COMMENT_ID = "commentId";
+    public static final String COMMENT = "comment";
+
     private Long commentId;
     private String taskId;
     private Comment comment;
