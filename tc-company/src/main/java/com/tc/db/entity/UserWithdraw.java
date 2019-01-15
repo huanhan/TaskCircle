@@ -174,4 +174,15 @@ public class UserWithdraw implements Serializable {
         }
         return result;
     }
+
+    public static UserWithdraw toDetail(UserWithdraw result) {
+        if (result != null){
+            if (result.getUser() != null){
+                result.setUser(new User(result.getUserId(),result.getUser().getName(),result.getUser().getUsername()));
+            }
+            result.setAuditWithdraws(null);
+        }
+
+        return result;
+    }
 }

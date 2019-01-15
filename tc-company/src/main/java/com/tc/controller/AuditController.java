@@ -133,15 +133,12 @@ public class AuditController {
     @ApiOperation(value = "用户提现审核列表")
     public Result allByUserWithdraw(@RequestBody QueryFinance queryFinance){
 
-        if (queryFinance.getState() == null || !queryFinance.getState().equals(WithdrawState.AUDIT)){
-            throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
-        }
-
         //更新审核超时的用户提现的状态为未审核
         userWithdrawService.updateState(queryFinance.getState());
 
         queryFinance.setType(WithdrawType.WITHDRAW);
         queryFinance.setState(WithdrawState.AUDIT);
+        queryFinance.setSort(new Sort(Sort.Direction.ASC,UserWithdraw.CREATE_TIME));
         Page<UserWithdraw> result = userWithdrawService.findByQueryFinance(queryFinance);
         return Result.init(UserWithdraw.toIndexAsList(result.getContent()),queryFinance);
     }
@@ -176,7 +173,7 @@ public class AuditController {
      */
     @GetMapping("/task/detail/{type}/{id:\\d+}")
     @ApiOperation(value = "待审核的任务详情信息")
-    public Task detail(@PathVariable("type") TaskState type, @PathVariable("id") String id){
+    public Task taskDetail(@PathVariable("type") TaskState type, @PathVariable("id") String id){
 
         Task result = null;
 
@@ -217,7 +214,7 @@ public class AuditController {
      */
     @GetMapping("/hunter/task/detail/{type}/{id:\\d+}")
     @ApiOperation(value = "待审核的任务详情信息")
-    public HunterTask detail(@PathVariable("type") HunterTaskState type, @PathVariable("id") String id){
+    public HunterTask hunterTaskDetail(@PathVariable("type") HunterTaskState type, @PathVariable("id") String id){
         HunterTask result = hunterTaskService.findByIdAndState(id,type);
         if (result == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
@@ -237,7 +234,30 @@ public class AuditController {
         return result;
     }
 
+    /**
+     * 获取用户提交的提现审核详情信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/finance/detail/{id:\\d+}")
+    @ApiOperation(value = "待审核的提现详情")
+    public UserWithdraw financeDetail(@PathVariable("id") String id){
+        UserWithdraw result = userWithdrawService.findByIdAndState(id,WithdrawState.AUDIT);
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        hasAudit(result.getAdminAuditTime());
 
+        Date now = new Date();
+        boolean isSuccess = userWithdrawService.updateState(id,WithdrawState.AUDIT_CENTER,now);
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+        result.setAdminAuditTime(new Timestamp(now.getTime()));
+        return UserWithdraw.toDetail(result);
+
+    }
 
 
     /**

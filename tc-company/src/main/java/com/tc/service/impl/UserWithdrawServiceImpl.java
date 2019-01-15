@@ -13,10 +13,12 @@ import com.tc.until.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,6 +31,7 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
     @Autowired
     private UserWithdrawRepository userWithdrawRepository;
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Page<UserWithdraw> findByQueryFinance(QueryFinance queryFinance) {
         return userWithdrawRepository.findAll((root, query, cb) -> {
@@ -37,12 +40,13 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
         },queryFinance);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState(WithdrawState state) {
-        //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
+        //获取提现状态为审核中的状态，并且审核时长超过设置的审核时长
         List<UserWithdraw> uws = userWithdrawRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get(UserWithdraw.STATE),UserState.AUDIT_CENTER));
+            predicates.add(cb.equal(root.get(UserWithdraw.STATE),WithdrawState.AUDIT_CENTER));
             predicates.add(cb.lessThan(root.get(UserWithdraw.ADMIN_AUDIT_TIME),new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
@@ -53,5 +57,17 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
             int count = userWithdrawRepository.updateState(ids,state);
             return count > 0;
         }
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public UserWithdraw findByIdAndState(String id, WithdrawState state) {
+        return userWithdrawRepository.findByIdAndState(id,state);
+    }
+
+    @Override
+    public Boolean updateState(String id, WithdrawState state, Date now) {
+        int count = userWithdrawRepository.updateState(id,state,new Timestamp(now.getTime()));
+        return count > 0;
     }
 }

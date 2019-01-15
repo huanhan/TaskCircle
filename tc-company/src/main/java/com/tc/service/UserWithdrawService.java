@@ -5,6 +5,8 @@ import com.tc.db.enums.WithdrawState;
 import com.tc.dto.finance.QueryFinance;
 import org.springframework.data.domain.Page;
 
+import java.util.Date;
+
 /**
  * 评论仓库
  * @author Cyg
@@ -23,4 +25,21 @@ public interface UserWithdrawService extends BasicService<UserWithdraw> {
      * @return
      */
     Boolean updateState(WithdrawState state);
+
+    /**
+     * 根据编号与状态获取提现信息
+     * @param id 编号
+     * @param state 状态
+     * @return
+     */
+    UserWithdraw findByIdAndState(String id, WithdrawState state);
+
+    /**
+     * 更新任务状态与管理员审核时间
+     * @param id
+     * @param state
+     * @param now
+     * @return
+     */
+    Boolean updateState(String id, WithdrawState state, Date now);
 }

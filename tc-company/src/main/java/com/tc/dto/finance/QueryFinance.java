@@ -16,6 +16,7 @@ import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 收支记录查询条件
@@ -159,6 +160,7 @@ public class QueryFinance extends PageRequest {
         predicates.add(QueryUtils.between(root,cb,User.MONEY,queryFinance.getMoneyBegin(),queryFinance.getMoneyEnd()));
         predicates.add(QueryUtils.between(root, cb, User.CREATE_TIME, queryFinance.getCreateTimeBegin(), queryFinance.getCreateTimeEnd()));
 
+        predicates.removeIf(Objects::isNull);
 
         return predicates;
     }
