@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 
+import com.tc.until.IdGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -121,5 +122,15 @@ public class UserIeRecord implements Serializable {
 
     public void setUserByTo(User userByTo) {
         this.userByTo = userByTo;
+    }
+
+    public static UserIeRecord init(Long me,Long to,String context,Float money){
+        UserIeRecord userIeRecord = new UserIeRecord();
+        userIeRecord.setMe(me);
+        userIeRecord.setTo(to);
+        userIeRecord.setContext(context);
+        userIeRecord.setId(IdGenerator.INSTANCE.nextId());
+        userIeRecord.setMoney(money);
+        return userIeRecord;
     }
 }

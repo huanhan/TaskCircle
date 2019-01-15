@@ -2047,7 +2047,11 @@ step</ColNames>
     </column>
     <column id="419" parent="233" name="compensate_money">
       <Position>20</Position>
+      <Comment>赔偿金额&#xd;
+任务数量小于10（0~0.1）&#xd;
+任务数量大于10（0~1/任务数量）</Comment>
       <DataType>float|0s</DataType>
+      <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
     <index id="420" parent="233" name="user_task">

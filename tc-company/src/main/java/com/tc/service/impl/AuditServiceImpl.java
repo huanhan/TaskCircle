@@ -7,6 +7,7 @@ import com.tc.dto.audit.QueryAudit;
 import com.tc.exception.DBException;
 import com.tc.service.AuditHunterService;
 import com.tc.service.AuditService;
+import com.tc.until.FloatHelper;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
@@ -174,9 +175,9 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                             List<Long> hunterIds = Hunter.toIds(queryResult);
 
                             //用户需要赔偿给猎刃的总金额
-                            Float rp = pay * hunterIds.size();
+                            Float rp = FloatHelper.multiply(pay, (float) hunterIds.size());
                             //赔偿完后，剩下的钱还给用户
-                            Float dm = task.getMoney() - rp;
+                            Float dm = FloatHelper.sub(task.getMoney(),rp);
 
                             //更新猎刃的账户金额
                             count = userRepository.update(hunterIds,pay);
@@ -270,33 +271,37 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         //猎刃执行的任务
                         Task okTask = hunterTask.getTask();
 
+                        //设置任务状态
+                        //只有未被接满的任务，状态才会等于ISSUE
+                        if (okTask.getState() != TaskState.ISSUE){
+                            //不管通过与否，都要修改用户发布任务的任务状态
+                            count = taskRepository.updateStateAndIssueTime(okTask.getId(),TaskState.ISSUE,new Timestamp(System.currentTimeMillis()));
+
+                            if (count <= 0){
+                                throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+                            }
+                        }
+
+                        //补偿流程
                         if (result.getResult().equals(AuditState.NRHC)){
                             //不能重做，需要补偿
 
+                            //将猎刃押金作为补偿给用户
+                            count = userRepository.update(okTask.getCompensateMoney(),okTask.getUserId());
 
-
+                            //新增转账记录
+                            if (count > 0) {
+                                String context = "来自 " + okTask.getName() + " 的补偿";
+                                UserIeRecord userIeRecord = UserIeRecord.init(hunterTask.getHunterId(),okTask.getUserId(),context,okTask.getCompensateMoney());
+                                userIeRecordRepository.save(userIeRecord);
+                            }
                         }else {
                             //不能重做，不用补偿
+
+                            //退回押金给猎刃
+                            count = userRepository.update(okTask.getCompensateMoney(),hunterTask.getHunterId());
                         }
                     }
-
-
-                    switch (result.getResult()){
-                        case NRHC:
-                            //设置猎刃任务状态为（结束未完成），并将猎刃押金作为补偿给用户，并新增转账记录
-                            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_NO);
-                            if (count > 0){
-
-                            }
-                            break;
-                        case NRNC:
-                            //设置猎刃任务状态未（结束未完成），并退回押金给猎刃
-                            break;
-                        default:
-                            //其他的状态什么都不做，交给猎刃选择
-                            break;
-                    }
-
 
                     break;
                 default:

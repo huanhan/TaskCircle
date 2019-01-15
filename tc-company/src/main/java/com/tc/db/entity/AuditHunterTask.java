@@ -72,7 +72,7 @@ public class AuditHunterTask {
     }
 
     @ManyToOne
-    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public HunterTask getHunterTask() {
         return hunterTask;
     }

@@ -227,7 +227,7 @@ public class AuditController {
         Date now = new Date();
 
         //将当前正在审核的任务加锁
-        boolean isSuccess = hunterTaskService.updateState(id,HunterTaskState.WITH_ADMIN_NEGOTIATE,now);
+        boolean isSuccess = hunterTaskService.updateState(id,HunterTaskState.ADMIN_ADUIT,now);
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
@@ -252,6 +252,18 @@ public class AuditController {
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+
+        //对状态与类别进行判断
+        if (addTaskAudit.getType().equals(AuditType.HUNTER_OK_TASK)){
+            if (addTaskAudit.getResult().equals(AuditState.PASS) || addTaskAudit.getResult().equals(AuditState.PASS)){
+                throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
+            }
+        }else {
+            if (!addTaskAudit.getResult().equals(AuditState.PASS) || !addTaskAudit.getResult().equals(AuditState.PASS)){
+                throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
+            }
+        }
+
         Audit audit = auditService.save(addTaskAudit.toAudit());
         return AuditTask.getBy(audit);
     }
