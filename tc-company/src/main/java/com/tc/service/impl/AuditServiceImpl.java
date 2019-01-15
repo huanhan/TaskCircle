@@ -72,10 +72,22 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
             final HunterTask hunterTask = (result.getAuditHunterTask() == null ? null : hunterTaskRepository.findOne(result.getAuditHunterTask().getHunterTaskId()));
             switch (audit.getType()){
                 case HUNTER:
-                    UserCategory userCategory = null;
+
+
+                    if (result.getAuditHunter() == null){
+                        throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+                    }
+
+                    Long userId = result.getAuditHunter().getUserId();
+
+                    UserCategory userCategory = UserCategory.NORMAL;
                     //如果审核通过，设置用户为猎刃
                     if (audit.getResult().equals(AuditState.PASS)){
                         userCategory = UserCategory.HUNTER;
+
+                        //添加猎刃
+                        hunterRepository.save(new Hunter(userId));
+
                     }
                     //不管是否通过，都会将人物状态修改为正常
                     count = userRepository.update(UserState.NORMAL,userCategory,audit.getAuditHunter().getUserId());

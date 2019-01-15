@@ -32,6 +32,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -95,6 +96,7 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         },queryUser);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState(UserState state) {
         //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
@@ -111,6 +113,19 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
             int count = userRepository.updateState(ids,state);
             return count > 0;
         }
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public User findByIdAndState(Long id, UserState state) {
+        return userRepository.findByIdAndState(id,state);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Boolean updateState(Long id, UserState state, Date now) {
+        int count = userRepository.updateState(id,state,new Timestamp(now.getTime()));
+        return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)

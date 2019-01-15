@@ -3,17 +3,13 @@ package com.tc.db.repository;
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserState;
-import com.tc.exception.DBException;
-import org.hibernate.usertype.UserType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -62,7 +58,7 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      */
     @Modifying
     @Query("update User u set u.state = :state ," +
-            "u.category = case when :category is null then u.category else :category end " +
+            "u.category = :category " +
             "where u.id = :id")
     int update(@Param("state") UserState state, @Param("category") UserCategory category, @Param("id") Long id);
 
@@ -95,4 +91,24 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
     @Modifying
     @Query(value = "update User u set u.state = :state, u.adminAuditTime = NULL where u.id in (:ids)")
     int updateState(List<Long> ids, UserState state);
+
+    /**
+     * 更新提现状态与审核时间
+     * @param id
+     * @param state
+     * @param timestamp
+     * @return
+     */
+    @Modifying
+    @Query(value = "update User u set u.state = :state, u.adminAuditTime = :time where u.id = :id")
+    int updateState(@Param("id") Long id, @Param("state") UserState state, @Param("time")Timestamp timestamp);
+
+    /**
+     * 根据猎刃任务编号与状态查询
+     * @param id
+     * @param state
+     * @return
+     */
+    @Query(value = "select u from User u where u.id = :id and u.state = :state")
+    User findByIdAndState(@Param("id") Long id, @Param("state") UserState state);
 }

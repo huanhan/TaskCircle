@@ -2,6 +2,7 @@ package com.tc.db.entity;
 
 
 import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -28,7 +29,12 @@ public class Hunter implements Serializable {
     private Collection<HunterTask> hunterTasks;
     private Collection<UserHunterInterflow> userHunterInterflows;
 
+    public Hunter() {
+    }
 
+    public Hunter(Long userId) {
+        this.userId = userId;
+    }
 
     @Id
     @Column(name = "user_id")
@@ -41,6 +47,7 @@ public class Hunter implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;

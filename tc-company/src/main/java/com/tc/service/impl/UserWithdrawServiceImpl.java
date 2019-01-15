@@ -65,6 +65,7 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
         return userWithdrawRepository.findByIdAndState(id,state);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState(String id, WithdrawState state, Date now) {
         int count = userWithdrawRepository.updateState(id,state,new Timestamp(now.getTime()));

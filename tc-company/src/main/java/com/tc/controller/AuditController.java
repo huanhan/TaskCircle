@@ -259,6 +259,30 @@ public class AuditController {
 
     }
 
+    /**
+     * 获取待审核用户申请猎刃详情信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/user/detail/{id:\\d+}")
+    @ApiOperation(value = "待审核用户申请猎刃详情")
+    public User userDetail(@PathVariable("id") Long id){
+        User result = userService.findByIdAndState(id,UserState.AUDIT_HUNTER);
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        hasAudit(result.getAdminAuditTime());
+
+        Date now = new Date();
+        boolean isSuccess = userService.updateState(id,UserState.AUDIT_CENTER,now);
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+        result.setAdminAuditTime(new Timestamp(now.getTime()));
+        return User.toDetail(result);
+    }
 
     /**
      * 添加任务审核结果
@@ -319,10 +343,6 @@ public class AuditController {
         Audit audit = auditService.save(addWithdrawAudit.toAudit());
         return AuditWithdraw.getBy(audit);
     }
-
-
-
-
 
     /**
      * 获取审核任务的参照信息

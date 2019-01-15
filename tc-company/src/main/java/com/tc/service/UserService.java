@@ -5,6 +5,8 @@ import com.tc.db.enums.UserState;
 import com.tc.dto.user.QueryUser;
 import org.springframework.data.domain.Page;
 
+import java.util.Date;
+
 /**
  * 用户服务接口，在BasicService中以有基本的服务，可以在这里额外添加
  * @author Cyg
@@ -45,4 +47,21 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     Boolean updateState(UserState state);
+
+    /**
+     * 根据编号与状态获取
+     * @param id
+     * @param state
+     * @return
+     */
+    User findByIdAndState(Long id, UserState state);
+
+    /**
+     * 更新用户的状态与管理员审核时间
+     * @param id
+     * @param state
+     * @param now
+     * @return
+     */
+    Boolean updateState(Long id, UserState state, Date now);
 }
