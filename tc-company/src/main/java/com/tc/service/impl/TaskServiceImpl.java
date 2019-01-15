@@ -69,7 +69,7 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean updateState(String id, TaskState state, Date date) {
-        int count = taskRepository.updateState(id,state,new Timestamp(date.getTime()));
+        int count = taskRepository.updateStateAndAdminAuditTime(id,state,new Timestamp(date.getTime()));
         return count > 0;
     }
 

@@ -41,6 +41,7 @@ public class Audit {
     private AuditTask auditTask;
     private AuditWithdraw auditWithdraw;
     private Admin admin;
+    private AuditHunterTask auditHunterTask;
 
     public static Audit toDetail(Audit result) {
         if (result != null){
@@ -55,6 +56,23 @@ public class Audit {
             }
         }
         return result;
+    }
+
+    /**
+     * 权限审核列表
+     * @param audits
+     * @return
+     */
+    public static List<Audit> toListInIndex(List<Audit> audits) {
+        if (!ListUtils.isEmpty(audits)){
+            audits.forEach(audit ->{
+                audit.setAuditHunter(null);
+                audit.setAdmin(new Admin(audit.getAdminId(),audit.getAdmin().getUser().getName(),audit.getAdmin().getUser().getUsername()));
+                audit.setAuditHunter(null);
+                audit.setAuditWithdraw(null);
+            });
+        }
+        return audits;
     }
 
     @Id
@@ -194,21 +212,13 @@ public class Audit {
         this.admin = admin;
     }
 
+    @OneToOne(cascade = {CascadeType.MERGE})
+    @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
+    public AuditHunterTask getAuditHunterTask() {
+        return auditHunterTask;
+    }
 
-    /**
-     * 权限审核列表
-     * @param audits
-     * @return
-     */
-    public static List<Audit> toListInIndex(List<Audit> audits) {
-        if (!ListUtils.isEmpty(audits)){
-            audits.forEach(audit ->{
-                audit.setAuditHunter(null);
-                audit.setAdmin(new Admin(audit.getAdminId(),audit.getAdmin().getUser().getName(),audit.getAdmin().getUser().getUsername()));
-                audit.setAuditHunter(null);
-                audit.setAuditWithdraw(null);
-            });
-        }
-        return audits;
+    public void setAuditHunterTask(AuditHunterTask auditHunterTask) {
+        this.auditHunterTask = auditHunterTask;
     }
 }

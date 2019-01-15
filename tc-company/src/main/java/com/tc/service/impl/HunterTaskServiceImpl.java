@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,5 +56,18 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             int count = hunterTaskRepository.updateState(ids,state);
             return count > 0;
         }
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public HunterTask findByIdAndState(String id, HunterTaskState type) {
+        return hunterTaskRepository.findByIdAndState(id,type);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Boolean updateState(String id, HunterTaskState state, Date date) {
+        int count = hunterTaskRepository.updateState(id,state,new Timestamp(date.getTime()));
+        return count > 0;
     }
 }

@@ -16,7 +16,7 @@ import java.util.Objects;
  * 猎刃接取的任务
  */
 @Entity
-@Table(name = "hunter_task", schema = "tc-company")
+@Table(name = "hunter_task", schema = "tc-company", catalog = "")
 public class HunterTask implements Serializable {
 
     public static final String ID = "id";
@@ -47,9 +47,31 @@ public class HunterTask implements Serializable {
 
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
+    private Collection<AuditHunterTask> auditHunterTasksById;
 
+    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(hunterTask -> {
+                if (hunterTask.getTask() != null){
+                    hunterTask.setTask(new Task(hunterTask.getTask().getId(),hunterTask.getTask().getName()));
+                }
+                if (hunterTask.getHunter() != null){
+                    hunterTask.getHunter().toDetail();
+                }
+                hunterTask.commentHunters = null;
+                hunterTask.hunterTaskSteps = null;
+            });
+        }
+        return content;
+    }
 
-
+    public static List<String> toIds(List<HunterTask> tasks) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)){
+            tasks.forEach(task -> result.add(task.id));
+        }
+        return result;
+    }
 
     @Id
     @Column(name = "id")
@@ -80,9 +102,6 @@ public class HunterTask implements Serializable {
     public void setHunterId(Long hunterId) {
         this.hunterId = hunterId;
     }
-
-
-
 
     @Basic
     @Column(name = "accept_time")
@@ -165,8 +184,6 @@ public class HunterTask implements Serializable {
         this.state = state;
     }
 
-
-
     @OneToMany(mappedBy = "hunterTask")
     public Collection<CommentHunter> getCommentHunters() {
         return commentHunters;
@@ -226,22 +243,6 @@ public class HunterTask implements Serializable {
         return Objects.hash(id, task.getId(), hunter.getUser().getId(), acceptTime, finishTime, context, hunterRejectCount, userRejectCount, state);
     }
 
-    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
-        if (!ListUtils.isEmpty(content)){
-            content.forEach(hunterTask -> {
-                if (hunterTask.getTask() != null){
-                    hunterTask.getTask().toDetail();
-                }
-                if (hunterTask.getHunter() != null){
-                    hunterTask.getHunter().toDetail();
-                }
-                hunterTask.commentHunters = null;
-                hunterTask.hunterTaskSteps = null;
-            });
-        }
-        return null;
-    }
-
     public void toDetail() {
         if (task != null){
             task = new Task(taskId,task.getName());
@@ -253,11 +254,12 @@ public class HunterTask implements Serializable {
         hunterTaskSteps = null;
     }
 
-    public static List<String> toIds(List<HunterTask> tasks) {
-        List<String> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(tasks)){
-            tasks.forEach(task -> result.add(task.id));
-        }
-        return result;
+    @OneToMany(mappedBy = "hunterTask")
+    public Collection<AuditHunterTask> getAuditHunterTasksById() {
+        return auditHunterTasksById;
+    }
+
+    public void setAuditHunterTasksById(Collection<AuditHunterTask> auditHunterTasksById) {
+        this.auditHunterTasksById = auditHunterTasksById;
     }
 }

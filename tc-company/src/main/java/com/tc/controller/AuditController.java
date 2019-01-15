@@ -104,7 +104,7 @@ public class AuditController {
 
     /**
      * 获取猎刃的任务审核列表
-     * 包括：猎刃放弃任务
+     * 包括：猎刃放弃任务,猎刃完成并且需要管理员审核的任务
      * @param queryHunterTask
      * @return
      */
@@ -112,7 +112,7 @@ public class AuditController {
     @ApiOperation(value = "猎刃任务审核列表")
     public Result allByTask(@RequestBody QueryHunterTask queryHunterTask){
 
-        if (queryHunterTask.getState() == null || !queryHunterTask.getState().equals(HunterTaskState.COMMIT_TO_ADMIN)){
+        if (queryHunterTask.getState() == null || (!queryHunterTask.getState().equals(HunterTaskState.COMMIT_TO_ADMIN) && !queryHunterTask.getState().equals(HunterTaskState.COMMIT_ADMIN_ADUIT))){
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
         }
 
@@ -191,28 +191,54 @@ public class AuditController {
                 break;
         }
 
-        if (result == null){
+        if (result == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
-        }else {
-
-            //判断任务是否被其他人审核
-            if (result.getAdminAuditTime() != null){
-                Timestamp begin = result.getAdminAuditTime();
-                Timestamp end = new Timestamp(System.currentTimeMillis());
-                if (end.getTime() - begin.getTime() < AUDIT_LONG){
-                    throw new ValidException("锁定中，" + new Timestamp(end.getTime() - begin.getTime()));
-                }
-            }
         }
+        hasAudit(result.getAdminAuditTime());
+
+        Date now = new Date();
 
         //将当前正在审核的任务加锁
-        boolean isSuccess = taskService.updateState(id,TaskState.AUDIT,new Date());
+        boolean isSuccess = taskService.updateState(id,TaskState.AUDIT,now);
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
 
+
+        result.setAdminAuditTime(new Timestamp(now.getTime()));
         return Task.toDetail(result);
     }
+
+    /**
+     * 获取猎刃放弃任务详情与猎刃完成任务详情
+     * @param type
+     * @param id
+     * @return
+     */
+    @GetMapping("/hunter/task/detail/{type}/{id:\\d+}")
+    @ApiOperation(value = "待审核的任务详情信息")
+    public HunterTask detail(@PathVariable("type") HunterTaskState type, @PathVariable("id") String id){
+        HunterTask result = hunterTaskService.findByIdAndState(id,type);
+        if (result == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        hasAudit(result.getAdminAuditTime());
+
+        Date now = new Date();
+
+        //将当前正在审核的任务加锁
+        boolean isSuccess = hunterTaskService.updateState(id,HunterTaskState.WITH_ADMIN_NEGOTIATE,now);
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+        result.setAdminAuditTime(new Timestamp(now.getTime()));
+        result.toDetail();
+        return result;
+    }
+
+
+
 
     /**
      * 添加任务审核结果
@@ -275,5 +301,23 @@ public class AuditController {
     @ApiOperation(value = "获取审核任务的参照信息")
     public TaskAuditRefer getTaskAuditRefer(@PathVariable("id") Long id){
         return new TaskAuditRefer();
+    }
+
+
+
+    /**
+     * 判断任务是否可以被审核
+     * @param timestamp
+     */
+    private void hasAudit(Timestamp timestamp) {
+
+        //判断任务是否被其他人审核
+        if (timestamp != null) {
+            Timestamp begin = timestamp;
+            Timestamp end = new Timestamp(System.currentTimeMillis());
+            if (end.getTime() - begin.getTime() < AUDIT_LONG) {
+                throw new ValidException("锁定中，" + new Timestamp(end.getTime() - begin.getTime()));
+            }
+        }
     }
 }

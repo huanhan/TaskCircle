@@ -47,6 +47,7 @@ public class Task implements Serializable {
     private User user;
     private String name;
     private Float money;
+    private Float compensateMoney;
     private TaskState state;
     private TaskType type;
     private Integer peopleNumber;
@@ -56,6 +57,7 @@ public class Task implements Serializable {
     private Timestamp deadline;
     private Timestamp auditTime;
     private Timestamp adminAuditTime;
+    private Timestamp issueTime;
     private Integer permitAbandonMinute;
     private Double longitude;
     private Double latitude;
@@ -118,6 +120,16 @@ public class Task implements Serializable {
 
     public void setMoney(Float money) {
         this.money = money;
+    }
+
+    @Basic
+    @Column(name = "compensate_money")
+    public Float getCompensateMoney() {
+        return compensateMoney;
+    }
+
+    public void setCompensateMoney(Float compensateMoney) {
+        this.compensateMoney = compensateMoney;
     }
 
     @Basic
@@ -201,6 +213,16 @@ public class Task implements Serializable {
 
     public void setAuditTime(Timestamp auditTime) {
         this.auditTime = auditTime;
+    }
+
+    @Basic
+    @Column(name = "issue_time")
+    public Timestamp getIssueTime() {
+        return issueTime;
+    }
+
+    public void setIssueTime(Timestamp issueTime) {
+        this.issueTime = issueTime;
     }
 
     @Basic
@@ -392,7 +414,7 @@ public class Task implements Serializable {
             task.setCommentTasks(null);
             task.setCommentUsers(null);
             if (task.getHunterTasks() != null){
-                task.getHunterTasks().forEach(HunterTask::toDetail);
+                task.getHunterTasks().forEach(hunterTask -> hunterTask.toDetail());
             }
             if (task.getTaskClassifyRelations() != null){
                 task.getTaskClassifyRelations().forEach(tcr ->{
