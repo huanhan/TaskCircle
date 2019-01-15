@@ -18,6 +18,19 @@ public class AuditWithdraw {
     private Audit audit;
     private UserWithdraw userWithdraw;
 
+    public AuditWithdraw() {
+    }
+
+    public AuditWithdraw(String id, String withdrawId) {
+        this.auditId = id;
+        this.withdrawId = withdrawId;
+    }
+
+    public AuditWithdraw(String withdrawId) {
+        this.withdrawId = withdrawId;
+    }
+
+
     @Id
     @Column(name = "audit_id")
     public String getAuditId() {
@@ -74,5 +87,18 @@ public class AuditWithdraw {
 
     public void setUserWithdraw(UserWithdraw userWithdraw) {
         this.userWithdraw = userWithdraw;
+    }
+
+    public static AuditWithdraw getBy(Audit audit) {
+        AuditWithdraw result = new AuditWithdraw();
+        if (audit != null){
+            if (audit.getAuditWithdraw() != null){
+                result.setWithdrawId(audit.getAuditWithdraw().withdrawId);
+            }
+            audit.setAuditWithdraw(null);
+            result.setAuditId(audit.getId());
+            result.setAudit(audit);
+        }
+        return result;
     }
 }

@@ -15,6 +15,19 @@ public class AuditHunter {
     private Audit audit;
     private User user;
 
+    public AuditHunter() {
+    }
+
+    public AuditHunter(String id, Long userId) {
+        this.auditId = id;
+        this.userId = userId;
+    }
+
+    public AuditHunter(Long userId) {
+        this.userId = userId;
+    }
+
+
     @Id
     @Column(name = "audit_id")
     public String getAuditId() {
@@ -70,5 +83,18 @@ public class AuditHunter {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public static AuditHunter getBy(Audit audit) {
+        AuditHunter result = new AuditHunter();
+        if (audit != null){
+            if (audit.getAuditHunter() != null){
+                result.setUserId(audit.getAuditHunter().userId);
+            }
+            audit.setAuditHunter(null);
+            result.setAuditId(audit.getId());
+            result.setAudit(audit);
+        }
+        return result;
     }
 }

@@ -67,6 +67,10 @@ public enum TaskState {
      */
     HUNTER_REJECT("猎刃拒绝协商"),
     /**
+     * 用户将放弃申请提交给管理员
+     */
+    COMMIT_AUDIT("提交管理员协商"),
+    /**
      * 猎刃拒绝用户放弃任务，并且用户提交管理员协调解决
      */
     ADMIN_NEGOTIATE("管理员协商中"),
@@ -77,7 +81,11 @@ public enum TaskState {
     /**
      * 系统退还用户押金
      */
-    DEPOSIT("押金退还")
+    DEPOSIT("押金退还"),
+    /**
+     * 查询专用
+     */
+    HUNTER_COMMIT("猎刃放弃任务")
     ;
 
 

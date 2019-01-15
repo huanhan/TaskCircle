@@ -42,6 +42,21 @@ public class Audit {
     private AuditWithdraw auditWithdraw;
     private Admin admin;
 
+    public static Audit toDetail(Audit result) {
+        if (result != null){
+            if (result.getAuditWithdraw() != null){
+                result.setAuditWithdraw(new AuditWithdraw(result.getAuditWithdraw().getWithdrawId()));
+            }
+            if (result.getAuditTask() != null){
+                result.setAuditTask(new AuditTask(result.getAuditTask().getTaskId(),result.getAuditTask().getMoney()));
+            }
+            if (result.getAuditHunter() != null){
+                result.setAuditHunter(new AuditHunter(result.getAuditHunter().getUserId()));
+            }
+        }
+        return result;
+    }
+
     @Id
     @Column(name = "id")
     public String getId() {
@@ -139,7 +154,7 @@ public class Audit {
         return Objects.hash(id, adminId, idea, result, reason, type, createTime);
     }
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
     public AuditHunter getAuditHunter() {
         return auditHunter;
@@ -149,7 +164,7 @@ public class Audit {
         this.auditHunter = auditHunter;
     }
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
     public AuditTask getAuditTask() {
         return auditTask;
@@ -159,7 +174,7 @@ public class Audit {
         this.auditTask = auditTask;
     }
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "id", referencedColumnName = "audit_id", nullable = false)
     public AuditWithdraw getAuditWithdraw() {
         return auditWithdraw;

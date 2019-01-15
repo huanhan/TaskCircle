@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -28,8 +29,10 @@ public class Task implements Serializable {
     public static final String PEOPLE_NUMBER = "peopleNumber";
     public static final String CONTEXT = "context";
     public static final String CREATE_TIME = "createTime";
+    public static final String AUDIT_TIME = "auditTime";
     public static final String BEGIN_TIME = "beginTime";
     public static final String DEADLINE = "deadline";
+    public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
     public static final String PERMIT_ABANDON_MINUTE = "permitAbandonMinute";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";
@@ -51,6 +54,8 @@ public class Task implements Serializable {
     private Timestamp createTime;
     private Timestamp beginTime;
     private Timestamp deadline;
+    private Timestamp auditTime;
+    private Timestamp adminAuditTime;
     private Integer permitAbandonMinute;
     private Double longitude;
     private Double latitude;
@@ -71,6 +76,7 @@ public class Task implements Serializable {
         this.id = id;
         this.name = name;
     }
+
 
 
 
@@ -115,6 +121,7 @@ public class Task implements Serializable {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "state")
     public TaskState getState() {
         return state;
@@ -125,6 +132,7 @@ public class Task implements Serializable {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
     public TaskType getType() {
         return type;
@@ -183,6 +191,26 @@ public class Task implements Serializable {
 
     public void setDeadline(Timestamp deadline) {
         this.deadline = deadline;
+    }
+
+    @Basic
+    @Column(name = "audit_time")
+    public Timestamp getAuditTime() {
+        return auditTime;
+    }
+
+    public void setAuditTime(Timestamp auditTime) {
+        this.auditTime = auditTime;
+    }
+
+    @Basic
+    @Column(name = "admin_audit_time")
+    public Timestamp getAdminAuditTime() {
+        return adminAuditTime;
+    }
+
+    public void setAdminAuditTime(Timestamp adminAuditTime) {
+        this.adminAuditTime = adminAuditTime;
     }
 
     @Basic
@@ -337,6 +365,24 @@ public class Task implements Serializable {
         this.userHunterInterflows = userHunterInterflowsById;
     }
 
+    public void toDetail(){
+        if (user != null){
+            user = new User(user.getId(),user.getName(),user.getUsername());
+        }
+        auditTasks = null;
+        commentTasks = null;
+        if (taskClassifyRelations != null){
+            taskClassifyRelations.forEach(tcr -> {
+                tcr.setTask(null);
+                if (tcr.getTaskClassify() != null) {
+                    tcr.setTaskClassify(new TaskClassify(tcr.getTaskClassify().getId(), tcr.getTaskClassify().getName()));
+                }
+            });
+        }
+        taskSteps = null;
+        userHunterInterflows = null;
+    }
+
     public static Task toDetail(Task task){
         if (task != null){
             if (task.getUser() != null){
@@ -345,7 +391,9 @@ public class Task implements Serializable {
             task.setAuditTasks(null);
             task.setCommentTasks(null);
             task.setCommentUsers(null);
-            task.setHunterTasks(null);
+            if (task.getHunterTasks() != null){
+                task.getHunterTasks().forEach(HunterTask::toDetail);
+            }
             if (task.getTaskClassifyRelations() != null){
                 task.getTaskClassifyRelations().forEach(tcr ->{
                     tcr.setTask(null);
@@ -376,5 +424,13 @@ public class Task implements Serializable {
             });
         }
         return content;
+    }
+
+    public static List<String> toIds(List<Task> tasks) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)){
+            tasks.forEach(task -> result.add(task.id));
+        }
+        return result;
     }
 }

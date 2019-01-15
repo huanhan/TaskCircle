@@ -1,10 +1,14 @@
 package com.tc.db.entity;
 
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -13,12 +17,18 @@ import java.util.Objects;
  */
 @Entity
 public class Hunter implements Serializable {
+
+    public static final String USER_ID = "userId";
+    public static final String USER = "user";
+
     private Long userId;
     private User user;
     private Timestamp createTime;
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTask> hunterTasks;
     private Collection<UserHunterInterflow> userHunterInterflows;
+
+
 
     @Id
     @Column(name = "user_id")
@@ -95,5 +105,22 @@ public class Hunter implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(user.getId(), createTime);
+    }
+
+    public void toDetail(){
+        if (user != null){
+            user = new User(userId,user.getName(),user.getUsername());
+        }
+        commentHunters = null;
+        hunterTasks = null;
+        userHunterInterflows = null;
+    }
+
+    public static List<Long> toIds(List<Hunter> queryResult) {
+        List<Long> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(queryResult)){
+            queryResult.forEach(hunter -> result.add(hunter.getUserId()));
+        }
+        return result;
     }
 }

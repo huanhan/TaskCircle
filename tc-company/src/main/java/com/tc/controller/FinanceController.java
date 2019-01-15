@@ -1,9 +1,13 @@
 package com.tc.controller;
 
+import com.tc.db.entity.UserWithdraw;
 import com.tc.dto.finance.CompanyFinance;
 import com.tc.dto.finance.IESource;
 import com.tc.dto.finance.QueryFinance;
+import com.tc.service.UserWithdrawService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +26,10 @@ import java.util.List;
 public class FinanceController {
 
 
+    @Autowired
+    private UserWithdrawService userWithdrawService;
+
+
     /**
      * 获取公司收入与支出列表
      * @param queryFinance 查询条件
@@ -30,7 +38,17 @@ public class FinanceController {
      */
     @GetMapping("/all")
     @ApiOperation(value = "获取公司收入与支出列表")
-    public List<CompanyFinance> all(@Valid @RequestBody QueryFinance queryFinance, BindingResult result){
+    public List<CompanyFinance> all(@RequestBody QueryFinance queryFinance){
+
+
+
+        Page<UserWithdraw> queryResult = userWithdrawService.findByQueryFinance(queryFinance);
+
+        List<CompanyFinance> result = CompanyFinance.getBy(queryResult.getContent(),queryFinance.getDateType());
+
+
+
+
         return new ArrayList<>();
     }
 

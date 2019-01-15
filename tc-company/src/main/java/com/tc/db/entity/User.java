@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +45,7 @@ public class User implements Serializable {
     public static final String STATE = "state";
     public static final String MONEY = "money";
     public static final String TASKS = "tasks";
-
+    public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
 
 
     /**
@@ -84,6 +85,12 @@ public class User implements Serializable {
      */
     @CreationTimestamp
     private Timestamp createTime;
+
+    /**
+     * 管理员审核开始时间
+     */
+    private Timestamp adminAuditTime;
+
     /**
      * 账户余额
      */
@@ -141,6 +148,10 @@ public class User implements Serializable {
      */
     private String headImg;
     /**
+     * 用户提交审核时间
+     */
+    private Timestamp auditTime;
+    /**
      * 猎刃审核记录
      */
     private Collection<AuditHunter> auditHunters;
@@ -189,17 +200,13 @@ public class User implements Serializable {
      */
     private Collection<UserOperationLog> userOperationLogs;
     /**
-     * 用户的提现记录
+     * 用户的提现与充值记录
      */
     private Collection<UserWithdraw> userWithdraws;
     /**
      * 一个用户接收多个消息
      */
     private Collection<UserMessage> userMessages;
-    /**
-     * 用户支出
-     */
-    private Collection<UserPay> userPays;
     public User() {
     }
 
@@ -224,6 +231,8 @@ public class User implements Serializable {
         this.username = username;
         this.headImg = headImg;
     }
+
+
 
 
     @Id
@@ -318,6 +327,16 @@ public class User implements Serializable {
 
     private void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    @Basic
+    @Column(name = "admin_audit_time")
+    public Timestamp getAdminAuditTime() {
+        return adminAuditTime;
+    }
+
+    public void setAdminAuditTime(Timestamp adminAuditTime) {
+        this.adminAuditTime = adminAuditTime;
     }
 
     @Basic
@@ -463,6 +482,17 @@ public class User implements Serializable {
         this.headImg = headImg;
     }
 
+    @Basic
+    @Column(name = "audit_time")
+    @JsonView(UserBasicDetailView.class)
+    public Timestamp getAuditTime() {
+        return auditTime;
+    }
+
+    public void setAuditTime(Timestamp auditTime) {
+        this.auditTime = auditTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -487,13 +517,14 @@ public class User implements Serializable {
                 Objects.equals(weight, user.weight) &&
                 Objects.equals(birthday, user.birthday) &&
                 Objects.equals(phone, user.phone) &&
-                Objects.equals(headImg, user.headImg);
+                Objects.equals(headImg, user.headImg) &&
+                Objects.equals(auditTime,user.auditTime);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, name, username, password, category, gender, lastLogin, createTime, money, idCard, address, school, major, interest, intro, height, weight, birthday,phone,headImg);
+        return Objects.hash(id, name, username, password, category, gender, lastLogin, createTime, money, idCard, address, school, major, interest, intro, height, weight, birthday, phone, headImg, auditTime);
     }
 
     @OneToOne(mappedBy = "user")
@@ -595,7 +626,7 @@ public class User implements Serializable {
         this.userExpense = expense;
     }
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE})
     @JsonView(UserBasicView.class)
     public Collection<UserImg> getUserImgs() {
         return userImgs;
@@ -632,15 +663,6 @@ public class User implements Serializable {
         this.userMessages = userMessages;
     }
 
-    @OneToMany(mappedBy = "user")
-    public Collection<UserPay> getUserPays() {
-        return userPays;
-    }
-
-    public void setUserPays(Collection<UserPay> userPaysById) {
-        this.userPays = userPaysById;
-    }
-
     public interface UserBasicView {}
 
     public interface UserBasicDetailView extends UserBasicView{}
@@ -660,7 +682,6 @@ public class User implements Serializable {
         user.setUserIncome(null);
         user.setUserMessages(null);
         user.setUserOperationLogs(null);
-        user.setUserPays(null);
         user.setUserWithdraws(null);
         user.setHunter(null);
         return user;
@@ -671,5 +692,13 @@ public class User implements Serializable {
             content.forEach(User::toDetail);
         }
         return content;
+    }
+
+    public static List<Long> toIds(List<User> users) {
+        List<Long> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(users)){
+            users.forEach(user -> result.add(user.id));
+        }
+        return result;
     }
 }

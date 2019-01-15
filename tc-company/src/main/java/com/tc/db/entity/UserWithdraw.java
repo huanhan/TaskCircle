@@ -1,11 +1,16 @@
 package com.tc.db.entity;
 
+import com.tc.db.enums.WithdrawState;
+import com.tc.db.enums.WithdrawType;
+import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,15 +21,28 @@ import java.util.Objects;
 @Table(name = "user_withdraw", schema = "tc-company")
 public class UserWithdraw implements Serializable {
 
+    public static final String ID = "id";
+    public static final String USER_ID = "userId";
     public static final String MONEY = "money";
+    public static final String STATE = "state";
+    public static final String TYPE = "type";
+    public static final String CREATE_TIME = "createTime";
+    public static final String AUDIT_WITHDRAWS = "auditWithdraws";
+    public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
+    public static final String USER = "user";
 
     private String id;
     private Long userId;
     private Float money;
-    private String state;
-    private Timestamp timestamp;
+    private WithdrawState state;
+    private WithdrawType type;
+    private Timestamp createTime;
+    private Timestamp adminAuditTime;
     private Collection<AuditWithdraw> auditWithdraws;
     private User user;
+
+
+
 
     @Id
     @Column(name = "id")
@@ -57,24 +75,47 @@ public class UserWithdraw implements Serializable {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "state")
-    public String getState() {
+    public WithdrawState getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(WithdrawState state) {
         this.state = state;
     }
 
     @Basic
-    @CreationTimestamp
-    @Column(name = "create_time")
-    public Timestamp getTimestamp() {
-        return timestamp;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    public WithdrawType getType() {
+        return type;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
+    public void setType(WithdrawType type) {
+        this.type = type;
+    }
+
+
+    @Basic
+    @CreationTimestamp
+    @Column(name = "create_time")
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp timestamp) {
+        this.createTime = timestamp;
+    }
+
+    @Basic
+    @Column(name = "admin_audit_time")
+    public Timestamp getAdminAuditTime() {
+        return adminAuditTime;
+    }
+
+    public void setAdminAuditTime(Timestamp adminAuditTime) {
+        this.adminAuditTime = adminAuditTime;
     }
 
     @Override
@@ -111,5 +152,26 @@ public class UserWithdraw implements Serializable {
 
     public void setUser(User userByUserId) {
         this.user = userByUserId;
+    }
+
+
+    public static List<UserWithdraw> toIndexAsList(List<UserWithdraw> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(userWithdraw -> {
+                userWithdraw.setAuditWithdraws(null);
+                if (userWithdraw.getUser()!= null){
+                    userWithdraw.setUser(new User(userWithdraw.userId,userWithdraw.getUser().getName(),userWithdraw.getUser().getUsername()));
+                }
+            });
+        }
+        return content;
+    }
+
+    public static List<String> toIds(List<UserWithdraw> uws) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(uws)){
+            uws.forEach(task -> result.add(task.id));
+        }
+        return result;
     }
 }

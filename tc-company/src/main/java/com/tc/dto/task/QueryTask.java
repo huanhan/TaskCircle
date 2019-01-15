@@ -1,14 +1,12 @@
 package com.tc.dto.task;
 
-import com.tc.db.entity.Comment;
-import com.tc.db.entity.CommentTask;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.User;
+import com.tc.db.entity.*;
+import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
 import com.tc.until.ListUtils;
+import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.*;
@@ -87,7 +85,7 @@ public class QueryTask extends PageRequest {
     private Float commentAvgEnd;
 
     public QueryTask() {
-        super(0,10);
+        this(0,10);
     }
 
     public QueryTask(int page, int size) {
@@ -326,6 +324,7 @@ public class QueryTask extends PageRequest {
         this.commentAvgEnd = commentAvgEnd;
     }
 
+
     public static List<Predicate> initPredicatesByTask(QueryTask queryTask, Root<Task> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(QueryUtils.equals(root,cb,Task.ID,queryTask.id));
@@ -338,7 +337,16 @@ public class QueryTask extends PageRequest {
         predicates.add(QueryUtils.like(root,cb,Task.CONTEXT,queryTask.context));
 
         if (queryTask.state != null){
-            predicates.add(QueryUtils.equals(root,cb,Task.TASK_STATE,queryTask.state));
+            if (queryTask.state.equals(TaskState.HUNTER_COMMIT)){
+                Subquery<HunterTask> hunterTask = query.subquery(HunterTask.class);
+                Root<HunterTask> xRoot = hunterTask.from(HunterTask.class);
+                hunterTask.select(xRoot.get(HunterTask.TASK_ID));
+                Predicate predicate = cb.equal(xRoot.get(HunterTask.HUNTER_TASK_STATE),HunterTaskState.COMMIT_TO_ADMIN);
+                hunterTask.where(predicate);
+                predicates.add(QueryUtils.in(root,cb,Task.ID,hunterTask));
+            }else {
+                predicates.add(QueryUtils.equals(root, cb, Task.TASK_STATE, queryTask.state));
+            }
         }else {
             if (!ListUtils.isEmpty(queryTask.states)){
                 predicates.add(QueryUtils.in(root,cb,Task.TASK_STATE,queryTask.states));

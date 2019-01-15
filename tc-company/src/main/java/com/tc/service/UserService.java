@@ -1,6 +1,7 @@
 package com.tc.service;
 
 import com.tc.db.entity.User;
+import com.tc.db.enums.UserState;
 import com.tc.dto.user.QueryUser;
 import org.springframework.data.domain.Page;
 
@@ -37,4 +38,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     Page<User> findByQueryUser(QueryUser queryUser);
+
+    /**
+     * 自动更新用户状态
+     * @param state
+     * @return
+     */
+    Boolean updateState(UserState state);
 }

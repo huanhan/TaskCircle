@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserImgPK;
+import com.tc.db.enums.UserIMGName;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -15,9 +16,18 @@ import java.util.Objects;
 public class UserImg {
 
     private Long userId;
-    private String imgName;
+    private UserIMGName imgName;
     private String urlLocation;
     private User user;
+
+    public UserImg() {
+    }
+
+    public UserImg(Long userId, UserIMGName imgName, String urlLocation) {
+        this.userId = userId;
+        this.imgName = imgName;
+        this.urlLocation = urlLocation;
+    }
 
     @Id
     @Column(name = "user_id")
@@ -30,12 +40,13 @@ public class UserImg {
     }
 
     @Id
+    @Enumerated(EnumType.STRING)
     @Column(name = "img_name")
-    public String getImgName() {
+    public UserIMGName getImgName() {
         return imgName;
     }
 
-    public void setImgName(String imgName) {
+    public void setImgName(UserIMGName imgName) {
         this.imgName = imgName;
     }
 

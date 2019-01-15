@@ -20,8 +20,11 @@ public class StringResourceCenter {
     public static final String VALIDATOR_QUERY_ADMIN_FAILED = VALIDATOR_QUERY_FAILED + "，管理员编号不能为空";
     public static final String VALIDATOR_ADD_TITLE_FAILED = "已存在相同标题";
     public static final String VALIDATOR_ADD_ID_FAILED = "已存在相同编号";
+    public static final String VALIDATOR_STATE_FAILED = "用户状态异常";
+
 
     public static final String CONTEXT_NOT_NULL = "内容不能为空";
+
 
 
 }

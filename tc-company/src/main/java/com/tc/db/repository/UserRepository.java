@@ -1,7 +1,10 @@
 package com.tc.db.repository;
 
 import com.tc.db.entity.User;
+import com.tc.db.enums.UserCategory;
+import com.tc.db.enums.UserState;
 import com.tc.exception.DBException;
+import org.hibernate.usertype.UserType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author Cyg
@@ -49,4 +53,46 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
             "WHERE u.id = :#{#user.id}"
     )
     int update(@Param("user") User user);
+
+    /**
+     * 更新用户状态
+     * @param state
+     * @param id
+     * @return
+     */
+    @Modifying
+    @Query("update User u set u.state = :state ," +
+            "u.category = case when :category is null then u.category else :category end " +
+            "where u.id = :id")
+    int update(@Param("state") UserState state, @Param("category") UserCategory category, @Param("id") Long id);
+
+    /**
+     * 跟新用户金额
+     * @param money
+     * @param id
+     * @return
+     */
+    @Modifying
+    @Query("update User u set u.money = u.money + :money where u.id = :id")
+    int update(@Param("money") Float money, @Param("id") Long id);
+
+    /**
+     * 跟新用户金额
+     * @param ids
+     * @param money
+     * @return
+     */
+    @Modifying
+    @Query("update User u set u.money = u.money + :money where u.id in :ids")
+    int update(@Param("ids") List<Long> ids,@Param("money") Float money);
+
+    /**
+     * 更新用户状态，并将审核时间制空
+     * @param ids
+     * @param state
+     * @return
+     */
+    @Modifying
+    @Query(value = "update User u set u.state = :state, u.adminAuditTime = NULL where u.id in (:ids)")
+    int updateState(List<Long> ids, UserState state);
 }

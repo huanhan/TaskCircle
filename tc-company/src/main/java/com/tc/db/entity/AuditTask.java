@@ -15,9 +15,24 @@ public class AuditTask {
 
     private String auditId;
     private String taskId;
-    private Double money;
+    private Float money;
     private Audit audit;
     private Task task;
+
+    public AuditTask() {
+    }
+
+    public AuditTask(String auditId, String taskId, Float money) {
+        this.auditId = auditId;
+        this.taskId = taskId;
+        this.money = money;
+    }
+
+    public AuditTask(String taskId, Float money) {
+        this.taskId = taskId;
+        this.money = money;
+    }
+
 
     @Id
     @Column(name = "audit_id")
@@ -41,11 +56,11 @@ public class AuditTask {
 
     @Basic
     @Column(name = "money")
-    public Double getMoney() {
+    public Float getMoney() {
         return money;
     }
 
-    public void setMoney(Double money) {
+    public void setMoney(Float money) {
         this.money = money;
     }
 
@@ -82,5 +97,18 @@ public class AuditTask {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public static AuditTask getBy(Audit audit) {
+        AuditTask result = new AuditTask();
+        if (audit != null){
+            if (audit.getAuditTask() != null){
+                result.setTaskId(audit.getAuditTask().taskId);
+            }
+            audit.setAuditTask(null);
+            result.setAuditId(audit.getId());
+            result.setAudit(audit);
+        }
+        return result;
     }
 }

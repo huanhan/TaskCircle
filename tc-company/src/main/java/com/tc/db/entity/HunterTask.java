@@ -1,11 +1,14 @@
 package com.tc.db.entity;
 
 import com.tc.db.enums.HunterTaskState;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -15,6 +18,19 @@ import java.util.Objects;
 @Entity
 @Table(name = "hunter_task", schema = "tc-company")
 public class HunterTask implements Serializable {
+
+    public static final String ID = "id";
+    public static final String TASK_ID = "taskId";
+    public static final String HUNTER_ID = "hunterId";
+    public static final String HUNTER_TASK_STATE = "state";
+    public static final String ACCEPT_TIME = "acceptTime";
+    public static final String AUDIT_TIME = "auditTime";
+    public static final String FINISH_TIME = "finishTime";
+    public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
+    public static final String CONTEXT = "context";
+    public static final String TASK = "task";
+    public static final String HUNTER = "hunter";
+
     private String id;
     private String taskId;
     private Long hunterId;
@@ -22,6 +38,8 @@ public class HunterTask implements Serializable {
     private Hunter hunter;
     private Timestamp acceptTime;
     private Timestamp finishTime;
+    private Timestamp auditTime;
+    private Timestamp adminAuditTime;
     private String context;
     private Integer hunterRejectCount;
     private Integer userRejectCount;
@@ -29,6 +47,9 @@ public class HunterTask implements Serializable {
 
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
+
+
+
 
     @Id
     @Column(name = "id")
@@ -81,6 +102,26 @@ public class HunterTask implements Serializable {
 
     public void setFinishTime(Timestamp finishTime) {
         this.finishTime = finishTime;
+    }
+
+    @Basic
+    @Column(name = "audit_time")
+    public Timestamp getAuditTime() {
+        return auditTime;
+    }
+
+    public void setAuditTime(Timestamp auditTime) {
+        this.auditTime = auditTime;
+    }
+
+    @Basic
+    @Column(name = "admin_audit_time")
+    public Timestamp getAdminAuditTime() {
+        return adminAuditTime;
+    }
+
+    public void setAdminAuditTime(Timestamp adminAuditTime) {
+        this.adminAuditTime = adminAuditTime;
     }
 
     @Basic
@@ -183,5 +224,40 @@ public class HunterTask implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id, task.getId(), hunter.getUser().getId(), acceptTime, finishTime, context, hunterRejectCount, userRejectCount, state);
+    }
+
+    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(hunterTask -> {
+                if (hunterTask.getTask() != null){
+                    hunterTask.getTask().toDetail();
+                }
+                if (hunterTask.getHunter() != null){
+                    hunterTask.getHunter().toDetail();
+                }
+                hunterTask.commentHunters = null;
+                hunterTask.hunterTaskSteps = null;
+            });
+        }
+        return null;
+    }
+
+    public void toDetail() {
+        if (task != null){
+            task = new Task(taskId,task.getName());
+        }
+        if (hunter != null){
+            hunter.toDetail();
+        }
+        commentHunters = null;
+        hunterTaskSteps = null;
+    }
+
+    public static List<String> toIds(List<HunterTask> tasks) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)){
+            tasks.forEach(task -> result.add(task.id));
+        }
+        return result;
     }
 }

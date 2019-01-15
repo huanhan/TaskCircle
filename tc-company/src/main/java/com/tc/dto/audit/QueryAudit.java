@@ -148,6 +148,9 @@ public class QueryAudit extends PageRequest {
 
     public static List<Predicate> initPredicates(QueryAudit queryAudit, Root<Audit> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
+        if (queryAudit.getAdminId() != null && queryAudit.getAdminId() > 0){
+            predicates.add(cb.equal(root.get(Audit.ADMIN_ID),queryAudit.getAdminId()));
+        }
         if (queryAudit.getResult() != null){
             predicates.add(cb.equal(root.get(Audit.RESULT),queryAudit.getResult()));
         }

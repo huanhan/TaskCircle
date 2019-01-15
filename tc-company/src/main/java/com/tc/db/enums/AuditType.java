@@ -9,8 +9,9 @@ public enum  AuditType {
 
     HUNTER("猎刃审核"),
     WITHDRAW("提现审核"),
-    TASK("任务审核")
-
+    TASK("新建任务审核"),
+    USER_FAILE_TASK("用户放弃任务"),
+    HUNTER_FAILE_TASK("管理员放弃任务"),
     ;
     private String type;
 

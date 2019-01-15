@@ -26,9 +26,12 @@ public enum HunterTaskState {
     COMPENSATE_SUCCESS("补偿成功"),
     COMPENSATE_EXCEPTION("补偿异常"),
     TASK_ABANDON("任务放弃"),
+    TASK_BE_ABANDON("任务被放弃"),
     NEGOTIATE_VALIDATOR("协商校验"),
     WITH_USER_NEGOTIATE("与用户协商"),
-    USER_REPULSE("用户拒绝"),
+    USER_REPULSE("用户拒绝猎刃放弃"),
+    HUNTER_REPULSE("猎刃拒绝用户放弃"),
+    COMMIT_TO_ADMIN("提交管理员放弃申请"),
     WITH_ADMIN_NEGOTIATE("管理员参与协商")
     ;
 

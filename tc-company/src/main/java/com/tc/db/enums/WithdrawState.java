@@ -5,6 +5,7 @@ public enum  WithdrawState {
     FAILED("提现失败"),
     EXCEPTION("提现异常"),
     AUDIT("提现审核"),
+    AUDIT_CENTER("审核中")
     ;
     private String state;
 

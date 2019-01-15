@@ -1,6 +1,8 @@
 package com.tc.db.entity;
 
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -33,6 +35,7 @@ public class UserIeRecord implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -63,7 +66,7 @@ public class UserIeRecord implements Serializable {
     }
 
     @Basic
-    @Column(name = "me")
+    @Column(name = "pay")
     public Long getMe() {
         return me;
     }
@@ -73,7 +76,7 @@ public class UserIeRecord implements Serializable {
     }
 
     @Basic
-    @Column(name = "to")
+    @Column(name = "come")
     public Long getTo() {
         return to;
     }
@@ -101,7 +104,7 @@ public class UserIeRecord implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "me", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "pay", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public User getUserByMe() {
         return userByMe;
     }
@@ -111,7 +114,7 @@ public class UserIeRecord implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "to", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "come", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
     public User getUserByTo() {
         return userByTo;
     }
