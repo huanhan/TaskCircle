@@ -1,6 +1,9 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,6 +22,8 @@ public class CommentTask {
     private String taskId;
     private Comment comment;
     private Task task;
+
+
 
     @Id
     @Column(name = "comment_id")
@@ -76,5 +81,19 @@ public class CommentTask {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public static List<CommentTask> toListInIndex(List<CommentTask> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(commentTask -> {
+                if (commentTask.getComment() != null){
+                    commentTask.setComment(new Comment(commentTask.getComment().getCreateTime(),commentTask.getComment().getCreation()));
+                }
+                if (commentTask.getTask() != null){
+                    commentTask.setTask(new Task(commentTask.getTaskId(),commentTask.getTask().getName()));
+                }
+            });
+        }
+        return content;
     }
 }

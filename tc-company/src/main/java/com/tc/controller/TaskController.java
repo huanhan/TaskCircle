@@ -4,6 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
 import com.tc.dto.StringIds;
+import com.tc.dto.comment.QueryTaskComment;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
