@@ -49,6 +49,16 @@ public class HunterTask implements Serializable {
     private Collection<HunterTaskStep> hunterTaskSteps;
     private Collection<AuditHunterTask> auditHunterTasksById;
 
+    public HunterTask() {
+    }
+
+    public HunterTask(String id, Task task) {
+        this.id = id;
+        if (task != null){
+            this.task = new Task(task.getId(),task.getName());
+        }
+    }
+
     public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
         if (!ListUtils.isEmpty(content)){
             content.forEach(hunterTask -> {

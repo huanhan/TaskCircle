@@ -1,6 +1,9 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,12 +13,22 @@ import java.util.Objects;
 @Entity
 @Table(name = "comment_hunter", schema = "tc-company")
 public class CommentHunter {
+
+    public static final String COMMENT_ID = "commentId";
+    public static final String HUNTER_ID = "hunterId";
+    public static final String HUNTER_TASK_ID = "hunterTaskId";
+    public static final String COMMENT = "comment";
+    public static final String HUNTER = "hunter";
+    public static final String HUNTER_TASK = "hunterTask";
+
     private Long commentId;
     private Long hunterId;
     private String hunterTaskId;
     private Comment comment;
     private Hunter hunter;
     private HunterTask hunterTask;
+
+
 
     @Id
     @Column(name = "comment_id")
@@ -94,5 +107,22 @@ public class CommentHunter {
 
     public void setHunterTask(HunterTask hunterTask) {
         this.hunterTask = hunterTask;
+    }
+
+    public static List<CommentHunter> toListInIndex(List<CommentHunter> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(commentHunter -> {
+                if (commentHunter.getComment() != null){
+                    commentHunter.setComment(new Comment(commentHunter.getComment().getCreateTime(),commentHunter.getComment().getCreation()));
+                }
+                if (commentHunter.getHunter() != null){
+                    commentHunter.setHunter(new Hunter(commentHunter.getHunterId(),commentHunter.getHunter().getUser()));
+                }
+                if (commentHunter.getHunterTask() != null){
+                    commentHunter.setHunterTask(new HunterTask(commentHunter.getHunterTaskId(),commentHunter.getHunterTask().getTask()));
+                }
+            });
+        }
+        return content;
     }
 }

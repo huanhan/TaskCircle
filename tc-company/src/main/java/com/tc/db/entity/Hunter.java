@@ -36,6 +36,13 @@ public class Hunter implements Serializable {
         this.userId = userId;
     }
 
+    public Hunter(Long hunterId, User user) {
+        this.userId = hunterId;
+        if (user != null){
+            this.user = new User(user.getId(),user.getName(),user.getUsername());
+        }
+    }
+
     @Id
     @Column(name = "user_id")
     public Long getUserId() {

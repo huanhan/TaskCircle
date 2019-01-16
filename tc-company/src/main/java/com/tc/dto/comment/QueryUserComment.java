@@ -26,6 +26,10 @@ public class QueryUserComment extends QueryBasicComment {
     private String account;
     private String taskId;
 
+    public QueryUserComment() {
+        super(0,10);
+    }
+
     public QueryUserComment(int page, int size) {
         super(page, size);
     }

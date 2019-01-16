@@ -1,10 +1,20 @@
 package com.tc.dto.comment;
 
+import com.tc.db.entity.Comment;
+import com.tc.db.entity.CommentUser;
 import com.tc.db.enums.CommentType;
 import com.tc.until.PageRequest;
+import com.tc.until.QueryUtils;
 import org.springframework.data.domain.Sort;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 查询评论的公用内容
@@ -97,4 +107,5 @@ public class QueryBasicComment extends PageRequest {
     public void setCreationId(Long creationId) {
         this.creationId = creationId;
     }
+
 }
