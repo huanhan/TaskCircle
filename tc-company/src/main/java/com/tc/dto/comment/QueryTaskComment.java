@@ -49,7 +49,7 @@ public class QueryTaskComment extends QueryBasicComment {
         predicates.add(QueryUtils.like(root.get(CommentTask.COMMENT).get(Comment.CONTEXT),cb,queryTaskComment.getContext()));
 
         predicates.add(QueryUtils.between(root.get(CommentTask.COMMENT).get(Comment.CREATE_TIME), cb, queryTaskComment.getCreateTimeBegin(), queryTaskComment.getCreateTimeEnd()));
-        predicates.add(QueryUtils.between(root.get(CommentTask.COMMENT).get(Comment.NUMBET), cb, queryTaskComment.getNumberBegin(), queryTaskComment.getNumberEnd()));
+        predicates.add(QueryUtils.between(root.get(CommentTask.COMMENT).get(Comment.NUMBER), cb, queryTaskComment.getNumberBegin(), queryTaskComment.getNumberEnd()));
 
         predicates.add(QueryUtils.equals(root,cb,CommentTask.TASK_ID,queryTaskComment.taskId));
 

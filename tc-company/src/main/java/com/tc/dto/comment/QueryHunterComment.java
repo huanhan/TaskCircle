@@ -77,7 +77,7 @@ public class QueryHunterComment extends QueryBasicComment{
         predicates.add(QueryUtils.like(root.get(CommentHunter.COMMENT).get(Comment.CONTEXT),cb,queryHunterComment.getContext()));
 
         predicates.add(QueryUtils.between(root.get(CommentHunter.COMMENT).get(Comment.CREATE_TIME), cb, queryHunterComment.getCreateTimeBegin(), queryHunterComment.getCreateTimeEnd()));
-        predicates.add(QueryUtils.between(root.get(CommentHunter.COMMENT).get(Comment.NUMBET), cb, queryHunterComment.getNumberBegin(), queryHunterComment.getNumberEnd()));
+        predicates.add(QueryUtils.between(root.get(CommentHunter.COMMENT).get(Comment.NUMBER), cb, queryHunterComment.getNumberBegin(), queryHunterComment.getNumberEnd()));
 
         predicates.add(QueryUtils.equals(root,cb,CommentHunter.HUNTER_ID,queryHunterComment.hunterId));
         predicates.add(QueryUtils.equals(root.get(CommentHunter.HUNTER).get(Hunter.USER).get(User.NAME),cb,queryHunterComment.hunterName));

@@ -52,7 +52,7 @@ public class QueryUserComment extends QueryBasicComment {
         predicates.add(QueryUtils.like(root.get(CommentUser.COMMENT).get(Comment.CONTEXT),cb,queryUserComment.getContext()));
 
         predicates.add(QueryUtils.between(root.get(CommentUser.COMMENT).get(Comment.CREATE_TIME), cb, queryUserComment.getCreateTimeBegin(), queryUserComment.getCreateTimeEnd()));
-        predicates.add(QueryUtils.between(root.get(CommentUser.COMMENT).get(Comment.NUMBET), cb, queryUserComment.getNumberBegin(), queryUserComment.getNumberEnd()));
+        predicates.add(QueryUtils.between(root.get(CommentUser.COMMENT).get(Comment.NUMBER), cb, queryUserComment.getNumberBegin(), queryUserComment.getNumberEnd()));
 
         predicates.add(QueryUtils.equals(root,cb,CommentUser.USER_ID,queryUserComment.userId));
         predicates.add(QueryUtils.equals(root.get(CommentUser.USER).get(User.NAME),cb,queryUserComment.userName));

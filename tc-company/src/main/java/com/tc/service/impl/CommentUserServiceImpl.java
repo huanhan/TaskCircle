@@ -32,4 +32,10 @@ public class CommentUserServiceImpl extends AbstractBasicServiceImpl<CommentUser
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryUserComment);
     }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public CommentUser findOne(Long id) {
+        return commentUserRepository.findOne(id);
+    }
 }

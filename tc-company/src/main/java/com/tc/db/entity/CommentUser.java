@@ -30,6 +30,7 @@ public class CommentUser {
 
 
 
+
     @Id
     @Column(name = "comment_id")
     public Long getCommentId() {
@@ -125,4 +126,30 @@ public class CommentUser {
         }
         return content;
     }
+
+    public static CommentUser toDetail(CommentUser commentUser) {
+        if (commentUser != null){
+            if (commentUser.getComment() != null){
+                Comment comment = commentUser.getComment();
+                commentUser.setComment(new Comment(
+                        comment.getId(),
+                        comment.getType(),
+                        comment.getContext(),
+                        comment.getCreateTime(),
+                        comment.getNumber(),
+                        comment.getCreationId(),
+                        comment.getCreation()
+                ));
+            }
+            if (commentUser.getUser() != null){
+                commentUser.setUser(new User(commentUser.getUserId(),commentUser.getUser().getName(),commentUser.getUser().getUsername()));
+            }
+            if (commentUser.getTask() != null){
+                commentUser.setTask(new Task(commentUser.getTaskId(),commentUser.getTask().getName()));
+            }
+        }
+        return commentUser;
+    }
+
+
 }

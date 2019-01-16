@@ -41,7 +41,7 @@ public class CommentController {
      * @param queryUserComment 用户评论查询条件
      * @return
      */
-    @GetMapping("/user")
+    @PostMapping("/user")
     @ApiOperation(value = "根据用户编号获取用户的评论列表")
     public Result getUserComment(@RequestBody QueryUserComment queryUserComment){
         Page<CommentUser> query = commentUserService.findByQuery(queryUserComment);
@@ -53,7 +53,7 @@ public class CommentController {
      * @param queryHunterComment 猎刃评论查询条件
      * @return
      */
-    @GetMapping("/hunter")
+    @PostMapping("/hunter")
     @ApiOperation(value = "根据猎刃编号获取猎刃的评论列表")
     public Result getUserComment(@RequestBody QueryHunterComment queryHunterComment){
         Page<CommentHunter> query = commentHunterService.findByQuery(queryHunterComment);
@@ -65,10 +65,22 @@ public class CommentController {
      * @param queryTaskComment 任务评论查询条件
      * @return
      */
-    @GetMapping("/task")
-    @ApiOperation(value = "根据猎刃编号获取猎刃的评论列表")
+    @PostMapping("/task")
+    @ApiOperation(value = "根据任务编号获取任务的评论列表")
     public Result getTaskComment(@RequestBody QueryTaskComment queryTaskComment){
         Page<CommentTask> query = commentTaskService.findByQuery(queryTaskComment);
         return Result.init(CommentTask.toListInIndex(query.getContent()),queryTaskComment);
+    }
+
+    /**
+     * 获取用户评论详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/user/{id:\\d+}")
+    @ApiOperation(value = "获取评论用户详情")
+    public CommentUser detailByCommentUser(@PathVariable("id") Long id){
+        CommentUser result = commentUserService.findOne(id);
+        return CommentUser.toDetail(result);
     }
 }
