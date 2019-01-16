@@ -74,7 +74,7 @@ public class AppCommentController {
      * @param bindingResult
      * @return
      */
-    @PostMapping("/user/{id:\\d+}")
+    @PostMapping("/hunter/{id:\\d+}")
     @ApiOperation(value = "猎刃对用户进行评论")
     public Comment toHunter(@PathVariable("id") Long id, @Valid @RequestBody HunterComment hunterComment, BindingResult bindingResult){
         if (bindingResult.hasErrors()){

@@ -42,7 +42,7 @@ public class AppTaskController {
      * @param queryTask 状态不能为空
      * @return
      */
-    @PostMapping("/{id:\\d+}")
+    @PostMapping("/user/{id:\\d+}")
     @ApiOperation(value = "根据状态获取指定用户的任务列表")
     public Result taskByUser(@PathVariable("id") Long id, @RequestBody QueryTask queryTask){
         if (!hasState(queryTask.getState())){
@@ -53,13 +53,13 @@ public class AppTaskController {
     }
 
     /**
-     * 根据状态获取指定用户的任务列表
+     * 根据状态获取指定猎刃的任务列表
      * @param id 用户编号
      * @param queryHunterTask 状态不能为空
      * @return
      */
-    @PostMapping("/{id:\\d+}")
-    @ApiOperation(value = "根据状态获取指定用户的任务列表")
+    @PostMapping("/hunter/{id:\\d+}")
+    @ApiOperation(value = "根据状态获取指定猎刃的任务列表")
     public Result taskByHunter(@PathVariable("id") Long id, @RequestBody QueryHunterTask queryHunterTask){
         if (!hasState(queryHunterTask.getState())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
