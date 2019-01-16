@@ -9,4 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @author Cyg
  */
 public interface UserImgRepository extends JpaRepository<UserImg,UserImgPK> {
+    Long countByUserId(Long userId);
 }

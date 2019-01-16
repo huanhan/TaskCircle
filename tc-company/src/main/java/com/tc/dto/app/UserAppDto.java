@@ -1,36 +1,31 @@
-package com.tc.dto.user;
+package com.tc.dto.app;
 
-
+import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
-/**
- * 修改用户
- * @author Cyg
- */
-public class ModifyUser {
-    /**
-     * 用户编号
-     */
-    @NotNull
-    @Min(value = 1)
-    private Long id;
+public class UserAppDto {
     /**
      * 用户姓名
      */
-    @NotBlank(message = "不能空")
-    @Length(max = 10)
     private String name;
+    /**
+     * 用户账户
+     */
+    private String username;
     /**
      * 用户性别
      */
-    @NotNull(message = "不能空")
     private UserGender gender;
+    /**
+     * 用户分类
+     */
+    private UserCategory category;
+    /**
+     * 账户余额
+     */
+    private Float money = 0.00f;
     /**
      * 身份证号码
      */
@@ -71,14 +66,14 @@ public class ModifyUser {
      * 用户手机号码
      */
     private String phone;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 用户头像
+     */
+    private String headImg;
+    /**
+     * 获取所有评论数
+     */
+    private Long commentsNum;
 
     public String getName() {
         return name;
@@ -88,12 +83,36 @@ public class ModifyUser {
         this.name = name;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public UserGender getGender() {
         return gender;
     }
 
     public void setGender(UserGender gender) {
         this.gender = gender;
+    }
+
+    public UserCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(UserCategory category) {
+        this.category = category;
+    }
+
+    public Float getMoney() {
+        return money;
+    }
+
+    public void setMoney(Float money) {
+        this.money = money;
     }
 
     public String getIdCard() {
@@ -174,5 +193,21 @@ public class ModifyUser {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getHeadImg() {
+        return headImg;
+    }
+
+    public void setHeadImg(String headImg) {
+        this.headImg = headImg;
+    }
+
+    public Long getCommentsNum() {
+        return commentsNum;
+    }
+
+    public void setCommentsNum(Long commentsNum) {
+        this.commentsNum = commentsNum;
     }
 }

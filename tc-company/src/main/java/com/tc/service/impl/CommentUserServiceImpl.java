@@ -3,7 +3,6 @@ package com.tc.service.impl;
 import com.tc.db.entity.CommentUser;
 import com.tc.db.repository.CommentUserRepository;
 import com.tc.dto.comment.QueryUserComment;
-import com.tc.dto.finance.QueryFinance;
 import com.tc.service.CommentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +22,11 @@ public class CommentUserServiceImpl extends AbstractBasicServiceImpl<CommentUser
     @Autowired
     private CommentUserRepository commentUserRepository;
 
+
+    @Override
+    public Long countByUserId(Long userid) {
+        return commentUserRepository.countByUserId(userid);
+    }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override

@@ -9,10 +9,13 @@ import org.springframework.data.domain.Page;
  * @author Cyg
  */
 public interface CommentUserService extends BasicService<CommentUser> {
+    Long countByUserId(Long userid);
+
     /**
      * 根据查询条件获取用户评论
      * @param queryUserComment
      * @return
      */
     Page<CommentUser> findByQuery(QueryUserComment queryUserComment);
+
 }

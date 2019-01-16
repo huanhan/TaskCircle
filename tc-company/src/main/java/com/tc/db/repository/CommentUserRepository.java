@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
  * 评论仓库
+ *
  * @author Cyg
  */
-public interface CommentUserRepository extends JpaRepository<CommentUser,Long>,JpaSpecificationExecutor<CommentUser> {
-
-
+public interface CommentUserRepository extends JpaRepository<CommentUser, Long>,JpaSpecificationExecutor<CommentUser> {
+    Long countByUserId(Long userId);
 }
