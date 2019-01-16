@@ -23,6 +23,10 @@ public class AuditHunterTask {
         this.hunterTaskId = taskId;
     }
 
+    public AuditHunterTask(String taskId) {
+        this.hunterTaskId = taskId;
+    }
+
     @Id
     @Column(name = "audit_id")
     public String getAuditId() {

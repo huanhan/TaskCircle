@@ -4,6 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserState;
 import com.tc.dto.Result;
+import com.tc.dto.comment.QueryUserComment;
 import com.tc.dto.user.*;
 import com.tc.exception.ValidException;
 import com.tc.service.UserService;

@@ -2,6 +2,7 @@ package com.tc.until;
 
 import com.tc.db.entity.Comment;
 import com.tc.db.entity.HunterTask;
+import com.tc.db.enums.CommentType;
 import com.tc.db.enums.HunterTaskState;
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,6 +67,18 @@ public class QueryUtils {
         return predicate;
     }
 
+    public static <T> Predicate between(Path<?> root, CriteriaBuilder cb, Timestamp begin, Timestamp end) {
+        Predicate predicate = null;
+        if (begin != null && end != null){
+            predicate = cb.between((Expression<? extends Timestamp>) root, begin, end);
+        }else if (begin != null){
+            predicate = cb.greaterThan((Expression<? extends Timestamp>) root, begin);
+        }else if (end != null){
+            predicate = cb.lessThan((Expression<? extends Timestamp>) root, end);
+        }
+        return predicate;
+    }
+
     public static Predicate between(Root<?> root, CriteriaBuilder cb,String property,Float begin,Float end){
         Predicate predicate = null;
         if (!QueryUtils.hasNull(begin) && !QueryUtils.hasNull(end)){
@@ -74,6 +87,18 @@ public class QueryUtils {
             predicate = cb.greaterThan(root.get(property),begin);
         }else if (!QueryUtils.hasNull(end)){
             predicate = cb.lessThan(root.get(property),end);
+        }
+        return predicate;
+    }
+
+    public static <Y> Predicate between(Path<?> root, CriteriaBuilder cb, Float begin, Float end) {
+        Predicate predicate = null;
+        if (!QueryUtils.hasNull(begin) && !QueryUtils.hasNull(end)){
+            predicate = cb.between((Expression<? extends Float>) root,begin ,end);
+        }else if (!QueryUtils.hasNull(begin)){
+            predicate = cb.greaterThan((Expression<? extends Float>) root,begin);
+        }else if (!QueryUtils.hasNull(end)){
+            predicate = cb.lessThan((Expression<? extends Float>) root,end);
         }
         return predicate;
     }
@@ -102,10 +127,20 @@ public class QueryUtils {
         return predicate;
     }
 
+
+
     public static Predicate like(Root<?> root, CriteriaBuilder cb,String property,String value){
         Predicate predicate = null;
         if (!StringUtils.isEmpty(value)){
             predicate = cb.like(root.get(property),"%" + value + "%");
+        }
+        return predicate;
+    }
+
+    public static <T> Predicate like(Path<?> root, CriteriaBuilder cb, T value) {
+        Predicate predicate = null;
+        if (value != null){
+            predicate = cb.like((Expression<String>) root,"%" + value + "%");
         }
         return predicate;
     }
@@ -185,6 +220,7 @@ public class QueryUtils {
         }
         return true;
     }
+
 
 
 }

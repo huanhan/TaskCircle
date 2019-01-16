@@ -1,6 +1,9 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -15,6 +18,8 @@ public class CommentUser {
     public static final String USER_ID = "userId";
     public static final String TASK_ID = "taskId";
     public static final String COMMENT = "comment";
+    public static final String USER = "user";
+    public static final String TASK = "task";
 
     private Long commentId;
     private Long userId;
@@ -22,6 +27,8 @@ public class CommentUser {
     private Comment comment;
     private User user;
     private Task task;
+
+
 
     @Id
     @Column(name = "comment_id")
@@ -100,5 +107,22 @@ public class CommentUser {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public static List<CommentUser> toListInIndex(List<CommentUser> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(commentUser -> {
+                if (commentUser.getComment() != null){
+                    commentUser.setComment(new Comment(commentUser.getComment().getCreateTime(),commentUser.getComment().getCreation()));
+                }
+                if (commentUser.getUser() != null){
+                    commentUser.setUser(new User(commentUser.getUserId(),commentUser.getUser().getName(),commentUser.getUser().getUsername()));
+                }
+                if (commentUser.getTask() != null){
+                    commentUser.setTask(new Task(commentUser.getTaskId(),commentUser.getTask().getName()));
+                }
+            });
+        }
+        return content;
     }
 }

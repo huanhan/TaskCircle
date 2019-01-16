@@ -3,7 +3,7 @@ package com.tc.controller;
 import com.tc.db.entity.CommentHunter;
 import com.tc.db.entity.Hunter;
 import com.tc.dto.user.HunterTaskStatistics;
-import com.tc.dto.user.QueryUserComment;
+import com.tc.dto.comment.QueryUserComment;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;

@@ -4,8 +4,8 @@ import com.tc.db.entity.*;
 import com.tc.db.entity.Audit;
 import com.tc.db.enums.AuditState;
 import com.tc.db.enums.AuditType;
+import com.tc.until.PageRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.CriteriaBuilder;

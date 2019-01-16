@@ -54,6 +54,12 @@ public class Audit {
             if (result.getAuditHunter() != null){
                 result.setAuditHunter(new AuditHunter(result.getAuditHunter().getUserId()));
             }
+            if (result.getAdmin() != null) {
+                result.setAdmin(new Admin(result.getAdminId(), result.getAdmin().getUser().getName(), result.getAdmin().getUser().getUsername()));
+            }
+            if (result.getAuditHunterTask() != null){
+                result.setAuditHunterTask(new AuditHunterTask(result.getAuditHunterTask().getHunterTaskId()));
+            }
         }
         return result;
     }
@@ -66,10 +72,21 @@ public class Audit {
     public static List<Audit> toListInIndex(List<Audit> audits) {
         if (!ListUtils.isEmpty(audits)){
             audits.forEach(audit ->{
-                audit.setAuditHunter(null);
-                audit.setAdmin(new Admin(audit.getAdminId(),audit.getAdmin().getUser().getName(),audit.getAdmin().getUser().getUsername()));
-                audit.setAuditHunter(null);
-                audit.setAuditWithdraw(null);
+                if (audit.getAuditHunter() != null){
+                    audit.setAuditHunter(new AuditHunter(audit.getAuditHunter().getUserId()));
+                }
+                if (audit.getAuditHunterTask() != null){
+                    audit.setAuditHunterTask(new AuditHunterTask(audit.getAuditHunterTask().getHunterTaskId()));
+                }
+                if (audit.getAuditWithdraw() != null){
+                    audit.setAuditWithdraw(new AuditWithdraw(audit.getAuditWithdraw().getWithdrawId()));
+                }
+                if (audit.getAuditTask() != null){
+                    audit.setAuditTask(new AuditTask(audit.getAuditTask().getTaskId(),audit.getAuditTask().getMoney()));
+                }
+                if (audit.getAdmin() != null) {
+                    audit.setAdmin(new Admin(audit.getAdminId(), audit.getAdmin().getUser().getName(), audit.getAdmin().getUser().getUsername()));
+                }
             });
         }
         return audits;

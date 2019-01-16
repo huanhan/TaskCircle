@@ -55,13 +55,44 @@ public class AuditController {
     public static final long AUDIT_LONG = 15 * 60 * 1000;
 
     /**
-     * 审核记录
+     * 我的审核记录
+     * @param id 用户编号
+     * @param queryAudit 查询条件
+     * @return
+     */
+    @PostMapping("/record/{id:\\d+}")
+    @ApiOperation(value = "我的审核记录列表")
+    public Result auditByMe(@PathVariable("id") Long id, @RequestBody QueryAudit queryAudit){
+        queryAudit.setAdminId(id);
+        queryAudit.setSort(new Sort(Sort.Direction.DESC,Audit.CREATE_TIME));
+        Page<Audit> result = auditService.findByQueryAudit(queryAudit);
+        return Result.init(Audit.toListInIndex(result.getContent()),queryAudit);
+    }
+
+    /**
+     * 查看我的审核详情信息
+     * @param id 审核编号
+     * @return
+     */
+    @GetMapping("/detail/{aid:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "查看我的审核详情信息")
+    public Audit detailByMe(@PathVariable("id") Long id,@PathVariable("aid") String aid){
+        Audit result = auditService.findOne(aid);
+        if (!id.equals(result.getAdminId())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        return Audit.toDetail(result);
+    }
+
+    /**
+     * 审核记录列表
      * @param queryAudit 查询条件
      * @return
      */
     @PostMapping("/record")
     @ApiOperation(value = "审核记录列表")
-    public Result auditByMe(@RequestBody QueryAudit queryAudit){
+    public Result auditByAll(@RequestBody QueryAudit queryAudit){
+        queryAudit.setSort(new Sort(Sort.Direction.DESC,Audit.CREATE_TIME));
         Page<Audit> result = auditService.findByQueryAudit(queryAudit);
         return Result.init(Audit.toListInIndex(result.getContent()),queryAudit);
     }
@@ -72,7 +103,7 @@ public class AuditController {
      * @return
      */
     @GetMapping("/detail/{id:\\d+}")
-    @ApiOperation(value = "查看审核详情信息")
+    @ApiOperation(value = "查看我的审核详情信息")
     public Audit detail(@PathVariable("id") String id){
         Audit result = auditService.findOne(id);
         return Audit.toDetail(result);

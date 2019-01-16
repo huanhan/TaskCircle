@@ -1,5 +1,7 @@
 package com.tc.db.entity;
 
+import com.tc.db.enums.CommentType;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -11,12 +13,20 @@ import java.util.Objects;
 @Entity
 public class Comment {
 
-    public static String NUMBER = "number";
+    public static String ID = "id";
+    public static String TYPE = "type";
+    public static String CONTEXT = "context";
+    public static String CREATE_TIME = "createTime";
+    public static String NUMBET = "number";
     public static String CREATION_ID = "creationId";
+    public static String COMMENT_HUNTER = "commentHunter";
+    public static String COMMENT_TASK = "commentTask";
+    public static String COMMENT_USER = "commentUser";
+    public static String USER = "creation";
 
 
     private Long id;
-    private String type;
+    private CommentType type;
     private String context;
     private Timestamp createTime;
     private Float number;
@@ -25,6 +35,13 @@ public class Comment {
     private CommentTask commentTask;
     private CommentUser commentUser;
     private User creation;
+
+    public Comment(Timestamp createTime, User creation) {
+        this.createTime = createTime;
+        if (creation != null){
+            this.creation = new User(creation.getId(),creation.getName(),creation.getUsername());
+        }
+    }
 
     @Id
     @Column(name = "id")
@@ -37,12 +54,13 @@ public class Comment {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    public String getType() {
+    public CommentType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(CommentType type) {
         this.type = type;
     }
 
