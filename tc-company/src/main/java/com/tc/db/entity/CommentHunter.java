@@ -30,6 +30,7 @@ public class CommentHunter {
 
 
 
+
     @Id
     @Column(name = "comment_id")
     public Long getCommentId() {
@@ -124,5 +125,29 @@ public class CommentHunter {
             });
         }
         return content;
+    }
+
+    public static CommentHunter toDetail(CommentHunter commentHunter) {
+        if (commentHunter != null){
+            if (commentHunter.getComment() != null){
+                Comment comment = commentHunter.getComment();
+                commentHunter.setComment(new Comment(
+                        comment.getId(),
+                        comment.getType(),
+                        comment.getContext(),
+                        comment.getCreateTime(),
+                        comment.getNumber(),
+                        comment.getCreationId(),
+                        comment.getCreation()
+                ));
+            }
+            if (commentHunter.getHunter() != null){
+                commentHunter.setHunter(new Hunter(commentHunter.getHunterId(),commentHunter.getHunter().getUser()));
+            }
+            if (commentHunter.getHunterTask() != null){
+                commentHunter.setHunterTask(new HunterTask(commentHunter.getHunterTaskId(),commentHunter.getHunterTask().getTask()));
+            }
+        }
+        return commentHunter;
     }
 }

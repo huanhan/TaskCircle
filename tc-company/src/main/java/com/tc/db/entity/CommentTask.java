@@ -25,6 +25,7 @@ public class CommentTask {
 
 
 
+
     @Id
     @Column(name = "comment_id")
     public Long getCommentId() {
@@ -95,5 +96,26 @@ public class CommentTask {
             });
         }
         return content;
+    }
+
+    public static CommentTask toDetail(CommentTask commentTask) {
+        if (commentTask != null){
+            if (commentTask.getComment() != null){
+                Comment comment = commentTask.getComment();
+                commentTask.setComment(new Comment(
+                        comment.getId(),
+                        comment.getType(),
+                        comment.getContext(),
+                        comment.getCreateTime(),
+                        comment.getNumber(),
+                        comment.getCreationId(),
+                        comment.getCreation()
+                ));
+            }
+            if (commentTask.getTask() != null){
+                commentTask.setTask(new Task(commentTask.getTaskId(),commentTask.getTask().getName()));
+            }
+        }
+        return commentTask;
     }
 }

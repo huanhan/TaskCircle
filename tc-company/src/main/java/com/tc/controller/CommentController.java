@@ -83,4 +83,28 @@ public class CommentController {
         CommentUser result = commentUserService.findOne(id);
         return CommentUser.toDetail(result);
     }
+
+    /**
+     * 获取评论猎刃详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/hunter/{id:\\d+}")
+    @ApiOperation(value = "获取评论猎刃详情")
+    public CommentHunter detailByCommentHunter(@PathVariable("id") Long id){
+        CommentHunter result = commentHunterService.findOne(id);
+        return CommentHunter.toDetail(result);
+    }
+
+    /**
+     * 获取评论任务详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/task/{id:\\d+}")
+    @ApiOperation(value = "获取评论猎刃详情")
+    public CommentTask detailByCommentTask(@PathVariable("id") Long id){
+        CommentTask result = commentTaskService.findOne(id);
+        return CommentTask.toDetail(result);
+    }
 }

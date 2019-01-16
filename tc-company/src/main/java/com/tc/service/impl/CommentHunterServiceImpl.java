@@ -8,6 +8,7 @@ import com.tc.service.CommentHunterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.util.List;
@@ -21,11 +22,18 @@ public class CommentHunterServiceImpl extends AbstractBasicServiceImpl<CommentHu
     @Autowired
     private CommentHunterRepository commentHunterRepository;
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Page<CommentHunter> findByQuery(QueryHunterComment queryHunterComment) {
         return commentHunterRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryHunterComment.initPredicates(queryHunterComment,root,query,cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryHunterComment);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public CommentHunter findOne(Long id) {
+        return commentHunterRepository.findOne(id);
     }
 }
