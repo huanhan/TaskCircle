@@ -131,23 +131,6 @@ public class TaskController {
     }
 
     /**
-     * 根据查询条件，获取本任务的评论情况
-     * @param id 任务编号
-     * @param queryTaskComment 评论查询条件
-     * @param result 检查异常结果
-     * @return
-     */
-    @GetMapping("/comment/{id:\\d+}")
-    @ApiOperation(value = "根据查询条件，获取本任务的评论情况")
-    public List<CommentTask> getCommentTasks(@PathVariable("id") Long id,
-                                             @Valid @RequestBody QueryTaskComment queryTaskComment,
-                                             BindingResult result){
-        return new ArrayList<>();
-    }
-
-
-
-    /**
      * 获取任务中单个步骤的执行情况
      * @param tid 任务编号
      * @param sid 任务步骤

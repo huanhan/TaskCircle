@@ -43,6 +43,8 @@ public class Hunter implements Serializable {
         }
     }
 
+
+
     @Id
     @Column(name = "user_id")
     public Long getUserId() {
@@ -136,5 +138,15 @@ public class Hunter implements Serializable {
             queryResult.forEach(hunter -> result.add(hunter.getUserId()));
         }
         return result;
+    }
+
+    public static Hunter toDetail(Hunter hunter) {
+        if (hunter != null){
+            hunter.user = User.toDetail(hunter.getUser());
+            hunter.commentHunters = null;
+            hunter.hunterTasks = null;
+            hunter.userHunterInterflows = null;
+        }
+        return hunter;
     }
 }
