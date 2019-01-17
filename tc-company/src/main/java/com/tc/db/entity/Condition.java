@@ -1,28 +1,50 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
+/**
+ * 消息条件实体
+ * @author Cyg
+ */
 @Entity
 public class Condition {
-    private long id;
+
+    public static final String ID = "id";
+    public static final String CONTEXT = "context";
+    public static final String NAME = "name";
+    public static final String VALUE = "value";
+    public static final String CREATION_NEME = "creationTime";
+    public static final String ADMIN_ID = "adminId";
+    public static final String ADMIN = "admin";
+
+
+    private Long id;
     private String context;
     private String name;
     private String value;
     private Timestamp creationTime;
-    private long adminId;
+    private Long adminId;
     private Admin admin;
     private Collection<MessageCondition> messageConditions;
 
+
+
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -57,6 +79,7 @@ public class Condition {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "creation_time")
     public Timestamp getCreationTime() {
         return creationTime;
@@ -68,11 +91,11 @@ public class Condition {
 
     @Basic
     @Column(name = "admin_id")
-    public long getAdminId() {
+    public Long getAdminId() {
         return adminId;
     }
 
-    public void setAdminId(long adminId) {
+    public void setAdminId(Long adminId) {
         this.adminId = adminId;
     }
 
@@ -85,8 +108,8 @@ public class Condition {
             return false;
         }
         Condition condition = (Condition) o;
-        return id == condition.id &&
-                adminId == condition.adminId &&
+        return id.equals(condition.id) &&
+                adminId.equals(condition.adminId) &&
                 Objects.equals(context, condition.context) &&
                 Objects.equals(name, condition.name) &&
                 Objects.equals(value, condition.value) &&
@@ -116,5 +139,27 @@ public class Condition {
 
     public void setMessageConditions(Collection<MessageCondition> messageConditions) {
         this.messageConditions = messageConditions;
+    }
+
+    public static Condition toDetail(Condition condition) {
+        if (condition != null){
+            if (condition.admin != null){
+                condition.admin = new Admin(condition.adminId,condition.admin.getUser());
+            }
+            condition.messageConditions = null;
+        }
+        return condition;
+    }
+
+    public static List<Condition> toListInIndex(List<Condition> content) {
+        if (ListUtils.isEmpty(content)){
+            content.forEach(condition -> {
+                condition.messageConditions = null;
+                if (condition.admin != null){
+                    condition.admin = new Admin(condition.adminId,condition.admin.getUser());
+                }
+            });
+        }
+        return content;
     }
 }

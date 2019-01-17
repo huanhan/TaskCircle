@@ -6,36 +6,40 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class MessageConditionPK implements Serializable {
-    private long conditionId;
-    private long messageId;
+    private Long conditionId;
+    private Long messageId;
 
     @Column(name = "condition_id")
     @Id
-    public long getConditionId() {
+    public Long getConditionId() {
         return conditionId;
     }
 
-    public void setConditionId(long conditionId) {
+    public void setConditionId(Long conditionId) {
         this.conditionId = conditionId;
     }
 
     @Column(name = "message_id")
     @Id
-    public long getMessageId() {
+    public Long getMessageId() {
         return messageId;
     }
 
-    public void setMessageId(long messageId) {
+    public void setMessageId(Long messageId) {
         this.messageId = messageId;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         MessageConditionPK that = (MessageConditionPK) o;
-        return conditionId == that.conditionId &&
-                messageId == that.messageId;
+        return conditionId.equals(that.conditionId) &&
+                messageId.equals(that.messageId);
     }
 
     @Override

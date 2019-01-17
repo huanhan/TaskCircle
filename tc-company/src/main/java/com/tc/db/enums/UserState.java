@@ -1,5 +1,10 @@
 package com.tc.db.enums;
 
+import com.tc.dto.condition.ConditionKey;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 用户状态
  */
@@ -15,5 +20,17 @@ public enum  UserState {
 
     UserState(String state) {
         this.state = state;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public static List<ConditionKey> toList(){
+        List<ConditionKey> result = new ArrayList<>();
+        for (UserState userState : UserState.values()) {
+            result.add(new ConditionKey(userState.name(),userState.state));
+        }
+        return result;
     }
 }

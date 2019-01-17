@@ -64,4 +64,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     Boolean updateState(Long id, UserState state, Date now);
+
+    /**
+     * 根据查询条件获取符合该查询条件的用户的数量
+     * @param queryUser
+     * @return
+     */
+    long countByQuery(QueryUser queryUser);
 }

@@ -130,6 +130,15 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
+    public long countByQuery(QueryUser queryUser) {
+        return userRepository.count((root, query, cb) -> {
+            List<Predicate> predicates = QueryUser.initPredicates(queryUser,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = getUser(s);
         return new LoginUser(user);

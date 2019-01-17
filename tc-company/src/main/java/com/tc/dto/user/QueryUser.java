@@ -359,6 +359,8 @@ public class QueryUser extends PageRequest {
 
     public static List<Predicate> initPredicates(QueryUser queryUser, Root<User> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
+
+
         predicates.add(QueryUtils.equals(root,cb,User.NAME,queryUser.getName()));
         predicates.add(QueryUtils.equals(root,cb,User.USERNAME,queryUser.getUsername()));
         predicates.add(QueryUtils.equals(root,cb,User.GENDER,queryUser.getGender()));
