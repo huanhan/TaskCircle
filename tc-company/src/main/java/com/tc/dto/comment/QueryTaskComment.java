@@ -20,6 +20,10 @@ public class QueryTaskComment extends QueryBasicComment {
 
     private String taskId;
 
+    public QueryTaskComment() {
+        super(0,10);
+    }
+
     public QueryTaskComment(int page, int size) {
         super(page, size);
     }

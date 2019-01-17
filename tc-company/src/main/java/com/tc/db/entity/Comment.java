@@ -181,4 +181,23 @@ public class Comment {
     public void setCreation(User creation) {
         this.creation = creation;
     }
+
+    public static Comment toDetail(Comment comment){
+        if (comment != null){
+            User creation = comment.creation;
+            if (creation != null){
+                comment.creation = new User(creation.getId(),creation.getName(),creation.getUsername());
+            }
+            if (comment.commentHunter != null){
+                comment.commentHunter = new CommentHunter(comment.commentHunter.getHunter(),comment.commentHunter.getHunterTask());
+            }
+            if (comment.commentUser != null){
+                comment.commentUser = new CommentUser(comment.commentUser.getUser(),comment.commentUser.getTask());
+            }
+            if (comment.commentTask != null){
+                comment.commentTask = new CommentTask(comment.commentTask.getTask());
+            }
+        }
+        return comment;
+    }
 }

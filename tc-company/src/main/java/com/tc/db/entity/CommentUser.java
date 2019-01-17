@@ -28,7 +28,19 @@ public class CommentUser {
     private User user;
     private Task task;
 
+    public CommentUser() {
+    }
 
+    public CommentUser(User user, Task task) {
+        if (user != null){
+            this.userId = user.getId();
+            this.user = new User(user.getId(),user.getName(),user.getUsername());
+        }
+        if (task != null){
+            this.taskId = task.getId();
+            this.task = new Task(task.getId(),task.getName());
+        }
+    }
 
 
     @Id
@@ -114,7 +126,7 @@ public class CommentUser {
         if (!ListUtils.isEmpty(content)){
             content.forEach(commentUser -> {
                 if (commentUser.getComment() != null){
-                    commentUser.setComment(new Comment(commentUser.getComment().getCreateTime(),commentUser.getComment().getCreation()));
+                    commentUser.setComment(Comment.toDetail(commentUser.getComment()));
                 }
                 if (commentUser.getUser() != null){
                     commentUser.setUser(new User(commentUser.getUserId(),commentUser.getUser().getName(),commentUser.getUser().getUsername()));

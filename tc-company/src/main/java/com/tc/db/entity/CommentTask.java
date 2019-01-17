@@ -23,7 +23,15 @@ public class CommentTask {
     private Comment comment;
     private Task task;
 
+    public CommentTask() {
+    }
 
+    public CommentTask(Task task) {
+        if (task != null){
+            this.taskId = task.getId();
+            this.task = new Task(task.getId(),task.getName());
+        }
+    }
 
 
     @Id
@@ -88,7 +96,7 @@ public class CommentTask {
         if (!ListUtils.isEmpty(content)){
             content.forEach(commentTask -> {
                 if (commentTask.getComment() != null){
-                    commentTask.setComment(new Comment(commentTask.getComment().getCreateTime(),commentTask.getComment().getCreation()));
+                    commentTask.setComment(Comment.toDetail(commentTask.comment));
                 }
                 if (commentTask.getTask() != null){
                     commentTask.setTask(new Task(commentTask.getTaskId(),commentTask.getTask().getName()));

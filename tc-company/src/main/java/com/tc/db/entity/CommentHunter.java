@@ -28,7 +28,17 @@ public class CommentHunter {
     private Hunter hunter;
     private HunterTask hunterTask;
 
+    public CommentHunter() {
+    }
 
+    public CommentHunter(Hunter hunter, HunterTask hunterTask) {
+        if (hunter != null){
+            this.hunter = new Hunter(hunterId,hunter.getUser());
+        }
+        if (hunterTask != null){
+            this.hunterTask = new HunterTask(hunterTaskId,hunterTask.getTask());
+        }
+    }
 
 
     @Id
@@ -114,7 +124,7 @@ public class CommentHunter {
         if (!ListUtils.isEmpty(content)){
             content.forEach(commentHunter -> {
                 if (commentHunter.getComment() != null){
-                    commentHunter.setComment(new Comment(commentHunter.getComment().getCreateTime(),commentHunter.getComment().getCreation()));
+                    commentHunter.setComment(Comment.toDetail(commentHunter.comment));
                 }
                 if (commentHunter.getHunter() != null){
                     commentHunter.setHunter(new Hunter(commentHunter.getHunterId(),commentHunter.getHunter().getUser()));
