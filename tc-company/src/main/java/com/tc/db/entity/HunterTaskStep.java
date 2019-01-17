@@ -15,6 +15,8 @@ import java.util.Objects;
 @Table(name = "hunter_task_step", schema = "tc-company")
 @IdClass(value = HunterTaskStepPK.class)
 public class HunterTaskStep implements Serializable {
+    public static final String STEP = "step";
+
     private String hunterTaskId;
     private Integer step;
     private Timestamp finishTime;
@@ -33,7 +35,7 @@ public class HunterTaskStep implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     public HunterTask getHunterTask() {
         return hunterTask;
     }
@@ -84,8 +86,12 @@ public class HunterTaskStep implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HunterTaskStep that = (HunterTaskStep) o;
         return step.equals(that.getStep()) &&
                 Objects.equals(hunterTask.getId(), that.getHunterTask().getId()) &&
