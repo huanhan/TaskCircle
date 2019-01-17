@@ -40,6 +40,15 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
         },queryFinance);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<UserWithdraw> findByQueryFinanceNotPage(QueryFinance queryFinance) {
+        return userWithdrawRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryFinance.initPredicates(queryFinance,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState(WithdrawState state) {

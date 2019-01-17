@@ -2758,21 +2758,28 @@ user_id</ColNames>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="531" parent="245" name="context">
+    <column id="531" parent="245" name="audit_pass_time">
       <Position>9</Position>
+      <Comment>审核通过时间</Comment>
+      <DataType>timestamp|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+    </column>
+    <column id="532" parent="245" name="context">
+      <Position>10</Position>
       <Comment>提现成功时额外的提示信息</Comment>
       <DataType>varchar(255)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="532" parent="245" name="user_userWithdraw">
+    <index id="533" parent="245" name="user_userWithdraw">
       <ColNames>user_id</ColNames>
     </index>
-    <key id="533" parent="245" name="PRIMARY">
+    <key id="534" parent="245" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="534" parent="245" name="user_userWithdraw">
+    <foreign-key id="535" parent="245" name="user_userWithdraw">
       <ColNames>user_id</ColNames>
       <RefSchemaName>tc-company</RefSchemaName>
       <RefTableName>user</RefTableName>

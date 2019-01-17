@@ -13,6 +13,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +35,14 @@ public class QueryFinance extends PageRequest {
     private WithdrawType type;
     private Timestamp createTimeBegin;
     private Timestamp createTimeEnd;
+    @NotNull
+    private Timestamp auditPassBegin;
+    @NotNull
+    private Timestamp auditPassEnd;
     /**
      * 设置查看方式用的
      */
+    @NotNull
     private DateType dateType;
 
 
@@ -139,6 +145,22 @@ public class QueryFinance extends PageRequest {
         this.createTimeEnd = createTimeEnd;
     }
 
+    public Timestamp getAuditPassBegin() {
+        return auditPassBegin;
+    }
+
+    public void setAuditPassBegin(Timestamp auditPassBegin) {
+        this.auditPassBegin = auditPassBegin;
+    }
+
+    public Timestamp getAuditPassEnd() {
+        return auditPassEnd;
+    }
+
+    public void setAuditPassEnd(Timestamp auditPassEnd) {
+        this.auditPassEnd = auditPassEnd;
+    }
+
     public DateType getDateType() {
         return dateType;
     }
@@ -158,7 +180,8 @@ public class QueryFinance extends PageRequest {
         predicates.add(QueryUtils.equals(root.get(UserWithdraw.USER).get(User.USERNAME),cb,queryFinance.account));
 
         predicates.add(QueryUtils.between(root,cb,User.MONEY,queryFinance.getMoneyBegin(),queryFinance.getMoneyEnd()));
-        predicates.add(QueryUtils.between(root, cb, User.CREATE_TIME, queryFinance.getCreateTimeBegin(), queryFinance.getCreateTimeEnd()));
+        predicates.add(QueryUtils.between(root, cb, UserWithdraw.CREATE_TIME, queryFinance.getCreateTimeBegin(), queryFinance.getCreateTimeEnd()));
+        predicates.add(QueryUtils.between(root, cb, UserWithdraw.AUDIT_PASS_TIME, queryFinance.getAuditPassBegin(), queryFinance.getAuditPassEnd()));
 
         predicates.removeIf(Objects::isNull);
 

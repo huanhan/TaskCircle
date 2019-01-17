@@ -58,10 +58,11 @@ public interface UserWithdrawRepository extends JpaRepository<UserWithdraw,Strin
      * @param id
      * @return
      */
-    @Query(value = "update UserWithdraw t set t.realityMoney = :realityMoney,t.context = :context,t.state = :state,t.adminAuditTime = NULL " +
+    @Query(value = "update UserWithdraw t set t.realityMoney = :realityMoney,t.context = :context,t.auditPassTime = :passTime,t.state = :state,t.adminAuditTime = NULL " +
             "where t.id = :id")
     int updateState(@Param("realityMoney") Float realityMoney,
                     @Param("context") String context,
+                    @Param("passTime") Timestamp auditPassTime,
                     @Param("state") WithdrawState state,
                     @Param("id") String id);
 

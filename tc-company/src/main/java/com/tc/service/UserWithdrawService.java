@@ -5,7 +5,9 @@ import com.tc.db.enums.WithdrawState;
 import com.tc.dto.finance.QueryFinance;
 import org.springframework.data.domain.Page;
 
+import javax.management.Query;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 评论仓库
@@ -18,6 +20,13 @@ public interface UserWithdrawService extends BasicService<UserWithdraw> {
      * @return
      */
     Page<UserWithdraw> findByQueryFinance(QueryFinance queryFinance);
+
+    /**
+     * 根据查询条件获取用户财务记录
+     * @param queryFinance
+     * @return
+     */
+    List<UserWithdraw> findByQueryFinanceNotPage(QueryFinance queryFinance);
 
     /**
      * 自动更新用户提现状态

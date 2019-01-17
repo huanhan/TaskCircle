@@ -108,6 +108,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         count = userWithdrawRepository.updateState(
                                 realityMoney,
                                 "审核服务费：" + FloatHelper.sub(money, realityMoney),
+                                new Timestamp(System.currentTimeMillis()),
                                 WithdrawState.SUCCESS,
                                 userWithdraw.getId()
                         );

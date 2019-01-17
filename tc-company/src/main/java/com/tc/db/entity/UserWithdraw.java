@@ -31,6 +31,7 @@ public class UserWithdraw implements Serializable {
     public static final String CREATE_TIME = "createTime";
     public static final String AUDIT_WITHDRAWS = "auditWithdraws";
     public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
+    public static final String AUDIT_PASS_TIME = "auditPassTime";
     public static final String USER = "user";
 
     private String id;
@@ -42,6 +43,7 @@ public class UserWithdraw implements Serializable {
     private WithdrawType type;
     private Timestamp createTime;
     private Timestamp adminAuditTime;
+    private Timestamp auditPassTime;
     private Collection<AuditWithdraw> auditWithdraws;
     private User user;
 
@@ -138,6 +140,16 @@ public class UserWithdraw implements Serializable {
 
     public void setAdminAuditTime(Timestamp adminAuditTime) {
         this.adminAuditTime = adminAuditTime;
+    }
+
+    @Basic
+    @Column(name = "audit_pass_time")
+    public Timestamp getAuditPassTime() {
+        return auditPassTime;
+    }
+
+    public void setAuditPassTime(Timestamp auditPassTime) {
+        this.auditPassTime = auditPassTime;
     }
 
     @Override

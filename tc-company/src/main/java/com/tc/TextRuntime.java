@@ -2,10 +2,17 @@ package com.tc;
 
 import com.tc.until.IdGenerator;
 import com.tc.until.TelephoneUtil;
+import com.tc.until.TimestampHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.TemporalField;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TextRuntime {
@@ -23,6 +30,32 @@ public class TextRuntime {
         System.out.println(b1.multiply(b2).floatValue());
         System.out.println(b1.remainder(b2).floatValue());
         System.out.println(b1.divide(b2,3,0).floatValue());
+
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+
+        LocalDateTime localDateTime = now.toLocalDateTime();
+        LocalDate localDate = LocalDate.of(localDateTime.getYear(),localDateTime.getMonth(),localDateTime.getDayOfMonth());
+        int year = localDateTime.getYear();
+        int monty = localDateTime.getMonth().getValue();
+        int day = localDateTime.getDayOfMonth();
+
+        System.out.println(year + "/" + monty + "/" + day);
+        Timestamp dayBegin = new Timestamp(Date.from(LocalDate.of(year,11,day).atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime());
+        System.out.println(dayBegin.getTime());
+
+        if(TimestampHelper.isToday(dayBegin)){
+            System.out.println("是当天");
+        }else {
+            System.out.println("不是当天");
+        }
+
+        System.out.println(TimestampHelper.toLocalDate(now).toString());
+
+        System.out.println(TimestampHelper.todayEndByTimestamp());
+        System.out.println(localDate.lengthOfMonth());
+
 
     }
 }
