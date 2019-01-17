@@ -80,4 +80,10 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
         int count = userWithdrawRepository.updateState(id,state,new Timestamp(now.getTime()));
         return count > 0;
     }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public UserWithdraw findOne(String id) {
+        return userWithdrawRepository.findOne(id);
+    }
 }

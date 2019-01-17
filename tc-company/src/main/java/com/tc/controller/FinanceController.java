@@ -48,7 +48,7 @@ public class FinanceController {
      * @param queryFinance 查询条件
      * @return
      */
-    @GetMapping("/all")
+    @PostMapping("/all")
     @ApiOperation(value = "获取公司收入与支出列表")
     public Result all(@Valid @RequestBody QueryFinance queryFinance,BindingResult bindingResult){
         if (bindingResult.hasErrors()){
