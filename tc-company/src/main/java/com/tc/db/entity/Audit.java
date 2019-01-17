@@ -43,54 +43,7 @@ public class Audit {
     private Admin admin;
     private AuditHunterTask auditHunterTask;
 
-    public static Audit toDetail(Audit result) {
-        if (result != null){
-            if (result.getAuditWithdraw() != null){
-                result.setAuditWithdraw(new AuditWithdraw(result.getAuditWithdraw().getWithdrawId()));
-            }
-            if (result.getAuditTask() != null){
-                result.setAuditTask(new AuditTask(result.getAuditTask().getTaskId(),result.getAuditTask().getMoney()));
-            }
-            if (result.getAuditHunter() != null){
-                result.setAuditHunter(new AuditHunter(result.getAuditHunter().getUserId()));
-            }
-            if (result.getAdmin() != null) {
-                result.setAdmin(new Admin(result.getAdminId(), result.getAdmin().getUser().getName(), result.getAdmin().getUser().getUsername()));
-            }
-            if (result.getAuditHunterTask() != null){
-                result.setAuditHunterTask(new AuditHunterTask(result.getAuditHunterTask().getHunterTaskId()));
-            }
-        }
-        return result;
-    }
 
-    /**
-     * 权限审核列表
-     * @param audits
-     * @return
-     */
-    public static List<Audit> toListInIndex(List<Audit> audits) {
-        if (!ListUtils.isEmpty(audits)){
-            audits.forEach(audit ->{
-                if (audit.getAuditHunter() != null){
-                    audit.setAuditHunter(new AuditHunter(audit.getAuditHunter().getUserId()));
-                }
-                if (audit.getAuditHunterTask() != null){
-                    audit.setAuditHunterTask(new AuditHunterTask(audit.getAuditHunterTask().getHunterTaskId()));
-                }
-                if (audit.getAuditWithdraw() != null){
-                    audit.setAuditWithdraw(new AuditWithdraw(audit.getAuditWithdraw().getWithdrawId()));
-                }
-                if (audit.getAuditTask() != null){
-                    audit.setAuditTask(new AuditTask(audit.getAuditTask().getTaskId(),audit.getAuditTask().getMoney()));
-                }
-                if (audit.getAdmin() != null) {
-                    audit.setAdmin(new Admin(audit.getAdminId(), audit.getAdmin().getUser().getName(), audit.getAdmin().getUser().getUsername()));
-                }
-            });
-        }
-        return audits;
-    }
 
     @Id
     @Column(name = "id")
@@ -237,5 +190,55 @@ public class Audit {
 
     public void setAuditHunterTask(AuditHunterTask auditHunterTask) {
         this.auditHunterTask = auditHunterTask;
+    }
+
+
+    public static Audit toDetail(Audit result) {
+        if (result != null){
+            if (result.getAuditWithdraw() != null){
+                result.setAuditWithdraw(new AuditWithdraw(result.getAuditWithdraw().getWithdrawId()));
+            }
+            if (result.getAuditTask() != null){
+                result.setAuditTask(new AuditTask(result.getAuditTask().getTaskId(),result.getAuditTask().getMoney()));
+            }
+            if (result.getAuditHunter() != null){
+                result.setAuditHunter(new AuditHunter(result.getAuditHunter().getUserId()));
+            }
+            if (result.getAdmin() != null) {
+                result.setAdmin(new Admin(result.getAdminId(), result.getAdmin().getUser().getName(), result.getAdmin().getUser().getUsername()));
+            }
+            if (result.getAuditHunterTask() != null){
+                result.setAuditHunterTask(new AuditHunterTask(result.getAuditHunterTask().getHunterTaskId()));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 权限审核列表
+     * @param audits
+     * @return
+     */
+    public static List<Audit> toListInIndex(List<Audit> audits) {
+        if (!ListUtils.isEmpty(audits)){
+            audits.forEach(audit ->{
+                if (audit.getAuditHunter() != null){
+                    audit.setAuditHunter(new AuditHunter(audit.getAuditHunter().getUserId()));
+                }
+                if (audit.getAuditHunterTask() != null){
+                    audit.setAuditHunterTask(new AuditHunterTask(audit.getAuditHunterTask().getHunterTaskId()));
+                }
+                if (audit.getAuditWithdraw() != null){
+                    audit.setAuditWithdraw(new AuditWithdraw(audit.getAuditWithdraw().getWithdrawId()));
+                }
+                if (audit.getAuditTask() != null){
+                    audit.setAuditTask(new AuditTask(audit.getAuditTask().getTaskId(),audit.getAuditTask().getMoney()));
+                }
+                if (audit.getAdmin() != null) {
+                    audit.setAdmin(new Admin(audit.getAdminId(), audit.getAdmin().getUser().getName(), audit.getAdmin().getUser().getUsername()));
+                }
+            });
+        }
+        return audits;
     }
 }

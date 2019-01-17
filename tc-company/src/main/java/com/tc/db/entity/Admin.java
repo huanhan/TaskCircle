@@ -42,6 +42,7 @@ public class Admin {
     private Collection<Authority> authorities;
     private Collection<Message> messages;
     private Collection<TaskClassify> taskClassifies;
+    private Collection<Condition> conditionsByUserId;
 
     public Admin() {
     }
@@ -56,6 +57,70 @@ public class Admin {
         this.setUser(new User(userId,name,username));
     }
 
+
+    public Admin(Long userId, User user) {
+        this.userId = userId;
+        if (user != null){
+            this.user = new User(userId,user.getName(),user.getUsername());
+        }
+    }
+
+    public static List<Show> toShows(List<Admin> admins){
+        List<Show> result = new ArrayList<>();
+        if (!admins.isEmpty()){
+            admins.forEach(admin ->{
+                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
+            });
+        }
+        return result;
+    }
+
+    public static List<Long> toKeys(List<Admin> list) {
+        List<Long> result = new ArrayList<>();
+        if (!list.isEmpty()){
+            list.forEach(admin -> result.add(admin.getUserId()));
+        }
+        return result;
+    }
+
+    /**
+     * 管理员管理列表
+     * @param admins
+     * @return
+     */
+    public static List<Admin> toListInIndex(List<Admin> admins) {
+        if (!ListUtils.isEmpty(admins)){
+            admins.forEach(admin ->{
+                User user = new User(admin.getUserId(),admin.getUser().getName());
+                user.setUsername(admin.getUser().getUsername());
+                user.setPhone(admin.getUser().getPhone());
+                user.setAddress(admin.getUser().getAddress());
+                admin.setUser(user);
+                admin.setAdmin(null);
+                admin.setAdmins(null);
+                admin.setAdminAuthorities(null);
+                admin.setAudits(null);
+                admin.setAuthorities(null);
+                admin.setMessages(null);
+                admin.setTaskClassifies(null);
+            });
+        }
+        return admins;
+    }
+
+    public static Admin toDetail(Admin admin){
+        if (admin != null){
+            admin.setUser(User.toDetail(admin.getUser()));
+            admin.setAdmin(new Admin(admin.getCreateId()));
+            admin.setAdmins(null);
+            admin.setAdminAuthorities(null);
+            admin.setAudits(null);
+            admin.setAuthorities(null);
+            admin.setMessages(null);
+            admin.setTaskClassifies(null);
+        }
+        return admin;
+    }
 
     @Id
     @Column(name = "user_id")
@@ -191,61 +256,12 @@ public class Admin {
         this.taskClassifies = taskClassifies;
     }
 
-    public static List<Show> toShows(List<Admin> admins){
-        List<Show> result = new ArrayList<>();
-        if (!admins.isEmpty()){
-            admins.forEach(admin ->{
-                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
-            });
-        }
-        return result;
+    @OneToMany(mappedBy = "admin")
+    public Collection<Condition> getConditionsByUserId() {
+        return conditionsByUserId;
     }
 
-    public static List<Long> toKeys(List<Admin> list) {
-        List<Long> result = new ArrayList<>();
-        if (!list.isEmpty()){
-            list.forEach(admin -> result.add(admin.getUserId()));
-        }
-        return result;
+    public void setConditionsByUserId(Collection<Condition> conditionsByUserId) {
+        this.conditionsByUserId = conditionsByUserId;
     }
-
-    /**
-     * 管理员管理列表
-     * @param admins
-     * @return
-     */
-    public static List<Admin> toListInIndex(List<Admin> admins) {
-        if (!ListUtils.isEmpty(admins)){
-            admins.forEach(admin ->{
-                User user = new User(admin.getUserId(),admin.getUser().getName());
-                user.setUsername(admin.getUser().getUsername());
-                user.setPhone(admin.getUser().getPhone());
-                user.setAddress(admin.getUser().getAddress());
-                admin.setUser(user);
-                admin.setAdmin(null);
-                admin.setAdmins(null);
-                admin.setAdminAuthorities(null);
-                admin.setAudits(null);
-                admin.setAuthorities(null);
-                admin.setMessages(null);
-                admin.setTaskClassifies(null);
-            });
-        }
-        return admins;
-    }
-
-    public static Admin toDetail(Admin admin){
-        if (admin != null){
-            admin.setUser(User.toDetail(admin.getUser()));
-            admin.setAdmin(new Admin(admin.getCreateId()));
-            admin.setAdmins(null);
-            admin.setAdminAuthorities(null);
-            admin.setAudits(null);
-            admin.setAuthorities(null);
-            admin.setMessages(null);
-            admin.setTaskClassifies(null);
-        }
-        return admin;
-    }
-
 }

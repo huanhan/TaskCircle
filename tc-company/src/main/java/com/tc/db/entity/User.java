@@ -203,10 +203,7 @@ public class User implements Serializable {
      * 用户的提现与充值记录
      */
     private Collection<UserWithdraw> userWithdraws;
-    /**
-     * 一个用户接收多个消息
-     */
-    private Collection<UserMessage> userMessages;
+
     public User() {
     }
 
@@ -654,14 +651,6 @@ public class User implements Serializable {
         this.userWithdraws = userWithdrawsById;
     }
 
-    @OneToMany(mappedBy = "user")
-    public Collection<UserMessage> getUserMessages() {
-        return userMessages;
-    }
-
-    public void setUserMessages(Collection<UserMessage> userMessages) {
-        this.userMessages = userMessages;
-    }
 
     public interface UserBasicView {}
 
@@ -680,7 +669,6 @@ public class User implements Serializable {
         user.setUserHunterInterflows(null);
         user.setUserImgs(null);
         user.setUserIncome(null);
-        user.setUserMessages(null);
         user.setUserOperationLogs(null);
         user.setUserWithdraws(null);
         user.setHunter(null);

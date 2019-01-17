@@ -1,10 +1,14 @@
 package com.tc.controller;
 
 import com.tc.db.entity.Message;
+import com.tc.dto.Result;
 import com.tc.dto.message.AddMessage;
 import com.tc.dto.message.ModifyMessage;
 import com.tc.dto.message.QueryMessage;
+import com.tc.service.MessageService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +26,21 @@ import java.util.List;
 @RequestMapping(value = "/message")
 public class MessageController {
 
+    @Autowired
+    private MessageService messageService;
+
+
+
     /**
      * 根据查询条件，获取消息列表
      * @param queryMessage 查询条件
-     * @param result 检查异常信息
      * @return
      */
     @GetMapping("/all")
     @ApiOperation(value = "根据查询条件，获取消息列表")
-    public List<Message> all(@Valid @RequestBody QueryMessage queryMessage, BindingResult result){
-        return new ArrayList<>();
+    public Result all(QueryMessage queryMessage){
+        Page<Message> query = messageService.findByQuery(queryMessage);
+        return Result.init(Message.toListByIndex(query.getContent()),queryMessage);
     }
 
     /**
@@ -42,7 +51,8 @@ public class MessageController {
     @GetMapping("/detail/{id:\\d+}")
     @ApiOperation(value = "获取消息详情")
     public Message detail(@PathVariable("id") Long id){
-        return new Message();
+        Message result = messageService.findOne(id);
+        return Message.toDetail(result);
     }
 
     /**
