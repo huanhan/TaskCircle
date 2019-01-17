@@ -1,7 +1,10 @@
 package com.tc.db.enums;
 
-import java.sql.Timestamp;
 
+/**
+ * 查看类型
+ * @author Cyg
+ */
 public enum DateType {
 
     DAY("日"),

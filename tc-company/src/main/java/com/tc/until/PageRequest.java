@@ -4,6 +4,11 @@ import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+
+/**
+ * 分页与排序
+ * @author Cyg
+ */
 public class PageRequest extends AbstractPageRequest {
 
     private static final long serialVersionUID = -4541509938956089562L;

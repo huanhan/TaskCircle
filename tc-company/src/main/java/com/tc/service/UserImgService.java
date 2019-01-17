@@ -3,7 +3,7 @@ package com.tc.service;
 import com.tc.db.entity.UserImg;
 
 /**
- * 评论仓库
+ * 用户图片服务
  *
  * @author Cyg
  */

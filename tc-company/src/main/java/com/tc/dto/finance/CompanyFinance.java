@@ -96,6 +96,17 @@ public class CompanyFinance extends PageRequest {
 
 
     public static List<CompanyFinance> getBy(List<UserWithdraw> content, DateType type) {
+        switch (type){
+            case DAY:
+
+
+
+                break;
+            case MONTH:
+                break;
+            case YEAR:
+                break;
+        }
 
 
 

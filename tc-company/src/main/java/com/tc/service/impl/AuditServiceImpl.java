@@ -1,5 +1,6 @@
 package com.tc.service.impl;
 
+import com.tc.controller.FinanceController;
 import com.tc.db.entity.*;
 import com.tc.db.enums.*;
 import com.tc.db.repository.*;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,19 +101,23 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
                     }
 
-                    WithdrawState withdrawState = WithdrawState.FAILED;
-                    //如果审核通过，设置提现状态为成功
-                    if (audit.getResult().equals(AuditState.PASS)) {
-                        withdrawState = WithdrawState.SUCCESS;
-                    }
-                    count = userWithdrawRepository.updateState(withdrawState,audit.getAuditWithdraw().getWithdrawId());
+                    Float money = userWithdraw.getMoney();
+                    Float realityMoney = FloatHelper.subToBD(1f,FinanceController.VACUATE).multiply(new BigDecimal(money.toString())).floatValue();
 
-                    if (count > 0){
-                        //提现失败，需要将提现金额返回到用户账户
-                        if (withdrawState.equals(WithdrawState.FAILED)){
+                    if (audit.getResult().equals(AuditState.PASS)) {
+                        count = userWithdrawRepository.updateState(
+                                realityMoney,
+                                "审核服务费：" + FloatHelper.sub(money, realityMoney),
+                                WithdrawState.SUCCESS,
+                                userWithdraw.getId()
+                        );
+                    }else {
+                        count = userWithdrawRepository.updateState(WithdrawState.FAILED,userWithdraw.getId());
+                        if (count > 0){
                             count = userRepository.update(userWithdraw.getMoney(),userWithdraw.getUserId());
                         }
                     }
+
 
 
                     break;

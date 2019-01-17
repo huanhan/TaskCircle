@@ -16,6 +16,7 @@ public class UserImgServiceImpl extends AbstractBasicServiceImpl<UserImg> implem
     @Autowired
     private UserImgRepository userImgRepository;
 
+    @Override
     public long countByUserId(Long userId){
         return userImgRepository.countByUserId(userId);
     }

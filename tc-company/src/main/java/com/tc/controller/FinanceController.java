@@ -5,6 +5,7 @@ import com.tc.dto.finance.CompanyFinance;
 import com.tc.dto.finance.IESource;
 import com.tc.dto.finance.QueryFinance;
 import com.tc.service.UserWithdrawService;
+import com.tc.until.FloatHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,11 @@ import java.util.List;
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping(value = "/finance")
 public class FinanceController {
+
+    /**
+     * 用户提现的提成
+     */
+    public static final Float VACUATE = 0.05F;
 
 
     @Autowired

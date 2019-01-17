@@ -24,6 +24,8 @@ public class UserWithdraw implements Serializable {
     public static final String ID = "id";
     public static final String USER_ID = "userId";
     public static final String MONEY = "money";
+    public static final String REALITY_MONEY = "realityMoney";
+    public static final String CONTEXT = "context";
     public static final String STATE = "state";
     public static final String TYPE = "type";
     public static final String CREATE_TIME = "createTime";
@@ -34,14 +36,14 @@ public class UserWithdraw implements Serializable {
     private String id;
     private Long userId;
     private Float money;
+    private Float realityMoney;
+    private String context;
     private WithdrawState state;
     private WithdrawType type;
     private Timestamp createTime;
     private Timestamp adminAuditTime;
     private Collection<AuditWithdraw> auditWithdraws;
     private User user;
-
-
 
 
     @Id
@@ -72,6 +74,26 @@ public class UserWithdraw implements Serializable {
 
     public void setMoney(Float money) {
         this.money = money;
+    }
+
+    @Basic
+    @Column(name = "reality_money")
+    public Float getRealityMoney() {
+        return realityMoney;
+    }
+
+    public void setRealityMoney(Float realityMoney) {
+        this.realityMoney = realityMoney;
+    }
+
+    @Basic
+    @Column(name = "context")
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
     }
 
     @Basic

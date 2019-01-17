@@ -51,6 +51,22 @@ public interface UserWithdrawRepository extends JpaRepository<UserWithdraw,Strin
     int updateState(@Param("id") String id, @Param("state") WithdrawState state, @Param("time")Timestamp timestamp);
 
     /**
+     * 更新用户状态，包括真实金额，内容，状态，和依据的用户编号
+     * @param realityMoney
+     * @param context
+     * @param state
+     * @param id
+     * @return
+     */
+    @Query(value = "update UserWithdraw t set t.realityMoney = :realityMoney,t.context = :context,t.state = :state,t.adminAuditTime = NULL " +
+            "where t.id = :id")
+    int updateState(@Param("realityMoney") Float realityMoney,
+                    @Param("context") String context,
+                    @Param("state") WithdrawState state,
+                    @Param("id") String id);
+
+
+    /**
      * 根据猎刃任务编号与状态查询
      * @param uwId
      * @param state

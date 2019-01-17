@@ -22,7 +22,7 @@ public class CommentUserServiceImpl extends AbstractBasicServiceImpl<CommentUser
     @Autowired
     private CommentUserRepository commentUserRepository;
 
-
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Long countByUserId(Long userid) {
         return commentUserRepository.countByUserId(userid);
