@@ -1,5 +1,8 @@
 package com.tc.db.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum TaskState {
 
     /**
@@ -93,5 +96,17 @@ public enum TaskState {
 
     TaskState(String state) {
         this.state = state;
+    }
+
+    /**
+     * 需要条件放弃的状态列表
+     * 所有要放弃的任务都时有条件的
+     * 放弃的任务一般都是在用户的任务被接取之后
+     * 任务没有被接取之前和任务发布之后的是可以下架的状态
+     * @return
+     */
+    public static List<TaskState> conditionAbandon(){
+        List<TaskState> result = new ArrayList<>();
+        return result;
     }
 }

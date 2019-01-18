@@ -29,6 +29,30 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     List<HunterTask> findBy(@Param("id") String taskId,@Param("state") HunterTaskState hunterTaskState);
 
     /**
+     * 获取指定任务的猎刃任务列表
+     * @param taskId
+     * @return
+     */
+    List<HunterTask> findByTaskId(String taskId);
+
+    /**
+     * 根据编号列表获取
+     * @param ids
+     * @return
+     */
+    List<HunterTask> findByIdIn(List<String> ids);
+
+
+    /**
+     * 获取猎刃编号列表
+     * @param ids
+     * @return
+     */
+    @Query(value = "select distinct t.hunterId from HunterTask t where t.id in (:ids)")
+    List<Long> findHunterById(@Param("ids") List<String> ids);
+
+
+    /**
      * 根据猎刃任务编号与状态查询
      * @param taskId
      * @param hunterTaskState
@@ -67,4 +91,12 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = :time where t.id = :id")
     int updateState(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time")Timestamp timestamp);
+
+    /**
+     * 获取指定任务编号与包含指定状态的猎刃任务
+     * @param id 指定的任务编号
+     * @param states 指定的状态
+     * @return
+     */
+    List<HunterTask> findByTaskIdAndStateIn(String id,List<HunterTaskState> states);
 }

@@ -8,11 +8,13 @@ import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
 import com.tc.dto.task.*;
+import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskService;
 import com.tc.service.HunterTaskStepService;
 import com.tc.service.TaskService;
 import com.tc.service.TaskStepService;
+import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,7 +160,7 @@ public class AppTaskController {
     }
 
     /**
-     * todo 审核押金 未完善
+     *
      * 普通用户将任务提交审核
      * <p>
      * 需要审核的任务有（用户新建任务，用户放弃的任务）
@@ -172,18 +174,27 @@ public class AppTaskController {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
-        //判断任务的发布者与提交任务审核的用户是否一致
-        if (task.getUser().getId() == id) {
-            //判断任务的状态是新建任务还是，用户放弃任务
-            if (task.getState() == TaskState.NEW_CREATE) {
-                //修改任务状态为新建任务 -> AWAIT_AUDIT
-                taskService.updateState(task.getId(), TaskState.AWAIT_AUDIT, new Date());
-            }
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
 
-            if (task.getState() == TaskState.NEW_CREATE) {
-                //修改任务状态为用户放弃任务 -> COMMIT_AUDIT
-                taskService.updateState(task.getId(), TaskState.COMMIT_AUDIT, new Date());
-            }
+        //判断任务的发布者与提交任务审核的用户是否一致
+        if (!task.getUser().getId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+        //判断任务的状态是否允许提交审核
+        if (!hasCommit(task)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //提交审核，即修改状态
+        boolean isSuccess = taskService.commitAudit(taskId,task.getState());
+
+        //验证修改是否成功
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
 
@@ -292,9 +303,18 @@ public class AppTaskController {
     @DeleteMapping("/remove/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "删除我的任务")
     public void delete(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-        //根据任务编号获取任务详情
+        //根据任务编号获取任务
+        Task task = taskService.findOne(taskId);
 
-        //判断任务发布者与用户编号是否相同
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的发布者与删除任务的用户是否一致
+        if (!task.getUser().getId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
 
         //判断当前的任务状态是否允许被删除
 
@@ -376,14 +396,45 @@ public class AppTaskController {
     }
 
     /**
-     * 用户或者猎刃点击放弃任务
+     * 用户点击放弃任务
+     * 放弃成功的任务将直接退还押金，并且不能重新发布
+     * @param id
+     * @param taskId
+     */
+    @GetMapping("/user/abandon/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击放弃任务")
+    public void abandonTaskByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+        //根据任务编号获取任务
+        Task task = taskService.findOne(taskId);
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的发布者与放弃任务的用户是否一致
+        if (!task.getUser().getId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+        //如果该放弃的任务不需要协商，不需要审核，则直接放弃任务，退还押金，并退还猎刃的押金，和将猎刃的任务状态修改为任务被放弃
+        int count = taskService.abandonTask(id,task);
+
+        if (count != 0){
+            throw new ValidException("目前有" + count + "猎刃正在执行该任务！已将任务做下架处理");
+        }
+    }
+
+
+    /**
+     * 猎刃点击放弃任务
      *
      * @param id
      * @param taskId
      */
-    @GetMapping("/abandon/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "用户或者猎刃点击放弃任务")
-    public void abandonTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    @GetMapping("/user/abandon/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击放弃任务")
+    public void abandonTaskByHunter(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据Id判断放弃任务的是用户还是猎刃
 
         //根据taskId获取任务详情
@@ -394,7 +445,6 @@ public class AppTaskController {
 
         //如果不满足，则抛除异常并交由用户自己选择
     }
-
 
     /**
      * 判断传入的猎刃任务状态是否允许访问
@@ -425,6 +475,29 @@ public class AppTaskController {
 
         return true;
     }
+
+
+    /**
+     * 判断用户提交审核时的状态是否允许提交
+     * @param task
+     * @return
+     */
+    private boolean hasCommit(Task task){
+        TaskState taskState = task.getState();
+
+        //任务新建状态可提交审核
+        if (taskState.equals(TaskState.NEW_CREATE)){
+            return true;
+        }
+
+        //猎刃拒绝状态可提交审核
+        if (taskState.equals(TaskState.HUNTER_REJECT)){
+            return true;
+        }
+
+        return false;
+    }
+
 
 
 }

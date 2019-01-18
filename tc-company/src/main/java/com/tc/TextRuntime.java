@@ -58,6 +58,9 @@ public class TextRuntime {
         System.out.println(TimestampHelper.todayEndByTimestamp());
         System.out.println(localDate.lengthOfMonth());
 
+        System.out.println(TimestampHelper.differByMinute(new Timestamp(System.currentTimeMillis()),
+                TimestampHelper.toTimestamp(LocalDateTime.of(2019,1,18,13,50))));
+
         user();
     }
 

@@ -7,9 +7,12 @@ import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
+import com.tc.db.repository.UserRepository;
 import com.tc.dto.task.QueryTask;
+import com.tc.exception.DBException;
 import com.tc.service.TaskService;
 import com.tc.until.ListUtils;
+import com.tc.until.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,9 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
     @Autowired
     private HunterTaskRepository hunterTaskRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
@@ -91,6 +97,98 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             int count = taskRepository.updateState(ids,state);
             return count > 0;
         }
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean commitAudit(String taskId, TaskState state) {
+
+        int count = 0;
+
+        if (state.equals(TaskState.NEW_CREATE) || state.equals(TaskState.HUNTER_REJECT)){
+           //任务提交审核时一般只修改状态与提交审核的时间，不做其他额外的操作
+
+           count = taskRepository.updateStateAndAuditTime(taskId,state,new Timestamp(System.currentTimeMillis()));
+
+        }
+
+        return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public int abandonTask(Long id, Task task) {
+        int count = 0;
+
+        //获取猎刃任务中接取状态的猎刃任务，并且从中选择接取时间小于允许放弃的时间
+        List<HunterTask> hts = hunterTaskRepository.findBy(task.getId(),HunterTaskState.RECEIVE);
+        List<String> ids = new ArrayList<>();
+        if (hts != null){
+            hts.forEach(hunterTask -> {
+                if (TimestampHelper.differByMinute(TimestampHelper.today(),hunterTask.getAcceptTime()) <= task.getPermitAbandonMinute()){
+                    ids.add(hunterTask.getId());
+                }
+            });
+        }
+
+        //先将可直接放弃的猎刃任务放弃掉
+        if (!ListUtils.isEmpty(ids)) {
+
+            //设置猎刃任务的状态为被放弃
+            count = hunterTaskRepository.updateState(ids, HunterTaskState.TASK_BE_ABANDON);
+
+            if (count != ids.size()) {
+                throw new DBException("修改猎刃任务状态错误");
+            }
+
+            //获取对应的猎刃编号
+            List<Long> hids = hunterTaskRepository.findHunterById(ids);
+
+            if (hids.size() != ids.size()) {
+                throw new DBException("数据获取异常");
+            }
+
+            count = userRepository.update(hids, task.getCompensateMoney());
+
+            if (count != ids.size()) {
+                throw new DBException("退还猎刃押金失败");
+            }
+
+        }
+
+        //获取该任务猎刃执行情况表中不允许放弃的猎刃任务
+        hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(),HunterTaskState.notAbandon());
+        if (ListUtils.isEmpty(hts)){
+            //说明用户已经可以直接放弃任务
+            count = taskRepository.updateState(task.getId(),TaskState.ABANDON_OK);
+
+            if (count <= 0){
+                throw new DBException("更新任务状态失败");
+            }
+
+            Float money = task.getMoney();
+
+            //更新用户金额（退还押金）
+            count = userRepository.update(money,id);
+
+            if (count <= 0){
+                throw new DBException("退还用户押金失败");
+            }
+
+            count = 0;
+        }else {
+            //将任务状态设置为禁止状态，防止之后的人接取
+            count = taskRepository.updateState(task.getId(),TaskState.FORBID_RECEIVE);
+
+            if (count <= 0){
+                throw new DBException("更新任务状态失败");
+            }
+
+            //说明由猎刃正在执行中，返回正在执行的猎刃数量
+            count = hts.size();
+        }
+
+        return count;
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)

@@ -19,7 +19,8 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
     @Autowired
     private HunterTaskStepRepository hunterTaskStepRepository;
 
-    public List<HunterTaskStep> findByHunterTaskId(String id,Sort sort) {
+    @Override
+    public List<HunterTaskStep> findByHunterTaskId(String id, Sort sort) {
         return hunterTaskStepRepository.findByHunterTaskId(id,sort);
     }
 }

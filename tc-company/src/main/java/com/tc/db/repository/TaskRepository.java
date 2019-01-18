@@ -39,6 +39,18 @@ public interface TaskRepository extends JpaRepository<Task,String>,JpaSpecificat
     int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") TaskState state, @Param("time")Timestamp timestamp);
 
     /**
+     * 更新任务状态与用户提交审核时间
+     * @param id
+     * @param state
+     * @param timestamp
+     * @return
+     */
+    @Modifying
+    @Query(value = "update Task t set t.state = :state, t.auditTime = :time where t.id = :id")
+    int updateStateAndAuditTime(@Param("id") String id, @Param("state") TaskState state, @Param("time")Timestamp timestamp);
+
+
+    /**
      * 更新任务状态与任务发布时间
      * @param id
      * @param state

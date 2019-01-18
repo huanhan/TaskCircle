@@ -6,6 +6,7 @@ import com.tc.dto.task.QueryTask;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 评论仓库
@@ -48,4 +49,20 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean updateState(TaskState state);
+
+    /**
+     * 用户将任务提交审核
+     * @param taskId 任务编号
+     * @param state 任务状态
+     * @return
+     */
+    boolean commitAudit(String taskId, TaskState state);
+
+    /**
+     * 用户放弃任务
+     * @param id
+     * @param taskId
+     * @return
+     */
+    int abandonTask(Long id, Task taskId);
 }

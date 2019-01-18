@@ -1,5 +1,8 @@
 package com.tc.db.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum HunterTaskState {
 
     /**
@@ -41,5 +44,36 @@ public enum HunterTaskState {
 
     HunterTaskState(String state) {
         this.state = state;
+    }
+
+    public static List<HunterTaskState> notAbandon(){
+        List<HunterTaskState> result = new ArrayList<>();
+        result.add(AWAIT_BEGIN);
+        result.add(BEGIN);
+        result.add(EXECUTORY);
+        result.add(TASK_COMPLETE);
+        result.add(AWAIT_USER_AUDIT);
+        result.add(USER_AUDIT);
+        result.add(AWAIT_BEGIN);
+        result.add(AWAIT_SETTLE_ACCOUNTS);
+        result.add(SETTLE_ACCOUNTS_SUCCESS);
+        result.add(SETTLE_ACCOUNTS_EXCEPTION);
+        result.add(USER_ADUIT_FAILED);
+        result.add(COMMIT_ADMIN_ADUIT);
+        result.add(ADMIN_ADUIT);
+        result.add(ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
+        result.add(ALLOW_REWORK_ABANDON_NO_COMPENSATE);
+        result.add(NO_REWORK_NO_COMPENSATE);
+        result.add(NO_REWORK_HAVE_COMPENSATE);
+        result.add(AWAIT_COMPENSATE);
+        result.add(COMPENSATE_SUCCESS);
+        result.add(COMPENSATE_EXCEPTION);
+        result.add(NEGOTIATE_VALIDATOR);
+        result.add(WITH_USER_NEGOTIATE);
+        result.add(USER_REPULSE);
+        result.add(HUNTER_REPULSE);
+        result.add(COMMIT_TO_ADMIN);
+        result.add(WITH_ADMIN_NEGOTIATE);
+        return result;
     }
 }

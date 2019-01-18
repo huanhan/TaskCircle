@@ -13,6 +13,15 @@ import java.util.Date;
  */
 public class TimestampHelper {
 
+
+    /**
+     * 获取当前时间
+     * @return
+     */
+    public static Timestamp today(){
+        return new Timestamp(System.currentTimeMillis());
+    }
+
     /**
      * 判断传入的时间是否当天
      * @param timestamp
@@ -229,4 +238,20 @@ public class TimestampHelper {
         }
         return result;
     }
+
+
+    /**
+     * 返回两个时间相差的分钟数
+     * @param t1
+     * @param t2
+     * @return
+     */
+    public static long differByMinute(Timestamp t1,Timestamp t2){
+        if (t1.after(t2)){
+            long differ = t1.getTime() - t2.getTime();
+            return differ/1000/60;
+        }
+        return 0;
+    }
+
 }
