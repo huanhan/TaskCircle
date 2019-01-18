@@ -1,5 +1,7 @@
 package com.tc.db.enums;
 
+import com.tc.db.entity.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +55,10 @@ public enum TaskState {
      * 用户点击任务删除按钮
      */
     DELETE("任务正在删除"),
+    /**
+     * 用户提交放弃申请
+     */
+    ABANDON_COMMIT("用户提交放弃的申请"),
     /**
      * 用户点击放弃任务按钮，并经过一系列判断后
      */
@@ -108,5 +114,14 @@ public enum TaskState {
     public static List<TaskState> conditionAbandon(){
         List<TaskState> result = new ArrayList<>();
         return result;
+    }
+
+    public static boolean isIssue(TaskState taskState){
+        switch (taskState){
+            case AUDIT_SUCCESS:
+                return true;
+            default:
+                return false;
+        }
     }
 }

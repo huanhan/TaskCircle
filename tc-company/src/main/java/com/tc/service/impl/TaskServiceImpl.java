@@ -3,6 +3,7 @@ package com.tc.service.impl;
 import com.tc.controller.AuditController;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
+import com.tc.db.entity.User;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.HunterTaskRepository;
@@ -10,8 +11,10 @@ import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserRepository;
 import com.tc.dto.task.QueryTask;
 import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.TaskService;
 import com.tc.until.ListUtils;
+import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -135,7 +138,7 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         if (!ListUtils.isEmpty(ids)) {
 
             //设置猎刃任务的状态为被放弃
-            count = hunterTaskRepository.updateState(ids, HunterTaskState.TASK_BE_ABANDON);
+            count = hunterTaskRepository.updateStateAndAdminAuditTime(ids, HunterTaskState.TASK_BE_ABANDON);
 
             if (count != ids.size()) {
                 throw new DBException("修改猎刃任务状态错误");
@@ -177,8 +180,8 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
             count = 0;
         }else {
-            //将任务状态设置为禁止状态，防止之后的人接取
-            count = taskRepository.updateState(task.getId(),TaskState.FORBID_RECEIVE);
+            //将任务状态设置为用户提交放弃申请状态，防止之后的人接取
+            count = taskRepository.updateState(task.getId(),TaskState.ABANDON_COMMIT);
 
             if (count <= 0){
                 throw new DBException("更新任务状态失败");
@@ -189,6 +192,28 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         }
 
         return count;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Task updateAndUserMoney(Task task) {
+        //获取发布该任务的用户信息
+        User user = task.getUser();
+        if (user.getMoney() < task.getMoney()){
+            throw new ValidException("用户余额不足");
+        }
+        //保存新的任务信息，并设置状态为发布状态
+        task.setState(TaskState.ISSUE);
+        Task result = taskRepository.save(task);
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+        //扣除用户押金
+        int count = userRepository.update(-task.getMoney(),user.getId());
+        if (count <= 0){
+            throw new DBException("扣除用户押金失败,任务发布失败");
+        }
+        return result;
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)

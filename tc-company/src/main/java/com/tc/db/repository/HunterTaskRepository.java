@@ -69,7 +69,8 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      */
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = NULL where t.id in (:ids)")
-    int updateState(@Param("ids") List<String> ids,@Param("state") HunterTaskState state);
+    int updateStateAndAdminAuditTime(@Param("ids") List<String> ids, @Param("state") HunterTaskState state);
+
 
     /**
      * 更新任务状态，并将审核时间制空
@@ -79,7 +80,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      */
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state where t.id = :id")
-    int updateState(@Param("id") String id,@Param("state") HunterTaskState state);
+    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") HunterTaskState state);
 
     /**
      * 更新猎刃任务状态与审核时间
@@ -90,7 +91,18 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      */
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = :time where t.id = :id")
-    int updateState(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time")Timestamp timestamp);
+    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time")Timestamp timestamp);
+
+    /**
+     * 更新猎刃任务状态与开始时间
+     * @param id
+     * @param state
+     * @param timestamp
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.state = :state, t.beginTime = :time where t.id = :id")
+    int updateStateAndBeginTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time")Timestamp timestamp);
 
     /**
      * 获取指定任务编号与包含指定状态的猎刃任务
@@ -99,4 +111,11 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     List<HunterTask> findByTaskIdAndStateIn(String id,List<HunterTaskState> states);
+
+    /**
+     * 根据任务编号获取猎刃任务数量
+     * @param id
+     * @return
+     */
+    int countByTaskId(String id);
 }

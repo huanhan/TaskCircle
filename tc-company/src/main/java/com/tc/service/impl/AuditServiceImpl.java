@@ -6,7 +6,6 @@ import com.tc.db.enums.*;
 import com.tc.db.repository.*;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.exception.DBException;
-import com.tc.service.AuditHunterService;
 import com.tc.service.AuditService;
 import com.tc.until.FloatHelper;
 import com.tc.until.IdGenerator;
@@ -162,7 +161,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
 
                             List<String> ids = HunterTask.toIds(hunterTasks);
 
-                            count = hunterTaskRepository.updateState(ids,HunterTaskState.TASK_BE_ABANDON);
+                            count = hunterTaskRepository.updateStateAndAdminAuditTime(ids,HunterTaskState.TASK_BE_ABANDON);
 
                             //必须将列表中的猎刃任务状态都修改成功
                             if (count != ids.size()){
@@ -229,7 +228,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
                     }
                     //当猎刃放弃任务需要管理员审核时，不管通过与否都将任务状态置为放弃
-                    count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+                    count = hunterTaskRepository.updateStateAndAdminAuditTime(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
 
                     if (count <= 0){
                         throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
@@ -281,7 +280,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     }
                     if (result.getResult().equals(AuditState.NRHC) || result.getResult().equals(AuditState.NRNC)){
                         //设置猎刃任务状态为（结束未完成）
-                        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_NO);
+                        count = hunterTaskRepository.updateStateAndAdminAuditTime(hunterTask.getId(),HunterTaskState.END_NO);
 
                         if (count <= 0){
                             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);

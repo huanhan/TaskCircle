@@ -6,9 +6,15 @@ import com.tc.db.entity.Task;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.HunterTaskRepository;
+import com.tc.db.repository.TaskRepository;
+import com.tc.db.repository.UserRepository;
 import com.tc.dto.task.QueryHunterTask;
+import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskService;
 import com.tc.until.ListUtils;
+import com.tc.until.StringResourceCenter;
+import com.tc.until.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -29,6 +35,12 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Autowired
     private HunterTaskRepository hunterTaskRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
@@ -53,7 +65,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             return true;
         }else {
             List<String> ids = HunterTask.toIds(tasks);
-            int count = hunterTaskRepository.updateState(ids,state);
+            int count = hunterTaskRepository.updateStateAndAdminAuditTime(ids,state);
             return count > 0;
         }
     }
@@ -67,7 +79,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState(String id, HunterTaskState state, Date date) {
-        int count = hunterTaskRepository.updateState(id,state,new Timestamp(date.getTime()));
+        int count = hunterTaskRepository.updateStateAndAdminAuditTime(id,state,new Timestamp(date.getTime()));
         return count > 0;
     }
 
@@ -75,5 +87,54 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
     @Override
     public List<HunterTask> findByTaskId(String taskId) {
         return hunterTaskRepository.findByTaskId(taskId);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean acceptTask(Long id, String taskId) {
+
+        int count;
+
+        Task task = taskRepository.findOne(taskId);
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        if (!task.getState().equals(TaskState.ISSUE)){
+            throw new ValidException("任务已被人接取");
+        }
+        int numberPeople = hunterTaskRepository.countByTaskId(taskId);
+
+        //判断任务是否被接满
+        if (numberPeople + 1 >= task.getPeopleNumber()){
+            //设置任务状态为禁止接取
+            count = taskRepository.updateState(taskId,TaskState.FORBID_RECEIVE);
+
+            if (count <= 0){
+                throw new DBException("设置任务状态失败");
+            }
+        }
+
+        //猎刃接任务（新增一条猎刃任务记录）
+        HunterTask news = HunterTask.init(taskId,id);
+        HunterTask result = hunterTaskRepository.save(news);
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
+
+        //扣除押金
+        count = userRepository.update(task.getCompensateMoney(),result.getHunterId());
+
+        if (count <= 0){
+            throw new DBException("扣除押金失败");
+        }
+
+        return true;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean beginTask(String taskId) {
+        int count = hunterTaskRepository.updateStateAndBeginTime(taskId,HunterTaskState.BEGIN,TimestampHelper.today());
+        return count > 0;
     }
 }

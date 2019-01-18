@@ -46,25 +46,7 @@ public class TaskController {
     @Autowired
     private TaskClassifyRelationService taskClassifyRelationService;
 
-    @PostMapping()
-    @ApiOperation("添加任务")
-    public Task add(@Valid @RequestBody AddTask addTask,BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
-        Task task = taskService.save(AddTask.toTask(addTask));
-        return Task.toDetail(task);
-    }
 
-    @PostMapping("/step")
-    @ApiOperation("添加任务步骤")
-    public TaskStep add(@Valid @RequestBody AddTaskStep addTaskStep,BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
-        TaskStep taskStep = taskStepService.save(AddTaskStep.toTaskStep(addTaskStep));
-        return TaskStep.toDetail(taskStep);
-    }
 
     /**
      * 根据查询条件获取任务列表

@@ -65,4 +65,11 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     int abandonTask(Long id, Task taskId);
+
+    /**
+     * 保存发布的任务信息与扣除用户押金
+     * @param task
+     * @return
+     */
+    Task updateAndUserMoney(Task task);
 }

@@ -14,6 +14,7 @@ import com.tc.service.HunterTaskService;
 import com.tc.service.HunterTaskStepService;
 import com.tc.service.TaskService;
 import com.tc.service.TaskStepService;
+import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
@@ -53,6 +54,154 @@ public class AppTaskController {
     @Autowired
     private HunterTaskStepService hunterTaskStepService;
 
+
+    /**
+     * 步骤1：新建任务在保存成功后的状态为NEW_CREATE("新建")
+     * 用户添加任务
+     * @param addTask
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping()
+    @ApiOperation("添加任务")
+    public Task add(@Valid @RequestBody AddTask addTask,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        Task task = taskService.save(AddTask.toTask(addTask));
+        return Task.toDetail(task);
+    }
+
+    /**
+     * 步骤1：属于添加任务
+     * 可能需要判断任务的状态，属于指定状态的任务才允许添加步骤
+     * 用户添加任务步骤
+     * @param addTaskStep
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping("/step")
+    @ApiOperation("添加任务步骤")
+    public TaskStep add(@Valid @RequestBody AddTaskStep addTaskStep,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        //根据任务编号获取任务
+        Task task = taskService.findOne(addTaskStep.getTaskId());
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        if (task.getState().equals(TaskState.NEW_CREATE)){
+            throw new ValidException("只有新建状态下的任务才允许添加步骤");
+        }
+
+        TaskStep taskStep = taskStepService.save(AddTaskStep.toTaskStep(addTaskStep));
+        return TaskStep.toDetail(taskStep);
+    }
+
+    /**
+     *
+     * 普通用户将任务提交审核
+     * 步骤2：用户提交新建任务的审核，此时任务状态被修改为AWAIT_AUDIT("等待审核")
+     * <p>
+     * 需要审核的任务有（用户新建任务，用户放弃的任务）
+     *
+     * @param id
+     * @param taskId
+     */
+    @GetMapping("/user/upAudit/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "将用户的任务提交审核")
+    public void upAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+        //根据任务编号获取任务
+        Task task = taskService.findOne(taskId);
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的发布者与提交任务审核的用户是否一致
+        if (!task.getUser().getId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+        //判断任务的状态是否允许提交审核
+        if (!hasCommit(task)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //提交审核，即修改状态
+        boolean isSuccess = taskService.commitAudit(taskId,task.getState());
+
+        //验证修改是否成功
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
+    /**
+     * 步骤3：用户点击发布任务按钮，如果发布成功，状态会变成ISSUE("任务发布中")
+     *
+     * 用户发布任务，要求补充完整任务信息
+     * 用户只能修改允许修改的内容，允许修改的内容由IssueTaskDTO指定
+     * 点击了发布按钮后，会从用户账户中扣除需要的押金
+     *
+     * <p>
+     * task需要替换成DTO
+     *
+     * @param id   用户编号
+     * @param issueTask 任务信息
+     */
+    @PostMapping("/issue/{id:\\d+}")
+    @ApiOperation(value = "发布我的任务")
+    public Task issueTask(@PathVariable("id") Long id, @Valid @RequestBody IssueTask issueTask, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        //根据任务编号获取任务
+        Task task = taskService.findOne(issueTask.getId());
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务状态是否允许发布
+        if (!TaskState.isIssue(task.getState())){
+            throw new DBException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //将DTO转成Entity
+        IssueTask.toTask(task,issueTask);
+
+        //判断用户的罚金是否在允许范围之内
+        if (task.getPeopleNumber() <= 10){
+            if (task.getCompensateMoney() > FloatHelper.multiply(task.getMoney(),0.1f) || task.getCompensateMoney() <= 0) {
+                throw new ValidException("罚金不符合规范");
+            }
+        }else {
+            if (task.getCompensateMoney() >
+                    FloatHelper.multiply(task.getMoney(),FloatHelper.divied(1f,(float)task.getPeopleNumber())) ||
+                    task.getCompensateMoney() <= 0){
+                throw new ValidException("罚金不符合规范");
+            }
+        }
+
+        //修改任务状态为发布状态，并且在修改完后，从用户账户中扣除发布需要的押金
+        Task result = taskService.updateAndUserMoney(task);
+
+        return Task.toDetail(result);
+
+    }
+
+    private boolean hasScope(Float money, Float compensateMoney) {
+        return false;
+    }
+
+
     /**
      * 根据状态获取指定用户的任务列表
      *
@@ -69,6 +218,8 @@ public class AppTaskController {
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
         return Result.init(taskPage);
     }
+
+
 
     /**
      * 根据状态获取指定猎刃的任务列表
@@ -159,44 +310,7 @@ public class AppTaskController {
         return Result.init(hunterTaskPage);
     }
 
-    /**
-     *
-     * 普通用户将任务提交审核
-     * <p>
-     * 需要审核的任务有（用户新建任务，用户放弃的任务）
-     *
-     * @param id
-     * @param taskId
-     */
-    @GetMapping("/user/upAudit/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "将用户的任务提交审核")
-    public void upAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-        //根据任务编号获取任务
-        Task task = taskService.findOne(taskId);
 
-        //判断查询的任务是否存在
-        if (task == null){
-            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
-        }
-
-        //判断任务的发布者与提交任务审核的用户是否一致
-        if (!task.getUser().getId().equals(id)){
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
-
-        //判断任务的状态是否允许提交审核
-        if (!hasCommit(task)){
-            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
-        }
-
-        //提交审核，即修改状态
-        boolean isSuccess = taskService.commitAudit(taskId,task.getState());
-
-        //验证修改是否成功
-        if (!isSuccess){
-            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-        }
-    }
 
     /**
      * todo 审核押金 未完善
@@ -321,21 +435,7 @@ public class AppTaskController {
         //删除任务，将任务状态修改为删除状态
     }
 
-    /**
-     * 猎刃接任务
-     *
-     * @param id
-     * @param taskId
-     */
-    @GetMapping("/accept/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "猎刃接任务")
-    public void acceptTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-        //获取用户详情信息
 
-        //判断该用户是否可以接任务
-
-        //在service中添加猎刃任务信息，需要做如下判断：任务是否允许被接，接完后是否需要修改任务状态，接完任务猎刃需要缴纳的押金
-    }
 
     /**
      * 任务执行步骤情况
@@ -355,27 +455,7 @@ public class AppTaskController {
     }
 
 
-    /**
-     * 用户发布任务
-     * <p>
-     * task需要替换成DTO
-     *
-     * @param id   用户编号
-     * @param task 任务信息
-     */
-    @GetMapping("/issue/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "发布我的任务")
-    public void issueTask(@PathVariable("id") Long id, @Valid @RequestBody Task task, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
 
-        //获取任务信息
-
-        //判断任务状态是否允许发布
-
-        //修改任务状态为发布状态，并且在修改完后，从用户账户中扣除发布需要的押金
-    }
 
     /**
      * 用户撤回
@@ -432,10 +512,9 @@ public class AppTaskController {
      * @param id
      * @param taskId
      */
-    @GetMapping("/user/abandon/{taskId:\\d+}/{id:\\d+}")
+    @GetMapping("/hunter/abandon/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击放弃任务")
     public void abandonTaskByHunter(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-        //根据Id判断放弃任务的是用户还是猎刃
 
         //根据taskId获取任务详情
 

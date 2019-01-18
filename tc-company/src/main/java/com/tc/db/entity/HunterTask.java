@@ -1,7 +1,9 @@
 package com.tc.db.entity;
 
 import com.tc.db.enums.HunterTaskState;
+import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -40,6 +42,7 @@ public class HunterTask implements Serializable {
     private Timestamp finishTime;
     private Timestamp auditTime;
     private Timestamp adminAuditTime;
+    private Timestamp beginTime;
     private String context;
     private Integer hunterRejectCount;
     private Integer userRejectCount;
@@ -83,6 +86,8 @@ public class HunterTask implements Serializable {
         return result;
     }
 
+
+
     @Id
     @Column(name = "id")
     public String getId() {
@@ -114,6 +119,7 @@ public class HunterTask implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "accept_time")
     public Timestamp getAcceptTime() {
         return acceptTime;
@@ -151,6 +157,16 @@ public class HunterTask implements Serializable {
 
     public void setAdminAuditTime(Timestamp adminAuditTime) {
         this.adminAuditTime = adminAuditTime;
+    }
+
+    @Basic
+    @Column(name = "begin_time")
+    public Timestamp getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(Timestamp beginTime) {
+        this.beginTime = beginTime;
     }
 
     @Basic
@@ -232,6 +248,15 @@ public class HunterTask implements Serializable {
         this.hunter = hunterByHunterId;
     }
 
+    @OneToMany(mappedBy = "hunterTask")
+    public Collection<AuditHunterTask> getAuditHunterTasksById() {
+        return auditHunterTasksById;
+    }
+
+    public void setAuditHunterTasksById(Collection<AuditHunterTask> auditHunterTasksById) {
+        this.auditHunterTasksById = auditHunterTasksById;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -264,12 +289,17 @@ public class HunterTask implements Serializable {
         hunterTaskSteps = null;
     }
 
-    @OneToMany(mappedBy = "hunterTask")
-    public Collection<AuditHunterTask> getAuditHunterTasksById() {
-        return auditHunterTasksById;
-    }
 
-    public void setAuditHunterTasksById(Collection<AuditHunterTask> auditHunterTasksById) {
-        this.auditHunterTasksById = auditHunterTasksById;
+    /**
+     * 新增一条猎刃任务记录
+     * @return
+     */
+    public static HunterTask init(String taskId,Long hunterId) {
+        HunterTask hunterTask = new HunterTask();
+        hunterTask.setId(IdGenerator.INSTANCE.nextId());
+        hunterTask.setTaskId(taskId);
+        hunterTask.setHunterId(hunterId);
+        hunterTask.setState(HunterTaskState.RECEIVE);
+        return hunterTask;
     }
 }

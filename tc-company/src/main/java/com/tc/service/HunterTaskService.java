@@ -49,4 +49,19 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     List<HunterTask> findByTaskId(String taskId);
+
+    /**
+     * 猎刃接任务
+     * @param id
+     * @param taskId
+     * @return
+     */
+    boolean acceptTask(Long id, String taskId);
+
+    /**
+     * 猎刃开始任务
+     * @param taskId
+     * @return
+     */
+    boolean beginTask(String taskId);
 }
