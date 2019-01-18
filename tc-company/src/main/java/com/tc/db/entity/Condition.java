@@ -13,7 +13,7 @@ import java.util.Objects;
  * 消息条件实体
  * @author Cyg
  */
-@Entity
+@Entity(name = "my_condition")
 public class Condition {
 
     public static final String ID = "id";
@@ -152,7 +152,7 @@ public class Condition {
     }
 
     public static List<Condition> toListInIndex(List<Condition> content) {
-        if (ListUtils.isEmpty(content)){
+        if (!ListUtils.isEmpty(content)){
             content.forEach(condition -> {
                 condition.messageConditions = null;
                 if (condition.admin != null){

@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.BeanUtils;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 /**
  * 添加查询条件
@@ -60,6 +61,7 @@ public class AddCondition {
     public static Condition toCondition(AddCondition addCondition) {
         Condition condition = new Condition();
         BeanUtils.copyProperties(addCondition,condition);
+        condition.setCreationTime(new Timestamp(System.currentTimeMillis()));
         return condition;
     }
 }

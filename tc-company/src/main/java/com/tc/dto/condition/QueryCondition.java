@@ -130,7 +130,7 @@ public class QueryCondition extends PageRequest {
         predicates.add(QueryUtils.equals(root,cb,Condition.ADMIN_ID,queryCondition.adminId));
         predicates.add(QueryUtils.equals(root,cb,Condition.NAME,queryCondition.name));
         predicates.add(QueryUtils.equals(root.get(Condition.ADMIN).get(Admin.USER).get(User.NAME),cb,queryCondition.adminName));
-        predicates.add(QueryUtils.equals(root.get(Condition.NAME).get(Admin.USER).get(User.USERNAME),cb,queryCondition.account));
+        predicates.add(QueryUtils.equals(root.get(Condition.ADMIN).get(Admin.USER).get(User.USERNAME),cb,queryCondition.account));
 
         predicates.add(QueryUtils.like(root,cb,Condition.CONTEXT,queryCondition.context));
         predicates.add(QueryUtils.like(root,cb,Condition.VALUE,queryCondition.value));
