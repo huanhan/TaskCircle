@@ -10,6 +10,7 @@ import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.HunterTaskStepRepository;
 import com.tc.db.repository.TaskStepRepository;
 import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskStepService;
 import com.tc.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,16 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
         if (hunterTaskStep == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
+        HunterTask hunterTask = hunterTaskStep.getHunterTask();
+
+
+        //验证指定的猎刃任务是否可以删除
+        if (!hunterTask.getState().equals(HunterTaskState.EXECUTORY)
+                || !hunterTask.getState().equals(HunterTaskState.TASK_COMPLETE)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+
         //删除的时候需要判断猎刃任务状态是不是已经完成，如果已经完成，则需要调整成未完成
         if (hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.TASK_COMPLETE)){
             count = hunterTaskRepository.updateState(hunterTaskStep.getHunterTaskId(),HunterTaskState.EXECUTORY);

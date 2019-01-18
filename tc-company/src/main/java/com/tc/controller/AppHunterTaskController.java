@@ -178,6 +178,12 @@ public class AppHunterTaskController {
 
     }
 
+    /**
+     * 步骤3：删除猎刃的任务步骤，需要判断任务状态，满足指定状态才允许删除，删除成功后将修改状态为EXECUTORY("正在执行")
+     * @param id
+     * @param deleteHunterTaskStep
+     * @param bindingResult
+     */
     @PostMapping("/delete/step")
     @ApiOperation(value = "删除猎刃的任务步骤")
     public void delete(@PathVariable("id") Long id, @Valid @RequestBody DeleteHunterTaskStep deleteHunterTaskStep, BindingResult bindingResult){
@@ -193,7 +199,7 @@ public class AppHunterTaskController {
 
 
     /**
-     * 步骤4：
+     * 步骤3：
      * 猎刃修改执行任务的内容
      * @param id
      * @param modifyHunterTask
@@ -231,6 +237,16 @@ public class AppHunterTaskController {
         return HunterTask.toDetail(hunterTask);
     }
 
+    /**
+     * 步骤4：提交用户审核，当前猎刃任务的状态必须为TASK_COMPLETE("任务完成")
+     * 提交成功后，任务状态变为AWAIT_USER_AUDIT("等待用户审核")
+     * @param id
+     * @param htId
+     */
+    @GetMapping("/user/audit/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃将任务提交用户审核")
+    public void upAuditToUser(@PathVariable("id") Long id,@PathVariable("htId") Long htId){
 
+    }
 
 }
