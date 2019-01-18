@@ -103,7 +103,9 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 步骤3：猎刃开始执行任务，如果是第一次添加步骤，则修改任务的状态为EXECUTORY("正在执行")
+     * 步骤3：猎刃开始执行任务，
+     * 如果是第一次添加步骤，则修改任务的状态为EXECUTORY("正在执行")
+     * 如果添加的是最后一次步骤，则修改任务的状态为TASK_COMPLETE("任务完成")
      * @param id
      * @param addHunterTaskStep
      * @param bindingResult
@@ -121,10 +123,9 @@ public class AppHunterTaskController {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
-        //验证指定的猎刃任务是否可以修改
+        //验证指定的猎刃任务是否可以添加
         if (!query.getState().equals(HunterTaskState.BEGIN)
-                || !query.getState().equals(HunterTaskState.EXECUTORY)
-                || !query.getState().equals(HunterTaskState.TASK_COMPLETE)){
+                || !query.getState().equals(HunterTaskState.EXECUTORY)){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 

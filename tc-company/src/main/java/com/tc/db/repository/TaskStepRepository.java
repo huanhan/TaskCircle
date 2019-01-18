@@ -35,4 +35,10 @@ public interface TaskStepRepository extends JpaRepository<TaskStep,TaskStepPK>,J
     int updateTaskStep(@Param("step") Integer step,@Param("id") String id);
 
 
+    /**
+     * 获取任务下的步骤数量
+     * @param taskId
+     * @return
+     */
+    int countByTaskId(String taskId);
 }
