@@ -3,6 +3,7 @@ package com.tc.controller;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.enums.TaskState;
+import com.tc.dto.huntertask.ModifyHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskService;
@@ -12,8 +13,10 @@ import com.tc.until.TimestampHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.sql.Timestamp;
 
 /**
@@ -88,6 +91,27 @@ public class AppHunterTaskController {
         if (!isBegin){
             throw new DBException("任务未能开始！");
         }
+    }
+
+
+    /**
+     * 猎刃修改执行任务的内容
+     * @param id
+     * @param modifyHunterTask
+     * @param bindingResult
+     * @return
+     */
+    @PutMapping("/update/{id:\\d+}")
+    @ApiOperation(value = "猎刃修改执行的任务的内容")
+    public HunterTask update(@PathVariable("id") Long id, @Valid @RequestBody ModifyHunterTask modifyHunterTask, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        HunterTask hunterTask = hunterTaskService.update(modifyHunterTask.getId(),modifyHunterTask.getContext());
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
+        return HunterTask.toDetail(hunterTask);
     }
 
 }

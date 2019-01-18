@@ -137,4 +137,14 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         int count = hunterTaskRepository.updateStateAndBeginTime(taskId,HunterTaskState.BEGIN,TimestampHelper.today());
         return count > 0;
     }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public HunterTask update(String id, String context) {
+        int count = hunterTaskRepository.updateContextById(id,context);
+        if (count > 0){
+            return hunterTaskRepository.findOne(id);
+        }
+        return null;
+    }
 }

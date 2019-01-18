@@ -62,29 +62,6 @@ public class HunterTask implements Serializable {
         }
     }
 
-    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
-        if (!ListUtils.isEmpty(content)){
-            content.forEach(hunterTask -> {
-                if (hunterTask.getTask() != null){
-                    hunterTask.setTask(new Task(hunterTask.getTask().getId(),hunterTask.getTask().getName()));
-                }
-                if (hunterTask.getHunter() != null){
-                    hunterTask.getHunter().toDetail();
-                }
-                hunterTask.commentHunters = null;
-                hunterTask.hunterTaskSteps = null;
-            });
-        }
-        return content;
-    }
-
-    public static List<String> toIds(List<HunterTask> tasks) {
-        List<String> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(tasks)){
-            tasks.forEach(task -> result.add(task.id));
-        }
-        return result;
-    }
 
 
 
@@ -289,6 +266,44 @@ public class HunterTask implements Serializable {
         hunterTaskSteps = null;
     }
 
+
+    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(hunterTask -> {
+                if (hunterTask.getTask() != null){
+                    hunterTask.setTask(new Task(hunterTask.getTask().getId(),hunterTask.getTask().getName()));
+                }
+                if (hunterTask.getHunter() != null){
+                    hunterTask.getHunter().toDetail();
+                }
+                hunterTask.commentHunters = null;
+                hunterTask.hunterTaskSteps = null;
+            });
+        }
+        return content;
+    }
+
+    public static List<String> toIds(List<HunterTask> tasks) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)){
+            tasks.forEach(task -> result.add(task.id));
+        }
+        return result;
+    }
+
+    public static HunterTask toDetail(HunterTask hunterTask) {
+        if (hunterTask != null){
+            if (hunterTask.task != null){
+                hunterTask.task = new Task(hunterTask.taskId,hunterTask.task.getName());
+            }
+            if (hunterTask.hunter != null){
+                hunterTask.hunter.toDetail();
+            }
+            hunterTask.commentHunters = null;
+            hunterTask.hunterTaskSteps = null;
+        }
+        return hunterTask;
+    }
 
     /**
      * 新增一条猎刃任务记录

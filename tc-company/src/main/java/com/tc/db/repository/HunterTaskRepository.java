@@ -118,4 +118,13 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     int countByTaskId(String id);
+
+    /**
+     * 更新内容
+     * @param id
+     * @param context
+     * @return
+     */
+    @Query(value = "update HunterTask  t set t.context = :context where t.id = :id")
+    int updateContextById(@Param("id") String id,@Param("context")  String context);
 }
