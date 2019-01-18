@@ -105,5 +105,12 @@ public class HunterTaskStep implements Serializable {
         return Objects.hash(hunterTask.getId(), step, finishTime, context, remake);
     }
 
-
+    public static HunterTaskStep toDetail(HunterTaskStep hunterTaskStep) {
+        if (hunterTaskStep != null){
+            if (hunterTaskStep.getHunterTask() != null){
+                hunterTaskStep.hunterTask = new HunterTask(hunterTaskStep.getHunterTaskId(),hunterTaskStep.getHunterTask().getTask());
+            }
+        }
+        return hunterTaskStep;
+    }
 }

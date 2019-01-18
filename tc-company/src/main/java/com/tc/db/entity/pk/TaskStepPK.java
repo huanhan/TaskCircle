@@ -24,8 +24,13 @@ public class TaskStepPK implements Serializable {
         this.taskId = taskId;
     }
 
+    public TaskStepPK() {
+    }
 
-
+    public TaskStepPK(String taskId, Integer step) {
+        this.taskId = taskId;
+        this.step = step;
+    }
 
     @Column(name = "step")
     @Id

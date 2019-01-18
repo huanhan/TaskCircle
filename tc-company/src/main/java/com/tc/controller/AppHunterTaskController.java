@@ -1,12 +1,16 @@
 package com.tc.controller;
 
 import com.tc.db.entity.HunterTask;
+import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.entity.Task;
+import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
+import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.huntertask.ModifyHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskService;
+import com.tc.service.HunterTaskStepService;
 import com.tc.service.TaskService;
 import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
@@ -34,6 +38,9 @@ public class AppHunterTaskController {
 
     @Autowired
     private HunterTaskService hunterTaskService;
+
+    @Autowired
+    private HunterTaskStepService hunterTaskStepService;
 
 
     /**
@@ -93,8 +100,45 @@ public class AppHunterTaskController {
         }
     }
 
+    /**
+     * 步骤3：猎刃开始执行任务，如果是第一次添加步骤，则修改任务的状态为EXECUTORY("正在执行")
+     * @param id
+     * @param addHunterTaskStep
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping("/add/step")
+    @ApiOperation(value = "添加猎刃的任务步骤")
+    public HunterTaskStep add(@PathVariable("id") Long id, @Valid @RequestBody AddHunterTaskStep addHunterTaskStep, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        //获取猎刃任务详情
+        HunterTask query = hunterTaskService.findOne(addHunterTaskStep.getId());
+        if (query == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //验证指定的猎刃任务是否可以修改
+        if (!query.getState().equals(HunterTaskState.BEGIN)
+                || !query.getState().equals(HunterTaskState.EXECUTORY)
+                || !query.getState().equals(HunterTaskState.TASK_COMPLETE)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        HunterTaskStep news = AddHunterTaskStep.toHunterTaskStep(addHunterTaskStep);
+        news.setHunterTask(query);
+
+        //添加步骤
+        HunterTaskStep result = hunterTaskStepService.save(news);
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
+        return HunterTaskStep.toDetail(result);
+    }
 
     /**
+     * 步骤4：
      * 猎刃修改执行任务的内容
      * @param id
      * @param modifyHunterTask
@@ -107,11 +151,31 @@ public class AppHunterTaskController {
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+
+        //获取猎刃任务详情
+        HunterTask old = hunterTaskService.findOne(modifyHunterTask.getId());
+        if (old == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //验证指定的猎刃任务是否可以修改
+        if (!old.getState().equals(HunterTaskState.BEGIN)
+                || !old.getState().equals(HunterTaskState.EXECUTORY)
+                || !old.getState().equals(HunterTaskState.TASK_COMPLETE)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+        if (old.getContext().equals(modifyHunterTask.getContext())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_UPDATE_ABNORMAL);
+        }
+
+        //修改内容
         HunterTask hunterTask = hunterTaskService.update(modifyHunterTask.getId(),modifyHunterTask.getContext());
         if (hunterTask == null){
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
         return HunterTask.toDetail(hunterTask);
     }
+
+
 
 }

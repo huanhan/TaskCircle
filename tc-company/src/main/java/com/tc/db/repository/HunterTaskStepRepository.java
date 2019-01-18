@@ -15,4 +15,11 @@ import java.util.List;
 public interface HunterTaskStepRepository extends JpaRepository<HunterTaskStep, HunterTaskStepPK> {
 
     List<HunterTaskStep> findByHunterTaskId(String id, Sort sort);
+
+    /**
+     * 获取猎刃任务对应的步骤的数量
+     * @param id
+     * @return
+     */
+    int countByHunterTaskId(String id);
 }

@@ -73,14 +73,14 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
 
 
     /**
-     * 更新任务状态，并将审核时间制空
+     * 更新任务状态
      * @param state
      * @param id
      * @return
      */
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state where t.id = :id")
-    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") HunterTaskState state);
+    int updateState(@Param("id") String id, @Param("state") HunterTaskState state);
 
     /**
      * 更新猎刃任务状态与审核时间

@@ -228,7 +228,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
                     }
                     //当猎刃放弃任务需要管理员审核时，不管通过与否都将任务状态置为放弃
-                    count = hunterTaskRepository.updateStateAndAdminAuditTime(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+                    count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
 
                     if (count <= 0){
                         throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
@@ -280,7 +280,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     }
                     if (result.getResult().equals(AuditState.NRHC) || result.getResult().equals(AuditState.NRNC)){
                         //设置猎刃任务状态为（结束未完成）
-                        count = hunterTaskRepository.updateStateAndAdminAuditTime(hunterTask.getId(),HunterTaskState.END_NO);
+                        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_NO);
 
                         if (count <= 0){
                             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
