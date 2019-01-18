@@ -1,7 +1,5 @@
 package com.tc.db.entity.pk;
 
-import com.tc.db.entity.HunterTask;
-
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;

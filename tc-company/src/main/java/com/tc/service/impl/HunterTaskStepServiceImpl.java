@@ -49,6 +49,31 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
+    public boolean deleteById(HunterTaskStepPK hunterTaskStepPK) {
+        int count;
+
+        HunterTaskStep hunterTaskStep = hunterTaskStepRepository.findOne(hunterTaskStepPK);
+        if (hunterTaskStep == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //删除的时候需要判断猎刃任务状态是不是已经完成，如果已经完成，则需要调整成未完成
+        if (hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.TASK_COMPLETE)){
+            count = hunterTaskRepository.updateState(hunterTaskStep.getHunterTaskId(),HunterTaskState.EXECUTORY);
+            if (count <= 0){
+                throw new DBException("修改猎刃任务状态失败");
+            }
+        }
+        try{
+            hunterTaskStepRepository.delete(hunterTaskStepPK);
+        }catch (Exception e){
+            throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
+        }
+
+        return true;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
     public HunterTaskStep save(HunterTaskStep hunterTaskStep) {
 
         //获取步骤对应的猎刃任务

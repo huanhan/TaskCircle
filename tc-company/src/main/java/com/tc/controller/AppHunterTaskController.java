@@ -8,6 +8,7 @@ import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.ModifyHunterTaskStep;
 import com.tc.dto.huntertask.AddHunterTaskStep;
+import com.tc.dto.huntertask.DeleteHunterTaskStep;
 import com.tc.dto.huntertask.ModifyHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -147,7 +148,7 @@ public class AppHunterTaskController {
      * @param bindingResult
      * @return
      */
-    @PostMapping("/update/step")
+    @PostMapping("/update/step/{id:\\d+}")
     @ApiOperation(value = "修改猎刃的任务步骤")
     public HunterTaskStep update(@PathVariable("id") Long id, @Valid @RequestBody ModifyHunterTaskStep modifyHunterTaskStep, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -175,6 +176,19 @@ public class AppHunterTaskController {
 
         return HunterTaskStep.toDetail(result);
 
+    }
+
+    @PostMapping("/delete/step")
+    @ApiOperation(value = "删除猎刃的任务步骤")
+    public void delete(@PathVariable("id") Long id, @Valid @RequestBody DeleteHunterTaskStep deleteHunterTaskStep, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+
+        boolean isDelete = hunterTaskStepService.deleteById(new HunterTaskStepPK(deleteHunterTaskStep.getHunterTaskId(),deleteHunterTaskStep.getStep()));
+        if (!isDelete){
+            throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
+        }
     }
 
 

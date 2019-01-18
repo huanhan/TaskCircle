@@ -21,4 +21,10 @@ public interface HunterTaskStepService extends BasicService<HunterTaskStep> {
      */
     HunterTaskStep findOne(HunterTaskStepPK hunterTaskStepPK);
 
+    /**
+     * 根据关联主键删除
+     * @param hunterTaskStepPK
+     * @return
+     */
+    boolean deleteById(HunterTaskStepPK hunterTaskStepPK);
 }
