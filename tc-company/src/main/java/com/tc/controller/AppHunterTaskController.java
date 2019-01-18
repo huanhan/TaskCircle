@@ -24,6 +24,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import java.sql.Timestamp;
 
 /**
@@ -245,8 +246,25 @@ public class AppHunterTaskController {
      */
     @GetMapping("/user/audit/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "猎刃将任务提交用户审核")
-    public void upAuditToUser(@PathVariable("id") Long id,@PathVariable("htId") Long htId){
-
+    public void upAuditToUser(@PathVariable("id") Long id,@PathVariable("htId") String htId){
+        //获取猎刃任务信息
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //判断猎刃任务与当前猎刃的关系
+        if (!hunterTask.getHunterId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        //对猎刃任务的状态进行判断
+        if (!hunterTask.getState().equals(HunterTaskState.TASK_COMPLETE)){
+            throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+        //提交用户审核（即修改状态）
+        boolean isSuccess = hunterTaskService.updateState(htId,HunterTaskState.AWAIT_USER_AUDIT);
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
     }
 
 }

@@ -102,7 +102,18 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      */
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state, t.beginTime = :time where t.id = :id")
-    int updateStateAndBeginTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time")Timestamp timestamp);
+    int updateStateAndBeginTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp timestamp);
+
+    /**
+     * 更新猎刃任务状态与完成时间
+     * @param id
+     * @param state
+     * @param finishTime
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.state = :state, t.finishTime = :time where t.id = :id")
+    int updateStateAndFinishTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp finishTime);
 
     /**
      * 获取指定任务编号与包含指定状态的猎刃任务
@@ -127,4 +138,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      */
     @Query(value = "update HunterTask  t set t.context = :context where t.id = :id")
     int updateContextById(@Param("id") String id,@Param("context")  String context);
+
+
+
 }

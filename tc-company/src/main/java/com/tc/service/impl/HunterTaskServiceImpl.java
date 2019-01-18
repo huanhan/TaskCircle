@@ -147,4 +147,18 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         }
         return null;
     }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean updateState(String htId, HunterTaskState state) {
+        int count = 0;
+        switch (state){
+            case AWAIT_USER_AUDIT:
+                count = hunterTaskRepository.updateStateAndFinishTime(htId,state,TimestampHelper.today());
+                break;
+            default:
+                break;
+        }
+        return count > 0;
+    }
 }
