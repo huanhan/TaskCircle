@@ -72,4 +72,11 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     Task updateAndUserMoney(Task task);
+
+    /**
+     * 用户撤回任务
+     * @param task
+     * @return
+     */
+    boolean outTask(Task task);
 }

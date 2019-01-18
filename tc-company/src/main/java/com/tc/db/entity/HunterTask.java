@@ -291,6 +291,14 @@ public class HunterTask implements Serializable {
         return result;
     }
 
+    public static List<Long> toUserIds(List<HunterTask> tasks) {
+        List<Long> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)){
+            tasks.forEach(task -> result.add(task.hunterId));
+        }
+        return result;
+    }
+
     public static HunterTask toDetail(HunterTask hunterTask) {
         if (hunterTask != null){
             if (hunterTask.task != null){

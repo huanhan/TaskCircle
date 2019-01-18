@@ -254,4 +254,24 @@ public class TimestampHelper {
         return 0;
     }
 
+    /**
+     * 将时间加上一个具体的分钟数
+     * @param timestamp
+     * @param minute
+     * @return
+     */
+    public static Timestamp addMinute(Timestamp timestamp,int minute){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        return TimestampHelper.toTimestamp(localDateTime.plusMinutes(minute));
+    }
+
+    /**
+     * 获取当前时间加一个具体的分钟数
+     * @param minute
+     * @return
+     */
+    public static Timestamp addMinuteByToday(int minute){
+        return addMinute(TimestampHelper.today(),minute);
+    }
+
 }

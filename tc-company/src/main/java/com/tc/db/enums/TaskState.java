@@ -44,6 +44,10 @@ public enum TaskState {
      */
     FORBID_RECEIVE("任务禁止被接取"),
     /**
+     * 任务被用户撤回
+     */
+    OUT("任务被撤回"),
+    /**
      * 用户发布任务被猎刃完成
      */
     FINISH("任务完成"),
@@ -119,6 +123,8 @@ public enum TaskState {
     public static boolean isIssue(TaskState taskState){
         switch (taskState){
             case AUDIT_SUCCESS:
+                return true;
+            case OK_ISSUE:
                 return true;
             default:
                 return false;

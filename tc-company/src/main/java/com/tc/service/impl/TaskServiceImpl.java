@@ -216,6 +216,44 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         return result;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean outTask(Task task) {
+        int count;
+
+        //获取满足放弃的条件的猎刃任务列表（任务编号，任务状态，允许放弃的分钟数）
+        List<HunterTask> queryHts = hunterTaskRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get(HunterTask.TASK_ID),task.getId()));
+            predicates.add(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE),HunterTaskState.RECEIVE));
+            predicates.add(cb.lessThan(root.get(HunterTask.ACCEPT_TIME),TimestampHelper.addMinuteByToday(task.getPermitAbandonMinute())));
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+        if (!ListUtils.isEmpty(queryHts)){
+            //获取猎刃任务编号，用来修改状态
+            List<String> ids = HunterTask.toIds(queryHts);
+            //获取用户编号，用来退回押金
+            List<Long> userIds = HunterTask.toUserIds(queryHts);
+            //设置猎刃任务的状态为被放弃
+            count = hunterTaskRepository.updateStateAndAdminAuditTime(ids, HunterTaskState.TASK_BE_ABANDON);
+            if (count != ids.size()){
+                throw new DBException("修改猎刃任务状态错误");
+            }
+            //退回猎刃押金
+            count = userRepository.update(userIds, task.getCompensateMoney());
+            if (count != ids.size()) {
+                throw new DBException("退还猎刃押金失败");
+            }
+        }
+        //修改任务状态为撤回
+        count = taskRepository.updateState(task.getId(),TaskState.OUT);
+        if (count <= 0){
+            throw new DBException("任务撤回失败");
+        }
+        return true;
+
+    }
+
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Task findOne(String id) {
