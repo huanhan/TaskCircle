@@ -3,8 +3,10 @@ package com.tc.controller;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.entity.Task;
+import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
+import com.tc.dto.ModifyHunterTaskStep;
 import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.huntertask.ModifyHunterTask;
 import com.tc.exception.DBException;
@@ -136,6 +138,44 @@ public class AppHunterTaskController {
         }
         return HunterTaskStep.toDetail(result);
     }
+
+    /**
+     * 步骤3：猎刃在执行过程中修改步骤内容，此时猎刃任务的状态一定是EXECUTORY("正在执行")
+     * @param id
+     * @param modifyHunterTaskStep
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping("/update/step")
+    @ApiOperation(value = "修改猎刃的任务步骤")
+    public HunterTaskStep update(@PathVariable("id") Long id, @Valid @RequestBody ModifyHunterTaskStep modifyHunterTaskStep, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+
+        HunterTaskStep hunterTaskStep = hunterTaskStepService.findOne(new HunterTaskStepPK(modifyHunterTaskStep.getId(),modifyHunterTaskStep.getStep()));
+        if (hunterTaskStep == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //对状态进行判断
+        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTORY)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        if(!ModifyHunterTaskStep.isUpdate(hunterTaskStep,modifyHunterTaskStep)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_UPDATE_ABNORMAL);
+        }
+
+        HunterTaskStep result = hunterTaskStepService.update(hunterTaskStep);
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+        return HunterTaskStep.toDetail(result);
+
+    }
+
 
     /**
      * 步骤4：

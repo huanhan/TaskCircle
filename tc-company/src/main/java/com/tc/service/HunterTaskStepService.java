@@ -1,6 +1,7 @@
 package com.tc.service;
 
 import com.tc.db.entity.HunterTaskStep;
+import com.tc.db.entity.pk.HunterTaskStepPK;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -12,5 +13,12 @@ import java.util.List;
  */
 public interface HunterTaskStepService extends BasicService<HunterTaskStep> {
     List<HunterTaskStep> findByHunterTaskId(String id,Sort sort);
+
+    /**
+     * 根据关联主键获取
+     * @param hunterTaskStepPK
+     * @return
+     */
+    HunterTaskStep findOne(HunterTaskStepPK hunterTaskStepPK);
 
 }

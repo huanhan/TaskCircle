@@ -3,6 +3,7 @@ package com.tc.service.impl;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.entity.TaskStep;
+import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.repository.HunterTaskRepository;
@@ -40,6 +41,12 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
         return hunterTaskStepRepository.findByHunterTaskId(id,sort);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public HunterTaskStep findOne(HunterTaskStepPK hunterTaskStepPK) {
+        return hunterTaskStepRepository.findOne(hunterTaskStepPK);
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public HunterTaskStep save(HunterTaskStep hunterTaskStep) {
@@ -70,5 +77,11 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
 
         //保存步骤
         return hunterTaskStepRepository.save(hunterTaskStep);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public HunterTaskStep update(HunterTaskStep user) {
+        return super.update(user);
     }
 }

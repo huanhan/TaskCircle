@@ -14,6 +14,14 @@ public class HunterTaskStepPK implements Serializable {
     private String hunterTaskId;
     private Integer step;
 
+    public HunterTaskStepPK() {
+    }
+
+    public HunterTaskStepPK(String id, Integer step) {
+        this.hunterTaskId = id;
+        this.step = step;
+    }
+
     @Column(name = "hunter_task_id")
     @Id
     public String getHunterTaskId() {
