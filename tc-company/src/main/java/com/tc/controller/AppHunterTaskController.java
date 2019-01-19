@@ -36,6 +36,10 @@ import javax.validation.ValidationException;
 @RequestMapping(value = "/app/ht")
 public class AppHunterTaskController {
 
+    /**
+     * 允许提交管理员协商的用户审核必要次数
+     */
+    private static final int OK_AUDIT_ADMIN_COUNT = 2;
 
     @Autowired
     private TaskService taskService;
@@ -315,6 +319,40 @@ public class AppHunterTaskController {
 
         //猎刃放弃任务
         boolean isSuccess = hunterTaskService.abandonTask(hunterTask,context.getContext());
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
+    /**
+     * HunterTask步骤5：猎刃将任务提交给管理员审核
+     * 如果是放弃任务的审核则设置状态为COMMIT_TO_ADMIN("提交管理员放弃申请")
+     * 如果是任务完成的审核则设置状态为COMMIT_ADMIN_AUDIT("任务完成，提交管理员审核")
+     * 猎刃需要无条件服从管理员审核
+     * @param id
+     * @param htId
+     */
+    @GetMapping("/admin/audit/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击提交管理员审核")
+    public void auditToAdmin(@PathVariable("id") Long id,@PathVariable("htId") String htId){
+        //获取猎刃任务信息
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的状态
+        if (!HunterTaskState.isUpAuditToAdmin(hunterTask.getState())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //判断与用户协商的次数是否达标
+        if (hunterTask.getUserRejectCount() < OK_AUDIT_ADMIN_COUNT){
+            throw new ValidException("请先与用户协商" + OK_AUDIT_ADMIN_COUNT + "次后，在提交审核");
+        }
+
+        //将任务提交管理员审核
+        boolean isSuccess = hunterTaskService.toAdminAudit(htId,hunterTask.getState());
         if (!isSuccess){
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

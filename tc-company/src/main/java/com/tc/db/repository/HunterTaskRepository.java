@@ -111,7 +111,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask t set t.state = :state, t.finishTime = :time where t.id = :id")
+    @Query(value = "update HunterTask t set t.state = :state, t.finishTime = :time,t.userRejectCount = 0 where t.id = :id")
     int updateStateAndFinishTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp finishTime);
 
     /**
@@ -148,7 +148,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state where t.id = :id")
+    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state, t.userRejectCount = t.userRejectCount + 1 where t.id = :id")
     int updateStateAndAuditContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
 
     /**
@@ -161,4 +161,25 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Modifying
     @Query(value = "update HunterTask  t set t.context = :context,t.state = :state where t.id = :id")
     int updateStateAndContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
+
+    /**
+     * 更新猎刃任务状态，并重置用户拒绝猎刃放弃次数
+     * @param id
+     * @param state
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask  t set t.userRejectCount = 0,t.state = :state where t.id = :id")
+    int updateStateAndResetURC(@Param("id") String id,@Param("state") HunterTaskState state);
+
+    /**
+     * 修改任务状态与猎刃提交审核的时间
+     * @param id
+     * @param state
+     * @param auditTime
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.state = :state, t.auditTime = :time where t.id = :id")
+    int updateStateAndAuditTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp auditTime);
 }

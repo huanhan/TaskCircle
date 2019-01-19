@@ -170,4 +170,25 @@ public enum HunterTaskState {
         return isFailure;
     }
 
+    /**
+     * 判断状态是否允许提交管理员审核
+     * @param state
+     * @return
+     */
+    public static boolean isUpAuditToAdmin(HunterTaskState state){
+        switch (state){
+            case USER_REPULSE:
+                return true;
+            case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
+                return true;
+            case ALLOW_REWORK_ABANDON_NO_COMPENSATE:
+                return true;
+            case NO_REWORK_NO_COMPENSATE:
+                return true;
+            case NO_REWORK_HAVE_COMPENSATE:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

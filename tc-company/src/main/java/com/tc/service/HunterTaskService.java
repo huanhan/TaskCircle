@@ -104,4 +104,12 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     boolean abandonTask(HunterTask hunterTask, String context);
+
+    /**
+     * 将任务交给管理员审核
+     * @param htId
+     * @param state
+     * @return
+     */
+    boolean toAdminAudit(String htId, HunterTaskState state);
 }

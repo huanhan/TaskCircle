@@ -173,7 +173,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
                 count = hunterTaskRepository.updateStateAndFinishTime(htId,state,TimestampHelper.today());
                 break;
             case TASK_COMPLETE:
-                count = hunterTaskRepository.updateState(htId,state);
+                count = hunterTaskRepository.updateStateAndResetURC(htId,state);
                 break;
             default:
                 break;
@@ -332,5 +332,12 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             throw new DBException("修改任务状态失败");
         }
         return false;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean toAdminAudit(String htId, HunterTaskState state) {
+        int count = hunterTaskRepository.updateStateAndAuditTime(htId,state,TimestampHelper.today());
+        return count > 0;
     }
 }
