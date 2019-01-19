@@ -333,7 +333,7 @@ public class AppTaskController {
     }
 
     /**
-     * HunterTask步骤4：用户点击提交不通过内容，此时会根据添加任务时设置的是否可重做，是否要补偿来设置猎刃任务的状态
+     * HunterTask步骤4：用户点击审核不通过，并提交不通过内容，此时会根据添加任务时设置的是否可重做，是否要补偿来设置猎刃任务的状态
      * 状态包括
      * ALLOW_REWORK_ABANDON_HAVE_COMPENSATE("允许重做，放弃要补偿"),
      *     ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
@@ -382,6 +382,65 @@ public class AppTaskController {
                 "放弃任务" + (isCompensate? "不需要" : "需要") + "赔偿");
     }
 
+    /**
+     * HunterTask步骤5：用户点击不同意猎刃放弃按钮，此时回将猎刃任务状态设置为USER_REPULSE（用户拒绝猎刃放弃）
+     * @param id
+     * @param context
+     * @param bindingResult
+     */
+    @PostMapping("/abandon/failure/{id:\\d+}")
+    @ApiOperation(value = "用户点击猎刃任务放弃申请不通过")
+    public void abandonNotPass(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        //根据编号获取猎刃任务
+        HunterTask hunterTask = hunterTaskService.findOne(context.getId());
+
+        //判断查询的任务是否存在
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的状态
+        if (!hunterTask.getState().equals(HunterTaskState.WITH_USER_NEGOTIATE)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //设置状态为用户拒绝放弃
+        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(),HunterTaskState.USER_REPULSE,context.getContext());
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
+    /**
+     * HunterTask步骤5：用户点击同意猎刃放弃按钮，此时回将猎刃任务状态设置为TASK_ABANDON（任务放弃）
+     * @param id
+     * @param htId
+     */
+    @GetMapping("/abandon/success/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击审核猎刃任务通过")
+    public void abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId){
+        //根据编号获取猎刃任务
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+
+        //判断查询的任务是否存在
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的状态
+        if (!hunterTask.getState().equals(HunterTaskState.WITH_USER_NEGOTIATE)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //设置状态为用户同意放弃
+        boolean isSuccess = hunterTaskService.abandonPassByUser(hunterTask);
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
 
     /**
      * 根据状态获取指定用户的任务列表

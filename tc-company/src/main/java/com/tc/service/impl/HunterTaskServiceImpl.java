@@ -340,4 +340,36 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         int count = hunterTaskRepository.updateStateAndAuditTime(htId,state,TimestampHelper.today());
         return count > 0;
     }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean abandonPassByUser(HunterTask hunterTask) {
+        //获取对应的任务
+        Task task = hunterTask.getTask();
+
+        //将猎刃任务的状态设置成放弃
+        int count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+        if (count <= 0){
+            throw new DBException("修改任务状态失败");
+        }
+
+        if (task.getCompensateMoney() > 0){
+            //退还猎刃押金
+            count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
+            if (count <= 0){
+                throw new DBException("退回押金失败");
+            }
+        }
+
+        //判断用户任务的状态是否需要重新发布任务
+        if (task.getState().equals(TaskState.FORBID_RECEIVE)){
+            //重新发布用户任务
+            count = taskRepository.updateStateAndIssueTime(task.getId(),TaskState.ISSUE,TimestampHelper.today());
+            if (count <= 0){
+                throw new DBException("修改任务状态失败");
+            }
+        }
+
+        return true;
+    }
 }
