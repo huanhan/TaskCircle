@@ -372,4 +372,47 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
         return true;
     }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public HunterTask findByTaskIsNotOk(String taskId, Long id) {
+
+        //获取指定猎刃的执行任务列表
+        List<HunterTask> hunterTasks = hunterTaskRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get(HunterTask.TASK_ID),taskId));
+            predicates.add(cb.equal(root.get(HunterTask.HUNTER_ID),id));
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+
+        boolean isRemove = hunterTasks.removeIf(hunterTask -> HunterTaskState.isOk(hunterTask.getState()));
+        if (isRemove && hunterTasks.size() == 1){
+            return hunterTasks.get(0);
+        }else if (hunterTasks.size() == 1){
+            return hunterTasks.get(0);
+        }
+        return null;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean abandonPassByHunter(HunterTask hunterTask) {
+        //获取对应的任务
+        Task task = hunterTask.getTask();
+        //设置猎人任务状态
+        int count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_BE_ABANDON);
+        if (count <= 0){
+            throw new DBException("修改任务状态失败");
+        }
+        if (task.getCompensateMoney() > 0){
+            //退回猎刃押金
+            count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
+            if (count <= 0){
+                throw new DBException("退回押金失败");
+            }
+        }
+
+
+        return false;
+    }
 }

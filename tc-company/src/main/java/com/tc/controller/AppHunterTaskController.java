@@ -358,4 +358,33 @@ public class AppHunterTaskController {
         }
     }
 
+    /**
+     * 猎刃同意用户放弃任务
+     * @param id
+     * @param taskId
+     */
+    @GetMapping("/abandon/success/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击提交管理员审核")
+    public void abandonPassByHunter(@PathVariable("id") Long id,@PathVariable("taskId") String taskId){
+        //获取需要猎刃同意的任务
+        Task task = taskService.findOne(taskId);
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //判断任务的状态是否需要猎刃同意
+        if (!task.getState().equals(TaskState.ABANDON_COMMIT)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+        //获取任务对应的本人的猎刃任务
+        HunterTask hunterTask = hunterTaskService.findByTaskIsNotOk(taskId,id);
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //猎刃同意用户放弃任务
+        boolean isSuccess = hunterTaskService.abandonPassByHunter(hunterTask);
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
 }

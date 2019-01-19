@@ -109,17 +109,10 @@ public enum TaskState {
     }
 
     /**
-     * 需要条件放弃的状态列表
-     * 所有要放弃的任务都时有条件的
-     * 放弃的任务一般都是在用户的任务被接取之后
-     * 任务没有被接取之前和任务发布之后的是可以下架的状态
+     * 判断哪些状态时的任务允许发布
+     * @param taskState
      * @return
      */
-    public static List<TaskState> conditionAbandon(){
-        List<TaskState> result = new ArrayList<>();
-        return result;
-    }
-
     public static boolean isIssue(TaskState taskState){
         switch (taskState){
             case AUDIT_SUCCESS:
@@ -130,4 +123,5 @@ public enum TaskState {
                 return false;
         }
     }
+    
 }

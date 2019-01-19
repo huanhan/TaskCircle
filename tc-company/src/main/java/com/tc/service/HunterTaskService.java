@@ -119,4 +119,19 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     boolean abandonPassByUser(HunterTask hunterTask);
+
+    /**
+     * 获取指定猎刃任务中，指定的猎刃未完成的任务
+     * @param taskId
+     * @param id
+     * @return
+     */
+    HunterTask findByTaskIsNotOk(String taskId, Long id);
+
+    /**
+     * 猎刃同意用户放弃
+     * @param hunterTask
+     * @return
+     */
+    boolean abandonPassByHunter(HunterTask hunterTask);
 }

@@ -191,4 +191,24 @@ public enum HunterTaskState {
                 return false;
         }
     }
+
+    /**
+     * 获取非正在执行的猎刃任务状态
+     * @param state
+     * @return
+     */
+    public static boolean isOk(HunterTaskState state) {
+        switch (state){
+            case END_NO:
+                return true;
+            case END_OK:
+                return true;
+            case TASK_ABANDON:
+                return true;
+            case TASK_BE_ABANDON:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

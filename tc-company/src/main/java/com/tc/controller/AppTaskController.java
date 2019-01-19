@@ -261,6 +261,7 @@ public class AppTaskController {
 
     /**
      * Task步骤5：用户点击放弃任务，
+     * 只有下架或者禁止接取的任务才允许放弃
      * 放弃失败时，会将任务状态置为ABANDON_COMMIT("用户提交放弃的申请")
      * 放弃失败时，需要先走用户-猎刃协商流程，单状态变成ABANDON_COMMIT即开始改流程
      * 放弃成功时，会将任务状态置为ABANDON_OK("任务被放弃")，
@@ -282,6 +283,11 @@ public class AppTaskController {
         //判断任务的发布者与放弃任务的用户是否一致
         if (!task.getUser().getId().equals(id)){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+        //判断可放弃任务的状态
+        if (!task.getState().equals(TaskState.FORBID_RECEIVE) || !task.getState().equals(TaskState.OUT)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //如果该放弃的任务不需要协商，不需要审核，则直接放弃任务，退还押金，并退还猎刃的押金，和将猎刃的任务状态修改为任务被放弃
