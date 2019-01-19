@@ -359,7 +359,8 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 猎刃同意用户放弃任务
+     * Task步骤5：猎刃同意用户放弃任务,此时会设置猎刃任务的状态为任务被放弃TASK_BE_ABANDON
+     * 并且如果放弃任务的猎刃时猎刃中的最后一个，则会将用户的任务设置成放弃状态，并且退回用户押金
      * @param id
      * @param taskId
      */
@@ -382,6 +383,11 @@ public class AppHunterTaskController {
         }
         //猎刃同意用户放弃任务
         boolean isSuccess = hunterTaskService.abandonPassByHunter(hunterTask);
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+        //判断是否需要放弃用户的任务
+        isSuccess = taskService.hasAbandon(task);
         if (!isSuccess){
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

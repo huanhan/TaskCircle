@@ -69,18 +69,8 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      * @return
      */
     @Modifying
-    @Query("update User u set u.money = u.money + :money where u.id = :id")
+    @Query("update User u set u.money = :money where u.id = :id")
     int update(@Param("money") Float money, @Param("id") Long id);
-
-    /**
-     * 跟新用户金额
-     * @param ids
-     * @param money
-     * @return
-     */
-    @Modifying
-    @Query("update User u set u.money = u.money + :money where u.id in :ids")
-    int update(@Param("ids") List<Long> ids,@Param("money") Float money);
 
     /**
      * 更新用户状态，并将审核时间制空

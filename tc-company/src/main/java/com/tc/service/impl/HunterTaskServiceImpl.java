@@ -138,7 +138,8 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         }
 
         //扣除押金
-        count = userRepository.update(task.getCompensateMoney(),result.getHunterId());
+        Float dMoney = FloatHelper.sub(hunter.getMoney(),task.getCompensateMoney());
+        count = userRepository.update(dMoney,result.getHunterId());
 
         if (count <= 0){
             throw new DBException("扣除押金失败");
@@ -192,10 +193,12 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         if (count <= 0){
             throw new DBException("设置任务状态失败");
         }
+        //获取猎刃信息
+        Hunter hunter = hunterTask.getHunter();
         //为猎刃发赏金与退回押金
         Float yMoney = task.getCompensateMoney();
         Float sMoney = FloatHelper.divied(task.getMoney(),task.getPeopleNumber().floatValue());
-        Float money = FloatHelper.add(yMoney,sMoney);
+        Float money = FloatHelper.addToBD(yMoney,sMoney).add(FloatHelper.toBig(hunter.getUser().getMoney())).floatValue();
         count = userRepository.update(money,hunterTask.getHunterId());
         if (count <= 0){
             throw new DBException("设置金额失败");
@@ -210,8 +213,13 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         if (record == null){
             throw new DBException("添加转账记录失败");
         }
-
-        return false;
+        //修改任务剩余赏金
+        Float lMoney = FloatHelper.sub(task.getMoney(),sMoney);
+        count = taskRepository.updateMoney(lMoney,task.getId());
+        if (count <= 0){
+            throw new DBException("设置任务金额失败");
+        }
+        return true;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -248,8 +256,11 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
 
                 if (task.getCompensateMoney() > 0) {
+                    //获取对应猎刃信息
+                    Hunter hunter = hunterTask.getHunter();
+                    Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),task.getCompensateMoney());
                     //退回猎刃押金
-                    count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
+                    count = userRepository.update(dMoney, hunterTask.getHunterId());
 
                     if (count <= 0) {
                         throw new DBException("押金退回失败");
@@ -269,8 +280,11 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             }
 
             if (task.getCompensateMoney() > 0) {
+                //获取对应用户信息
+                User user = task.getUser();
+                Float dMoney = FloatHelper.add(user.getMoney(),task.getCompensateMoney());
                 //将押金给与用户补偿
-                count = userRepository.update(task.getCompensateMoney(), task.getUserId());
+                count = userRepository.update(dMoney, task.getUserId());
                 if (count <= 0){
                     throw new DBException("用户补偿失败");
                 }
@@ -306,13 +320,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
                 throw new DBException("修改任务状态失败");
             }
 
-            if (task.getCompensateMoney() > 0) {
-                //将押金退回猎刃账户
-                count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
-                if (count <= 0){
-                    throw new DBException("退回押金失败");
-                }
-            }
+            outMoneyToHunter(task,hunterTask);
 
             //判断用户任务的状态是否需要重新发布任务
             if (task.getState().equals(TaskState.FORBID_RECEIVE)){
@@ -353,13 +361,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             throw new DBException("修改任务状态失败");
         }
 
-        if (task.getCompensateMoney() > 0){
-            //退还猎刃押金
-            count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
-            if (count <= 0){
-                throw new DBException("退回押金失败");
-            }
-        }
+        outMoneyToHunter(task,hunterTask);
 
         //判断用户任务的状态是否需要重新发布任务
         if (task.getState().equals(TaskState.FORBID_RECEIVE)){
@@ -404,15 +406,26 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         if (count <= 0){
             throw new DBException("修改任务状态失败");
         }
+        this.outMoneyToHunter(task,hunterTask);
+        return false;
+    }
+
+    /**
+     * 退还用户押金
+     * @param task
+     * @param hunterTask
+     */
+    private void outMoneyToHunter(Task task,HunterTask hunterTask){
+        int count;
         if (task.getCompensateMoney() > 0){
+            //获取对应猎刃信息
+            Hunter hunter = hunterTask.getHunter();
+            Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),task.getCompensateMoney());
             //退回猎刃押金
-            count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
+            count = userRepository.update(dMoney, hunterTask.getHunterId());
             if (count <= 0){
                 throw new DBException("退回押金失败");
             }
         }
-
-
-        return false;
     }
 }

@@ -43,15 +43,6 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
 
 
     /**
-     * 获取猎刃编号列表
-     * @param ids
-     * @return
-     */
-    @Query(value = "select distinct t.hunterId from HunterTask t where t.id in (:ids)")
-    List<Long> findHunterById(@Param("ids") List<String> ids);
-
-
-    /**
      * 根据猎刃任务编号与状态查询
      * @param taskId
      * @param hunterTaskState

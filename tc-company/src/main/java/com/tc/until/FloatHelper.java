@@ -99,4 +99,8 @@ public class FloatHelper {
         BigDecimal b2 = new BigDecimal(f2.toString());
         return b1.multiply(b2);
     }
+
+    public static BigDecimal toBig(Float f){
+        return new BigDecimal(f.toString());
+    }
 }

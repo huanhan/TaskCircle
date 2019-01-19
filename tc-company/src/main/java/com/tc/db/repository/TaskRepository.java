@@ -72,4 +72,13 @@ public interface TaskRepository extends JpaRepository<Task,String>,JpaSpecificat
     @Query(value = "update Task t set t.state = :state, t.adminAuditTime = NULL where t.id in (:ids)")
     int updateState(@Param("ids") List<String> ids, @Param("state") TaskState state);
 
+    /**
+     * 更新任务金额
+     * @param money
+     * @param id
+     * @return
+     */
+    @Modifying
+    @Query(value = "update Task t set t.money = :money where t.id = :id")
+    int updateMoney(@Param("money") Float money,@Param("id") String id);
 }

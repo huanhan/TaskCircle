@@ -1,11 +1,13 @@
 package com.tc.service.impl;
 
 import com.tc.controller.AuditController;
+import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
+import com.tc.db.repository.HunterRepository;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserRepository;
@@ -13,6 +15,7 @@ import com.tc.dto.task.QueryTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.TaskService;
+import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
@@ -22,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
-import javax.xml.bind.ValidationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +46,9 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private HunterRepository hunterRepository;
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
@@ -154,13 +159,20 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             }
 
             //获取对应的猎刃编号
-            List<Long> hids = hunterTaskRepository.findHunterById(ids);
 
-            if (hids.size() != ids.size()) {
+            List<HunterTask> hunterTasks = hunterTaskRepository.findByIdIn(ids);
+
+            if (hunterTasks.size() != ids.size()) {
                 throw new DBException("数据获取异常");
             }
 
-            count = userRepository.update(hids, task.getCompensateMoney());
+            count = 0;
+            for (HunterTask hunterTask :
+                    hunterTasks) {
+                Float dMoney = FloatHelper.add(hunterTask.getHunter().getUser().getMoney(),task.getCompensateMoney());
+                userRepository.update(dMoney,hunterTask.getHunterId());
+                count ++;
+            }
 
             if (count != ids.size()) {
                 throw new DBException("退还猎刃押金失败");
@@ -179,9 +191,11 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             }
 
             Float money = task.getMoney();
-
+            //获取对应用户信息
+            User user = task.getUser();
+            Float dMoney = FloatHelper.add(user.getMoney(),money);
             //更新用户金额（退还押金）
-            count = userRepository.update(money,id);
+            count = userRepository.update(dMoney,id);
 
             if (count <= 0){
                 throw new DBException("退还用户押金失败");
@@ -218,8 +232,9 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         if (result == null){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        Float dMoney = FloatHelper.sub(user.getMoney(),task.getMoney());
         //扣除用户押金
-        int count = userRepository.update(-task.getMoney(),user.getId());
+        int count = userRepository.update(dMoney,user.getId());
         if (count <= 0){
             throw new DBException("扣除用户押金失败,任务发布失败");
         }
@@ -242,15 +257,19 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         if (!ListUtils.isEmpty(queryHts)){
             //获取猎刃任务编号，用来修改状态
             List<String> ids = HunterTask.toIds(queryHts);
-            //获取用户编号，用来退回押金
-            List<Long> userIds = HunterTask.toUserIds(queryHts);
             //设置猎刃任务的状态为被放弃
             count = hunterTaskRepository.updateStateAndAdminAuditTime(ids, HunterTaskState.TASK_BE_ABANDON);
             if (count != ids.size()){
                 throw new DBException("修改猎刃任务状态错误");
             }
             //退回猎刃押金
-            count = userRepository.update(userIds, task.getCompensateMoney());
+            count = 0;
+            for (HunterTask hunterTask:
+                 queryHts) {
+                Float dMoney = FloatHelper.add(hunterTask.getHunter().getUser().getMoney(),task.getCompensateMoney());
+                userRepository.update(dMoney,hunterTask.getHunterId());
+                count ++;
+            }
             if (count != ids.size()) {
                 throw new DBException("退还猎刃押金失败");
             }
@@ -283,6 +302,29 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         }
         int count = taskRepository.updateState(taskId,TaskState.FINISH);
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean hasAbandon(Task task) {
+        //判断是否还有猎刃在执行任务
+        List<HunterTask> hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(),HunterTaskState.notAbandon());
+        if (!ListUtils.isEmpty(hts)){
+            return false;
+        }
+        //放弃任务
+        int count = taskRepository.updateState(task.getId(),TaskState.ABANDON_OK);
+        if (count <= 0){
+            throw new DBException("修改任务状态失败");
+        }
+        //获取发布该任务的用户信息
+        User user = task.getUser();
+        Float dMoney = FloatHelper.sub(user.getMoney(),task.getMoney());
+        count = userRepository.update(dMoney,task.getUserId());
+        if (count <= 0){
+            throw new DBException("退还用户押金失败");
+        }
+        return true;
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)

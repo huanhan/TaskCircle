@@ -6,7 +6,6 @@ import com.tc.dto.task.QueryTask;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * 评论仓库
@@ -86,4 +85,11 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean taskIsSuccess(String taskId);
+
+    /**
+     * 判断任务是否可放弃，可放弃则直接放弃
+     * @param task
+     * @return
+     */
+    boolean hasAbandon(Task task);
 }

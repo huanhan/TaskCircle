@@ -114,7 +114,10 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     }else {
                         count = userWithdrawRepository.updateState(WithdrawState.FAILED,userWithdraw.getId());
                         if (count > 0){
-                            count = userRepository.update(userWithdraw.getMoney(),userWithdraw.getUserId());
+                            //获取用户信息
+                            User user = userWithdraw.getUser();
+                            Float dMoney = FloatHelper.add(user.getMoney(),userWithdraw.getMoney());
+                            count = userRepository.update(dMoney,userWithdraw.getUserId());
                         }
                     }
 
@@ -144,8 +147,11 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     if (audit.getResult().equals(AuditState.PASS)) {
                         //用户放弃的任务被通过时，退还用户押金，并修改那些拒绝用户放弃任务的猎刃的任务状态为“被放弃”
                         if (count > 0){
+                            //获取任务对应用户
+                            User user = task.getUser();
+                            Float dMoney = FloatHelper.add(user.getMoney(),task.getMoney());
                             //退还用户押金
-                            count = userRepository.update(task.getMoney(),task.getUserId());
+                            count = userRepository.update(dMoney,task.getUserId());
 
                             //押金如果没有退还成功
                             if (count <= 0){
@@ -190,22 +196,31 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                                 return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
                             });
 
-                            List<Long> hunterIds = Hunter.toIds(queryResult);
 
                             //用户需要赔偿给猎刃的总金额
-                            Float rp = FloatHelper.multiply(pay, (float) hunterIds.size());
+                            Float rp = FloatHelper.multiply(pay, (float) queryResult.size());
                             //赔偿完后，剩下的钱还给用户
                             Float dm = FloatHelper.sub(task.getMoney(),rp);
 
+                            count = 0;
                             //更新猎刃的账户金额
-                            count = userRepository.update(hunterIds,pay);
+                            for (Hunter hunter:
+                                 queryResult) {
+                                Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),pay);
+                                userRepository.update(dMoney,hunter.getUserId());
+                                count ++;
+                            }
+
+                            if (count != queryResult.size()){
+                                throw new DBException("更新猎刃金额失败");
+                            }
 
                             //添加用户转账记录
                             List<UserIeRecord> userIeRecords = new ArrayList<>();
-                            hunterIds.forEach(aLong -> {
+                            queryResult.forEach(hunter -> {
                                 UserIeRecord userIeRecord = new UserIeRecord();
                                 userIeRecord.setMe(task.getUserId());
-                                userIeRecord.setTo(aLong);
+                                userIeRecord.setTo(hunter.getUserId());
                                 userIeRecord.setContext("来自 " + task.getName() + " 的补偿");
                                 userIeRecord.setId(IdGenerator.INSTANCE.nextId());
                                 userIeRecord.setMoney(pay);
@@ -214,9 +229,12 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
 
                             userIeRecordRepository.save(userIeRecords);
 
-                            if (count == hunterIds.size()){
+                            if (count == queryResult.size()){
+                                //获取任务对应用户
+                                User user = task.getUser();
+                                Float dMoney = FloatHelper.add(user.getMoney(),dm);
                                 //退还用户剩下的押金
-                                count = userRepository.update(dm,task.getUserId());
+                                count = userRepository.update(dMoney,task.getUserId());
                             }
 
                         }
@@ -250,15 +268,21 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     if (audit.getResult().equals(AuditState.PASS)) {
                         //审核通过
 
+                        //获取对应的猎刃信息
+                        Hunter hunter = hunterTask.getHunter();
+                        Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),noTask.getCompensateMoney());
                         //将猎刃的押金退回
-                        count = userRepository.update(noTask.getCompensateMoney(),hunterTask.getHunterId());
+                        count = userRepository.update(dMoney,hunterTask.getHunterId());
 
 
                     }else {
                         //审核不通过
 
+                        //获取对应的用户信息
+                        User user = noTask.getUser();
+                        Float dMoney = FloatHelper.add(user.getMoney(),noTask.getCompensateMoney());
                         //将猎刃押金作为用户补偿，用户需要新增一条转账记录
-                        count = userRepository.update(noTask.getCompensateMoney(),noTask.getUserId());
+                        count = userRepository.update(dMoney,noTask.getUserId());
 
                         if (count > 0) {
                             UserIeRecord userIeRecord = new UserIeRecord();
@@ -304,8 +328,12 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         if (result.getResult().equals(AuditState.NRHC)){
                             //不能重做，需要补偿
 
+                            //获取对应的用户信息
+                            User user = okTask.getUser();
+                            Float dMoney = FloatHelper.add(user.getMoney(),okTask.getCompensateMoney());
+
                             //将猎刃押金作为补偿给用户
-                            count = userRepository.update(okTask.getCompensateMoney(),okTask.getUserId());
+                            count = userRepository.update(dMoney,okTask.getUserId());
 
                             //新增转账记录
                             if (count > 0) {
@@ -316,8 +344,12 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         }else {
                             //不能重做，不用补偿
 
+                            //获取对应的猎刃信息
+                            Hunter hunter = hunterTask.getHunter();
+                            Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),okTask.getCompensateMoney());
+
                             //退回押金给猎刃
-                            count = userRepository.update(okTask.getCompensateMoney(),hunterTask.getHunterId());
+                            count = userRepository.update(dMoney,hunterTask.getHunterId());
                         }
                     }
 
