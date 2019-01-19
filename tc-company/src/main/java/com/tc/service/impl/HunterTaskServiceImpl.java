@@ -163,6 +163,9 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             case AWAIT_USER_AUDIT:
                 count = hunterTaskRepository.updateStateAndFinishTime(htId,state,TimestampHelper.today());
                 break;
+            case TASK_COMPLETE:
+                count = hunterTaskRepository.updateState(htId,state);
+                break;
             default:
                 break;
         }

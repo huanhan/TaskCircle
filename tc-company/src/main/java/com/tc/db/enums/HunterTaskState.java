@@ -98,6 +98,12 @@ public enum HunterTaskState {
         }
     }
 
+    /**
+     * 根据用户任务设置的选项获取对应的猎刃状态
+     * @param isRework 是否可重做
+     * @param isCompensate 是否要赔偿
+     * @return 对应的状态
+     */
     public static HunterTaskState getBy(boolean isRework,boolean isCompensate){
         if (isRework && isCompensate){
             return HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE;
@@ -107,6 +113,21 @@ public enum HunterTaskState {
             return HunterTaskState.NO_REWORK_HAVE_COMPENSATE;
         }else {
             return HunterTaskState.NO_REWORK_NO_COMPENSATE;
+        }
+    }
+
+    /**
+     * 判断猎刃是否可以重做任务
+     * @return
+     */
+    public static boolean isRework(HunterTaskState state){
+        switch (state){
+            case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
+                return true;
+            case ALLOW_REWORK_ABANDON_NO_COMPENSATE:
+                return true;
+            default:
+                return false;
         }
     }
 

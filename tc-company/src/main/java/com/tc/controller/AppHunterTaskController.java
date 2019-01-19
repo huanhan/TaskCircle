@@ -48,7 +48,7 @@ public class AppHunterTaskController {
 
 
     /**
-     * 步骤1：猎刃点击接取任务按钮，接取成功后猎刃的任务状态为RECEIVE("任务接取"),
+     * HunterTask步骤1：猎刃点击接取任务按钮，接取成功后猎刃的任务状态为RECEIVE("任务接取"),
      * 如果接完后对应的任务不可接了，那么需要设置任务状态为FORBID_RECEIVE("任务禁止被接取")
      * 猎刃点击接取任务按钮
      * 此时新增一条猎刃任务信息
@@ -69,7 +69,7 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 步骤2：猎刃点击开始任务，如果任务成功开始，则设置状态为BEGIN("开始")
+     * HunterTask步骤2：猎刃点击开始任务，如果任务成功开始，则设置状态为BEGIN("开始")
      *
      *
      *
@@ -105,7 +105,7 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 步骤3：猎刃开始执行任务，
+     * HunterTask步骤3：猎刃开始执行任务，
      * 如果是第一次添加步骤，则修改任务的状态为EXECUTORY("正在执行")
      * 如果添加的是最后一次步骤，则修改任务的状态为TASK_COMPLETE("任务完成")
      * @param id
@@ -143,7 +143,7 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 步骤3：猎刃在执行过程中修改步骤内容，此时猎刃任务的状态一定是EXECUTORY("正在执行")
+     * HunterTask步骤3：猎刃在执行过程中修改步骤内容，此时猎刃任务的状态一定是EXECUTORY("正在执行")
      * @param id
      * @param modifyHunterTaskStep
      * @param bindingResult
@@ -180,7 +180,7 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 步骤3：删除猎刃的任务步骤，需要判断任务状态，满足指定状态才允许删除，删除成功后将修改状态为EXECUTORY("正在执行")
+     * HunterTask步骤3：删除猎刃的任务步骤，需要判断任务状态，满足指定状态才允许删除，删除成功后将修改状态为EXECUTORY("正在执行")
      * @param id
      * @param deleteHunterTaskStep
      * @param bindingResult
@@ -200,7 +200,7 @@ public class AppHunterTaskController {
 
 
     /**
-     * 步骤3：
+     * HunterTask步骤3：
      * 猎刃修改执行任务的内容
      * @param id
      * @param modifyHunterTask
@@ -239,7 +239,7 @@ public class AppHunterTaskController {
     }
 
     /**
-     * 步骤4：提交用户审核，当前猎刃任务的状态必须为TASK_COMPLETE("任务完成")
+     * HunterTask步骤4：提交用户审核，当前猎刃任务的状态必须为TASK_COMPLETE("任务完成")
      * 提交成功后，任务状态变为AWAIT_USER_AUDIT("等待用户审核")
      * @param id
      * @param htId
@@ -262,6 +262,30 @@ public class AppHunterTaskController {
         }
         //提交用户审核（即修改状态）
         boolean isSuccess = hunterTaskService.updateState(htId,HunterTaskState.AWAIT_USER_AUDIT);
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
+    /**
+     * HunterTask步骤5：猎刃点击重做任务，将任务状态修改为TASK_COMPLETE("任务完成")
+     * @param id
+     * @param htId
+     */
+    @GetMapping("/rework/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击重做任务")
+    public void reworkTask(@PathVariable("id") Long id,@PathVariable("htId") String htId){
+        //获取猎刃任务信息
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //判断任务状态是否允许重做
+        if (!HunterTaskState.isRework(hunterTask.getState())){
+            throw new ValidException("当前任务不允许重做");
+        }
+        //重新设置任务的状态
+        boolean isSuccess = hunterTaskService.updateState(hunterTask.getId(),HunterTaskState.TASK_COMPLETE);
         if (!isSuccess){
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
