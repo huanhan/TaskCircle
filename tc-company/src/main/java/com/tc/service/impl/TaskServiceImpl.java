@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import javax.xml.bind.ValidationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,7 +63,15 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean updateState(String id, TaskState state) {
-        int count = taskRepository.updateState(id,state);
+        int count;
+        switch (state){
+            case ISSUE:
+                count = taskRepository.updateStateAndIssueTime(id,state,TimestampHelper.today());
+                break;
+            default:
+                count = taskRepository.updateState(id,state);
+                break;
+        }
         return count > 0;
     }
 
@@ -202,7 +211,8 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         if (user.getMoney() < task.getMoney()){
             throw new ValidException("用户余额不足");
         }
-        //保存新的任务信息，并设置状态为发布状态
+
+        //保存新的任务信息
         task.setState(TaskState.ISSUE);
         Task result = taskRepository.save(task);
         if (result == null){

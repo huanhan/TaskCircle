@@ -76,4 +76,5 @@ public enum HunterTaskState {
         result.add(WITH_ADMIN_NEGOTIATE);
         return result;
     }
+
 }

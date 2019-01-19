@@ -199,7 +199,10 @@ public class AppTaskController {
     }
 
     /**
-     * 步骤4：用户点击撤回按钮，如果撤回成功，则修改任务状态OK_ISSUE（任务可发布）
+     * 步骤4：用户点击撤回按钮，如果撤回成功，则修改任务状态OUT（任务被撤回）
+     * 撤回任务的目的时为了不让人继续接任务
+     * 用户不可以修改撤回的任务，只能选择上架
+     * 只有在发布中的任务才可撤回
      * 任务的撤回会将满足放弃条件的猎刃任务强行放弃掉
      * 放弃的条件：猎刃任务状态为RECEIVE("任务接取")，并且接取的时间少于用户设置的允许放弃时间
      * 如果满足撤回条件：需要退回猎刃押金，并将猎刃任务状态设置成TASK_BE_ABANDON("任务被放弃")
@@ -219,7 +222,7 @@ public class AppTaskController {
         }
 
         //判断任务状态是否可被撤回
-        if (!task.getState().equals(TaskState.ISSUE) || !task.getState().equals(TaskState.FORBID_RECEIVE)){
+        if (!task.getState().equals(TaskState.ISSUE)){
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -228,6 +231,34 @@ public class AppTaskController {
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+    }
+
+    /**
+     * 步骤4：用户如果撤回了任务，用户可以选择继续上架或者放弃任务，
+     * 该步骤针对的是上架按钮，上架成功，任务状态变成ISSUE("任务发布中")
+     *
+     * @param id
+     * @param taskId
+     */
+    @GetMapping("/put/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击重新上架按钮功能")
+    public void putTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId){
+
+        //根据任务编号获取任务
+        Task task = taskService.findOne(taskId);
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务状态是否可重新上架
+        if (!task.getState().equals(TaskState.OUT)){
+            throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //重新上架任务
+        taskService.updateState(taskId,TaskState.ISSUE);
     }
 
     /**
