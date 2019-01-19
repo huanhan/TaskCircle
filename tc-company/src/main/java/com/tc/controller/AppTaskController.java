@@ -1,7 +1,6 @@
 package com.tc.controller;
 
 import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.TaskStep;
 import com.tc.db.enums.HunterTaskState;
@@ -16,7 +15,6 @@ import com.tc.service.HunterTaskStepService;
 import com.tc.service.TaskService;
 import com.tc.service.TaskStepService;
 import com.tc.until.FloatHelper;
-import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -180,17 +177,17 @@ public class AppTaskController {
         IssueTask.toTask(task,issueTask);
 
         //判断用户的罚金是否在允许范围之内
-        if (task.getPeopleNumber() <= 10){
-            if (task.getCompensateMoney() > FloatHelper.multiply(task.getMoney(),0.1f) || task.getCompensateMoney() <= 0) {
-                throw new ValidException("罚金不符合规范");
-            }
-        }else {
-            if (task.getCompensateMoney() >
-                    FloatHelper.multiply(task.getMoney(),FloatHelper.divied(1f,(float)task.getPeopleNumber())) ||
-                    task.getCompensateMoney() <= 0){
-                throw new ValidException("罚金不符合规范");
-            }
-        }
+//        if (task.getPeopleNumber() <= 10){
+//            if (task.getCompensateMoney() > FloatHelper.multiply(task.getMoney(),0.1f) || task.getCompensateMoney() <= 0) {
+//                throw new ValidException("罚金不符合规范");
+//            }
+//        }else {
+//            if (task.getCompensateMoney() >
+//                    FloatHelper.multiply(task.getMoney(),FloatHelper.divied(1f,(float)task.getPeopleNumber())) ||
+//                    task.getCompensateMoney() <= 0){
+//                throw new ValidException("罚金不符合规范");
+//            }
+//        }
 
         //修改任务状态为发布状态，并且在修改完后，从用户账户中扣除发布需要的押金
         Task result = taskService.updateAndUserMoney(task);
@@ -521,38 +518,14 @@ public class AppTaskController {
             //判断任务的状态是猎刃完成任务需要审核
             if (hunterTask.getState() == HunterTaskState.TASK_COMPLETE) {
                 //完成任务需要审核COMMIT_ADMIN_ADUIT
-                hunterTaskService.updateState(hunterTask.getTaskId(), HunterTaskState.COMMIT_ADMIN_ADUIT, new Date());
+                hunterTaskService.updateState(hunterTask.getTaskId(), HunterTaskState.COMMIT_ADMIN_AUDIT, new Date());
             }
 
         }
 
     }
 
-    /**
-     * todo 有可能 要审核押金 未完善
-     * 猎刃将完成的任务提交用户
-     *
-     * @param id
-     * @param taskId 猎刃任务表的任务id
-     */
-    @GetMapping("/hunter/toUser/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "将完成的任务交给用户查看")
-    public void upAuditByHunterToUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-        //根据编号获取猎刃任务详情（包括执行步骤）
-        HunterTask hunterTask = hunterTaskService.findOne(taskId);
-        //所有改任务的步骤
-        List<HunterTaskStep> hunterTaskSteps = hunterTaskStepService.findByHunterTaskId(hunterTask.getId(), new Sort(Sort.Direction.ASC, HunterTaskStep.STEP));
 
-        //进行简要的系统判断（比如步骤是否都有完成）
-        List<TaskStep> taskSteps = taskStepService.findByTaskId(hunterTask.getTaskId(), new Sort(Sort.Direction.ASC, TaskStep.STEP));
-        if (taskSteps.size() == hunterTaskSteps.size()) {
-            //都有提交信息算是完成了
-            //修改猎刃任务状态为任务完成，后面用户需要查看猎刃完成的任务情况，根据情况点击确认完成
-            hunterTaskService.updateState(taskId, HunterTaskState.TASK_COMPLETE, new Date());
-        }
-
-
-    }
 
     /**
      * 添加任务已实现
@@ -644,26 +617,6 @@ public class AppTaskController {
 
 
 
-
-
-    /**
-     * 猎刃点击放弃任务
-     *
-     * @param id
-     * @param taskId
-     */
-    @GetMapping("/hunter/abandon/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "用户点击放弃任务")
-    public void abandonTaskByHunter(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-
-        //根据taskId获取任务详情
-
-        //判断该任务的放弃条件
-
-        //如果满足直接放弃的条件，则在这里直接放弃，并退回用户押金或者猎刃押金
-
-        //如果不满足，则抛除异常并交由用户自己选择
-    }
 
     /**
      * 判断传入的猎刃任务状态是否允许访问

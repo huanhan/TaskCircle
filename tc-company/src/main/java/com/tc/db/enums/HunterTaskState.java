@@ -11,7 +11,7 @@ public enum HunterTaskState {
     RECEIVE("任务接取"),
     AWAIT_BEGIN("等待开始"),
     BEGIN("开始"),
-    EXECUTORY("正在执行"),
+    EXECUTE("正在执行"),
     TASK_COMPLETE("任务完成"),
     AWAIT_USER_AUDIT("等待用户审核"),
     USER_AUDIT("用户审核中"),
@@ -20,9 +20,9 @@ public enum HunterTaskState {
     SETTLE_ACCOUNTS_EXCEPTION("结算异常"),
     END_OK("任务结束并且完成"),
     END_NO("任务结束并且未完成"),
-    USER_ADUIT_FAILED("用户审核失败"),
-    COMMIT_ADMIN_ADUIT("任务完成，提交管理员审核"),
-    ADMIN_ADUIT("管理员审核中"),
+    USER_AUDIT_FAILURE("用户审核失败"),
+    COMMIT_ADMIN_AUDIT("任务完成，提交管理员审核"),
+    ADMIN_AUDIT("管理员审核中"),
     ALLOW_REWORK_ABANDON_HAVE_COMPENSATE("允许重做，放弃要补偿"),
     ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
     NO_REWORK_NO_COMPENSATE("不能重做，不用补偿"),
@@ -50,7 +50,7 @@ public enum HunterTaskState {
         List<HunterTaskState> result = new ArrayList<>();
         result.add(AWAIT_BEGIN);
         result.add(BEGIN);
-        result.add(EXECUTORY);
+        result.add(EXECUTE);
         result.add(TASK_COMPLETE);
         result.add(AWAIT_USER_AUDIT);
         result.add(USER_AUDIT);
@@ -58,9 +58,9 @@ public enum HunterTaskState {
         result.add(AWAIT_SETTLE_ACCOUNTS);
         result.add(SETTLE_ACCOUNTS_SUCCESS);
         result.add(SETTLE_ACCOUNTS_EXCEPTION);
-        result.add(USER_ADUIT_FAILED);
-        result.add(COMMIT_ADMIN_ADUIT);
-        result.add(ADMIN_ADUIT);
+        result.add(USER_AUDIT_FAILURE);
+        result.add(COMMIT_ADMIN_AUDIT);
+        result.add(ADMIN_AUDIT);
         result.add(ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
         result.add(ALLOW_REWORK_ABANDON_NO_COMPENSATE);
         result.add(NO_REWORK_NO_COMPENSATE);
@@ -129,6 +129,45 @@ public enum HunterTaskState {
             default:
                 return false;
         }
+    }
+
+    /**
+     * 判断哪些状态猎刃是允许放弃任务的
+     * @param state
+     * @return
+     */
+    public static boolean isAbandon(HunterTaskState state){
+        boolean isFailure;
+        switch (state){
+            case RECEIVE:
+                isFailure = true;
+                break;
+            case BEGIN:
+                isFailure = true;
+                break;
+            case EXECUTE:
+                isFailure = true;
+                break;
+            case TASK_COMPLETE:
+                isFailure = true;
+                break;
+            case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
+                isFailure = true;
+                break;
+            case ALLOW_REWORK_ABANDON_NO_COMPENSATE:
+                isFailure = true;
+                break;
+            case NO_REWORK_NO_COMPENSATE:
+                isFailure = true;
+                break;
+            case NO_REWORK_HAVE_COMPENSATE:
+                isFailure = true;
+                break;
+            default:
+                isFailure = false;
+                break;
+        }
+        return isFailure;
     }
 
 }

@@ -1,16 +1,13 @@
 package com.tc.service.impl;
 
 import com.tc.controller.AuditController;
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.UserIeRecord;
+import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserIeRecordRepository;
 import com.tc.db.repository.UserRepository;
-import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.QueryHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -64,7 +61,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
         List<HunterTask> tasks = hunterTaskRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE),HunterTaskState.ADMIN_ADUIT));
+            predicates.add(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE),HunterTaskState.ADMIN_AUDIT));
             predicates.add(cb.lessThan(root.get(HunterTask.ADMIN_AUDIT_TIME),new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
@@ -121,11 +118,23 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             }
         }
 
+
+
+
         //猎刃接任务（新增一条猎刃任务记录）
         HunterTask news = HunterTask.init(taskId,id);
         HunterTask result = hunterTaskRepository.save(news);
         if (result == null){
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
+
+        //判断用户账户余额
+        User hunter = userRepository.findOne(result.getHunterId());
+        if (hunter == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        if (hunter.getMoney() < task.getCompensateMoney()){
+            throw new ValidException("用户账户余额不足，需要押金：" + task.getCompensateMoney() + "元");
         }
 
         //扣除押金
@@ -208,7 +217,120 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean auditNotPassByUser(String id, HunterTaskState state, String context) {
-        int count = hunterTaskRepository.updateStateAndContext(id,state,context);
+        int count = hunterTaskRepository.updateStateAndAuditContext(id,state,context);
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean abandonTask(HunterTask hunterTask, String context) {
+
+        int count;
+
+        //获取对应的任务
+        Task task = hunterTask.getTask();
+        //获取对应的状态
+        HunterTaskState hunterTaskState = hunterTask.getState();
+
+        //不需要与用户协商的状态
+        if (hunterTaskState.equals(HunterTaskState.RECEIVE)){
+            //当前状态是新接取状态
+
+            //是否处于允许直接放弃的范围内
+            if(TimestampHelper.differByMinute(TimestampHelper.today(),hunterTask.getAcceptTime()) <= task.getPermitAbandonMinute()){
+
+                //设置猎刃任务状态为放弃任务
+                count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+
+                if (count <= 0){
+                    throw new DBException("修改任务状态失败");
+                }
+
+
+                if (task.getCompensateMoney() > 0) {
+                    //退回猎刃押金
+                    count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
+
+                    if (count <= 0) {
+                        throw new DBException("押金退回失败");
+                    }
+                }
+
+                return true;
+            }
+        }else if (hunterTaskState.equals(HunterTaskState.NO_REWORK_HAVE_COMPENSATE) ||
+                hunterTaskState.equals(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE)){
+            //放弃需要补偿时
+
+            //修改成结束未完成的状态，并保存放弃理由
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),HunterTaskState.END_NO,context);
+            if (count <= 0){
+                throw new DBException("修改任务状态失败");
+            }
+
+            if (task.getCompensateMoney() > 0) {
+                //将押金给与用户补偿
+                count = userRepository.update(task.getCompensateMoney(), task.getUserId());
+                if (count <= 0){
+                    throw new DBException("用户补偿失败");
+                }
+                //新增转账记录
+                UserIeRecord userIeRecord = userIeRecordRepository.save(UserIeRecord.init(
+                        hunterTask.getHunterId(),
+                        task.getUserId(),
+                        "来自（" + task.getName() + "）的猎刃放弃补偿",
+                        task.getCompensateMoney()
+                ));
+                if (userIeRecord == null){
+                    throw new DBException("添加转账记录失败");
+                }
+            }
+
+            //判断用户任务的状态是否需要重新发布任务
+            if (task.getState().equals(TaskState.FORBID_RECEIVE)){
+                //重新发布用户任务
+                count = taskRepository.updateStateAndIssueTime(task.getId(),TaskState.ISSUE,TimestampHelper.today());
+                if (count <= 0){
+                    throw new DBException("修改任务状态失败");
+                }
+            }
+
+            return true;
+        }else if (hunterTaskState.equals(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE) ||
+                hunterTaskState.equals(HunterTaskState.NO_REWORK_NO_COMPENSATE)){
+            //放弃不需要补偿时
+
+            //修改成结束未完成的状态，并保存放弃理由
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),HunterTaskState.END_NO,context);
+            if (count <= 0){
+                throw new DBException("修改任务状态失败");
+            }
+
+            if (task.getCompensateMoney() > 0) {
+                //将押金退回猎刃账户
+                count = userRepository.update(task.getCompensateMoney(), hunterTask.getHunterId());
+                if (count <= 0){
+                    throw new DBException("退回押金失败");
+                }
+            }
+
+            //判断用户任务的状态是否需要重新发布任务
+            if (task.getState().equals(TaskState.FORBID_RECEIVE)){
+                //重新发布用户任务
+                count = taskRepository.updateStateAndIssueTime(task.getId(),TaskState.ISSUE,TimestampHelper.today());
+                if (count <= 0){
+                    throw new DBException("修改任务状态失败");
+                }
+            }
+
+            return true;
+        }
+
+        //将放弃任务的申请提交与用户协商
+        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.WITH_USER_NEGOTIATE);
+        if (count <= 0){
+            throw new DBException("修改任务状态失败");
+        }
+        return false;
     }
 }

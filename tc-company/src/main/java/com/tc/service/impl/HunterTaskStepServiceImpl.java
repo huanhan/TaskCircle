@@ -61,7 +61,7 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
 
 
         //验证指定的猎刃任务是否可以删除
-        if (!hunterTask.getState().equals(HunterTaskState.EXECUTORY)
+        if (!hunterTask.getState().equals(HunterTaskState.EXECUTE)
                 || !hunterTask.getState().equals(HunterTaskState.TASK_COMPLETE)){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
@@ -69,7 +69,7 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
 
         //删除的时候需要判断猎刃任务状态是不是已经完成，如果已经完成，则需要调整成未完成
         if (hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.TASK_COMPLETE)){
-            count = hunterTaskRepository.updateState(hunterTaskStep.getHunterTaskId(),HunterTaskState.EXECUTORY);
+            count = hunterTaskRepository.updateState(hunterTaskStep.getHunterTaskId(),HunterTaskState.EXECUTE);
             if (count <= 0){
                 throw new DBException("修改猎刃任务状态失败");
             }
@@ -105,7 +105,7 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
         //判断是否第一次添加步骤
         int count = hunterTaskStepRepository.countByHunterTaskId(hunterTask.getId());
         if (count == 0 && hunterTask.getState().equals(HunterTaskState.BEGIN)){
-            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.EXECUTORY);
+            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.EXECUTE);
             if (count <= 0){
                 throw new DBException("修改猎刃任务状态失败");
             }

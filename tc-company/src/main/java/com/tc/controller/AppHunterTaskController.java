@@ -7,6 +7,7 @@ import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.ModifyHunterTaskStep;
+import com.tc.dto.audit.AuditContext;
 import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.huntertask.DeleteHunterTaskStep;
 import com.tc.dto.huntertask.ModifyHunterTask;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
-import java.sql.Timestamp;
 
 /**
  * 猎刃任务控制器
@@ -127,7 +127,7 @@ public class AppHunterTaskController {
 
         //验证指定的猎刃任务是否可以添加
         if (!query.getState().equals(HunterTaskState.BEGIN)
-                || !query.getState().equals(HunterTaskState.EXECUTORY)){
+                || !query.getState().equals(HunterTaskState.EXECUTE)){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -162,7 +162,7 @@ public class AppHunterTaskController {
         }
 
         //对状态进行判断
-        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTORY)){
+        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTE)){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -222,7 +222,7 @@ public class AppHunterTaskController {
 
         //验证指定的猎刃任务是否可以修改
         if (!old.getState().equals(HunterTaskState.BEGIN)
-                || !old.getState().equals(HunterTaskState.EXECUTORY)
+                || !old.getState().equals(HunterTaskState.EXECUTE)
                 || !old.getState().equals(HunterTaskState.TASK_COMPLETE)){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
@@ -286,6 +286,35 @@ public class AppHunterTaskController {
         }
         //重新设置任务的状态
         boolean isSuccess = hunterTaskService.updateState(hunterTask.getId(),HunterTaskState.TASK_COMPLETE);
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
+    /**
+     * HunterTask步骤5：猎刃点击放弃任务
+     * 如果成功放弃任务，则将任务状态置为TASK_ABANDON("任务放弃")
+     * 如果任务完成了但是不通过用户审核而放弃时，将任务状态设置为END_NO（“结束未完成”）
+     * 如果不允许直接放弃，则将任务状态置为WITH_USER_NEGOTIATE("与用户协商"),
+     * @param id
+     * @param context
+     */
+    @PostMapping("/abandon/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击放弃任务")
+    public void abandonTask(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
+        //获取猎刃任务信息
+        HunterTask hunterTask = hunterTaskService.findOne(context.getId());
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的状态
+        if (!HunterTaskState.isAbandon(hunterTask.getState())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //猎刃放弃任务
+        boolean isSuccess = hunterTaskService.abandonTask(hunterTask,context.getContext());
         if (!isSuccess){
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

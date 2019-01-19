@@ -143,7 +143,7 @@ public class AuditController {
     @ApiOperation(value = "猎刃任务审核列表")
     public Result allByTask(@RequestBody QueryHunterTask queryHunterTask){
 
-        if (queryHunterTask.getState() == null || (!queryHunterTask.getState().equals(HunterTaskState.COMMIT_TO_ADMIN) && !queryHunterTask.getState().equals(HunterTaskState.COMMIT_ADMIN_ADUIT))){
+        if (queryHunterTask.getState() == null || (!queryHunterTask.getState().equals(HunterTaskState.COMMIT_TO_ADMIN) && !queryHunterTask.getState().equals(HunterTaskState.COMMIT_ADMIN_AUDIT))){
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
         }
 
@@ -255,7 +255,7 @@ public class AuditController {
         Date now = new Date();
 
         //将当前正在审核的任务加锁
-        boolean isSuccess = hunterTaskService.updateState(id,HunterTaskState.ADMIN_ADUIT,now);
+        boolean isSuccess = hunterTaskService.updateState(id,HunterTaskState.ADMIN_AUDIT,now);
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

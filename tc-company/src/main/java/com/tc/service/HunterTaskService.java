@@ -2,7 +2,6 @@ package com.tc.service;
 
 import com.tc.db.entity.HunterTask;
 import com.tc.db.enums.HunterTaskState;
-import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.QueryHunterTask;
 import org.springframework.data.domain.Page;
 
@@ -97,4 +96,12 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     boolean auditNotPassByUser(String id, HunterTaskState state, String context);
+
+    /**
+     * 猎刃放弃任务
+     * @param hunterTask
+     * @param context
+     * @return
+     */
+    boolean abandonTask(HunterTask hunterTask, String context);
 }

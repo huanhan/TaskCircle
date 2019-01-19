@@ -141,12 +141,24 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
 
 
     /**
+     * 设置状态与用户审核内容
+     * @param id
+     * @param state
+     * @param context
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state where t.id = :id")
+    int updateStateAndAuditContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
+
+    /**
      * 设置状态与内容
      * @param id
      * @param state
      * @param context
+     * @return
      */
     @Modifying
-    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state where t.id = :id")
+    @Query(value = "update HunterTask  t set t.context = :context,t.state = :state where t.id = :id")
     int updateStateAndContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
 }
