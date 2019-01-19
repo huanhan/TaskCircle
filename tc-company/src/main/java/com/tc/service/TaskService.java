@@ -79,4 +79,11 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean outTask(Task task);
+
+    /**
+     * 判断任务是否成功
+     * @param taskId
+     * @return
+     */
+    boolean taskIsSuccess(String taskId);
 }

@@ -57,7 +57,7 @@ public class AppTaskController {
 
 
     /**
-     * 步骤1：新建任务在保存成功后的状态为NEW_CREATE("新建")
+     * Task步骤1：新建任务在保存成功后的状态为NEW_CREATE("新建")
      * 用户添加任务
      * @param addTask
      * @param bindingResult
@@ -74,7 +74,7 @@ public class AppTaskController {
     }
 
     /**
-     * 步骤1：属于添加任务
+     * Task步骤1：属于添加任务
      * 可能需要判断任务的状态，属于指定状态的任务才允许添加步骤
      * 用户添加任务步骤
      * @param addTaskStep
@@ -106,7 +106,7 @@ public class AppTaskController {
     /**
      *
      * 普通用户将任务提交审核
-     * 步骤2：用户提交新建任务的审核，此时任务状态被修改为AWAIT_AUDIT("等待审核")
+     * Task步骤2：用户提交新建任务的审核，此时任务状态被修改为AWAIT_AUDIT("等待审核")
      * <p>
      * 需要审核的任务有（用户新建任务，用户放弃的任务）
      *
@@ -144,7 +144,7 @@ public class AppTaskController {
     }
 
     /**
-     * 步骤3：用户点击发布任务按钮，如果发布成功，状态会变成ISSUE("任务发布中")
+     * Task步骤3：用户点击发布任务按钮，如果发布成功，状态会变成ISSUE("任务发布中")
      *
      * 用户发布任务，要求补充完整任务信息
      * 用户只能修改允许修改的内容，允许修改的内容由IssueTaskDTO指定
@@ -199,7 +199,7 @@ public class AppTaskController {
     }
 
     /**
-     * 步骤4：用户点击撤回按钮，如果撤回成功，则修改任务状态OUT（任务被撤回）
+     * Task步骤4：用户点击撤回按钮，如果撤回成功，则修改任务状态OUT（任务被撤回）
      * 撤回任务的目的时为了不让人继续接任务
      * 用户不可以修改撤回的任务，只能选择上架
      * 只有在发布中的任务才可撤回
@@ -234,7 +234,7 @@ public class AppTaskController {
     }
 
     /**
-     * 步骤4：用户如果撤回了任务，用户可以选择继续上架或者放弃任务，
+     * Task步骤4：用户如果撤回了任务，用户可以选择继续上架或者放弃任务，
      * 该步骤针对的是上架按钮，上架成功，任务状态变成ISSUE("任务发布中")
      *
      * @param id
@@ -262,8 +262,11 @@ public class AppTaskController {
     }
 
     /**
-     * 用户点击放弃任务
-     * 放弃成功的任务将直接退还押金，并且不能重新发布
+     * Task步骤5：用户点击放弃任务，
+     * 放弃失败时，会将任务状态置为ABANDON_COMMIT("用户提交放弃的申请")
+     * 放弃失败时，需要先走用户-猎刃协商流程，单状态变成ABANDON_COMMIT即开始改流程
+     * 放弃成功时，会将任务状态置为ABANDON_OK("任务被放弃")，
+     * 并且任务将直接退还押金，并且不能重新发布，此时一个任务的开始-放弃流程完毕
      * @param id
      * @param taskId
      */
@@ -291,7 +294,40 @@ public class AppTaskController {
         }
     }
 
+    /**
+     * HunterTask步骤4：用户点击审核成功按钮，通过后修改猎刃任务的状态为END_OK("任务结束并且完成")
+     * 并且将押金退回与发放赏金
+     * 此时猎刃任务的流程 新建-接完并完成 的流程完成
+     * 并判断自己的任务是否全部被完成了，是的话就修改自己的任务的状态为FINISH("任务完成")
+     * 此时，自身的任务流程 新建-完成 的流程完成
+     * 猎刃将完成的任务提交用户审核
+     * 用户点击审核通过
+     * @param id
+     * @param htId
+     */
+    @GetMapping("/user/abandon/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击放弃任务")
+    public void auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId){
+        //根据编号获取猎刃任务
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
 
+        //判断查询的任务是否存在
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //提交审核完成结果
+        boolean isSuccess = hunterTaskService.auditPassByUser(hunterTask);
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+        //判断本人的任务是否已被全部完成
+        isSuccess = taskService.taskIsSuccess(hunterTask.getTaskId());
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
 
 
     /**

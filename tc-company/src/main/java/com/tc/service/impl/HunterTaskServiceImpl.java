@@ -3,15 +3,18 @@ package com.tc.service.impl;
 import com.tc.controller.AuditController;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
+import com.tc.db.entity.UserIeRecord;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
+import com.tc.db.repository.UserIeRecordRepository;
 import com.tc.db.repository.UserRepository;
 import com.tc.dto.task.QueryHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskService;
+import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
@@ -41,6 +44,9 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserIeRecordRepository userIeRecordRepository;
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
@@ -160,5 +166,38 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
                 break;
         }
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean auditPassByUser(HunterTask hunterTask) {
+        int count;
+        //获取对应的任务信息
+        Task task = hunterTask.getTask();
+        //设置猎刃任务的状态为通过
+        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_OK);
+        if (count <= 0){
+            throw new DBException("设置任务状态失败");
+        }
+        //为猎刃发赏金与退回押金
+        Float yMoney = task.getCompensateMoney();
+        Float sMoney = FloatHelper.divied(task.getMoney(),task.getPeopleNumber().floatValue());
+        Float money = FloatHelper.add(yMoney,sMoney);
+        count = userRepository.update(money,hunterTask.getHunterId());
+        if (count <= 0){
+            throw new DBException("设置金额失败");
+        }
+        //添加猎刃的转账记录
+        UserIeRecord record = userIeRecordRepository.save(
+                UserIeRecord.init(
+                        task.getUserId(),
+                        hunterTask.getHunterId(),
+                        "来自任务（" + task.getName() + ")的赏金",
+                        sMoney));
+        if (record == null){
+            throw new DBException("添加转账记录失败");
+        }
+
+        return false;
     }
 }

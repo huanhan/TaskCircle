@@ -80,4 +80,11 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     boolean updateState(String htId, HunterTaskState awaitUserAudit);
+
+    /**
+     * 用户审核猎刃的任务通过
+     * @param hunterTask
+     * @return
+     */
+    boolean auditPassByUser(HunterTask hunterTask);
 }

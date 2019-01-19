@@ -264,6 +264,27 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean taskIsSuccess(String taskId) {
+        Task task = taskRepository.findOne(taskId);
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //根据猎刃任务已经完成的人数判断任务成功与否
+        long peopleNumber = hunterTaskRepository.count((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get(HunterTask.TASK_ID),taskId));
+            predicates.add(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE),HunterTaskState.END_OK));
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+        if (!task.getPeopleNumber().equals(peopleNumber)){
+            return false;
+        }
+        int count = taskRepository.updateState(taskId,TaskState.FINISH);
+        return count > 0;
+    }
+
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public Task findOne(String id) {
