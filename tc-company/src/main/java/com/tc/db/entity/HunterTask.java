@@ -44,6 +44,7 @@ public class HunterTask implements Serializable {
     private Timestamp adminAuditTime;
     private Timestamp beginTime;
     private String context;
+    private String auditContext;
     private Integer hunterRejectCount;
     private Integer userRejectCount;
     private HunterTaskState state;
@@ -154,6 +155,16 @@ public class HunterTask implements Serializable {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    @Basic
+    @Column(name = "audit_context")
+    public String getAuditContext() {
+        return auditContext;
+    }
+
+    public void setAuditContext(String auditContext) {
+        this.auditContext = auditContext;
     }
 
     @Basic

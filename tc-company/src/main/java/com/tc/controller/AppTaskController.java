@@ -7,6 +7,7 @@ import com.tc.db.entity.TaskStep;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
+import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -305,8 +306,8 @@ public class AppTaskController {
      * @param id
      * @param htId
      */
-    @GetMapping("/user/abandon/{htId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "用户点击放弃任务")
+    @GetMapping("/audit/success/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击审核猎刃任务通过")
     public void auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId){
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
@@ -314,6 +315,11 @@ public class AppTaskController {
         //判断查询的任务是否存在
         if (hunterTask == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断哪些猎刃任务状态允许被用户审核
+        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())){
+            throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //提交审核完成结果
@@ -327,6 +333,56 @@ public class AppTaskController {
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+    }
+
+    /**
+     * HunterTask步骤4：用户点击提交不通过内容，此时会根据添加任务时设置的是否可重做，是否要补偿来设置猎刃任务的状态
+     * 状态包括
+     * ALLOW_REWORK_ABANDON_HAVE_COMPENSATE("允许重做，放弃要补偿"),
+     *     ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
+     *     NO_REWORK_NO_COMPENSATE("不能重做，不用补偿"),
+     *     NO_REWORK_HAVE_COMPENSATE("不能重做，要补偿"),
+     * @param id
+     * @param context
+     * @param bindingResult
+     */
+    @PostMapping("/audit/failure/{id:\\d+}")
+    @ApiOperation(value = "用户点击审核猎刃任务不通过")
+    public Result auditFailure(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+
+        //根据编号获取猎刃任务
+        HunterTask hunterTask = hunterTaskService.findOne(context.getId());
+
+        //判断查询的任务是否存在
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断哪些猎刃任务状态允许被用户审核
+        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())){
+            throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //获取对应的任务
+        Task task = hunterTask.getTask();
+
+        //获取判断需要的状态
+        boolean isRework = task.getTaskRework();
+        boolean isCompensate = task.getCompensate();
+        HunterTaskState hunterTaskState = HunterTaskState.getBy(isRework,isCompensate);
+
+        //设置状态，并添加不同意的原因
+        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(),hunterTaskState,context.getContext());
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+        //返回结果
+        return Result.init("提交成功，当前用户"
+                + (isRework? "可重做" : "不可重做") + "任务，" +
+                "放弃任务" + (isCompensate? "不需要" : "需要") + "赔偿");
     }
 
 

@@ -1,9 +1,8 @@
 package com.tc.db.repository;
 
-import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.enums.HunterTaskState;
-import com.tc.db.enums.TaskState;
+import com.tc.dto.audit.AuditContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -136,9 +135,18 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @param context
      * @return
      */
+    @Modifying
     @Query(value = "update HunterTask  t set t.context = :context where t.id = :id")
     int updateContextById(@Param("id") String id,@Param("context")  String context);
 
 
-
+    /**
+     * 设置状态与内容
+     * @param id
+     * @param state
+     * @param context
+     */
+    @Modifying
+    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state where t.id = :id")
+    int updateStateAndContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
 }

@@ -257,7 +257,7 @@ public class AppHunterTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
         //对猎刃任务的状态进行判断
-        if (!hunterTask.getState().equals(HunterTaskState.TASK_COMPLETE)){
+        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())){
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
         //提交用户审核（即修改状态）

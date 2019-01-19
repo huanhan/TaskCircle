@@ -10,6 +10,7 @@ import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserIeRecordRepository;
 import com.tc.db.repository.UserRepository;
+import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.QueryHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -199,5 +200,12 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         }
 
         return false;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean auditNotPassByUser(String id, HunterTaskState state, String context) {
+        int count = hunterTaskRepository.updateStateAndContext(id,state,context);
+        return count > 0;
     }
 }

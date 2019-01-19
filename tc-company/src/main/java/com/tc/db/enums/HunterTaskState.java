@@ -77,4 +77,37 @@ public enum HunterTaskState {
         return result;
     }
 
+    /**
+     * 是否允许提交用户审核
+     * @return
+     */
+    public static boolean isUpAuditToUser(HunterTaskState state){
+        switch (state){
+            case TASK_COMPLETE:
+                return true;
+            case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
+                return true;
+            case ALLOW_REWORK_ABANDON_NO_COMPENSATE:
+                return true;
+            case NO_REWORK_NO_COMPENSATE:
+                return true;
+            case NO_REWORK_HAVE_COMPENSATE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static HunterTaskState getBy(boolean isRework,boolean isCompensate){
+        if (isRework && isCompensate){
+            return HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE;
+        }else if (isRework){
+            return HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE;
+        }else if (isCompensate){
+            return HunterTaskState.NO_REWORK_HAVE_COMPENSATE;
+        }else {
+            return HunterTaskState.NO_REWORK_NO_COMPENSATE;
+        }
+    }
+
 }
