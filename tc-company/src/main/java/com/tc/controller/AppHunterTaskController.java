@@ -393,4 +393,16 @@ public class AppHunterTaskController {
         }
     }
 
+    /**
+     * Task步骤5：猎刃不同意用户放弃任务，此时将猎刃任务的状态设置成
+     * @param id
+     * @param context
+     * @param bindingResult
+     */
+    @PostMapping("/abandon/failure/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击用户的放弃申请不通过")
+    public void abandonNotPassByHunter(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
+
+    }
+
 }
