@@ -644,40 +644,6 @@ public class AppTaskController {
 
 
     /**
-     * todo 审核押金 未完善
-     * 猎刃将任务提交审核
-     * <p>
-     * 需要审核的任务有（猎刃放弃任务，猎刃完成的任务被用户拒绝）
-     *
-     * @param id
-     * @param taskId
-     */
-    @GetMapping("/hunter/upAudit/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "将用户的任务提交审核")
-    public void upAuditByHunter(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-        //根据猎刃任务编号获取任务
-        HunterTask hunterTask = hunterTaskService.findOne(taskId);
-        //判断任务的接收者与提交任务审核的用户是否一致
-        if (hunterTask.getHunterId() == id) {
-            //判断任务的状态是猎刃放弃任务
-            if (hunterTask.getState() == HunterTaskState.TASK_ABANDON) {
-                //修改任务状态为猎刃放弃任务COMMIT_TO_ADMIN
-                hunterTaskService.updateState(hunterTask.getTaskId(), HunterTaskState.COMMIT_TO_ADMIN, new Date());
-            }
-
-            //判断任务的状态是猎刃完成任务需要审核
-            if (hunterTask.getState() == HunterTaskState.TASK_COMPLETE) {
-                //完成任务需要审核COMMIT_ADMIN_ADUIT
-                hunterTaskService.updateState(hunterTask.getTaskId(), HunterTaskState.COMMIT_ADMIN_AUDIT, new Date());
-            }
-
-        }
-
-    }
-
-
-
-    /**
      * 添加任务已实现
      *
      * @param id            用户编号
@@ -798,27 +764,6 @@ public class AppTaskController {
         return true;
     }
 
-
-    /**
-     * 判断用户提交审核时的状态是否允许提交
-     * @param task
-     * @return
-     */
-    private boolean hasCommit(Task task){
-        TaskState taskState = task.getState();
-
-        //任务新建状态可提交审核
-        if (taskState.equals(TaskState.NEW_CREATE)){
-            return true;
-        }
-
-        //猎刃拒绝状态可提交审核
-        if (taskState.equals(TaskState.HUNTER_REJECT)){
-            return true;
-        }
-
-        return false;
-    }
 
 
 
