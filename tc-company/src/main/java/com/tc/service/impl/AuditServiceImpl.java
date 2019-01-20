@@ -7,10 +7,7 @@ import com.tc.db.repository.*;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.exception.DBException;
 import com.tc.service.AuditService;
-import com.tc.until.FloatHelper;
-import com.tc.until.IdGenerator;
-import com.tc.until.ListUtils;
-import com.tc.until.StringResourceCenter;
+import com.tc.until.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -137,7 +134,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         count = taskRepository.updateState(task.getId(),TaskState.AUDIT_FAILUER);
                     }
                     break;
-                case USER_FAILE_TASK:
+                case USER_FAILURE_TASK:
                     //获取的任务不能为空
                     if (task == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
@@ -240,7 +237,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                         }
                     }
                     break;
-                case HUNTER_FAILE_TASK:
+                case HUNTER_FAILURE_TASK:
                     //获取的猎刃任务不能为空
                     if (hunterTask == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
@@ -302,56 +299,86 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     if (hunterTask == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
                     }
-                    if (result.getResult().equals(AuditState.NRHC) || result.getResult().equals(AuditState.NRNC)){
-                        //设置猎刃任务状态为（结束未完成）
-                        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_NO);
+                    //获取对应任务
+                    Task hTask = hunterTask.getTask();
+                    //获取任务对应的用户信息
+                    User hTaskUser = hTask.getUser();
+                    //获取对应的猎刃信息
+                    Hunter hunter = hunterTask.getHunter();
 
-                        if (count <= 0){
-                            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-                        }
-
-                        //猎刃执行的任务
-                        Task okTask = hunterTask.getTask();
-
-                        //设置任务状态
-                        //只有未被接满的任务，状态才会等于ISSUE
-                        if (okTask.getState() != TaskState.ISSUE){
-                            //不管通过与否，都要修改用户发布任务的任务状态
-                            count = taskRepository.updateStateAndIssueTime(okTask.getId(),TaskState.ISSUE,new Timestamp(System.currentTimeMillis()));
-
+                    switch (result.getResult()){
+                        case REWORK:
+                            //管理员让猎刃重做任务
+                            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.EXECUTE);
+                            break;
+                        case ABANDON_COMPENSATE:
+                            //管理员让猎刃放弃任务，并且补偿用户
+                            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
                             if (count <= 0){
-                                throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+                                throw new DBException("设置任务状态失败");
                             }
-                        }
-
-                        //补偿流程
-                        if (result.getResult().equals(AuditState.NRHC)){
-                            //不能重做，需要补偿
-
-                            //获取对应的用户信息
-                            User user = okTask.getUser();
-                            Float dMoney = FloatHelper.add(user.getMoney(),okTask.getCompensateMoney());
 
                             //将猎刃押金作为补偿给用户
-                            count = userRepository.update(dMoney,okTask.getUserId());
+                            Float dMoney = FloatHelper.add(hTaskUser.getMoney(),hTask.getCompensateMoney());
+                            count = userRepository.update(dMoney,hTaskUser.getId());
 
                             //新增转账记录
                             if (count > 0) {
-                                String context = "来自 " + okTask.getName() + " 的补偿";
-                                UserIeRecord userIeRecord = UserIeRecord.init(hunterTask.getHunterId(),okTask.getUserId(),context,okTask.getCompensateMoney());
+                                String context = "来自 " + hTask.getName() + " 的补偿";
+                                UserIeRecord userIeRecord = UserIeRecord.init(hunterTask.getHunterId(),hTask.getUserId(),context,hTask.getCompensateMoney());
                                 userIeRecordRepository.save(userIeRecord);
                             }
-                        }else {
-                            //不能重做，不用补偿
+                            break;
+                        case ABANDON_NOT_COMPENSATE:
+                            //管理员让猎刃放弃任务
+                            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_NO);
+                            if (count <= 0){
+                                throw new DBException("设置任务状态失败");
+                            }
+                            break;
+                        case TASK_OK:
+                            //管理员让猎刃任务直接完成
+                            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_OK);
+                            if (count <= 0){
+                                throw new DBException("设置任务状态失败");
+                            }
 
-                            //获取对应的猎刃信息
-                            Hunter hunter = hunterTask.getHunter();
-                            Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),okTask.getCompensateMoney());
+                            //为猎刃发赏金与退回押金
+                            Float yMoney = hTask.getCompensateMoney();
+                            Float sMoney = FloatHelper.divied(hTask.getMoney(),hTask.getPeopleNumber().floatValue());
+                            Float nMoney = FloatHelper.addToBD(yMoney,sMoney).add(FloatHelper.toBig(hunter.getUser().getMoney())).floatValue();
+                            count = userRepository.update(nMoney,hunterTask.getHunterId());
+                            if (count <= 0){
+                                throw new DBException("设置金额失败");
+                            }
+                            //添加猎刃的转账记录
+                            UserIeRecord record = userIeRecordRepository.save(
+                                    UserIeRecord.init(
+                                            hTask.getUserId(),
+                                            hunterTask.getHunterId(),
+                                            "来自任务（" + hTask.getName() + ")的赏金",
+                                            sMoney));
+                            if (record == null){
+                                throw new DBException("添加转账记录失败");
+                            }
+                            //修改任务剩余赏金
+                            Float lMoney = FloatHelper.sub(hTask.getMoney(),sMoney);
+                            count = taskRepository.updateMoney(lMoney,hTask.getId());
+                            if (count <= 0){
+                                throw new DBException("设置任务金额失败");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
 
-                            //退回押金给猎刃
-                            count = userRepository.update(dMoney,hunterTask.getHunterId());
+                    if (!result.getResult().equals(AuditState.REWORK)){
+                        //判断用户是否需要重新发布任务
+                        if (TaskState.isReIssue(hTask.getState())){
+                            count = taskRepository.updateStateAndIssueTime(hTask.getId(),TaskState.ISSUE,TimestampHelper.today());
                         }
                     }
+
 
                     break;
                 default:

@@ -125,6 +125,20 @@ public enum TaskState {
     }
 
     /**
+     * 判断任务是否需要重新发布
+     * @param taskState
+     * @return
+     */
+    public static boolean isReIssue(TaskState taskState){
+        switch (taskState){
+            case FORBID_RECEIVE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * 哪些状态允许用户将任务提交管理员审核
      * @param taskState
      * @return

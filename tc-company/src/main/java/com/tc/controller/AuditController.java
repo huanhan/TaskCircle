@@ -328,14 +328,19 @@ public class AuditController {
             throw new ValidException(bindingResult.getFieldErrors());
         }
 
-        //对状态与类别进行判断
-        if (addTaskAudit.getType().equals(AuditType.HUNTER_OK_TASK)){
-            if (addTaskAudit.getResult().equals(AuditState.PASS) || addTaskAudit.getResult().equals(AuditState.PASS)){
-                throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
+        //判断类别
+        if (!AuditType.isTask(addTaskAudit.getType())){
+            throw new ValidException("审核类别有误");
+        }
+
+        //判断审核结果
+        if (addTaskAudit.getResult().equals(AuditType.HUNTER_OK_TASK)){
+            if (!AuditState.isHunterTaskOkAudit(addTaskAudit.getResult())){
+                throw new ValidException("审核结果有误");
             }
         }else {
-            if (!addTaskAudit.getResult().equals(AuditState.PASS) || !addTaskAudit.getResult().equals(AuditState.PASS)){
-                throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
+            if (!AuditState.isOther(addTaskAudit.getResult())){
+                throw new ValidException("审核结果有误");
             }
         }
 
