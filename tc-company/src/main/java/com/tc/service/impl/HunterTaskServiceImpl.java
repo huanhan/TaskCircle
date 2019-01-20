@@ -240,6 +240,20 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //获取对应的状态
         HunterTaskState hunterTaskState = hunterTask.getState();
 
+        //判断用户是否也放弃了任务
+        if (task.getState().equals(TaskState.ABANDON_COMMIT) && hunterTask.getStop()){
+            //设置猎刃任务状态为放弃任务
+            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+
+            if (count <= 0){
+                throw new DBException("修改任务状态失败");
+            }
+
+            outMoneyToHunter(task,hunterTask);
+
+            return true;
+        }
+
         //不需要与用户协商的状态
         if (hunterTaskState.equals(HunterTaskState.RECEIVE)){
             //当前状态是新接取状态
@@ -254,18 +268,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
                     throw new DBException("修改任务状态失败");
                 }
 
-
-                if (task.getCompensateMoney() > 0) {
-                    //获取对应猎刃信息
-                    Hunter hunter = hunterTask.getHunter();
-                    Float dMoney = FloatHelper.add(hunter.getUser().getMoney(),task.getCompensateMoney());
-                    //退回猎刃押金
-                    count = userRepository.update(dMoney, hunterTask.getHunterId());
-
-                    if (count <= 0) {
-                        throw new DBException("押金退回失败");
-                    }
-                }
+                outMoneyToHunter(task,hunterTask);
 
                 return true;
             }

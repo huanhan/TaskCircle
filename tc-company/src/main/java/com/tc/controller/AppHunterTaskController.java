@@ -88,6 +88,10 @@ public class AppHunterTaskController {
         if (hunterTask == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
+        //判断猎刃任务状态
+        if (!hunterTask.getState().equals(HunterTaskState.RECEIVE) || hunterTask.getStop()){
+            throw new DBException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
         //获取任务详情
         Task task = hunterTask.getTask();
         if (task == null){
@@ -131,7 +135,8 @@ public class AppHunterTaskController {
 
         //验证指定的猎刃任务是否可以添加
         if (!query.getState().equals(HunterTaskState.BEGIN)
-                || !query.getState().equals(HunterTaskState.EXECUTE)){
+                || !query.getState().equals(HunterTaskState.EXECUTE)
+                || query.getStop()){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -166,7 +171,8 @@ public class AppHunterTaskController {
         }
 
         //对状态进行判断
-        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTE)){
+        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTE)
+                || hunterTaskStep.getHunterTask().getStop()){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -194,6 +200,19 @@ public class AppHunterTaskController {
     public void delete(@PathVariable("id") Long id, @Valid @RequestBody DeleteHunterTaskStep deleteHunterTaskStep, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
+        }
+
+        //获取删除的任务步骤详情
+        HunterTaskStep hunterTaskStep = hunterTaskStepService.findOne(new HunterTaskStepPK(deleteHunterTaskStep.getHunterTaskId(),deleteHunterTaskStep.getStep()));
+        if (hunterTaskStep == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //对状态进行判断
+        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTE)
+                || !hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.TASK_COMPLETE)
+                || hunterTaskStep.getHunterTask().getStop()){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         boolean isDelete = hunterTaskStepService.deleteById(new HunterTaskStepPK(deleteHunterTaskStep.getHunterTaskId(),deleteHunterTaskStep.getStep()));
@@ -227,7 +246,8 @@ public class AppHunterTaskController {
         //验证指定的猎刃任务是否可以修改
         if (!old.getState().equals(HunterTaskState.BEGIN)
                 || !old.getState().equals(HunterTaskState.EXECUTE)
-                || !old.getState().equals(HunterTaskState.TASK_COMPLETE)){
+                || !old.getState().equals(HunterTaskState.TASK_COMPLETE)
+                || old.getStop()){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
         if (old.getContext().equals(modifyHunterTask.getContext())){
@@ -261,7 +281,7 @@ public class AppHunterTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
         //对猎刃任务的状态进行判断
-        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())){
+        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState()) || hunterTask.getStop()){
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
         //提交用户审核（即修改状态）
@@ -285,7 +305,7 @@ public class AppHunterTaskController {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
         //判断任务状态是否允许重做
-        if (!HunterTaskState.isRework(hunterTask.getState())){
+        if (!HunterTaskState.isRework(hunterTask.getState()) || hunterTask.getStop()){
             throw new ValidException("当前任务不允许重做");
         }
         //重新设置任务的状态
@@ -312,9 +332,16 @@ public class AppHunterTaskController {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
-        //判断任务的状态
-        if (!HunterTaskState.isAbandon(hunterTask.getState())){
-            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        if (!hunterTask.getStop() && !hunterTask.getTask().getState().equals(TaskState.ABANDON_COMMIT)) {
+            //任务没有暂停时，判断任务的状态是否允许放弃
+            if (!HunterTaskState.isAbandon(hunterTask.getState())) {
+                throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+            }
+        }else {
+            //任务被暂停时，判断任务暂停是否没有被完成
+            if (HunterTaskState.isOk(hunterTask.getState())){
+                throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+            }
         }
 
         //猎刃放弃任务
