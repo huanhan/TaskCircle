@@ -209,6 +209,26 @@ public enum HunterTaskState {
     }
 
     /**
+     * 判断状态是否允许提交管理员审核
+     * @param state
+     * @return
+     */
+    public static boolean isDiUpAuditToAdmin(HunterTaskState state){
+        switch (state){
+            case COMMIT_TO_ADMIN:
+                return true;
+            case WITH_ADMIN_NEGOTIATE:
+                return true;
+            case COMMIT_ADMIN_AUDIT:
+                return true;
+            case ADMIN_AUDIT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * 获取非正在执行的猎刃任务状态
      * @param state
      * @return

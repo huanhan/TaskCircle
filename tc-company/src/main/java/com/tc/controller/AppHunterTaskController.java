@@ -378,6 +378,13 @@ public class AppHunterTaskController {
             throw new ValidException("请先与用户协商" + OK_AUDIT_ADMIN_COUNT + "次后，在提交审核");
         }
 
+        //设置提交状态
+        if (!hunterTask.getState().equals(HunterTaskState.USER_REPULSE)){
+            hunterTask.setState(HunterTaskState.COMMIT_ADMIN_AUDIT);
+        }else {
+            hunterTask.setState(HunterTaskState.COMMIT_TO_ADMIN);
+        }
+
         //将任务提交管理员审核
         boolean isSuccess = hunterTaskService.toAdminAudit(htId,hunterTask.getState());
         if (!isSuccess){
@@ -386,6 +393,33 @@ public class AppHunterTaskController {
     }
 
     /**
+     * HunterTask步骤5：猎刃点击取消提交管理员审核，取消成功，将任务变回原先状态
+     * @param id
+     * @param htId
+     */
+    @GetMapping("/admin/di/audit/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击取消提交管理员审核")
+    public void diAuditToAdmin(@PathVariable("id") Long id,@PathVariable("htId") String htId){
+        //获取猎刃任务信息
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的状态
+        if (!HunterTaskState.isDiUpAuditToAdmin(hunterTask.getState())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //取消审核申请，变回原先状态
+        boolean isSuccess = hunterTaskService.diAdminAudit(htId,hunterTask.getState());
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+    }
+
+  /**
      * Task步骤5：猎刃同意用户放弃任务,此时会设置猎刃任务的状态为任务被放弃TASK_BE_ABANDON
      * 并且如果放弃任务的猎刃时猎刃中的最后一个，则会将用户的任务设置成放弃状态，并且退回用户押金
      * @param id

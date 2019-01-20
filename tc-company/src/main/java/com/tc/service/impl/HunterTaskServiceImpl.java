@@ -354,6 +354,24 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
+    public boolean diAdminAudit(String htId, HunterTaskState state) {
+        int count = 0;
+        if (state.equals(HunterTaskState.COMMIT_TO_ADMIN) || state.equals(HunterTaskState.WITH_ADMIN_NEGOTIATE)){
+            count = hunterTaskRepository.updateState(htId,HunterTaskState.USER_REPULSE);
+        }else if (state.equals(HunterTaskState.COMMIT_ADMIN_AUDIT) || state.equals(HunterTaskState.ADMIN_AUDIT)){
+            HunterTask hunterTask = hunterTaskRepository.findOne(htId);
+            Task task = hunterTask.getTask();
+            //获取判断需要的状态
+            boolean isRework = task.getTaskRework();
+            boolean isCompensate = task.getCompensate();
+            HunterTaskState hunterTaskState = HunterTaskState.getBy(isRework,isCompensate);
+            count = hunterTaskRepository.updateState(htId,hunterTaskState);
+        }
+        return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
     public boolean abandonPassByUser(HunterTask hunterTask) {
         //获取对应的任务
         Task task = hunterTask.getTask();

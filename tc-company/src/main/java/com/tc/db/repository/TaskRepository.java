@@ -81,4 +81,5 @@ public interface TaskRepository extends JpaRepository<Task,String>,JpaSpecificat
     @Modifying
     @Query(value = "update Task t set t.money = :money where t.id = :id")
     int updateMoney(@Param("money") Float money,@Param("id") String id);
+
 }
