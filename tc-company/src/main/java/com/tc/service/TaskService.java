@@ -92,4 +92,12 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean hasAbandon(Task task);
+
+    /**
+     * 用户取消放弃任务
+     * @param id
+     * @param task
+     * @return
+     */
+    boolean diAbandonTask(Long id, Task task);
 }

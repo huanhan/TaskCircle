@@ -300,6 +300,41 @@ public class AppTaskController {
     }
 
     /**
+     * Task步骤5：用户点击取消放弃任务，修改任务为撤回状态OUT("任务被撤回")
+     * ，并且将猎刃任务继续，
+     * @param id
+     * @param taskId
+     */
+    @GetMapping("/user/di/abandon/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击取消放弃任务")
+    public void diPassAbandon(@PathVariable("id") Long id, @PathVariable("taskId") String taskId){
+        //根据任务编号获取任务
+        Task task = taskService.findOne(taskId);
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的发布者与放弃任务的用户是否一致
+        if (!task.getUser().getId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+        //判断任务状态是否是放弃状态
+        if (!task.getState().equals(TaskState.ABANDON_COMMIT)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //取消放弃任务
+        boolean isSuccess = taskService.diAbandonTask(id,task);
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+    }
+
+    /**
      * HunterTask步骤4：用户点击审核成功按钮，通过后修改猎刃任务的状态为END_OK("任务结束并且完成")
      * 并且将押金退回与发放赏金
      * 此时猎刃任务的流程 新建-接完并完成 的流程完成

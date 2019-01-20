@@ -28,6 +28,15 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     List<HunterTask> findBy(@Param("id") String taskId,@Param("state") HunterTaskState hunterTaskState);
 
     /**
+     * 根据任务编号与是否暂停获取猎刃任务
+     * @param taskId
+     * @param isStop
+     * @return
+     */
+    List<HunterTask> findByTaskIdAndIsStop(String taskId,Boolean isStop);
+
+
+    /**
      * 获取指定任务的猎刃任务列表
      * @param taskId
      * @return
@@ -193,4 +202,13 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Modifying
     @Query(value = "update HunterTask  t set t.hunterRejectContext = :context,t.state = :state,t.hunterRejectCount = t.hunterRejectCount + 1 where t.id = :id")
     int updateStateAndHunterRejectContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
+
+    /**
+     * 取消猎刃任务的暂停，并重置猎刃拒绝用户次数
+     * @param strings
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.hunterRejectCount = 0,t.stop = false where t.id in (:ids)")
+    int diStop(List<String> strings);
 }

@@ -134,6 +134,28 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
+    public boolean diAbandonTask(Long id, Task task) {
+        int count = 0;
+        //设置任务状态为撤回
+        count = taskRepository.updateState(task.getId(),TaskState.OUT);
+        if (count <= 0){
+            throw new DBException("任务状态修改失败");
+        }
+        //获取所有暂停的猎刃任务列表
+        List<HunterTask> hunterTasks = hunterTaskRepository.findByTaskIdAndIsStop(task.getId(),true);
+        if (ListUtils.isEmpty(hunterTasks)){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //将猎刃任务取消暂停
+        count = hunterTaskRepository.diStop(HunterTask.toIds(hunterTasks));
+        if (count != hunterTasks.size()){
+            throw new DBException("取消猎刃任务暂停失败");
+        }
+        return true;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
     public int abandonTask(Long id, Task task) {
         int count = 0;
 
@@ -336,6 +358,8 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         }
         return true;
     }
+
+
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
