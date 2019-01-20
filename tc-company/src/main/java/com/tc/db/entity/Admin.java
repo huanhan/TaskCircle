@@ -42,7 +42,6 @@ public class Admin {
     private Collection<Authority> authorities;
     private Collection<Message> messages;
     private Collection<TaskClassify> taskClassifies;
-    private Collection<Condition> conditionsByUserId;
 
     public Admin() {
     }
@@ -256,12 +255,4 @@ public class Admin {
         this.taskClassifies = taskClassifies;
     }
 
-    @OneToMany(mappedBy = "admin")
-    public Collection<Condition> getConditionsByUserId() {
-        return conditionsByUserId;
-    }
-
-    public void setConditionsByUserId(Collection<Condition> conditionsByUserId) {
-        this.conditionsByUserId = conditionsByUserId;
-    }
 }

@@ -139,6 +139,12 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
+    public long countByIds(List<Long> lIds) {
+        return userRepository.countByIdIn(lIds);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = getUser(s);
         return new LoginUser(user);
@@ -178,5 +184,11 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Override
     public User findOne(Long id) {
         return userRepository.findOne(id);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public long count() {
+        return userRepository.count();
     }
 }

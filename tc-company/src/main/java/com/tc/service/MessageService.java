@@ -1,6 +1,7 @@
 package com.tc.service;
 
 import com.tc.db.entity.Message;
+import com.tc.db.enums.MessageState;
 import com.tc.dto.message.QueryMessage;
 import org.springframework.data.domain.Page;
 
@@ -15,4 +16,19 @@ public interface MessageService extends BasicService<Message> {
      * @return
      */
     Page<Message> findByQuery(QueryMessage queryMessage);
+
+    /**
+     * 删除消息查看条件
+     * @param id
+     * @return
+     */
+    boolean deleteCondition(Long id);
+
+    /**
+     * 更新状态
+     * @param id
+     * @param state
+     * @return
+     */
+    boolean updateState(Long id, MessageState state);
 }

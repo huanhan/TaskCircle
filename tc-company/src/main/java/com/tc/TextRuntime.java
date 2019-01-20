@@ -2,6 +2,7 @@ package com.tc;
 
 import com.tc.db.entity.User;
 import com.tc.until.IdGenerator;
+import com.tc.until.ListUtils;
 import com.tc.until.TelephoneUtil;
 import com.tc.until.TimestampHelper;
 
@@ -62,6 +63,17 @@ public class TextRuntime {
                 TimestampHelper.toTimestamp(LocalDateTime.of(2019,1,18,13,50))));
 
         user();
+
+
+        List<String> ss = new ArrayList<>();
+        ss.add("1");
+        ss.add("2");
+        ss.add("3");
+        ss.add("4");
+        ss.add("wo");
+        List<Long> ls = ListUtils.to(ss);
+
+        ls.forEach(System.out::println);
     }
 
 

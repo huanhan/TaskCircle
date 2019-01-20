@@ -1,13 +1,8 @@
 package com.tc.db.enums;
 
-import com.tc.db.entity.UserAuthority;
 import com.tc.dto.Show;
-import com.tc.dto.condition.ConditionKey;
-import org.apache.commons.lang3.ArrayUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,12 +58,6 @@ public enum UserCategory {
         return result;
     }
 
-    public static List<ConditionKey> toList() {
-        List<ConditionKey> result = new ArrayList<>();
-        for (UserCategory category : UserCategory.values()) {
-            result.add(new ConditionKey(category.name(),category.category));
-        }
-        return result;
-    }
+
 
 }

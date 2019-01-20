@@ -4,6 +4,7 @@ import com.tc.db.entity.Admin;
 import com.tc.db.entity.Message;
 import com.tc.db.entity.User;
 import com.tc.db.entity.Message;
+import com.tc.db.enums.MessageState;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
 import org.springframework.data.domain.Sort;
@@ -32,7 +33,7 @@ public class QueryMessage extends PageRequest {
     private String creationName;
     private String account;
     private String type;
-    private String state;
+    private MessageState state;
 
 
     public QueryMessage() {
@@ -125,11 +126,11 @@ public class QueryMessage extends PageRequest {
         this.type = type;
     }
 
-    public String getState() {
+    public MessageState getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(MessageState state) {
         this.state = state;
     }
 

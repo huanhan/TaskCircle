@@ -1,9 +1,5 @@
 package com.tc.db.enums;
 
-import com.tc.db.entity.HunterTask;
-import com.tc.until.ListUtils;
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 import java.util.ArrayList;
 import java.util.List;
 

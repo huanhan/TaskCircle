@@ -6,6 +6,7 @@ import com.tc.dto.user.QueryUser;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户服务接口，在BasicService中以有基本的服务，可以在这里额外添加
@@ -71,4 +72,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     long countByQuery(QueryUser queryUser);
+
+    /**
+     * 根据编号获取数量
+     * @param lIds
+     * @return
+     */
+    long countByIds(List<Long> lIds);
 }

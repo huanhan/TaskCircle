@@ -101,4 +101,11 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      */
     @Query(value = "select u from User u where u.id = :id and u.state = :state")
     User findByIdAndState(@Param("id") Long id, @Param("state") UserState state);
+
+    /**
+     * 根据编号获取数量
+     * @param lIds
+     * @return
+     */
+    long countByIdIn(List<Long> lIds);
 }

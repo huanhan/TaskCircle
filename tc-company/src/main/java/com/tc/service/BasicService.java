@@ -110,4 +110,10 @@ public interface BasicService<T> {
      * @return
      */
     boolean deleteByIds(StringIds ids);
+
+    /**
+     * 获取记录总数
+     * @return
+     */
+    long count();
 }

@@ -1,20 +1,10 @@
 package com.tc.db.enums;
 
 public enum MessageType {
-    /**
-     * 只允许以个人接
-     */
-    SOLO("单人型"),
-
-    /**
-     * 可以多个人接
-     */
-    MULTI("多人型"),
-
-    /**
-     * 用户指定某个人去完成
-     */
+    CONDITION("条件型"),
+    ALL("所有型"),
     APPOINT("指定型"),
+
     ;
 
     private String type;

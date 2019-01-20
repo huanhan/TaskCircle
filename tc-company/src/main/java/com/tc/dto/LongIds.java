@@ -18,7 +18,13 @@ public class LongIds {
     @NotEmpty(message = "集合必须存在元素")
     private List<Long> ids;
 
+    public LongIds() {
+    }
 
+    public LongIds(Long id, List<Long> ids) {
+        this.id = id;
+        this.ids = ids;
+    }
 
     public Long getId() {
         return id;

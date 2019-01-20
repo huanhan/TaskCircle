@@ -79,4 +79,9 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
     public T findOne(String id) {
         return null;
     }
+
+    @Override
+    public long count() {
+        return 0;
+    }
 }

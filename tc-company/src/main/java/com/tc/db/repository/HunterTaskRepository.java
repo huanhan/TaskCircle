@@ -33,7 +33,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @param isStop
      * @return
      */
-    List<HunterTask> findByTaskIdAndIsStop(String taskId,Boolean isStop);
+    List<HunterTask> findByTaskIdAndStop(String taskId,Boolean isStop);
 
 
     /**

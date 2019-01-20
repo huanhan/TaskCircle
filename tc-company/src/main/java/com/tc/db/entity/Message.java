@@ -1,6 +1,10 @@
 package com.tc.db.entity;
 
+import com.tc.db.enums.MessageState;
+import com.tc.db.enums.MessageType;
 import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -31,12 +35,12 @@ public class Message implements Serializable {
     private String title;
     private Timestamp createTime;
     private Admin creation;
-    private String type;
-    private String state;
+    private MessageState state;
+    private MessageType type;
+    private String lookCondition;
 
-    private int sendCount = 0;
-    private int lookCount = 0;
-    private Collection<MessageCondition> messageConditions;
+    private long sendCount = 0;
+    private long lookCount = 0;
 
     public static List<Message> toListByIndex(List<Message> content) {
         if (!ListUtils.isEmpty(content)){
@@ -60,6 +64,7 @@ public class Message implements Serializable {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
         return id;
     }
@@ -99,6 +104,7 @@ public class Message implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -119,40 +125,52 @@ public class Message implements Serializable {
     }
 
     @Basic
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state")
+    public MessageState getState() {
+        return state;
+    }
+
+    public void setState(MessageState state) {
+        this.state = state;
+    }
+
+    @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    public String getType() {
+    public MessageType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(MessageType type) {
         this.type = type;
     }
 
     @Basic
-    @Column(name = "state")
-    public String getState() {
-        return state;
+    @Column(name = "look_condition")
+    public String getLookCondition() {
+        return lookCondition;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setLookCondition(String lookCondition) {
+        this.lookCondition = lookCondition;
     }
 
     @Transient
-    public int getSendCount() {
+    public long getSendCount() {
         return sendCount;
     }
 
-    public void setSendCount(int sendCount) {
+    public void setSendCount(long sendCount) {
         this.sendCount = sendCount;
     }
 
     @Transient
-    public int getLookCount() {
+    public long getLookCount() {
         return lookCount;
     }
 
-    public void setLookCount(int lookCount) {
+    public void setLookCount(long lookCount) {
         this.lookCount = lookCount;
     }
 
@@ -166,22 +184,13 @@ public class Message implements Serializable {
                 Objects.equals(context, message.context) &&
                 Objects.equals(title, message.title) &&
                 Objects.equals(createTime, message.createTime) &&
-                Objects.equals(type, message.type) &&
                 Objects.equals(state, message.state);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, context, title, createTime, creation, type, state);
+        return Objects.hash(id, context, title, createTime, creation, state);
     }
 
-    @OneToMany(mappedBy = "message")
-    public Collection<MessageCondition> getMessageConditions() {
-        return messageConditions;
-    }
-
-    public void setMessageConditions(Collection<MessageCondition> messageConditions) {
-        this.messageConditions = messageConditions;
-    }
 }

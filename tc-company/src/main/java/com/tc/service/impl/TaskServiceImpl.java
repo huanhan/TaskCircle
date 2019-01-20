@@ -156,7 +156,7 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             throw new DBException("任务状态修改失败");
         }
         //获取所有暂停的猎刃任务列表
-        List<HunterTask> hunterTasks = hunterTaskRepository.findByTaskIdAndIsStop(task.getId(),true);
+        List<HunterTask> hunterTasks = hunterTaskRepository.findByTaskIdAndStop(task.getId(),true);
         if (ListUtils.isEmpty(hunterTasks)){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }

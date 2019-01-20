@@ -33,4 +33,18 @@ public class ListUtils extends org.apache.commons.collections.ListUtils {
         }
         return list.size() == 0;
     }
+
+
+    public static  List<Long> to(List<String> list){
+        List<Long> results = new ArrayList<>();
+
+        for (String s : list) {
+            try {
+                results.add(Long.parseLong(s));
+            }catch (Exception ignored){
+            }
+        }
+        return results;
+    }
+
 }

@@ -328,13 +328,15 @@ public class AuditController {
             throw new ValidException(bindingResult.getFieldErrors());
         }
 
+
+
         //判断类别
         if (!AuditType.isTask(addTaskAudit.getType())){
             throw new ValidException("审核类别有误");
         }
 
         //判断审核结果
-        if (addTaskAudit.getResult().equals(AuditType.HUNTER_OK_TASK)){
+        if (addTaskAudit.getType().equals(AuditType.HUNTER_OK_TASK)){
             if (!AuditState.isHunterTaskOkAudit(addTaskAudit.getResult())){
                 throw new ValidException("审核结果有误");
             }

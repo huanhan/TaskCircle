@@ -6,6 +6,7 @@ import com.tc.db.enums.*;
 import com.tc.db.repository.*;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.AuditService;
 import com.tc.until.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.xml.bind.ValidationException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -126,18 +128,28 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     if (task == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
                     }
-                    if (audit.getResult().equals(AuditState.PASS)) {
-                        //用户新发布的任务审核被通过
-                        count = taskRepository.updateState(task.getId(),TaskState.AUDIT_SUCCESS);
+                    //判断任务状态是否满足审核需要的状态
+                    if (task.getState().equals(TaskState.AUDIT)){
+                        if (audit.getResult().equals(AuditState.PASS)) {
+                            //用户新发布的任务审核被通过
+                            count = taskRepository.updateState(task.getId(),TaskState.AUDIT_SUCCESS);
+                        }else {
+                            //用户新发布的任务审核不通过
+                            count = taskRepository.updateState(task.getId(),TaskState.AUDIT_FAILUER);
+                        }
                     }else {
-                        //用户新发布的任务审核不通过
-                        count = taskRepository.updateState(task.getId(),TaskState.AUDIT_FAILUER);
+                        throw new ValidException("任务状态异常");
                     }
+
                     break;
                 case USER_FAILURE_TASK:
                     //获取的任务不能为空
                     if (task == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+                    }
+                    //判断状态
+                    if (!task.getState().equals(TaskState.AUDIT)){
+                        throw new ValidException("任务状态异常");
                     }
                     //当放弃任务需要管理员审核时，不管通过与否都将任务状态置为放弃
                     count = taskRepository.updateState(task.getId(),TaskState.ABANDON_OK);
@@ -242,6 +254,10 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     if (hunterTask == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
                     }
+                    //判断猎刃任务状态
+                    if (!hunterTask.getState().equals(HunterTaskState.ADMIN_AUDIT)){
+                        throw new ValidException("任务状态异常");
+                    }
                     //当猎刃放弃任务需要管理员审核时，不管通过与否都将任务状态置为放弃
                     count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
 
@@ -298,6 +314,10 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                     //获取的猎刃任务不能为空
                     if (hunterTask == null) {
                         throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+                    }
+                    //判断猎刃任务状态
+                    if (!hunterTask.getState().equals(HunterTaskState.ADMIN_AUDIT)){
+                        throw new ValidException("任务状态异常");
                     }
                     //获取对应任务
                     Task hTask = hunterTask.getTask();
