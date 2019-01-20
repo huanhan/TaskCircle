@@ -1,5 +1,9 @@
 package com.tc.db.enums;
 
+import com.tc.db.entity.HunterTask;
+import com.tc.until.ListUtils;
+import org.omg.CORBA.PUBLIC_MEMBER;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,5 +226,19 @@ public enum HunterTaskState {
             default:
                 return false;
         }
+    }
+
+    /**
+     * 用户判断猎刃是否都拒绝了用户
+     * @return
+     */
+    public static List<HunterTaskState> notAbandonState(){
+        List<HunterTaskState> result = new ArrayList<>();
+        result.add(END_NO);
+        result.add(END_OK);
+        result.add(TASK_ABANDON);
+        result.add(TASK_BE_ABANDON);
+        result.add(HUNTER_REPULSE);
+        return result;
     }
 }

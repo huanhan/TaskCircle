@@ -211,4 +211,14 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Modifying
     @Query(value = "update HunterTask t set t.hunterRejectCount = 0,t.stop = false where t.id in (:ids)")
     int diStop(List<String> strings);
+
+    /**
+     * 获取指定任务中，不包括指定状态列表的猎刃任务数量
+     * @param taskId
+     * @param states
+     * @return
+     */
+    @Query(value = "select count(t) from HunterTask t where t.taskId = :taskId and t.state in (:states)")
+    int countByTaskIdAndHunterTaskStateNotIn(String taskId,List<HunterTaskState> states);
+
 }

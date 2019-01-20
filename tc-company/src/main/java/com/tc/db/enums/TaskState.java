@@ -123,5 +123,40 @@ public enum TaskState {
                 return false;
         }
     }
-    
+
+    /**
+     * 哪些状态允许用户将任务提交管理员审核
+     * @param taskState
+     * @return
+     */
+    public static boolean isToAdminAudit(TaskState taskState){
+        switch (taskState){
+            case NEW_CREATE:
+                return true;
+            case HUNTER_REJECT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 哪些状态允许用户取消管理员审核
+     * @param state
+     * @return
+     */
+    public static boolean isDiAuditByAdmin(TaskState state) {
+        switch (state){
+            case AWAIT_AUDIT:
+                return true;
+            case AUDIT:
+                return true;
+            case ADMIN_NEGOTIATE:
+                return true;
+            case COMMIT_AUDIT:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

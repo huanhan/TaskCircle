@@ -41,6 +41,11 @@ import java.util.List;
 @RequestMapping(value = "/app/task")
 public class AppTaskController {
 
+    /**
+     * 允许用户放弃任务的最大猎刃任务执行人数限制
+     */
+    public static final int USER_ABANDON_NUMBER = 5;
+
     @Autowired
     private TaskService taskService;
 
@@ -112,7 +117,7 @@ public class AppTaskController {
      * @param taskId
      */
     @GetMapping("/user/upAudit/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "将用户的任务提交审核")
+    @ApiOperation(value = "将用户的任务提交给管理员审核")
     public void upAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
@@ -128,7 +133,7 @@ public class AppTaskController {
         }
 
         //判断任务的状态是否允许提交审核
-        if (!hasCommit(task)){
+        if (!TaskState.isToAdminAudit(task.getState())){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -140,6 +145,43 @@ public class AppTaskController {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
+
+    /**
+     * Task步骤2：将用户的取消任务的提交管理员审核，取消审核后变为原有的状态
+     *
+     * @param id
+     * @param taskId
+     */
+    @GetMapping("/user/di/upAudit/{taskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "将用户的取消任务的提交管理员审核")
+    public void diUpAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId){
+        //根据任务编号获取任务
+        Task task = taskService.findOne(taskId);
+
+        //判断查询的任务是否存在
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //判断任务的发布者与提交任务审核的用户是否一致
+        if (!task.getUser().getId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+        //判断任务的状态是否允许取消
+        if (!TaskState.isDiAuditByAdmin(task.getState())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //取消审核
+        boolean isSuccess = taskService.diCommitAudit(taskId,task.getState());
+
+        //验证修改是否成功
+        if (!isSuccess){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+    }
+
 
     /**
      * Task步骤3：用户点击发布任务按钮，如果发布成功，状态会变成ISSUE("任务发布中")
@@ -295,7 +337,14 @@ public class AppTaskController {
         int count = taskService.abandonTask(id,task);
 
         if (count != 0){
-            throw new ValidException("目前有" + count + "猎刃正在执行该任务！已将任务做下架处理");
+            String context = "";
+            if (count <= AppTaskController.USER_ABANDON_NUMBER){
+                context = "目前有" + count + "猎刃正在执行该任务！已禁止猎刃继续执行任务";
+            }else {
+                context = "目前有" + count + "猎刃正在执行该任务！不能放弃任务，剩余猎刃将继续执行任务，可以选择与猎刃交流让猎刃放弃";
+            }
+            throw new ValidException(context);
+
         }
     }
 

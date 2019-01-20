@@ -444,7 +444,15 @@ public class AppHunterTaskController {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
         //设置猎刃任务状态为不同意用户放弃
-        hunterTaskService.abandonNotPassByHunter(hunterTask.getId(),context.getContext());
+        boolean isSuccess = hunterTaskService.abandonNotPassByHunter(hunterTask.getId(),context.getContext());
+        if (!isSuccess){
+            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+        //判断用户的任务是否完全被拒绝
+        isSuccess = taskService.taskIsReject(task.getId());
+        if (!isSuccess){
+            throw new ValidationException("还有猎刃没有拒绝用户");
+        }
     }
 
 }

@@ -45,6 +45,8 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 自动修改任务状态,根据时长判断，超过时长则修改任务为未审核状态
+     *
+     * @param state
      * @return
      */
     boolean updateState(TaskState state);
@@ -56,6 +58,14 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean commitAudit(String taskId, TaskState state);
+
+    /**
+     * 用户取消审核
+     * @param taskId
+     * @param state
+     * @return
+     */
+    boolean diCommitAudit(String taskId, TaskState state);
 
     /**
      * 用户放弃任务
@@ -87,6 +97,13 @@ public interface TaskService extends BasicService<Task> {
     boolean taskIsSuccess(String taskId);
 
     /**
+     * 判断任务是否完全被拒绝
+     * @param id
+     * @return
+     */
+    boolean taskIsReject(String id);
+
+    /**
      * 判断任务是否可放弃，可放弃则直接放弃
      * @param task
      * @return
@@ -100,4 +117,7 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean diAbandonTask(Long id, Task task);
+
+
+
 }

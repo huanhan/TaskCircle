@@ -1,5 +1,6 @@
 package com.tc.service.impl;
 
+import com.tc.controller.AppTaskController;
 import com.tc.controller.AuditController;
 import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
@@ -125,10 +126,23 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         if (state.equals(TaskState.NEW_CREATE) || state.equals(TaskState.HUNTER_REJECT)){
            //任务提交审核时一般只修改状态与提交审核的时间，不做其他额外的操作
 
+
            count = taskRepository.updateStateAndAuditTime(taskId,state,new Timestamp(System.currentTimeMillis()));
 
         }
 
+        return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean diCommitAudit(String taskId, TaskState state) {
+        int count = 0;
+        if (state.equals(TaskState.ADMIN_NEGOTIATE) || state.equals(TaskState.COMMIT_AUDIT)){
+            count = taskRepository.updateState(taskId,TaskState.HUNTER_REJECT);
+        }else if (state.equals(TaskState.AUDIT) || state.equals(TaskState.AWAIT_AUDIT)){
+            count = taskRepository.updateState(taskId,TaskState.NEW_CREATE);
+        }
         return count > 0;
     }
 
@@ -229,17 +243,33 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
             count = 0;
         }else {
-            //将任务状态设置为用户提交放弃申请状态，防止之后的人接取
-            count = taskRepository.updateState(task.getId(),TaskState.ABANDON_COMMIT);
 
-            if (count <= 0){
-                throw new DBException("更新任务状态失败");
-            }
+            //判断是否允许用户放弃任务
+            if (hts.size() <= AppTaskController.USER_ABANDON_NUMBER){
+                //将任务状态设置为用户提交放弃申请状态，防止之后的人接取
+                count = taskRepository.updateState(task.getId(),TaskState.ABANDON_COMMIT);
 
-            //将猎刃的任务状态置为暂停状态，阻止猎刃继续进行任务
-            count = hunterTaskRepository.stopTask(HunterTask.toIds(hts));
-            if (count != hts.size()){
-                throw new DBException("暂停猎刃任务失败");
+                if (count <= 0){
+                    throw new DBException("更新任务状态失败");
+                }
+
+
+                //将猎刃的任务状态置为暂停状态，阻止猎刃继续进行任务
+                count = hunterTaskRepository.stopTask(HunterTask.toIds(hts));
+                if (count != hts.size()){
+                    throw new DBException("暂停猎刃任务失败");
+                }
+            }else {
+
+                if (!task.getState().equals(TaskState.OUT)) {
+                    //将任务撤回，不能放弃
+                    count = taskRepository.updateState(task.getId(), TaskState.OUT);
+
+                    if (count <= 0) {
+                        throw new DBException("更新任务状态失败");
+                    }
+                }
+
             }
 
             //说明由猎刃正在执行中，返回正在执行的猎刃数量
@@ -334,6 +364,26 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         }
         int count = taskRepository.updateState(taskId,TaskState.FINISH);
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean taskIsReject(String id) {
+        Task task = taskRepository.findOne(id);
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //获取除了已拒绝外的剩下猎刃任务数
+        int count = hunterTaskRepository.countByTaskIdAndHunterTaskStateNotIn(id,HunterTaskState.notAbandonState());
+        if (count > 0){
+            return false;
+        }
+        //如果任务数等于0
+        count = taskRepository.updateState(id,TaskState.HUNTER_REJECT);
+        if (count <= 0){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+        return true;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
