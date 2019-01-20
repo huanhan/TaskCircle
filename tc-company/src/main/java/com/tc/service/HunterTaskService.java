@@ -1,6 +1,7 @@
 package com.tc.service;
 
 import com.tc.db.entity.HunterTask;
+import com.tc.db.entity.Task;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.dto.task.QueryHunterTask;
 import org.springframework.data.domain.Page;
@@ -134,4 +135,20 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     boolean abandonPassByHunter(HunterTask hunterTask);
+
+    /**
+     * 根据指定任务编号与猎刃编号获取我的一个被暂停的任务
+     * @param taskId
+     * @param id
+     * @return
+     */
+    HunterTask findOne(String taskId, Long id);
+
+    /**
+     * 猎刃不同意用户放弃任务
+     * @param id
+     * @param context
+     * @return
+     */
+    boolean abandonNotPassByHunter(String id, String context);
 }

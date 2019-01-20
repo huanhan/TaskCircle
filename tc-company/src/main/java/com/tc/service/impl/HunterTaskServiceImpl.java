@@ -410,6 +410,25 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         return false;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public HunterTask findOne(String taskId, Long id) {
+        return hunterTaskRepository.findOne((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get(HunterTask.TASK_ID),taskId));
+            predicates.add(cb.equal(root.get(HunterTask.HUNTER_ID),id));
+            predicates.add(cb.equal(root.get(HunterTask.IS_STOP),true));
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean abandonNotPassByHunter(String id, String context) {
+        int count = hunterTaskRepository.updateStateAndHunterRejectContext(id,HunterTaskState.HUNTER_REPULSE,context);
+        return count > 0;
+    }
+
     /**
      * 退还用户押金
      * @param task

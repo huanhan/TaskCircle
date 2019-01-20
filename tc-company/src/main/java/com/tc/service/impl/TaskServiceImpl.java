@@ -138,11 +138,15 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         int count = 0;
 
         //获取猎刃任务中接取状态的猎刃任务，并且从中选择接取时间小于允许放弃的时间
-        List<HunterTask> hts = hunterTaskRepository.findBy(task.getId(),HunterTaskState.RECEIVE);
+        List<HunterTask> hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(),HunterTaskState.isAbandon());
         List<String> ids = new ArrayList<>();
         if (hts != null){
             hts.forEach(hunterTask -> {
-                if (TimestampHelper.differByMinute(TimestampHelper.today(),hunterTask.getAcceptTime()) <= task.getPermitAbandonMinute()){
+                if (hunterTask.getState().equals(HunterTaskState.RECEIVE)) {
+                    if (TimestampHelper.differByMinute(TimestampHelper.today(), hunterTask.getAcceptTime()) <= task.getPermitAbandonMinute()) {
+                        ids.add(hunterTask.getId());
+                    }
+                }else {
                     ids.add(hunterTask.getId());
                 }
             });
@@ -208,6 +212,12 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
             if (count <= 0){
                 throw new DBException("更新任务状态失败");
+            }
+
+            //将猎刃的任务状态置为暂停状态，阻止猎刃继续进行任务
+            count = hunterTaskRepository.stopTask(HunterTask.toIds(hts));
+            if (count != hts.size()){
+                throw new DBException("暂停猎刃任务失败");
             }
 
             //说明由猎刃正在执行中，返回正在执行的猎刃数量

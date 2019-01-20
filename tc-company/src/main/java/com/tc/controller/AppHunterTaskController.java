@@ -376,8 +376,8 @@ public class AppHunterTaskController {
         if (!task.getState().equals(TaskState.ABANDON_COMMIT)){
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
-        //获取任务对应的本人的猎刃任务
-        HunterTask hunterTask = hunterTaskService.findByTaskIsNotOk(taskId,id);
+        //获取任务对应的本人的猎刃任务(猎刃被暂停的猎刃任务在指定的任务的猎刃任务中只允许存在1个)
+        HunterTask hunterTask = hunterTaskService.findOne(taskId,id);
         if (hunterTask == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
@@ -394,7 +394,7 @@ public class AppHunterTaskController {
     }
 
     /**
-     * Task步骤5：猎刃不同意用户放弃任务，此时将猎刃任务的状态设置成
+     * Task步骤5：猎刃不同意用户放弃任务，此时将猎刃任务的状态设置成HUNTER_REPULSE("猎刃拒绝用户放弃")，并修改对应次数
      * @param id
      * @param context
      * @param bindingResult
@@ -402,7 +402,22 @@ public class AppHunterTaskController {
     @PostMapping("/abandon/failure/{id:\\d+}")
     @ApiOperation(value = "猎刃点击用户的放弃申请不通过")
     public void abandonNotPassByHunter(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
-
+        //获取需要猎刃不同意的任务
+        Task task = taskService.findOne(context.getId());
+        if (task == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //判断任务的状态是否需要猎刃同意
+        if (!task.getState().equals(TaskState.ABANDON_COMMIT)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+        //获取任务对应的本人的猎刃任务
+        HunterTask hunterTask = hunterTaskService.findOne(context.getId(),id);
+        if (hunterTask == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        //设置猎刃任务状态为不同意用户放弃
+        hunterTaskService.abandonNotPassByHunter(hunterTask.getId(),context.getContext());
     }
 
 }

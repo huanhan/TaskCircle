@@ -30,6 +30,7 @@ public enum HunterTaskState {
     AWAIT_COMPENSATE("等待补偿"),
     COMPENSATE_SUCCESS("补偿成功"),
     COMPENSATE_EXCEPTION("补偿异常"),
+    TASK_STOP("任务暂停"),
     TASK_ABANDON("任务放弃"),
     TASK_BE_ABANDON("任务被放弃"),
     NEGOTIATE_VALIDATOR("协商校验"),
@@ -46,6 +47,19 @@ public enum HunterTaskState {
         this.state = state;
     }
 
+    /**
+     * 当用户放弃任务时，允许猎刃直接放弃的猎刃任务状态
+     * @return
+     */
+    public static List<HunterTaskState> isAbandon(){
+        List<HunterTaskState> result = new ArrayList<>();
+        result.add(RECEIVE);
+        result.add(USER_REPULSE);
+        result.add(COMMIT_TO_ADMIN);
+        result.add(WITH_ADMIN_NEGOTIATE);
+        return result;
+    }
+
     public static List<HunterTaskState> notAbandon(){
         List<HunterTaskState> result = new ArrayList<>();
         result.add(AWAIT_BEGIN);
@@ -53,6 +67,7 @@ public enum HunterTaskState {
         result.add(EXECUTE);
         result.add(TASK_COMPLETE);
         result.add(AWAIT_USER_AUDIT);
+        result.add(TASK_STOP);
         result.add(USER_AUDIT);
         result.add(AWAIT_BEGIN);
         result.add(AWAIT_SETTLE_ACCOUNTS);
@@ -70,10 +85,7 @@ public enum HunterTaskState {
         result.add(COMPENSATE_EXCEPTION);
         result.add(NEGOTIATE_VALIDATOR);
         result.add(WITH_USER_NEGOTIATE);
-        result.add(USER_REPULSE);
         result.add(HUNTER_REPULSE);
-        result.add(COMMIT_TO_ADMIN);
-        result.add(WITH_ADMIN_NEGOTIATE);
         return result;
     }
 

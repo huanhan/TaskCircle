@@ -32,6 +32,9 @@ public class HunterTask implements Serializable {
     public static final String CONTEXT = "context";
     public static final String TASK = "task";
     public static final String HUNTER = "hunter";
+    public static final String IS_STOP = "isStop";
+
+
 
     private String id;
     private String taskId;
@@ -45,9 +48,11 @@ public class HunterTask implements Serializable {
     private Timestamp beginTime;
     private String context;
     private String auditContext;
+    private String hunterRejectContext;
     private Integer hunterRejectCount;
     private Integer userRejectCount;
     private HunterTaskState state;
+    private Boolean isStop;
 
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
@@ -168,6 +173,16 @@ public class HunterTask implements Serializable {
     }
 
     @Basic
+    @Column(name = "hunter_reject_context")
+    public String getHunterRejectContext() {
+        return hunterRejectContext;
+    }
+
+    public void setHunterRejectContext(String hunterRejectContext) {
+        this.hunterRejectContext = hunterRejectContext;
+    }
+
+    @Basic
     @Column(name = "hunter_reject_count")
     public Integer getHunterRejectCount() {
         return hunterRejectCount;
@@ -196,6 +211,16 @@ public class HunterTask implements Serializable {
 
     public void setState(HunterTaskState state) {
         this.state = state;
+    }
+
+    @Basic
+    @Column(name = "is_stop")
+    public Boolean getStop() {
+        return isStop;
+    }
+
+    public void setStop(Boolean stop) {
+        isStop = stop;
     }
 
     @OneToMany(mappedBy = "hunterTask")

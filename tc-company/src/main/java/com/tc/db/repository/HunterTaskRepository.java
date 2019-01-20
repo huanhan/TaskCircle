@@ -173,4 +173,24 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state, t.auditTime = :time where t.id = :id")
     int updateStateAndAuditTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp auditTime);
+
+    /**
+     * 修改猎刃任务为暂停
+     * @param ids
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.stop = true where t.id in (:ids)")
+    int stopTask(@Param("ids") List<String> ids);
+
+    /**
+     * 设置猎刃任务状态，与拒绝用户需要的内容，并且拒绝次数自增1
+     * @param id
+     * @param state
+     * @param context
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask  t set t.hunterRejectContext = :context,t.state = :state,t.hunterRejectCount = t.hunterRejectCount + 1 where t.id = :id")
+    int updateStateAndHunterRejectContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
 }
