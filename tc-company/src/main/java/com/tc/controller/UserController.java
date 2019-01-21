@@ -6,13 +6,11 @@ import com.tc.db.enums.UserCategory;
 import com.tc.dto.Result;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.comment.QueryUserComment;
+import com.tc.dto.finance.QueryFinance;
 import com.tc.dto.task.QueryTask;
 import com.tc.dto.user.*;
 import com.tc.exception.ValidException;
-import com.tc.service.AuditService;
-import com.tc.service.CommentUserService;
-import com.tc.service.TaskService;
-import com.tc.service.UserService;
+import com.tc.service.*;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +43,9 @@ public class UserController {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private UserWithdrawService userWithdrawService;
 
     /**
      * 根据查询条件获取用户列表
@@ -115,6 +116,7 @@ public class UserController {
     @ApiOperation(value = "根据用户编号和统计条件获取用户收支统计情况")
     public UserWithdrawStatistics getUserWithdrawStatistics(@PathVariable("id") Long id,
                                                             @RequestBody DateCondition condition){
+        List<UserWithdraw> query = userWithdrawService.findByQueryFinanceNotPage(QueryFinance.init(id,condition.getBegin(),condition.getEnd()));
         return new UserWithdrawStatistics();
     }
 

@@ -62,8 +62,13 @@ public class QueryFinance extends PageRequest {
         super(page, size, sort);
     }
 
-
-
+    public QueryFinance(Long id, Timestamp begin, Timestamp end) {
+        super(0,10);
+        this.userId = id;
+        this.auditPassBegin = begin;
+        this.auditPassEnd = end;
+        this.state = WithdrawState.SUCCESS;
+    }
 
     public String getId() {
         return id;
@@ -186,5 +191,9 @@ public class QueryFinance extends PageRequest {
         predicates.removeIf(Objects::isNull);
 
         return predicates;
+    }
+
+    public static QueryFinance init(Long id, Timestamp begin, Timestamp end) {
+        return new QueryFinance(id,begin,end);
     }
 }
