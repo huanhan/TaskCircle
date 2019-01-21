@@ -112,12 +112,14 @@ public class UserController {
      * @param condition 统计条件
      * @return
      */
-    @GetMapping("/statistics/{id:\\d+}/ws")
+    @PostMapping("/statistics/{id:\\d+}/ws")
     @ApiOperation(value = "根据用户编号和统计条件获取用户收支统计情况")
     public UserWithdrawStatistics getUserWithdrawStatistics(@PathVariable("id") Long id,
                                                             @RequestBody DateCondition condition){
         List<UserWithdraw> query = userWithdrawService.findByQueryFinanceNotPage(QueryFinance.init(id,condition.getBegin(),condition.getEnd()));
-        return new UserWithdrawStatistics();
+        UserWithdrawStatistics userWithdrawStatistics = UserWithdrawStatistics.statistics(query,condition.getType());
+        userWithdrawStatistics.setUser(User.toDetail(query.get(0).getUser()));
+        return userWithdrawStatistics;
     }
 
     /**

@@ -3,6 +3,8 @@ package com.tc.dto.user;
 import com.tc.dto.enums.DateType;
 import com.tc.until.TimestampHelper;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.sql.Timestamp;
 
 /**
@@ -16,8 +18,19 @@ public class DateCondition {
     public static final int MAX_MONTH = 12;
     public static final int MAX_YEAR = 12;
 
+    public static final String[] HOURS = {
+            "00:00","01:00","02:00","03:00","04:00","05:00",
+            "06:00","07:00","08:00","09:00","10:00","11:00",
+            "12:00","13:00","14:00","15:00","16:00","17:00",
+            "18:00","19:00","20:00","21:00","22:00","23:00"};
+
+    @NotNull
+    @Past
     private Timestamp begin;
+    @NotNull
+    @Past
     private Timestamp end;
+    @NotNull
     private DateType type;
 
     public Timestamp getBegin() {
