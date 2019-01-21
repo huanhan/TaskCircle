@@ -56,7 +56,15 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
     public Page<Audit> findByQueryAudit(QueryAudit queryAudit) {
         return auditRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryAudit.initPredicates(queryAudit,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },queryAudit);
+    }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public Page<Audit> findByQueryAndUser(QueryAudit queryAudit) {
+        return auditRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryAudit.initPredicatesByUser(queryAudit,root,query,cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryAudit);
     }

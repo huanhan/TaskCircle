@@ -104,10 +104,13 @@ public class AuditTask {
         if (audit != null){
             if (audit.getAuditTask() != null){
                 result.setTaskId(audit.getAuditTask().taskId);
+                if (audit.getAuditTask().getTask() != null){
+                    result.setTask(Task.toDetail(audit.getAuditTask().getTask()));
+                }
             }
             audit.setAuditTask(null);
             result.setAuditId(audit.getId());
-            result.setAudit(audit);
+            result.setAudit(Audit.toDetail(audit));
         }
         return result;
     }

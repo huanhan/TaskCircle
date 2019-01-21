@@ -1,12 +1,17 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
+import com.tc.db.enums.AuditType;
 import com.tc.db.enums.UserCategory;
-import com.tc.db.enums.UserState;
 import com.tc.dto.Result;
+import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.comment.QueryUserComment;
+import com.tc.dto.task.QueryTask;
 import com.tc.dto.user.*;
 import com.tc.exception.ValidException;
+import com.tc.service.AuditService;
+import com.tc.service.CommentUserService;
+import com.tc.service.TaskService;
 import com.tc.service.UserService;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用户管理控制器
+ * 普通用户管理控制器
  * @author Cyg
  */
 @RestController
@@ -32,6 +37,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private CommentUserService commentUserService;
+
+    @Autowired
+    private AuditService auditService;
+
     /**
      * 根据查询条件获取用户列表
      * @param queryUser 用户查询条件
@@ -41,6 +55,7 @@ public class UserController {
     @ApiOperation(value = "根据查询条件获取用户列表")
     public Result all(@RequestBody QueryUser queryUser){
 
+        queryUser.setCategory(UserCategory.NORMAL);
         Page<User> queryUsers = userService.findByQueryUser(queryUser);
         List<User> result = User.toIndexAsList(queryUsers.getContent());
         return Result.init(result,queryUser);
@@ -61,35 +76,7 @@ public class UserController {
 
     }
 
-    /**
-     * 提交猎刃审核申请
-     * @param commitHunter 提交申请的必要信息
-     * @param bindingResult
-     */
-    @PostMapping("/commit/hunter")
-    @ApiOperation(value = "提交猎刃审核申请")
-    public void commitByHunter(@Valid @RequestBody CommitHunter commitHunter, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
 
-        User user = userService.findOne(commitHunter.getId());
-        if (user == null){
-            throw new ValidException(StringResourceCenter.DB_QUERY_ABNORMAL);
-        }
-        if (user.getCategory() != UserCategory.NORMAL){
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
-        if (user.getState() != UserState.NORMAL){
-            throw new ValidException(StringResourceCenter.VALIDATOR_STATE_FAILED);
-        }
-
-        User result = userService.save(CommitHunter.toUser(user,commitHunter));
-        if (result == null){
-            throw new ValidException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-        }
-
-    }
 
     /**
      * 获取用户数量
@@ -114,102 +101,20 @@ public class UserController {
         return new UserTaskStatistics();
     }
 
-    /**
-     * 根据用户编号获取用户发布的任务列表
-     * @param id 用户编号
-     * @param queryUserTask 用户任务查询信息
-     * @param result 异常结果
-     * @return
-     */
-    @GetMapping("/task/out/{id:\\d+}")
-    @ApiOperation(value = "根据用户编号获取用户发布的任务列表")
-    public List<Task> getUserOutTask(@PathVariable("id") Long id,
-                                     @Valid @RequestBody QueryUserTask queryUserTask, BindingResult result){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 根据用户编号获取用户评论信息
-     * @param id 用户编号
-     * @param queryUserComment 用户评论查询条件
-     * @param result 异常结果
-     * @return
-     */
-    @GetMapping("/comment/{id:\\d+}")
-    @ApiOperation(value = "根据用户编号获取用户的评论列表")
-    public List<CommentUser> getUserComment(@PathVariable("id") Long id,
-                                            @Valid @RequestBody QueryUserComment queryUserComment, BindingResult result){
-        return new ArrayList<>();
-    }
 
 
-    /**
-     * 根据用户编号获取用户的审核历史记录
-     * @param id
-     * @param queryUserAuditRecord
-     * @param result
-     * @return
-     */
-    @GetMapping("/audit/{id:\\d+}")
-    @ApiOperation(value = "根据用户编号获取用户的审核历史记录，包括任务审核，猎刃审核，提现审核等")
-    public List<UserAuditRecord> getUserAuditRecords(@PathVariable("id") Long id,
-                                                    @Valid @RequestBody QueryUserAuditRecord queryUserAuditRecord, BindingResult result){
-        return new ArrayList<>();
-    }
 
-    /**
-     * 根据用户编号、审核类别、审核编号获取审核详情
-     * @param id 用户编号
-     * @param category 审核种类
-     * @param cid 审核编号
-     * @return
-     */
-    @GetMapping("/audit/{id:\\d+}/{category}/{cid:\\d+}")
-    @ApiOperation(value = "根据用户编号、审核类别、审核编号获取审核详情")
-    public UserAuditRecord getUserAuditRecord(@PathVariable("id") Long id,
-                                              @PathVariable("category") String category,
-                                              @PathVariable("cid") Long cid){
-        return new UserAuditRecord();
-    }
-
-
-    /**
-     * 根据查询条件获取用户操作日志
-     * @param id 用户编号
-     * @param queryUserAuditRecord 用户操作日志查询条件
-     * @param result 异常信息
-     * @return
-     */
-    @GetMapping("/op/{id:\\d+}")
-    @ApiOperation(value = "根据查询条件获取用户操作日志")
-    public List<UserOperationLog> getUserOperationLogs(@PathVariable("id") Long id,
-                                                       @Valid @RequestBody QueryUserAuditRecord queryUserAuditRecord,
-                                                       BindingResult result){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 根据用户编号和操作编号获取操作详情
-     * @param id 用户编号
-     * @param oid 操作编号
-     * @return
-     */
-    @GetMapping("/op/{uid:\\d+}/{oid:\\d+}")
-    @ApiOperation(value = "根据用户编号和操作编号获取操作详情")
-    public UserOperationLog getUserOperationLog(@PathVariable("uid") Long id,@PathVariable("oid") Long oid){
-        return new UserOperationLog();
-    }
 
     /**
      * 根据用户编号和统计条件获取用户收支统计情况
      * @param id 用户编号
-     * @param userWithdrawStatisticsCondition 统计条件
+     * @param condition 统计条件
      * @return
      */
     @GetMapping("/statistics/{id:\\d+}/ws")
     @ApiOperation(value = "根据用户编号和统计条件获取用户收支统计情况")
     public UserWithdrawStatistics getUserWithdrawStatistics(@PathVariable("id") Long id,
-                                                            @RequestBody UserWithdrawStatisticsCondition userWithdrawStatisticsCondition){
+                                                            @RequestBody DateCondition condition){
         return new UserWithdrawStatistics();
     }
 
@@ -227,5 +132,93 @@ public class UserController {
         return new ArrayList<>();
     }
 
+    /**
+     * 根据查询条件获取任务列表
+     * @param queryTask 查询条件
+     * @return
+     */
+    @PostMapping("/task/{id:\\d+}")
+    @ApiOperation(value = "获取任务列表")
+    public Result all(@RequestBody QueryTask queryTask, @PathVariable("id") Long id){
+        queryTask.setTaskId(id);
+        Page<Task> queryTasks = taskService.findByQueryTask(queryTask);
+        List<Task> result = Task.toIndexAsList(queryTasks.getContent());
+        return Result.init(result,queryTask);
+    }
 
+    /**
+     * 获取用户评论信息
+     * @param queryUserComment 用户评论查询条件
+     * @return
+     */
+    @PostMapping("/comment/{id:\\d+}")
+    @ApiOperation(value = "根据用户编号获取用户的评论列表")
+    public Result getUserComment(@RequestBody QueryUserComment queryUserComment, @PathVariable("id") Long id){
+        queryUserComment.setUserId(id);
+        Page<CommentUser> query = commentUserService.findByQuery(queryUserComment);
+        return Result.init(CommentUser.toListInIndex(query.getContent()),queryUserComment);
+    }
+
+    /**
+     * 根据用户编号获取用户的审核历史记录
+     * 包括提现审核，发布任务的审核，放弃任务的审核
+     * @param id
+     * @param queryAudit
+     * @return
+     */
+    @GetMapping("/audit/{id:\\d+}")
+    @ApiOperation(value = "根据用户编号获取用户的审核历史记录，包括任务审核，猎刃审核，提现审核等")
+    public Result getUserAuditRecords(@PathVariable("id") Long id,@RequestBody QueryAudit queryAudit){
+        if (!AuditType.isAuditUser(queryAudit.getType())){
+            throw new ValidException("状态类别错误");
+        }
+        queryAudit.setUserId(id);
+        Page<Audit> audits = auditService.findByQueryAndUser(queryAudit);
+        return Result.init(Audit.toListInIndex(audits.getContent()),queryAudit);
+    }
+
+    /**
+     * 根据用户编号、审核类别、审核编号获取审核详情
+     * @param id 用户编号
+     * @param aid 审核编号
+     * @return
+     */
+    @GetMapping("/audit/{id:\\d+}/{aid:\\d+}")
+    @ApiOperation(value = "根据用户编号、审核类别、审核编号获取审核详情")
+    public Result getUserAuditRecord(@PathVariable("id") Long id,
+                                     @PathVariable("aid") String aid){
+        Audit query = auditService.findOne(aid);
+        if (!AuditType.isAuditUser(query.getType())){
+            throw new ValidException("类别异常");
+        }
+        Object result = null;
+        Long userId = 0L;
+        AuditTask auditTask;
+        switch (query.getType()){
+            case WITHDRAW:
+                AuditWithdraw auditWithdraw = AuditWithdraw.getBy(query);
+                userId = auditWithdraw.getUserWithdraw().getUserId();
+                result = auditWithdraw;
+                break;
+            case TASK:
+                auditTask = AuditTask.getBy(query);
+                userId = auditTask.getTask().getUserId();
+                result = auditTask;
+                break;
+            case USER_FAILURE_TASK:
+                auditTask = AuditTask.getBy(query);
+                userId = auditTask.getTask().getUserId();
+                result = auditTask;
+                break;
+            default:
+                break;
+        }
+        if (result == null){
+            throw new ValidException("获取数据失败");
+        }
+        if (!userId.equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        return Result.init(result,new QueryAudit(query.getType()));
+    }
 }

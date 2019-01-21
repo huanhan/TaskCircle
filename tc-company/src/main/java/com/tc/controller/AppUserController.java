@@ -4,12 +4,14 @@ import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserState;
 import com.tc.dto.app.UserAppDto;
+import com.tc.dto.user.CommitHunter;
 import com.tc.dto.user.ModifyUser;
 import com.tc.dto.user.ModifyUserHeader;
 import com.tc.exception.ValidException;
 import com.tc.service.CommentUserService;
 import com.tc.service.UserImgService;
 import com.tc.service.UserService;
+import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,5 +175,34 @@ public class AppUserController {
         userService.updateState(id, UserState.AUDIT_HUNTER, new Date());
     }
 
+    /**
+     * 提交猎刃审核申请
+     * @param commitHunter 提交申请的必要信息
+     * @param bindingResult
+     */
+    @PostMapping("/commit/hunter")
+    @ApiOperation(value = "提交猎刃审核申请")
+    public void commitByHunter(@Valid @RequestBody CommitHunter commitHunter, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+
+        User user = userService.findOne(commitHunter.getId());
+        if (user == null){
+            throw new ValidException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        if (user.getCategory() != UserCategory.NORMAL){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        if (user.getState() != UserState.NORMAL){
+            throw new ValidException(StringResourceCenter.VALIDATOR_STATE_FAILED);
+        }
+
+        User result = userService.save(CommitHunter.toUser(user,commitHunter));
+        if (result == null){
+            throw new ValidException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+
+    }
 
 }

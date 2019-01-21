@@ -1,19 +1,18 @@
 package com.tc;
 
 import com.tc.db.entity.User;
+import com.tc.dto.enums.DateType;
+import com.tc.dto.user.DateCondition;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
-import com.tc.until.TelephoneUtil;
 import com.tc.until.TimestampHelper;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,6 +73,19 @@ public class TextRuntime {
         List<Long> ls = ListUtils.to(ss);
 
         ls.forEach(System.out::println);
+
+
+
+        long minue = TimestampHelper.differByMonth(now,
+                TimestampHelper.toTimestamp(LocalDateTime.of(2019,2,28,13,50)));
+        System.out.println(minue);
+
+
+        dateCondition(
+                now,
+                TimestampHelper.toTimestamp(LocalDateTime.of(2019,2,28,13,50)),
+                DateType.HOURS
+        );
     }
 
 
@@ -87,5 +99,17 @@ public class TextRuntime {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void dateCondition(Timestamp begin, Timestamp end, DateType type){
+        DateCondition dateCondition = new DateCondition();
+        dateCondition.setBegin(begin);
+        dateCondition.setEnd(end);
+        dateCondition.setType(type);
+        DateCondition.reset(dateCondition);
+        System.out.println("开始时间：" + dateCondition.getBegin());
+        System.out.println("结束时间：" + dateCondition.getEnd());
+        System.out.println("类型：" + dateCondition.getType().name());
+
     }
 }

@@ -48,6 +48,8 @@ public class UserWithdraw implements Serializable {
     private User user;
 
 
+
+
     @Id
     @Column(name = "id")
     public String getId() {
@@ -219,4 +221,6 @@ public class UserWithdraw implements Serializable {
 
         return result;
     }
+
+
 }

@@ -160,4 +160,19 @@ public class AdminController {
         return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit);
     }
 
+    /**
+     * 查看管理员的审核详情信息
+     * @param id 审核编号
+     * @return
+     */
+    @GetMapping("/audit/detail/{aid:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "查看我的审核详情信息")
+    public Audit auditDetail(@PathVariable("id") Long id,@PathVariable("aid") String aid){
+        Audit result = auditService.findOne(aid);
+        if (!id.equals(result.getAdminId())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        return Audit.toDetail(result);
+    }
+
 }

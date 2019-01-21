@@ -94,10 +94,13 @@ public class AuditWithdraw {
         if (audit != null){
             if (audit.getAuditWithdraw() != null){
                 result.setWithdrawId(audit.getAuditWithdraw().withdrawId);
+                if (audit.getAuditWithdraw().userWithdraw != null){
+                    result.setUserWithdraw(UserWithdraw.toDetail(audit.getAuditWithdraw().userWithdraw));
+                }
             }
             audit.setAuditWithdraw(null);
             result.setAuditId(audit.getId());
-            result.setAudit(audit);
+            result.setAudit(Audit.toDetail(audit));
         }
         return result;
     }

@@ -5,6 +5,8 @@ import com.tc.db.entity.Audit;
 import com.tc.db.enums.AuditState;
 import com.tc.db.enums.AuditType;
 import com.tc.until.PageRequest;
+import com.tc.until.QueryUtils;
+import com.tc.until.SpecificationFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 
@@ -15,6 +17,7 @@ import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 管理员审核查询条件
@@ -33,10 +36,18 @@ public class QueryAudit extends PageRequest {
     private Float moneyEnd;
     private Float wdMoneyBegin;
     private Float wdMoneyEnd;
+    private Long userId;
+
 
     public QueryAudit() {
         super(0, 10);
     }
+
+    public QueryAudit(AuditType auditType){
+        super(0, 10);
+        this.type = auditType;
+    }
+
 
     public QueryAudit(int page, int size) {
         super(page, size);
@@ -146,6 +157,14 @@ public class QueryAudit extends PageRequest {
         this.wdMoneyEnd = wdMoneyEnd;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public static List<Predicate> initPredicates(QueryAudit queryAudit, Root<Audit> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
         if (queryAudit.getAdminId() != null && queryAudit.getAdminId() > 0){
@@ -234,4 +253,13 @@ public class QueryAudit extends PageRequest {
         
         return predicates;
     }
+
+    public static List<Predicate> initPredicatesByUser(QueryAudit queryAudit, Root<Audit> root, CriteriaQuery<?> query, CriteriaBuilder cb){
+        List<Predicate> predicates = initPredicates(queryAudit,root,query,cb);
+        predicates.add(QueryUtils.equals(root.get(Audit.AUDIT_TASK).get(AuditTask.TASK).get(Task.USER_ID),cb,queryAudit.userId));
+        predicates.add(QueryUtils.equals(root.get(Audit.AUDIT_WITHDRAW).get(AuditWithdraw.USER_WITHDRAW).get(UserWithdraw.USER_ID),cb,queryAudit.userId));
+        predicates.removeIf(Objects::isNull);
+        return predicates;
+    }
+
 }

@@ -34,6 +34,28 @@ public class TimestampHelper {
     }
 
     /**
+     * 某一个小时的开始时间
+     * @param timestamp
+     * @return
+     */
+    public static Timestamp toHouseBegin(Timestamp timestamp) {
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        LocalDateTime result = LocalDateTime.of(localDateTime.getYear(),localDateTime.getMonth(),localDateTime.getDayOfMonth(),localDateTime.getHour(),0);
+        return toTimestamp(result);
+    }
+
+    /**
+     * 某一个小时的结束时间
+     * @param timestamp
+     * @return
+     */
+    public static Timestamp toHouseEnd(Timestamp timestamp){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        LocalDateTime result = LocalDateTime.of(localDateTime.getYear(),localDateTime.getMonth(),localDateTime.getDayOfMonth(),localDateTime.getHour(),59,59);
+        return toTimestamp(result);
+    }
+
+    /**
      * 某一天的开始时间
      * @param timestamp
      * @return
@@ -118,6 +140,7 @@ public class TimestampHelper {
         return LocalDateTime.of(todayByLDT.getYear(),todayByLDT.getMonth(),todayByLDT.getDayOfMonth(),23,59,59);
     }
 
+
     /**
      * 获取当日开始的时间
      * @return
@@ -187,6 +210,20 @@ public class TimestampHelper {
         return localDateTime.getYear() + "年";
     }
 
+    /**
+     * 判断两个日期是同年同月同日
+     * @param begin
+     * @param end
+     * @return
+     */
+    public static boolean isEqualDay(Timestamp begin,Timestamp end){
+        if (begin.after(end)){
+            return false;
+        }
+        LocalDate lb = toLocalDate(begin);
+        LocalDate le = toLocalDate(end);
+        return lb.getYear() == le.getYear() && lb.getMonth() == le.getMonth() && lb.getDayOfMonth() == le.getDayOfMonth();
+    }
 
     /**
      * 判断两个日期是同年同月
@@ -247,9 +284,72 @@ public class TimestampHelper {
      * @return
      */
     public static long differByMinute(Timestamp t1,Timestamp t2){
-        if (t1.after(t2)){
-            long differ = t1.getTime() - t2.getTime();
+        if (t1.before(t2)){
+            long differ = t2.getTime() - t1.getTime();
             return differ/1000/60;
+        }
+        return 0;
+    }
+
+    /**
+     * 返回两个时间相差的小时数
+     * @param t1
+     * @param t2
+     * @return
+     */
+    public static long differByHours(Timestamp t1, Timestamp t2){
+        if (t1.before(t2)){
+            long differ = t2.getTime() - t1.getTime();
+            return differ/1000/60/60;
+        }
+        return 0;
+    }
+
+    /**
+     * 返回两个时间相差的天数
+     * @param t1
+     * @param t2
+     * @return
+     */
+    public static long differByDay(Timestamp t1,Timestamp t2){
+        if (t1.before(t2)){
+            long differ = t2.getTime() - t1.getTime();
+            return differ/1000/60/60/24;
+        }
+        return 0;
+    }
+
+    /**
+     * 返回两个时间相差的月数
+     * @param t1
+     * @param t2
+     * @return
+     */
+    public static long differByMonth(Timestamp t1, Timestamp t2){
+        if (t1.before(t2)){
+            LocalDateTime lt1 = t1.toLocalDateTime();
+            LocalDateTime lt2 = t2.toLocalDateTime();
+            int year = lt2.getYear() -  lt1.getYear();
+            int month;
+            if (year > 1){
+                month = (12 - lt1.getMonthValue()) + lt2.getMonthValue();
+            }else {
+                month = lt2.getMonthValue() - lt1.getMonthValue();
+            }
+            return (12 * year) + month;
+        }
+        return 0;
+    }
+
+    /**
+     * 返回两个时间相差的年数
+     * @param t1
+     * @param t2
+     * @return
+     */
+    public static long differByYear(Timestamp t1, Timestamp t2){
+        if (t1.before(t2)){
+            return t2.toLocalDateTime().getYear() - t1.toLocalDateTime().getYear();
         }
         return 0;
     }
@@ -266,6 +366,50 @@ public class TimestampHelper {
     }
 
     /**
+     * 将时间加上一个具体的小时数
+     * @param timestamp
+     * @param hours
+     * @return
+     */
+    public static Timestamp addHours(Timestamp timestamp,int hours){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        return TimestampHelper.toTimestamp(localDateTime.plusHours(hours));
+    }
+
+    /**
+     * 将时间加上一个具体的天数
+     * @param timestamp
+     * @param day
+     * @return
+     */
+    public static Timestamp addDay(Timestamp timestamp,int day){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        return TimestampHelper.toTimestamp(localDateTime.plusDays(day));
+    }
+
+    /**
+     * 将时间加上一个具体的月
+     * @param timestamp
+     * @param month
+     * @return
+     */
+    public static Timestamp addMonth(Timestamp timestamp,int month){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        return TimestampHelper.toTimestamp(localDateTime.plusMonths(month));
+    }
+
+    /**
+     * 将时间加上一个具体的年
+     * @param timestamp
+     * @param year
+     * @return
+     */
+    public static Timestamp addYear(Timestamp timestamp,int year){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        return TimestampHelper.toTimestamp(localDateTime.plusYears(year));
+    }
+
+    /**
      * 获取当前时间加一个具体的分钟数
      * @param minute
      * @return
@@ -273,5 +417,6 @@ public class TimestampHelper {
     public static Timestamp addMinuteByToday(int minute){
         return addMinute(TimestampHelper.today(),minute);
     }
+
 
 }

@@ -41,4 +41,21 @@ public enum  AuditType {
         }
     }
 
+    /**
+     * 判断是否是审核用户
+     * @param type
+     * @return
+     */
+    public static boolean isAuditUser(AuditType type){
+        switch (type){
+            case WITHDRAW:
+                return true;
+            case TASK:
+                return true;
+            case USER_FAILURE_TASK:
+                return true;
+                default:
+                    return false;
+        }
+    }
 }

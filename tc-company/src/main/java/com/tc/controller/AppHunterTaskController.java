@@ -3,14 +3,18 @@ package com.tc.controller;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.entity.Task;
+import com.tc.db.entity.User;
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
+import com.tc.db.enums.UserCategory;
+import com.tc.db.enums.UserState;
 import com.tc.dto.ModifyHunterTaskStep;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.huntertask.DeleteHunterTaskStep;
 import com.tc.dto.huntertask.ModifyHunterTask;
+import com.tc.dto.user.CommitHunter;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.HunterTaskService;
@@ -488,5 +492,6 @@ public class AppHunterTaskController {
             throw new ValidationException("还有猎刃没有拒绝用户");
         }
     }
+
 
 }
