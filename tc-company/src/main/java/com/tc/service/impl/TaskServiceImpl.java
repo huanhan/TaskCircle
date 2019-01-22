@@ -51,6 +51,7 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
     @Autowired
     private HunterRepository hunterRepository;
 
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Task save(Task task) {
@@ -64,6 +65,15 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             List<Predicate> predicates = QueryTask.initPredicatesByTask(queryTask,root,query,cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryTask);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Task> findByQueryTaskAndNotPage(QueryTask queryTask) {
+        return taskRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryTask.initPredicatesByTask(queryTask,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

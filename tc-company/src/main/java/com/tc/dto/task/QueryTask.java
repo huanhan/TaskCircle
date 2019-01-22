@@ -84,8 +84,18 @@ public class QueryTask extends PageRequest {
     private Float commentAvgBegin;
     private Float commentAvgEnd;
 
+
+
+
     public QueryTask() {
         this(0,10);
+    }
+
+    public QueryTask(Long userId, Timestamp createTimeBegin, Timestamp createTimeEnd) {
+        super(0, 10);
+        this.userId = userId;
+        this.createTimeBegin = createTimeBegin;
+        this.createTimeEnd = createTimeEnd;
     }
 
     public QueryTask(int page, int size) {
@@ -99,6 +109,8 @@ public class QueryTask extends PageRequest {
     public QueryTask(int page, int size, Sort sort) {
         super(page, size, sort);
     }
+
+
 
     public String getId() {
         return id;
@@ -378,5 +390,9 @@ public class QueryTask extends PageRequest {
         predicates.removeIf(Objects::isNull);
 
         return predicates;
+    }
+
+    public static QueryTask init(Long id, Timestamp begin, Timestamp end) {
+        return new QueryTask(id,begin,end);
     }
 }

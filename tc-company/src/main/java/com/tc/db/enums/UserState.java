@@ -8,8 +8,9 @@ public enum  UserState {
     AUDIT_HUNTER("猎刃审核"),
     AUDIT_CENTER("审核中"),
     AUDIT_FAILE("审核失败"),
-    AUDIT_SUCCESS("审核成功")
-
+    AUDIT_SUCCESS("审核成功"),
+    STOP("停用"),
+    DELETE("删除"),
     ;
     private String state;
 

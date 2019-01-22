@@ -6,20 +6,27 @@ import com.tc.db.enums.UserCategory;
 import com.tc.dto.Result;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.comment.QueryUserComment;
+import com.tc.dto.enums.TaskConditionSelect;
 import com.tc.dto.finance.QueryFinance;
+import com.tc.dto.statistics.TaskCondition;
 import com.tc.dto.task.QueryTask;
 import com.tc.dto.user.*;
+import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.*;
+import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
+import com.tc.until.TimestampHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,11 +39,16 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
+    public static final int NOT_LOGIN_TIME = 180;
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private TaskClassifyService taskClassifyService;
 
     @Autowired
     private CommentUserService commentUserService;
@@ -96,12 +108,26 @@ public class UserController {
      * @param id 用户编号
      * @return
      */
-    @GetMapping("/statistics/{id:\\d+}/out/task")
+    @PostMapping("/statistics/{id:\\d+}/out/task")
     @ApiOperation(value = "根据用户编号获取用户任务统计信息")
-    public UserTaskStatistics getTaskStatisticsByUser(@PathVariable("id") Long id){
-        return new UserTaskStatistics();
+    public UserTaskStatistics getTaskStatisticsByUser(@PathVariable("id") Long id,@Valid @RequestBody TaskCondition condition,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        List<Task> query = taskService.findByQueryTaskAndNotPage(QueryTask.init(id,condition.getBegin(),condition.getEnd()));
+        if (ListUtils.isEmpty(query)){
+            throw new DBException("任务：" + StringResourceCenter.DB_QUERY_FAILED);
+        }
+        List<TaskClassify> classifies = null;
+        if (condition.getSelect().equals(TaskConditionSelect.CLASSIFY)){
+            classifies = taskClassifyService.findByIds(TaskCondition.toIds(condition.getItems()));
+            if (ListUtils.isEmpty(classifies)){
+                throw new DBException("分类：" + StringResourceCenter.DB_QUERY_FAILED);
+            }
+        }
+        UserTaskStatistics result = UserTaskStatistics.statistics(query,condition,classifies);
+        return UserTaskStatistics.filter(result,condition.getResult());
     }
-
 
 
 
@@ -125,15 +151,15 @@ public class UserController {
     /**
      * 根据用户编号和收支查询条件获取收支列表
      * @param id 用户编号
-     * @param queryUserWithdraw 查询条件
-     * @param result 校验异常结果
+     * @param queryFinance 查询条件
      * @return
      */
     @GetMapping("/ws/{id:\\d+}")
-    public List<UserWithdraw> getUserWithdraw(@PathVariable("id") Long id,
-                                              @Valid @RequestBody QueryUserWithdraw queryUserWithdraw,
-                                              BindingResult result){
-        return new ArrayList<>();
+    public Result getUserWithdraw(@PathVariable("id") Long id,@RequestBody QueryFinance queryFinance){
+        queryFinance.setUserId(id);
+        queryFinance.setSort(new Sort(Sort.Direction.DESC,UserWithdraw.CREATE_TIME));
+        Page<UserWithdraw> query = userWithdrawService.findByQueryFinance(queryFinance);
+        return Result.init(UserWithdraw.toIndexAsList(query.getContent()),queryFinance);
     }
 
     /**

@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 public class Statistics {
     private Timestamp key;
     private Float value;
+    private String name;
 
     public Statistics() {
     }
@@ -12,6 +13,12 @@ public class Statistics {
     public Statistics(Timestamp key, Float value) {
         this.key = key;
         this.value = value;
+    }
+
+    public Statistics(Timestamp key, Float value, String name) {
+        this.key = key;
+        this.value = value;
+        this.name = name;
     }
 
     public Timestamp getKey() {
@@ -30,7 +37,15 @@ public class Statistics {
         this.value = value;
     }
 
-    public static Statistics init(Timestamp key,Float value){
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public static Statistics init(Timestamp key, Float value){
         return new Statistics(key,value);
     }
 }

@@ -119,6 +119,7 @@ public class IssueTask {
             task.setPermitAbandonMinute(issueTask.permitAbandonMinute);
             isUpdate = true;
         }
+        task.setOriginalMoney(issueTask.money);
         return isUpdate;
     }
 }

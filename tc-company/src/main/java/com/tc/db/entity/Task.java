@@ -47,6 +47,7 @@ public class Task implements Serializable {
     private User user;
     private String name;
     private Float money;
+    private Float originalMoney;
     private Float compensateMoney;
     private TaskState state;
     private TaskType type;
@@ -120,6 +121,16 @@ public class Task implements Serializable {
 
     public void setMoney(Float money) {
         this.money = money;
+    }
+
+    @Basic
+    @Column(name = "original_money")
+    public Float getOriginalMoney() {
+        return originalMoney;
+    }
+
+    public void setOriginalMoney(Float originalMoney) {
+        this.originalMoney = originalMoney;
     }
 
     @Basic

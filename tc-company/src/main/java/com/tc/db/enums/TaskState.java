@@ -1,7 +1,5 @@
 package com.tc.db.enums;
 
-import com.tc.db.entity.Task;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +106,10 @@ public enum TaskState {
         this.state = state;
     }
 
+    public String getState() {
+        return state;
+    }
+
     /**
      * 判断哪些状态时的任务允许发布
      * @param taskState
@@ -172,5 +174,11 @@ public enum TaskState {
             default:
                 return false;
         }
+    }
+
+    public static List<TaskState> byStrs(List<String> strings){
+        List<TaskState> result = new ArrayList<>();
+        strings.forEach(s -> result.add(TaskState.valueOf(s)));
+        return result;
     }
 }

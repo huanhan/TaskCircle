@@ -139,4 +139,6 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
         int count = taskClassifyRepository.deleteByIds(ids.getIds());
         return count > 0;
     }
+
+
 }

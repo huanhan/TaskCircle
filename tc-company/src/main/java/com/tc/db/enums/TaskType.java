@@ -1,5 +1,8 @@
 package com.tc.db.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum  TaskType {
 
     /**
@@ -22,5 +25,15 @@ public enum  TaskType {
 
     TaskType(String type) {
         this.type = type;
+    }
+
+    public static List<TaskType> byStrs(List<String> items) {
+        List<TaskType> result = new ArrayList<>();
+        items.forEach(s -> result.add(TaskType.valueOf(s)));
+        return result;
+    }
+
+    public String getType() {
+        return type;
     }
 }

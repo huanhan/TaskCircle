@@ -191,4 +191,5 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     public long count() {
         return userRepository.count();
     }
+
 }

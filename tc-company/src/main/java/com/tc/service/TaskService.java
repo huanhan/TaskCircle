@@ -6,6 +6,7 @@ import com.tc.dto.task.QueryTask;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 评论仓库
@@ -18,6 +19,13 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     Page<Task> findByQueryTask(QueryTask queryTask);
+
+    /**
+     * 根据条件获取任务列表
+     * @param queryTask
+     * @return
+     */
+    List<Task> findByQueryTaskAndNotPage(QueryTask queryTask);
 
     /**
      * 修改任务状态
