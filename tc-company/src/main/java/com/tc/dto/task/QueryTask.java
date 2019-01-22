@@ -4,6 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
+import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
@@ -357,8 +358,18 @@ public class QueryTask extends PageRequest {
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.NAME),cb,queryTask.getUsername()));
         predicates.add(QueryUtils.equals(root,cb,Task.IS_TASK_REWORK,queryTask.isTaskRework));
         predicates.add(QueryUtils.equals(root,cb,Task.IS_COMPENSATE,queryTask.isCompensate));
-        predicates.add(QueryUtils.equals(
-                root.get(Task.TASK_CLASSIFY_RELATIONS).get(TaskClassifyRelation.TASK_CLASSIFY_ID),cb,queryTask.classifyId));
+
+        if (FloatHelper.isNotNull(queryTask.classifyId)){
+
+            Subquery<TaskClassifyRelation> tcr = query.subquery(TaskClassifyRelation.class);
+            Root<TaskClassifyRelation> xRoot = tcr.from(TaskClassifyRelation.class);
+            tcr.select(xRoot.get(TaskClassifyRelation.TASK_ID));
+            Predicate predicate = cb.equal(xRoot.get(TaskClassifyRelation.TASK_CLASSIFY_ID),queryTask.getClassifyId());
+            tcr.where(predicate);
+
+            predicates.add(cb.in(root.get(Task.ID)).value(tcr));
+        }
+
 
         predicates.add(QueryUtils.like(root,cb,Task.CONTEXT,queryTask.context));
 

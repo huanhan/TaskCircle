@@ -114,6 +114,15 @@ public class FloatHelper {
     }
 
     /**
+     * 判断值是不是非空
+     * @param value
+     * @return
+     */
+    public static boolean isNotNull(Long value){
+        return !isNull(value);
+    }
+
+    /**
      * 判断值是不是空
      * @param value
      * @return
@@ -130,4 +139,6 @@ public class FloatHelper {
     public static boolean isNotNull(Float value){
         return !isNull(value);
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.db.enums.AuditType;
+import com.tc.db.enums.MessageState;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Result;
 import com.tc.dto.audit.QueryAudit;
@@ -337,7 +338,7 @@ public class UserController {
         if (user == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
-        List<Message> queryMessage = messageService.findByQueryAndNotPage(new QueryMessage());
+        List<Message> queryMessage = messageService.findByQueryAndNotPage(QueryMessage.init(MessageState.NORMAL));
         List<Message> result = Message.byUser(queryMessage,user);
         return Result.init(Message.toListByIndex(result));
     }
