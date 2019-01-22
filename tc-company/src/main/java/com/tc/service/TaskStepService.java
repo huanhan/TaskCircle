@@ -20,6 +20,8 @@ public interface TaskStepService extends BasicService<TaskStep> {
      */
     List<TaskStep> findByTaskId(String taskId,Sort sort);
 
+    void saveAll(List<TaskStep> taskStep);
+
     /**
      * 更新任务步骤标识号
      * @param step

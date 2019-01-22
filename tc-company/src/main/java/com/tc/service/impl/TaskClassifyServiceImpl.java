@@ -23,6 +23,7 @@ import java.util.List;
 
 /**
  * 任务分类服务的实现
+ *
  * @author Cyg
  */
 @Service
@@ -34,31 +35,36 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
     @Autowired
     private TaskClassifyRelationRepository taskClassifyRelationRepository;
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Page<TaskClassify> queryByQueryTaskClassify(QueryTaskClassify queryTaskClassify) {
         return taskClassifyRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = QueryTaskClassify.initPredicates(queryTaskClassify,root,query,cb);
-
+            List<Predicate> predicates = QueryTaskClassify.initPredicates(queryTaskClassify, root, query, cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
-        },queryTaskClassify);
+        }, queryTaskClassify);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
+    public List<TaskClassify> findAll() {
+        return taskClassifyRepository.findAll();
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public boolean whether(String name, Long parents) {
         TaskClassify taskClassify;
 
-        if (parents == null){
+        if (parents == null) {
             taskClassify = taskClassifyRepository.getFirstByNameEqualsAndParentsIsNull(name);
-        }else {
-            taskClassify = taskClassifyRepository.getFirstByNameEqualsAndParents_IdEquals(name,parents);
+        } else {
+            taskClassify = taskClassifyRepository.getFirstByNameEqualsAndParents_IdEquals(name, parents);
         }
 
         return taskClassify == null;
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<TaskClassify> findByIds(List<Long> ids) {
         return taskClassifyRepository.findByIdIn(ids);
@@ -70,41 +76,41 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
 
         //获取用户传入的分类编号的具体内容
         List<TaskClassify> queryTcs = this.findByIds(ids);
-        if (ListUtils.isEmpty(queryTcs)){
+        if (ListUtils.isEmpty(queryTcs)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
         }
 
         //与其他父分类的子分类的名称进行比对判断，获得不重复的子分类
         List<String> names = TaskClassify.toNames(queryTcs);
-        List<TaskClassify> whetherList = this.whetherByNames(names,pid);
-        if (!ListUtils.isEmpty(whetherList)){
+        List<TaskClassify> whetherList = this.whetherByNames(names, pid);
+        if (!ListUtils.isEmpty(whetherList)) {
             whetherList.forEach(tc -> queryTcs.removeIf(qtc -> tc.getName().equals(qtc.getName())));
         }
 
         //重新设置分类的父分类
         List<Long> result = TaskClassify.toIds(queryTcs);
-        int count = taskClassifyRepository.updateByIds(result,pid);
+        int count = taskClassifyRepository.updateByIds(result, pid);
 
-        if (result.size() != count){
+        if (result.size() != count) {
             throw new DBException(StringResourceCenter.DB_INSERT_ABNORMAL);
         }
 
         return result;
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<TaskClassify> whetherByNames(List<String> names, Long pid) {
-        return taskClassifyRepository.findByNameIsInAndParentsIdEquals(names,pid);
+        return taskClassifyRepository.findByNameIsInAndParentsIdEquals(names, pid);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<TaskClassify> findByParents() {
         return taskClassifyRepository.findByParentsIsNull();
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public TaskClassify findOne(Long id) {
         TaskClassify result = taskClassifyRepository.findOne(id);
