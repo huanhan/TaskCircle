@@ -105,11 +105,29 @@ public class FloatHelper {
     }
 
     /**
-     * 判断只是不是空
+     * 判断值是不是空
      * @param value
      * @return
      */
     public static boolean isNull(Long value) {
         return value == null || value <= 0;
+    }
+
+    /**
+     * 判断值是不是空
+     * @param value
+     * @return
+     */
+    public static boolean isNull(Float value){
+        return value == null || value <= 0;
+    }
+
+    /**
+     * 判断值是不是非空
+     * @param value
+     * @return
+     */
+    public static boolean isNotNull(Float value){
+        return !isNull(value);
     }
 }

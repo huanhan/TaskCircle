@@ -153,4 +153,10 @@ public class QueryMessage extends PageRequest {
 
         return predicates;
     }
+
+    public static QueryMessage init(MessageState state){
+        QueryMessage queryMessage = new QueryMessage();
+        queryMessage.setState(state);
+        return queryMessage;
+    }
 }

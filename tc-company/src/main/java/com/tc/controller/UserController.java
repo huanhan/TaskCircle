@@ -9,6 +9,7 @@ import com.tc.dto.comment.QueryUserComment;
 import com.tc.dto.enums.TaskConditionSelect;
 import com.tc.dto.finance.QueryFinance;
 import com.tc.dto.finance.QueryIE;
+import com.tc.dto.message.QueryMessage;
 import com.tc.dto.statistics.TaskCondition;
 import com.tc.dto.task.QueryTask;
 import com.tc.dto.user.*;
@@ -69,6 +70,9 @@ public class UserController {
 
     @Autowired
     private UserContactService userContactService;
+
+    @Autowired
+    private MessageService messageService;
 
     /**
      * 根据查询条件获取用户列表
@@ -319,5 +323,22 @@ public class UserController {
     public Result userContact(@PathVariable("id") Long id){
         List<UserContact> query = userContactService.findByUser(id);
         return Result.init(UserContact.toListInIndex(query));
+    }
+
+    /**
+     * 获取用户所有可查看的系统消息
+     * @param id
+     * @return
+     */
+    @GetMapping("/message/{id:\\d+}")
+    @ApiOperation(value = "获取用户所有可查看的系统消息")
+    public Result userMessage(@PathVariable("id") Long id){
+        User user = userService.findOne(id);
+        if (user == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        List<Message> queryMessage = messageService.findByQueryAndNotPage(new QueryMessage());
+        List<Message> result = Message.byUser(queryMessage,user);
+        return Result.init(Message.toListByIndex(result));
     }
 }

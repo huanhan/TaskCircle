@@ -1,8 +1,13 @@
 package com.tc.db.enums;
 
+/**
+ * 消息状态
+ * @author Cyg
+ */
+
 public enum  MessageState {
 
-    NORAML("正常"),
+    NORMAL("正常"),
     STOP("停用"),
 
     ;

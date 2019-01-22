@@ -25,7 +25,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -132,7 +131,7 @@ public class MessageController {
         if (StringUtils.isEmpty(query.getLookCondition()) || query.getType() == null){
             throw new ValidException("请设置查看条件后，在发布消息");
         }
-        boolean isSuccess = messageService.updateState(id,MessageState.NORAML);
+        boolean isSuccess = messageService.updateState(id,MessageState.NORMAL);
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

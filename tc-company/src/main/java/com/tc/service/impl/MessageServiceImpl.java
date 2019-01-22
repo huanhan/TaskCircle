@@ -44,6 +44,15 @@ public class MessageServiceImpl extends AbstractBasicServiceImpl<Message> implem
         },queryMessage);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Message> findByQueryAndNotPage(QueryMessage queryMessage) {
+        return messageRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryMessage.initPredicates(queryMessage,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean deleteCondition(Long id) {
