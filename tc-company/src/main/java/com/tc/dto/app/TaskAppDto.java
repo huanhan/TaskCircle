@@ -1,7 +1,9 @@
 package com.tc.dto.app;
 
+import com.tc.db.entity.Task;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
+import org.springframework.beans.BeanUtils;
 
 import java.sql.Timestamp;
 
@@ -20,6 +22,14 @@ public class TaskAppDto {
     private Integer peopleNumber;
     private Timestamp beginTime;
     private Timestamp deadline;
+
+    public static TaskAppDto toDetail(Task task) {
+        TaskAppDto taskAppDto = new TaskAppDto();
+        taskAppDto.setHeadImg(task.getUser().getHeadImg());
+        taskAppDto.setUsername(task.getUser().getUsername());
+        BeanUtils.copyProperties(task, taskAppDto);
+        return taskAppDto;
+    }
 
     public String getId() {
         return id;

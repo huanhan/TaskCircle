@@ -1,13 +1,13 @@
 package com.tc.controller;
 
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.TaskClassify;
+import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
 import com.tc.dto.app.AddTaskReq;
+import com.tc.dto.app.TaskAppDto;
 import com.tc.dto.app.TaskClassifyAppDto;
+import com.tc.dto.app.TaskDetailAppDto;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -585,23 +586,64 @@ public class AppTaskController {
     /**
      * 根据状态获取指定用户的任务列表
      *
-     * @param id        用户编号
-     * @param queryTask 状态不能为空
+     * @param state 任务状态
+     * @param id    用户编号
      * @return
      */
-    @PostMapping("/user/{id:\\d+}")
+    @GetMapping("/user/{state}/{page}/{size}/{id:\\d+}")
     @ApiOperation(value = "根据状态获取指定用户的任务列表")
-    public Result taskByUser(@PathVariable("id") Long id, @RequestBody QueryTask queryTask) {
-        if (!hasState(queryTask.getState())) {
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
+    public Page<TaskAppDto> taskByUser(@PathVariable("state") String state,
+                                       @PathVariable("page") int page,
+                                       @PathVariable("size") int size,
+                                       @PathVariable("id") Long id) {
+        QueryTask queryTask = new QueryTask(page, size);
+        /*if (!hasState(queryTask.getState())) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }*/
+        queryTask.setUserId(id);
+        queryTask.setState(TaskState.valueOf(state));
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
-        return Result.init(taskPage);
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
+        BeanUtils.copyProperties(taskPage, appDtoPage);
+
+        return appDtoPage;
     }
 
+    /**
+     * 查询分类下所有已发布任务
+     *
+     * @param classid 分类id
+     * @return
+     */
+    @GetMapping("/issue/{classid:\\d+}/{page}/{size}")
+    @ApiOperation(value = "查询分类下所有已发布任务")
+    public Page<TaskAppDto> queryByClassid(@PathVariable("classid") long classid,
+                                           @PathVariable("page") int page,
+                                           @PathVariable("size") int size) {
+        QueryTask queryTask = new QueryTask(page, size);
+        queryTask.setState(TaskState.ISSUE);
+        queryTask.setClassifyId(classid);
+
+        Page<Task> taskPage = taskService.findByQueryTask(queryTask);
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
+        BeanUtils.copyProperties(taskPage, appDtoPage);
+
+        return appDtoPage;
+    }
 
     /**
      * 根据状态获取指定猎刃的任务列表
+     * todo 猎刃相关
      *
      * @param id              用户编号
      * @param queryHunterTask 状态不能为空
@@ -613,6 +655,7 @@ public class AppTaskController {
         if (!hasState(queryHunterTask.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
+
         Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
         return Result.init(hunterTaskPage);
     }
@@ -633,13 +676,22 @@ public class AppTaskController {
      * @param queryTask
      * @return
      */
-    @PostMapping("/query")
+    @PostMapping("/issue/query")
     @ApiOperation(value = "根据排序条件获取已发布的任务")
-    public Result taskByAll(@RequestBody QueryTask queryTask) {
+    public Page<TaskAppDto> taskByAll(@RequestBody QueryTask queryTask) {
         queryTask.setState(TaskState.ISSUE);
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
-        return Result.init(taskPage);
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
+        BeanUtils.copyProperties(taskPage, appDtoPage);
+
+        return appDtoPage;
     }
+
 
     /**
      * 获取任务详情信息,该任务详情是任何人都可以看的任务详情
@@ -652,20 +704,10 @@ public class AppTaskController {
      */
     @GetMapping("/{id:\\d+}")
     @ApiOperation(value = "获取任务详情信息")
-    public Task look(@PathVariable("id") String id) {
+    public TaskDetailAppDto look(@PathVariable("id") String id) {
         //根据Id获取任务
         Task task = taskService.findOne(id);
-
-        //判断状态是否为已发布
-        if (task.getState() != TaskState.ISSUE) {
-            throw new ValidException("任务状态异常");
-        }
-
-        //加入任务步骤
-       /* List<TaskStep> taskSteps = taskStepService.findByTaskId(id, new Sort(Sort.Direction.ASC, TaskStep.STEP));
-        task.setTaskSteps(taskSteps);*/
-
-        return task;
+        return TaskDetailAppDto.toDetail(task);
     }
 
     /**
@@ -687,25 +729,6 @@ public class AppTaskController {
         Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
 
         return Result.init(hunterTaskPage);
-    }
-
-
-    /**
-     * 添加任务已实现
-     *
-     * @param id            用户编号
-     * @param addTask
-     * @param bindingResult
-     * @return
-     */
-    @PostMapping("/add/{id:\\d+}")
-    @ApiOperation("添加我的新任务")
-    public Task add(@PathVariable("id") Long id, @Valid @RequestBody AddTask addTask, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
-        Task task = taskService.save(AddTask.toTask(addTask));
-        return Task.toDetail(task);
     }
 
 
