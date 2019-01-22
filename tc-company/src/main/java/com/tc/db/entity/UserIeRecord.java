@@ -2,11 +2,13 @@ package com.tc.db.entity;
 
 
 import com.tc.until.IdGenerator;
+import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,6 +18,18 @@ import java.util.Objects;
 @Entity
 @Table(name = "user_ie_record", schema = "tc-company")
 public class UserIeRecord implements Serializable {
+
+    public static final String ID = "id";
+    public static final String CREATE_TIME = "createTime";
+    public static final String MONEY = "money";
+    public static final String CONTEXT = "context";
+    public static final String ME = "me";
+    public static final String TO = "to";
+    public static final String USER_ME = "userByMe";
+    public static final String USER_TO = "userByTo";
+
+
+
     private String id;
     private Timestamp createTime;
     private Float money;
@@ -24,6 +38,9 @@ public class UserIeRecord implements Serializable {
     private Long to;
     private User userByMe;
     private User userByTo;
+
+
+
 
     @Id
     @Column(name = "id")
@@ -131,6 +148,34 @@ public class UserIeRecord implements Serializable {
         userIeRecord.setContext(context);
         userIeRecord.setId(IdGenerator.INSTANCE.nextId());
         userIeRecord.setMoney(money);
+        return userIeRecord;
+    }
+
+    public static List<UserIeRecord> toListInIndex(List<UserIeRecord> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(userIeRecord -> {
+                if (userIeRecord.getUserByMe() != null){
+                    User me = userIeRecord.userByMe;
+                    userIeRecord.setUserByMe(new User(me.getId(),me.getName(),me.getUsername()));
+                }
+                if (userIeRecord.getUserByTo() != null){
+                    User to = userIeRecord.userByTo;
+                    userIeRecord.setUserByTo(new User(to.getId(),to.getName(),to.getUsername()));
+                }
+            });
+        }
+        return content;
+    }
+
+    public static UserIeRecord toDetail(UserIeRecord userIeRecord) {
+        if (userIeRecord.getUserByMe() != null){
+            User me = userIeRecord.userByMe;
+            userIeRecord.setUserByMe(new User(me.getId(),me.getName(),me.getUsername()));
+        }
+        if (userIeRecord.getUserByTo() != null){
+            User to = userIeRecord.userByTo;
+            userIeRecord.setUserByTo(new User(to.getId(),to.getName(),to.getUsername()));
+        }
         return userIeRecord;
     }
 }

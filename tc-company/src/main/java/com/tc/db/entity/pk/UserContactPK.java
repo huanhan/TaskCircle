@@ -1,8 +1,11 @@
 package com.tc.db.entity.pk;
 
 import com.tc.db.entity.User;
+import com.tc.db.enums.UserContactName;
 
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
@@ -13,7 +16,7 @@ import java.util.Objects;
  */
 public class UserContactPK implements Serializable {
     private Long userId;
-    private String contactName;
+    private UserContactName contactName;
 
     @Column(name = "user_id")
     @Id
@@ -26,12 +29,13 @@ public class UserContactPK implements Serializable {
     }
 
     @Column(name = "contact_name")
+    @Enumerated(EnumType.STRING)
     @Id
-    public String getContactName() {
+    public UserContactName getContactName() {
         return contactName;
     }
 
-    public void setContactName(String contactName) {
+    public void setContactName(UserContactName contactName) {
         this.contactName = contactName;
     }
 

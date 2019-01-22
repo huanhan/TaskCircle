@@ -16,4 +16,8 @@ public enum UserIMGName {
     UserIMGName(String IMGName) {
         this.IMGName = IMGName;
     }
+
+    public String getIMGName() {
+        return IMGName;
+    }
 }

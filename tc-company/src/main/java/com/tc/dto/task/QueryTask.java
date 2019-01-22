@@ -339,7 +339,7 @@ public class QueryTask extends PageRequest {
 
     public static List<Predicate> initPredicatesByTask(QueryTask queryTask, Root<Task> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(QueryUtils.equals(root,cb,Task.ID,queryTask.id));
+        predicates.add(QueryUtils.equals(root,cb,User.ID,queryTask.id));
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.ID),cb,queryTask.userId));
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.USERNAME),cb,queryTask.getAccount()));
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.NAME),cb,queryTask.getUsername()));

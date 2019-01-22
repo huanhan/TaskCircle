@@ -2,8 +2,10 @@ package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserImgPK;
 import com.tc.db.enums.UserIMGName;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,6 +30,8 @@ public class UserImg {
         this.imgName = imgName;
         this.urlLocation = urlLocation;
     }
+
+
 
     @Id
     @Column(name = "user_id")
@@ -86,5 +90,15 @@ public class UserImg {
         return Objects.hash(user.getId(), imgName, urlLocation);
     }
 
-
+    public static List<UserImg> toListInIndex(List<UserImg> userImgs) {
+        if (!ListUtils.isEmpty(userImgs)){
+            userImgs.forEach(userImg -> {
+                if (userImg.getUser() != null){
+                    User user = userImg.user;
+                    userImg.setUser(new User(user.getId(),user.getName(),user.getUsername()));
+                }
+            });
+        }
+        return userImgs;
+    }
 }

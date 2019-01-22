@@ -1,11 +1,16 @@
 package com.tc.until;
 
+import com.google.common.graph.ElementOrder;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.UserAuthority;
 import com.tc.dto.Show;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,5 +47,10 @@ public class TranstionHelper {
         return result;
     }
 
+    public static String toGson(Object o){
 
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        return gson.toJson(o);
+
+    }
 }

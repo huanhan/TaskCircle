@@ -2,10 +2,12 @@ package com.tc;
 
 import com.tc.db.entity.User;
 import com.tc.dto.enums.DateType;
+import com.tc.dto.finance.QueryIE;
 import com.tc.dto.user.DateCondition;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import com.tc.until.TimestampHelper;
+import com.tc.until.TranstionHelper;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -86,6 +88,8 @@ public class TextRuntime {
                 TimestampHelper.toTimestamp(LocalDateTime.of(2019,2,28,13,50)),
                 DateType.HOURS
         );
+
+        printGson(new QueryIE());
     }
 
 
@@ -111,5 +115,10 @@ public class TextRuntime {
         System.out.println("结束时间：" + dateCondition.getEnd());
         System.out.println("类型：" + dateCondition.getType().name());
 
+    }
+
+    public static void printGson(Object o){
+        String json = TranstionHelper.toGson(o);
+        System.out.println(json);
     }
 }

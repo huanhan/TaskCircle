@@ -14,4 +14,8 @@ public enum UserContactName {
     UserContactName(String contactName) {
         this.contactName = contactName;
     }
+
+    public String getContactName() {
+        return contactName;
+    }
 }

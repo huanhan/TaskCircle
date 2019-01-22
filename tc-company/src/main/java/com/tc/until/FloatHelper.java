@@ -103,4 +103,13 @@ public class FloatHelper {
     public static BigDecimal toBig(Float f){
         return new BigDecimal(f.toString());
     }
+
+    /**
+     * 判断只是不是空
+     * @param value
+     * @return
+     */
+    public static boolean isNull(Long value) {
+        return value == null || value <= 0;
+    }
 }

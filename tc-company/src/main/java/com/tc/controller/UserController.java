@@ -8,6 +8,7 @@ import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.comment.QueryUserComment;
 import com.tc.dto.enums.TaskConditionSelect;
 import com.tc.dto.finance.QueryFinance;
+import com.tc.dto.finance.QueryIE;
 import com.tc.dto.statistics.TaskCondition;
 import com.tc.dto.task.QueryTask;
 import com.tc.dto.user.*;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.method.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +60,15 @@ public class UserController {
 
     @Autowired
     private UserWithdrawService userWithdrawService;
+
+    @Autowired
+    private UserIeRecordService userIeRecordService;
+
+    @Autowired
+    private UserImgService userImgService;
+
+    @Autowired
+    private UserContactService userContactService;
 
     /**
      * 根据查询条件获取用户列表
@@ -250,5 +261,63 @@ public class UserController {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
         return Result.init(result,new QueryAudit(query.getType()));
+    }
+
+    /**
+     * 获取用户转账记录列表
+     * @param id
+     * @param queryIE
+     * @return
+     */
+    @PostMapping("/ie/query/{id:\\d+}")
+    @ApiOperation(value = "获取用户转账记录列表")
+    public Result userIERecord(@PathVariable("id") Long id, @RequestBody QueryIE queryIE){
+        queryIE.setMe(id);
+        queryIE.setTo(id);
+        Page<UserIeRecord> query = userIeRecordService.findByQuery(queryIE);
+        return Result.init(UserIeRecord.toListInIndex(query.getContent()),queryIE);
+    }
+
+    /**
+     * 获取用户转账记录详情
+     * @param id
+     * @param ieId
+     * @return
+     */
+    @GetMapping("/ie/detail/{ieId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "获取用户转账记录详情")
+    public UserIeRecord userIeDetail(@PathVariable("id") Long id, @PathVariable("ieId") String ieId){
+        UserIeRecord ieRecord = userIeRecordService.findOne(ieId);
+        if (ieRecord == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        if (!ieRecord.getTo().equals(id) && !ieRecord.getMe().equals(id)){
+            throw new ValidException("用户信息不正确");
+        }
+        return UserIeRecord.toDetail(ieRecord);
+    }
+
+    /**
+     * 获取用户的图片资料
+     * @param id
+     * @return
+     */
+    @GetMapping("/img/{id:\\d+}")
+    @ApiOperation(value = "获取用户的图片资料")
+    public Result userImg(@PathVariable("id") Long id){
+        List<UserImg> query = userImgService.findByUser(id);
+        return Result.init(UserImg.toListInIndex(query));
+    }
+
+    /**
+     * 获取用户所有的联系方式
+     * @param id
+     * @return
+     */
+    @GetMapping("/contact/{id:\\d+}")
+    @ApiOperation(value = "获取用户所有的联系方式")
+    public Result userContact(@PathVariable("id") Long id){
+        List<UserContact> query = userContactService.findByUser(id);
+        return Result.init(UserContact.toListInIndex(query));
     }
 }

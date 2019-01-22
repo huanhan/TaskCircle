@@ -1,7 +1,11 @@
 package com.tc.db.entity.pk;
 
 
+import com.tc.db.enums.UserIMGName;
+
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
@@ -12,7 +16,7 @@ import java.util.Objects;
  */
 public class UserImgPK implements Serializable {
     private Long userId;
-    private String imgName;
+    private UserIMGName imgName;
 
     @Column(name = "user_id")
     @Id
@@ -26,12 +30,13 @@ public class UserImgPK implements Serializable {
 
 
     @Column(name = "img_name")
+    @Enumerated(EnumType.STRING)
     @Id
-    public String getImgName() {
+    public UserIMGName getImgName() {
         return imgName;
     }
 
-    public void setImgName(String imgName) {
+    public void setImgName(UserIMGName imgName) {
         this.imgName = imgName;
     }
 

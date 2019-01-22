@@ -2,9 +2,11 @@ package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserContactPK;
 import com.tc.db.enums.UserContactName;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -21,6 +23,8 @@ public class UserContact implements Serializable {
     private String contact;
     private Boolean isDefault;
     private User user;
+
+
 
     @Id
     @Column(name = "user_id")
@@ -88,8 +92,18 @@ public class UserContact implements Serializable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(user.getId(), contactName, contact, isDefault);
+        return Objects.hash(userId, contactName, contact, isDefault);
     }
 
-
+    public static List<UserContact> toListInIndex(List<UserContact> query) {
+        if (!ListUtils.isEmpty(query)){
+            query.forEach(userContact -> {
+                if (userContact.user != null){
+                    User user = userContact.user;
+                    userContact.setUser(new User(user.getId(),user.getName(),user.getUsername()));
+                }
+            });
+        }
+        return query;
+    }
 }
