@@ -1,6 +1,8 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
+import com.tc.db.entity.pk.HunterTaskStepPK;
+import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
 import com.tc.dto.StringIds;
@@ -8,10 +10,7 @@ import com.tc.dto.comment.QueryTaskComment;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
-import com.tc.service.TaskClassifyRelationService;
-import com.tc.service.TaskClassifyService;
-import com.tc.service.TaskService;
-import com.tc.service.TaskStepService;
+import com.tc.service.*;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,12 @@ public class TaskController {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private HunterTaskService hunterTaskService;
+
+    @Autowired
+    private HunterTaskStepService hunterTaskStepService;
 
     @Autowired
     private TaskStepService taskStepService;
@@ -105,7 +110,7 @@ public class TaskController {
      * @param id 任务编号
      * @return
      */
-    @GetMapping("/step/{id:\\d+}")
+    @PostMapping("/step/{id:\\d+}")
     @ApiOperation(value = "获取任务的步骤列表")
     public List<TaskStep> getTaskSteps(@PathVariable("id") String id){
         List<TaskStep> queryTss = taskStepService.findByTaskId(id,new Sort(Sort.Direction.ASC,TaskStep.STEP));
@@ -113,16 +118,64 @@ public class TaskController {
     }
 
     /**
-     * 获取任务中单个步骤的执行情况
+     * 获取任务中单个步骤的详情
      * @param tid 任务编号
      * @param sid 任务步骤
      * @return
      */
     @GetMapping("/step/detail/{tid:\\d+}/{sid:\\d+}")
-    @ApiOperation(value = "获取任务中单个步骤的执行情况")
-    public TaskStepDetail getTaskStepDetail(@PathVariable("tid") Long tid, @PathVariable("sid") Long sid){
-        return new TaskStepDetail();
+    @ApiOperation(value = "获取任务中单个步骤的详细情况")
+    public TaskStep getTaskStepDetail(@PathVariable("tid") String tid, @PathVariable("sid") Integer sid){
+        TaskStep taskStep = taskStepService.findOne(new TaskStepPK(tid,sid));
+        if (taskStep == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        return TaskStep.toDetail(taskStep);
     }
+
+    /**
+     * 根据查询条件，获取接受本任务的猎刃任务列表
+     * @param id 任务编号
+     * @param queryHunterTask 查询条件
+     * @return
+     */
+    @PostMapping("/hunter/{id:\\d+}")
+    @ApiOperation(value = "根据查询条件，获取接受本任务的猎刃任务列表")
+    public Result getTaskHunters(@PathVariable("id") String id,@RequestBody QueryHunterTask queryHunterTask){
+        queryHunterTask.setTaskId(id);
+        Page<HunterTask> query = hunterTaskService.findByQueryHunterTask(queryHunterTask);
+        return Result.init(HunterTask.toIndexAsList(query.getContent()),queryHunterTask);
+    }
+
+    /**
+     * 获取猎刃任务步骤列表
+     * @param id
+     * @return
+     */
+    @PostMapping("/hunter/step/{id:\\d+}")
+    @ApiOperation(value = "获取猎刃任务的步骤列表")
+    public List<HunterTaskStep> getHunterTaskSteps(@PathVariable("id") String id){
+        List<HunterTaskStep> query = hunterTaskStepService.findByHunterTaskId(id,new Sort(Sort.Direction.ASC,HunterTaskStep.STEP));
+        return HunterTaskStep.toListInIndex(query);
+    }
+
+    /**
+     * 猎刃任务步骤的详情
+     * @param tid
+     * @param sid
+     * @return
+     */
+    @GetMapping("/hunter/step/detail/{tid:\\d+}/{sid:\\d+}")
+    @ApiOperation(value = "获取任务中单个步骤的详细情况")
+    public HunterTaskStep getHunterTaskStep(@PathVariable("tid") String tid, @PathVariable("sid") Integer sid){
+        HunterTaskStep result = hunterTaskStepService.findOne(new HunterTaskStepPK(tid,sid));
+        if (result == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        return HunterTaskStep.toDetail(result);
+    }
+
+
 
     /**
      * 管理员设置任务状态
@@ -208,32 +261,6 @@ public class TaskController {
     public List<UserHunterInterflow> getUserHunterInterflows(@PathVariable("id") Long id,
                                                              @Valid @RequestBody QueryTaskInterflow queryTaskInterflow,
                                                              BindingResult result){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 根据查询条件，获取接受本任务的猎刃列表
-     * @param id 任务编号
-     * @param queryTaskHunter 查询条件
-     * @param result 检查异常结果
-     * @return
-     */
-    @GetMapping("/hunter/{id:\\d+}")
-    @ApiOperation(value = "根据查询条件，获取接受本任务的猎刃列表")
-    public List<HunterTask> getTaskHunters(@PathVariable("id") Long id,
-                                           @Valid @RequestBody QueryTaskHunter queryTaskHunter,
-                                           BindingResult result){
-        return new ArrayList<>();
-    }
-
-    /**
-     * 获取接受了某个任务的某个猎刃的任务具体执行情况步骤
-     * @param id 猎刃接受任务的任务单号
-     * @return
-     */
-    @GetMapping("/hts/{id:\\d+}")
-    @ApiOperation(value = "获取接受了某个任务的某个猎刃的任务具体执行情况步骤")
-    public List<HunterTaskStep> getHunterTaskSteps(@PathVariable("id") Long id){
         return new ArrayList<>();
     }
 }

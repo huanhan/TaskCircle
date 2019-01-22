@@ -1,6 +1,7 @@
 package com.tc.service.impl;
 
 import com.tc.db.entity.TaskStep;
+import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.repository.TaskStepRepository;
 import com.tc.exception.ValidException;
 import com.tc.service.TaskStepService;
@@ -73,6 +74,12 @@ public class TaskStepServiceImpl extends AbstractBasicServiceImpl<TaskStep> impl
     @Override
     public void updateStep(Integer step, String id){
         taskStepRepository.updateTaskStep(step,id);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public TaskStep findOne(TaskStepPK taskStepPK) {
+        return taskStepRepository.findOne(taskStepPK);
     }
 
 }

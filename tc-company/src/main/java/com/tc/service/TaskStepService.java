@@ -1,6 +1,8 @@
 package com.tc.service;
 
 import com.tc.db.entity.TaskStep;
+import com.tc.db.entity.pk.TaskStepPK;
+import com.tc.db.enums.TaskState;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,4 +28,11 @@ public interface TaskStepService extends BasicService<TaskStep> {
      * @param id
      */
     void updateStep(Integer step, String id);
+
+    /**
+     * 根据联合主键查询
+     * @param taskStepPK
+     * @return
+     */
+    TaskStep findOne(TaskStepPK taskStepPK);
 }

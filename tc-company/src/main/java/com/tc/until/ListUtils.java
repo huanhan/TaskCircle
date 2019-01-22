@@ -27,6 +27,10 @@ public class ListUtils extends org.apache.commons.collections.ListUtils {
         return list.size() == 0;
     }
 
+    public static boolean isNotEmpty(List list){
+        return !isEmpty(list);
+    }
+
     public static boolean isEmpty(Collection list){
         if (list == null) {
             return true;

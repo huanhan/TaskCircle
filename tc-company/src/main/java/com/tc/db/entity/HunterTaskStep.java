@@ -1,10 +1,12 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.HunterTaskStepPK;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,6 +25,18 @@ public class HunterTaskStep implements Serializable {
     private String context;
     private String remake;
     private HunterTask hunterTask;
+
+    public static List<HunterTaskStep> toListInIndex(List<HunterTaskStep> query) {
+        if (ListUtils.isNotEmpty(query)){
+
+            query.forEach(hunterTaskStep -> {
+                if (hunterTaskStep.getHunterTask() != null){
+                    hunterTaskStep.setHunterTask(HunterTask.toDetail(hunterTaskStep.getHunterTask()));
+                }
+            });
+        }
+        return query;
+    }
 
     @Id
     @Column(name = "hunter_task_id")

@@ -29,7 +29,10 @@ public class HunterTask implements Serializable {
     public static final String AUDIT_TIME = "auditTime";
     public static final String FINISH_TIME = "finishTime";
     public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
+    public static final String BEGIN_TIME = "beginTime";
     public static final String CONTEXT = "context";
+    public static final String AUDIT_CONTEXT = "auditContext";
+    public static final String HUNTER_REJECT_CONTEXT = "hunterRejectContext";
     public static final String TASK = "task";
     public static final String HUNTER = "hunter";
     public static final String IS_STOP = "isStop";
