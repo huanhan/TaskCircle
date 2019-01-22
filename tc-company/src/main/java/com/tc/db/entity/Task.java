@@ -39,8 +39,10 @@ public class Task implements Serializable {
     public static final String IS_TASK_REWORK = "isTaskRework";
     public static final String IS_COMPENSATE = "isCompensate";
 
+
     public static final String USER = "user";
 
+    public static final String TASK_CLASSIFY_RELATIONS= "taskClassifyRelations";
 
     private String id;
     private Long userId;

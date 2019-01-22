@@ -67,6 +67,10 @@ public class QueryTask extends PageRequest {
      */
     private Integer peopleNumberBegin;
     /**
+     * 分类编号
+     */
+    private Long classifyId;
+    /**
      * 任务可接人数（结束）（任务类别为多人时使用）（与任务类别组冲突）
      */
     private Integer peopleNumberEnd;
@@ -142,6 +146,14 @@ public class QueryTask extends PageRequest {
 
     public void setTaskId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getClassifyId() {
+        return classifyId;
+    }
+
+    public void setClassifyId(Long classifyId) {
+        this.classifyId = classifyId;
     }
 
     public String getAccount() {
@@ -345,6 +357,8 @@ public class QueryTask extends PageRequest {
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.NAME),cb,queryTask.getUsername()));
         predicates.add(QueryUtils.equals(root,cb,Task.IS_TASK_REWORK,queryTask.isTaskRework));
         predicates.add(QueryUtils.equals(root,cb,Task.IS_COMPENSATE,queryTask.isCompensate));
+        predicates.add(QueryUtils.equals(
+                root.get(Task.TASK_CLASSIFY_RELATIONS).get(TaskClassifyRelation.TASK_CLASSIFY_ID),cb,queryTask.classifyId));
 
         predicates.add(QueryUtils.like(root,cb,Task.CONTEXT,queryTask.context));
 
