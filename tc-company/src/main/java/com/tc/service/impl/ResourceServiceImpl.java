@@ -127,7 +127,7 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
                         }
                     }
                     return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
-                },queryResource.toPageRequest()
+                },queryResource
         ).getContent();
     }
 }

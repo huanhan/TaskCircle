@@ -1,6 +1,8 @@
 package com.tc.dto.resource;
 
 import com.tc.dto.MyPage;
+import com.tc.until.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.sql.Timestamp;
 
@@ -8,7 +10,7 @@ import java.sql.Timestamp;
  * 查询资源
  * @author Cyg
  */
-public class QueryResource extends MyPage {
+public class QueryResource extends PageRequest {
 
     public static final String NAME = "name";
     public static final String INFO = "info";
@@ -54,6 +56,23 @@ public class QueryResource extends MyPage {
      * 请求类型
      */
     private String type;
+
+
+    public QueryResource() {
+        super(0,10);
+    }
+
+    public QueryResource(int page, int size) {
+        super(page, size);
+    }
+
+    public QueryResource(int page, int size, Sort.Direction direction, String... properties) {
+        super(page, size, direction, properties);
+    }
+
+    public QueryResource(int page, int size, Sort sort) {
+        super(page, size, sort);
+    }
 
     public String getName() {
         return name;
