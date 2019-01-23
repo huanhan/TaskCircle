@@ -6,7 +6,6 @@ import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
 import com.tc.dto.StringIds;
-import com.tc.dto.comment.QueryTaskComment;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -21,7 +20,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,6 +49,8 @@ public class TaskController {
     @Autowired
     private TaskClassifyRelationService taskClassifyRelationService;
 
+    @Autowired
+    private UserHunterInterflowService userHunterInterflowService;
 
 
     /**
@@ -194,13 +194,44 @@ public class TaskController {
         }
         boolean has = hasUpdate(task.getState(),state);
         if (has) {
-            boolean isUpdateSuccess = taskService.updateState(id,state);
+            boolean isUpdateSuccess = taskService.adminUpdateState(id,state);
             if (!isUpdateSuccess){
                 throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
             }
         }else {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
+    }
+
+    /**
+     * 获取指定任务中用户与猎刃的聊天记录
+     * @param id 猎刃接任务的单号
+     * @param queryTaskInterflow 查询条件
+     * @return
+     */
+    @PostMapping("/interflow/{id:\\d+}")
+    @ApiOperation(value = "获取指定任务中用户与猎刃的聊天记录")
+    public Result getUserHunterInterflows(@PathVariable("id") Long id,
+                                          @RequestBody QueryTaskInterflow queryTaskInterflow){
+        queryTaskInterflow.setUserId(id);
+        Page<UserHunterInterflow> query = userHunterInterflowService.findByQueryAndGroup(queryTaskInterflow);
+        return Result.init(UserHunterInterflow.toListInIndex(query.getContent()),queryTaskInterflow);
+    }
+
+    /**
+     * 获取指定任务，指定用户，指定猎刃的聊天内容
+     * @param queryTaskInterflow
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping("/interflow/detail")
+    @ApiOperation(value = "获取指定任务，指定用户，指定猎刃的聊天内容")
+    public Result getInterflow(@RequestBody QueryTaskInterflow queryTaskInterflow,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        Page<UserHunterInterflow> query = userHunterInterflowService.findByQuery(queryTaskInterflow);
+        return Result.init(UserHunterInterflow.toListInIndex(query.getContent()),queryTaskInterflow);
     }
 
     private boolean hasUpdate(TaskState old, TaskState news) {
@@ -211,7 +242,7 @@ public class TaskController {
                 break;
             case AUDIT:
                 break;
-            case AUDIT_FAILUER:
+            case AUDIT_FAILURE:
                 break;
             case AUDIT_SUCCESS:
                 break;
@@ -219,48 +250,25 @@ public class TaskController {
                 break;
             case ISSUE:
                 break;
-            case RECEIVE:
-                break;
+
             case FORBID_RECEIVE:
                 break;
-            case FINISH:
-                break;
-            case DELETE_OK:
-                break;
-            case DELETE:
-                break;
+
             case ABANDON_OK:
                 break;
-            case ABANDON:
-                break;
-            case USER_HUNTER_NEGOTIATE:
-                break;
+
             case HUNTER_REJECT:
                 break;
             case ADMIN_NEGOTIATE:
                 break;
-            case USER_COMPENSATION:
-                break;
-            case DEPOSIT:
-                break;
+
             default:
                 break;
         }
         return true;
     }
 
-    /**
-     * 获取指定任务与猎刃的聊天记录
-     * @param id 猎刃接任务的单号
-     * @param queryTaskInterflow 查询条件
-     * @param result 检查异常结果
-     * @return
-     */
-    @GetMapping("/interflow/{id:\\d+}")
-    @ApiOperation(value = "获取指定任务与猎刃的聊天记录")
-    public List<UserHunterInterflow> getUserHunterInterflows(@PathVariable("id") Long id,
-                                                             @Valid @RequestBody QueryTaskInterflow queryTaskInterflow,
-                                                             BindingResult result){
-        return new ArrayList<>();
-    }
+
+
+
 }

@@ -178,6 +178,11 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         return true;
     }
 
+    @Override
+    public boolean adminUpdateState(String id, TaskState state) {
+        return false;
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public int abandonTask(Long id, Task task) {
