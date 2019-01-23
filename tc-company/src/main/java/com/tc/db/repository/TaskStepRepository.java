@@ -41,4 +41,11 @@ public interface TaskStepRepository extends JpaRepository<TaskStep,TaskStepPK>,J
      * @return
      */
     int countByTaskId(String taskId);
+
+    /**
+     * 删除某个任务所有步骤
+     * @param id
+     * @return
+     */
+    int deleteByTaskId(String id);
 }

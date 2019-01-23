@@ -4,6 +4,7 @@ import com.tc.db.entity.Task;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.task.QueryTask;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,13 @@ import java.util.List;
  * @author Cyg
  */
 public interface TaskService extends BasicService<Task> {
+    /**
+     * 修改任务
+     * @param task
+     * @return
+     */
+    Task modify(Task task);
+
     /**
      * 根据查询条件获取任务列表
      * @param queryTask

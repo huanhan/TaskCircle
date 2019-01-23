@@ -4,10 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
-import com.tc.dto.app.AddTaskReq;
-import com.tc.dto.app.TaskAppDto;
-import com.tc.dto.app.TaskClassifyAppDto;
-import com.tc.dto.app.TaskDetailAppDto;
+import com.tc.dto.app.*;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -71,14 +67,14 @@ public class AppTaskController {
      */
     @PostMapping("{id:\\d+}")
     @ApiOperation("添加任务")
-    public Task add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskReq addTaskReq, BindingResult bindingResult) {
+    public TaskDetailAppDto add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskDto addTaskReq, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        Task task = AddTaskReq.toTask(addTaskReq);
+        Task task = AddTaskDto.toTask(addTaskReq);
         task.setUserId(id);
         Task taskResult = taskService.save(task);
-        return Task.toDetail(taskResult);
+        return TaskDetailAppDto.toDetail(taskResult);
     }
 
     /**
@@ -241,7 +237,7 @@ public class AppTaskController {
      */
     @PostMapping("/issue/{id:\\d+}")
     @ApiOperation(value = "发布我的任务")
-    public Task issueTask(@PathVariable("id") Long id, @Valid @RequestBody IssueTask issueTask, BindingResult bindingResult) {
+    public TaskDetailAppDto issueTask(@PathVariable("id") Long id, @Valid @RequestBody IssueTaskDto issueTask, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -259,7 +255,7 @@ public class AppTaskController {
         }
 
         //将DTO转成Entity
-        IssueTask.toTask(task, issueTask);
+        IssueTaskDto.toTask(task, issueTask);
 
         //判断用户的罚金是否在允许范围之内
 //        if (task.getPeopleNumber() <= 10){
@@ -277,7 +273,7 @@ public class AppTaskController {
         //修改任务状态为发布状态，并且在修改完后，从用户账户中扣除发布需要的押金
         Task result = taskService.updateAndUserMoney(task);
 
-        return Task.toDetail(result);
+        return TaskDetailAppDto.toDetail(result);
 
     }
 
@@ -586,7 +582,7 @@ public class AppTaskController {
     /**
      * 根据状态获取指定用户的任务列表
      *
-     * @param state 任务状态
+     * @param state 任务状态 查询全部用ALL,其余参考TaskState
      * @param id    用户编号
      * @return
      */
@@ -601,7 +597,10 @@ public class AppTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }*/
         queryTask.setUserId(id);
-        queryTask.setState(TaskState.valueOf(state));
+        if (!state.equals("ALL")) {
+            queryTask.setState(TaskState.valueOf(state));
+        }
+
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
         List<Task> content = taskPage.getContent();
         List<TaskAppDto> taskAppDtos = new ArrayList<>();
@@ -742,13 +741,12 @@ public class AppTaskController {
      */
     @PostMapping("/modify/{id:\\d+}")
     @ApiOperation("修改我的任务")
-    public Task update(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
+    public TaskDetailAppDto update(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-
-
-        return new Task();
+        Task taskResult = taskService.modify(ModifyTask.toTask(modifyTask));
+        return TaskDetailAppDto.toDetail(taskResult);
     }
 
     /**
