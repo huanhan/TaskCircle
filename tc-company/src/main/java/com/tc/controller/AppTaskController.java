@@ -1,32 +1,32 @@
 package com.tc.controller;
 
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.TaskStep;
+import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
+import com.tc.dto.app.AddTaskReq;
+import com.tc.dto.app.TaskAppDto;
+import com.tc.dto.app.TaskClassifyAppDto;
+import com.tc.dto.app.TaskDetailAppDto;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
-import com.tc.service.HunterTaskService;
-import com.tc.service.HunterTaskStepService;
-import com.tc.service.TaskService;
-import com.tc.service.TaskStepService;
-import com.tc.until.FloatHelper;
+import com.tc.service.*;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -58,22 +58,66 @@ public class AppTaskController {
     @Autowired
     private HunterTaskStepService hunterTaskStepService;
 
+    @Autowired
+    private TaskClassifyService taskClassifyService;
 
     /**
      * Task步骤1：新建任务在保存成功后的状态为NEW_CREATE("新建")
      * 用户添加任务
-     * @param addTask
+     *
+     * @param addTaskReq
      * @param bindingResult
      * @return
      */
-    @PostMapping()
+    @PostMapping("{id:\\d+}")
     @ApiOperation("添加任务")
-    public Task add(@Valid @RequestBody AddTask addTask,BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
+    public Task add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskReq addTaskReq, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        Task task = taskService.save(AddTask.toTask(addTask));
-        return Task.toDetail(task);
+        Task task = AddTaskReq.toTask(addTaskReq);
+        task.setUserId(id);
+        Task taskResult = taskService.save(task);
+        return Task.toDetail(taskResult);
+    }
+
+    /**
+     * 获取任务类别列表
+     *
+     * @return
+     */
+    @GetMapping("tcl")
+    @ApiOperation(value = "获取任务类别列表")
+    public List<TaskClassifyAppDto> all() {
+        //查询全部
+        List<TaskClassify> classifies = taskClassifyService.findAll();
+        //重制
+        List<TaskClassify> resetTaskClassify = TaskClassify.reset(classifies);
+
+        ArrayList<TaskClassifyAppDto> taskClassifyAppDtos = new ArrayList<>();
+        ArrayList<TaskClassifyAppDto> childTaskClassifyAppDtos;
+
+        //循环重制结果
+        for (TaskClassify taskClassify : resetTaskClassify) {
+            //拷贝重制后的父属性
+            TaskClassifyAppDto taskClassifyAppDto = new TaskClassifyAppDto();
+            BeanUtils.copyProperties(taskClassify, taskClassifyAppDto);
+            //判断是否有子
+            if (taskClassify.getTaskClassifies() != null) {
+                childTaskClassifyAppDtos = new ArrayList<>();
+                TaskClassifyAppDto childTaskClassifyAppDto;
+                //循环增加子
+                for (TaskClassify classify : taskClassify.getTaskClassifies()) {
+                    childTaskClassifyAppDto = new TaskClassifyAppDto();
+                    BeanUtils.copyProperties(classify, childTaskClassifyAppDto);
+                    childTaskClassifyAppDtos.add(childTaskClassifyAppDto);
+                }
+                taskClassifyAppDto.setTaskClassifies(childTaskClassifyAppDtos);
+            }
+            taskClassifyAppDtos.add(taskClassifyAppDto);
+        }
+
+        return taskClassifyAppDtos;
     }
 
     /**
@@ -84,7 +128,7 @@ public class AppTaskController {
      * @param bindingResult
      * @return
      */
-    @PostMapping("/step")
+    /*@PostMapping("/step")
     @ApiOperation("添加任务步骤")
     public TaskStep add(@Valid @RequestBody AddTaskStep addTaskStep,BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -104,10 +148,9 @@ public class AppTaskController {
 
         TaskStep taskStep = taskStepService.save(AddTaskStep.toTaskStep(addTaskStep));
         return TaskStep.toDetail(taskStep);
-    }
+    }*/
 
     /**
-     *
      * 普通用户将任务提交审核
      * Task步骤2：用户提交新建任务的审核，此时任务状态被修改为AWAIT_AUDIT("等待审核")
      * <p>
@@ -123,61 +166,61 @@ public class AppTaskController {
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的发布者与提交任务审核的用户是否一致
-        if (!task.getUser().getId().equals(id)){
+        if (!task.getUser().getId().equals(id)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
 
         //判断任务的状态是否允许提交审核
-        if (!TaskState.isToAdminAudit(task.getState())){
+        if (!TaskState.isToAdminAudit(task.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //提交审核，即修改状态
-        boolean isSuccess = taskService.commitAudit(taskId,task.getState());
+        boolean isSuccess = taskService.commitAudit(taskId, task.getState());
 
         //验证修改是否成功
-        if (!isSuccess){
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
 
     /**
-     * Task步骤2：将用户的取消任务的提交管理员审核，取消审核后变为原有的状态
+     * Task步骤2：取消审核
      *
      * @param id
      * @param taskId
      */
     @GetMapping("/user/di/upAudit/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "将用户的取消任务的提交管理员审核")
-    public void diUpAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId){
+    @ApiOperation(value = "取消审核")
+    public void diUpAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的发布者与提交任务审核的用户是否一致
-        if (!task.getUser().getId().equals(id)){
+        if (!task.getUser().getId().equals(id)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
 
         //判断任务的状态是否允许取消
-        if (!TaskState.isDiAuditByAdmin(task.getState())){
+        if (!TaskState.isDiAuditByAdmin(task.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //取消审核
-        boolean isSuccess = taskService.diCommitAudit(taskId,task.getState());
+        boolean isSuccess = taskService.diCommitAudit(taskId, task.getState());
 
         //验证修改是否成功
-        if (!isSuccess){
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
@@ -185,15 +228,15 @@ public class AppTaskController {
 
     /**
      * Task步骤3：用户点击发布任务按钮，如果发布成功，状态会变成ISSUE("任务发布中")
-     *
+     * <p>
      * 用户发布任务，要求补充完整任务信息
      * 用户只能修改允许修改的内容，允许修改的内容由IssueTaskDTO指定
      * 点击了发布按钮后，会从用户账户中扣除需要的押金
-     *
+     * <p>
      * <p>
      * task需要替换成DTO
      *
-     * @param id   用户编号
+     * @param id        用户编号
      * @param issueTask 任务信息
      */
     @PostMapping("/issue/{id:\\d+}")
@@ -206,17 +249,17 @@ public class AppTaskController {
         Task task = taskService.findOne(issueTask.getId());
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务状态是否允许发布
-        if (!TaskState.isIssue(task.getState())){
+        if (!TaskState.isIssue(task.getState())) {
             throw new DBException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //将DTO转成Entity
-        IssueTask.toTask(task,issueTask);
+        IssueTask.toTask(task, issueTask);
 
         //判断用户的罚金是否在允许范围之内
 //        if (task.getPeopleNumber() <= 10){
@@ -247,6 +290,7 @@ public class AppTaskController {
      * 放弃的条件：猎刃任务状态为RECEIVE("任务接取")，并且接取的时间少于用户设置的允许放弃时间
      * 如果满足撤回条件：需要退回猎刃押金，并将猎刃任务状态设置成TASK_BE_ABANDON("任务被放弃")
      * 任务的撤回不影响任务进行中的猎刃进行任务
+     *
      * @param id     用户编号
      * @param taskId 任务编号
      */
@@ -257,18 +301,18 @@ public class AppTaskController {
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务状态是否可被撤回
-        if (!task.getState().equals(TaskState.ISSUE)){
+        if (!task.getState().equals(TaskState.ISSUE)) {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //撤回任务
         boolean isSuccess = taskService.outTask(task);
-        if (!isSuccess){
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
@@ -282,23 +326,23 @@ public class AppTaskController {
      */
     @GetMapping("/put/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击重新上架按钮功能")
-    public void putTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId){
+    public void putTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
 
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务状态是否可重新上架
-        if (!task.getState().equals(TaskState.OUT)){
+        if (!task.getState().equals(TaskState.OUT)) {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //重新上架任务
-        taskService.updateState(taskId,TaskState.ISSUE);
+        taskService.updateState(taskId, TaskState.ISSUE);
     }
 
     /**
@@ -309,6 +353,7 @@ public class AppTaskController {
      * 放弃成功时，会将任务状态置为ABANDON_OK("任务被放弃")，
      * 并且任务将直接退还押金，并且不能重新发布，此时一个任务的开始-放弃流程完毕
      * 用户放弃任务需要谨慎，因为用户点击放弃任务后，也会直接将猎刃放弃任务的申请直接通过
+     *
      * @param id
      * @param taskId
      */
@@ -319,28 +364,28 @@ public class AppTaskController {
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的发布者与放弃任务的用户是否一致
-        if (!task.getUser().getId().equals(id)){
+        if (!task.getUser().getId().equals(id)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
 
         //判断可放弃任务的状态
-        if (!task.getState().equals(TaskState.FORBID_RECEIVE) || !task.getState().equals(TaskState.OUT)){
+        if (!task.getState().equals(TaskState.FORBID_RECEIVE) || !task.getState().equals(TaskState.OUT)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //如果该放弃的任务不需要协商，不需要审核，则直接放弃任务，退还押金，并退还猎刃的押金，和将猎刃的任务状态修改为任务被放弃
-        int count = taskService.abandonTask(id,task);
+        int count = taskService.abandonTask(id, task);
 
-        if (count != 0){
+        if (count != 0) {
             String context = "";
-            if (count <= AppTaskController.USER_ABANDON_NUMBER){
+            if (count <= AppTaskController.USER_ABANDON_NUMBER) {
                 context = "目前有" + count + "猎刃正在执行该任务！已禁止猎刃继续执行任务";
-            }else {
+            } else {
                 context = "目前有" + count + "猎刃正在执行该任务！不能放弃任务，剩余猎刃将继续执行任务，可以选择与猎刃交流让猎刃放弃";
             }
             throw new ValidException(context);
@@ -351,33 +396,34 @@ public class AppTaskController {
     /**
      * Task步骤5：用户点击取消放弃任务，修改任务为撤回状态OUT("任务被撤回")
      * ，并且将猎刃任务继续，
+     *
      * @param id
      * @param taskId
      */
     @GetMapping("/user/di/abandon/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击取消放弃任务")
-    public void diPassAbandon(@PathVariable("id") Long id, @PathVariable("taskId") String taskId){
+    public void diPassAbandon(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的发布者与放弃任务的用户是否一致
-        if (!task.getUser().getId().equals(id)){
+        if (!task.getUser().getId().equals(id)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
 
         //判断任务状态是否是放弃状态
-        if (!task.getState().equals(TaskState.ABANDON_COMMIT)){
+        if (!task.getState().equals(TaskState.ABANDON_COMMIT)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //取消放弃任务
-        boolean isSuccess = taskService.diAbandonTask(id,task);
-        if (!isSuccess){
+        boolean isSuccess = taskService.diAbandonTask(id, task);
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
 
@@ -391,34 +437,35 @@ public class AppTaskController {
      * 此时，自身的任务流程 新建-完成 的流程完成
      * 猎刃将完成的任务提交用户审核
      * 用户点击审核通过
+     *
      * @param id
      * @param htId
      */
     @GetMapping("/audit/success/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务通过")
-    public void auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId){
+    public void auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
 
         //判断查询的任务是否存在
-        if (hunterTask == null){
+        if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断哪些猎刃任务状态允许被用户审核
-        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())){
+        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())) {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //提交审核完成结果
         boolean isSuccess = hunterTaskService.auditPassByUser(hunterTask);
-        if (!isSuccess){
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
 
         //判断本人的任务是否已被全部完成
         isSuccess = taskService.taskIsSuccess(hunterTask.getTaskId());
-        if (!isSuccess){
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
@@ -427,17 +474,18 @@ public class AppTaskController {
      * HunterTask步骤4：用户点击审核不通过，并提交不通过内容，此时会根据添加任务时设置的是否可重做，是否要补偿来设置猎刃任务的状态
      * 状态包括
      * ALLOW_REWORK_ABANDON_HAVE_COMPENSATE("允许重做，放弃要补偿"),
-     *     ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
-     *     NO_REWORK_NO_COMPENSATE("不能重做，不用补偿"),
-     *     NO_REWORK_HAVE_COMPENSATE("不能重做，要补偿"),
+     * ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
+     * NO_REWORK_NO_COMPENSATE("不能重做，不用补偿"),
+     * NO_REWORK_HAVE_COMPENSATE("不能重做，要补偿"),
+     *
      * @param id
      * @param context
      * @param bindingResult
      */
     @PostMapping("/audit/failure/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务不通过")
-    public Result auditFailure(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
+    public Result auditFailure(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
 
@@ -445,12 +493,12 @@ public class AppTaskController {
         HunterTask hunterTask = hunterTaskService.findOne(context.getId());
 
         //判断查询的任务是否存在
-        if (hunterTask == null){
+        if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断哪些猎刃任务状态允许被用户审核
-        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())){
+        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())) {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
@@ -460,75 +508,77 @@ public class AppTaskController {
         //获取判断需要的状态
         boolean isRework = task.getTaskRework();
         boolean isCompensate = task.getCompensate();
-        HunterTaskState hunterTaskState = HunterTaskState.getBy(isRework,isCompensate);
+        HunterTaskState hunterTaskState = HunterTaskState.getBy(isRework, isCompensate);
 
         //设置状态，并添加不同意的原因
-        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(),hunterTaskState,context.getContext());
-        if (!isSuccess){
+        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(), hunterTaskState, context.getContext());
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
         //返回结果
         return Result.init("提交成功，当前用户"
-                + (isRework? "可重做" : "不可重做") + "任务，" +
-                "放弃任务" + (isCompensate? "不需要" : "需要") + "赔偿");
+                + (isRework ? "可重做" : "不可重做") + "任务，" +
+                "放弃任务" + (isCompensate ? "不需要" : "需要") + "赔偿");
     }
 
     /**
      * HunterTask步骤5：用户点击不同意猎刃放弃按钮，此时回将猎刃任务状态设置为USER_REPULSE（用户拒绝猎刃放弃）
+     *
      * @param id
      * @param context
      * @param bindingResult
      */
     @PostMapping("/abandon/failure/{id:\\d+}")
     @ApiOperation(value = "用户点击猎刃任务放弃申请不通过")
-    public void abandonNotPass(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
+    public void abandonNotPass(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(context.getId());
 
         //判断查询的任务是否存在
-        if (hunterTask == null){
+        if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的状态
-        if (!hunterTask.getState().equals(HunterTaskState.WITH_USER_NEGOTIATE)){
+        if (!hunterTask.getState().equals(HunterTaskState.WITH_USER_NEGOTIATE)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //设置状态为用户拒绝放弃
-        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(),HunterTaskState.USER_REPULSE,context.getContext());
-        if (!isSuccess){
+        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(), HunterTaskState.USER_REPULSE, context.getContext());
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
 
     /**
      * HunterTask步骤5：用户点击同意猎刃放弃按钮，此时回将猎刃任务状态设置为TASK_ABANDON（任务放弃）
+     *
      * @param id
      * @param htId
      */
     @GetMapping("/abandon/success/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务通过")
-    public void abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId){
+    public void abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
 
         //判断查询的任务是否存在
-        if (hunterTask == null){
+        if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的状态
-        if (!hunterTask.getState().equals(HunterTaskState.WITH_USER_NEGOTIATE)){
+        if (!hunterTask.getState().equals(HunterTaskState.WITH_USER_NEGOTIATE)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
         //设置状态为用户同意放弃
         boolean isSuccess = hunterTaskService.abandonPassByUser(hunterTask);
-        if (!isSuccess){
+        if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
     }
@@ -536,24 +586,64 @@ public class AppTaskController {
     /**
      * 根据状态获取指定用户的任务列表
      *
-     * @param id        用户编号
-     * @param queryTask 状态不能为空
+     * @param state 任务状态
+     * @param id    用户编号
      * @return
      */
-    @PostMapping("/user/{id:\\d+}")
+    @GetMapping("/user/{state}/{page}/{size}/{id:\\d+}")
     @ApiOperation(value = "根据状态获取指定用户的任务列表")
-    public Result taskByUser(@PathVariable("id") Long id, @RequestBody QueryTask queryTask) {
-        if (!hasState(queryTask.getState())) {
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
+    public Page<TaskAppDto> taskByUser(@PathVariable("state") String state,
+                                       @PathVariable("page") int page,
+                                       @PathVariable("size") int size,
+                                       @PathVariable("id") Long id) {
+        QueryTask queryTask = new QueryTask(page, size);
+        /*if (!hasState(queryTask.getState())) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }*/
+        queryTask.setUserId(id);
+        queryTask.setState(TaskState.valueOf(state));
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
-        return Result.init(taskPage);
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
+        BeanUtils.copyProperties(taskPage, appDtoPage);
+
+        return appDtoPage;
     }
 
+    /**
+     * 查询分类下所有已发布任务
+     *
+     * @param classid 分类id
+     * @return
+     */
+    @GetMapping("/issue/{classid:\\d+}/{page}/{size}")
+    @ApiOperation(value = "查询分类下所有已发布任务")
+    public Page<TaskAppDto> queryByClassid(@PathVariable("classid") long classid,
+                                           @PathVariable("page") int page,
+                                           @PathVariable("size") int size) {
+        QueryTask queryTask = new QueryTask(page, size);
+        queryTask.setState(TaskState.ISSUE);
+        queryTask.setClassifyId(classid);
 
+        Page<Task> taskPage = taskService.findByQueryTask(queryTask);
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
+        BeanUtils.copyProperties(taskPage, appDtoPage);
+
+        return appDtoPage;
+    }
 
     /**
      * 根据状态获取指定猎刃的任务列表
+     * todo 猎刃相关
      *
      * @param id              用户编号
      * @param queryHunterTask 状态不能为空
@@ -565,6 +655,7 @@ public class AppTaskController {
         if (!hasState(queryHunterTask.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
+
         Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
         return Result.init(hunterTaskPage);
     }
@@ -585,13 +676,22 @@ public class AppTaskController {
      * @param queryTask
      * @return
      */
-    @PostMapping("/query")
+    @PostMapping("/issue/query")
     @ApiOperation(value = "根据排序条件获取已发布的任务")
-    public Result taskByAll(@RequestBody QueryTask queryTask) {
+    public Page<TaskAppDto> taskByAll(@RequestBody QueryTask queryTask) {
         queryTask.setState(TaskState.ISSUE);
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
-        return Result.init(taskPage);
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
+        BeanUtils.copyProperties(taskPage, appDtoPage);
+
+        return appDtoPage;
     }
+
 
     /**
      * 获取任务详情信息,该任务详情是任何人都可以看的任务详情
@@ -604,20 +704,10 @@ public class AppTaskController {
      */
     @GetMapping("/{id:\\d+}")
     @ApiOperation(value = "获取任务详情信息")
-    public Task look(@PathVariable("id") String id) {
+    public TaskDetailAppDto look(@PathVariable("id") String id) {
         //根据Id获取任务
         Task task = taskService.findOne(id);
-
-        //判断状态是否为已发布
-        if (task.getState() == TaskState.ISSUE) {
-            throw new ValidException("任务状态异常");
-        }
-
-        //加入任务步骤
-        List<TaskStep> taskSteps = taskStepService.findByTaskId(id, new Sort(Sort.Direction.ASC, TaskStep.STEP));
-        task.setTaskSteps(taskSteps);
-
-        return task;
+        return TaskDetailAppDto.toDetail(task);
     }
 
     /**
@@ -639,26 +729,6 @@ public class AppTaskController {
         Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
 
         return Result.init(hunterTaskPage);
-    }
-
-
-
-    /**
-     * 添加任务已实现
-     *
-     * @param id            用户编号
-     * @param addTask
-     * @param bindingResult
-     * @return
-     */
-    @PostMapping("/add/{id:\\d+}")
-    @ApiOperation("添加我的新任务")
-    public Task add(@PathVariable("id") Long id, @Valid @RequestBody AddTask addTask, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
-        Task task = taskService.save(AddTask.toTask(addTask));
-        return Task.toDetail(task);
     }
 
 
@@ -694,12 +764,12 @@ public class AppTaskController {
         Task task = taskService.findOne(taskId);
 
         //判断查询的任务是否存在
-        if (task == null){
+        if (task == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
 
         //判断任务的发布者与删除任务的用户是否一致
-        if (!task.getUser().getId().equals(id)){
+        if (!task.getUser().getId().equals(id)) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
 
@@ -707,7 +777,6 @@ public class AppTaskController {
 
         //删除任务，将任务状态修改为删除状态
     }
-
 
 
     /**
@@ -723,16 +792,7 @@ public class AppTaskController {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-
-
     }
-
-
-
-
-
-
-
 
     /**
      * 判断传入的猎刃任务状态是否允许访问
@@ -763,8 +823,6 @@ public class AppTaskController {
 
         return true;
     }
-
-
 
 
 }

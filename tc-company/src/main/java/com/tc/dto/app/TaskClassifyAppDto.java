@@ -1,10 +1,13 @@
 package com.tc.dto.app;
 
+import java.util.List;
+
 public class TaskClassifyAppDto {
 
     private Long id;
     private String name;
     private String classifyImg;
+    private List<TaskClassifyAppDto> taskClassifies;
 
     public Long getId() {
         return id;
@@ -28,5 +31,13 @@ public class TaskClassifyAppDto {
 
     public void setClassifyImg(String classifyImg) {
         this.classifyImg = classifyImg;
+    }
+
+    public List<TaskClassifyAppDto> getTaskClassifies() {
+        return taskClassifies;
+    }
+
+    public void setTaskClassifies(List<TaskClassifyAppDto> taskClassifies) {
+        this.taskClassifies = taskClassifies;
     }
 }

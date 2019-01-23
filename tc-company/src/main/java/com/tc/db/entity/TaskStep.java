@@ -30,8 +30,6 @@ public class TaskStep implements Serializable {
     private Task task;
 
 
-
-
     @Id
     @Column(name = "task_id")
     public String getTaskId() {
@@ -44,7 +42,7 @@ public class TaskStep implements Serializable {
 
 
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     public Task getTask() {
         return task;
     }
@@ -95,8 +93,12 @@ public class TaskStep implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TaskStep taskStep = (TaskStep) o;
         return step.equals(taskStep.getStep()) &&
                 Objects.equals(task.getId(), taskStep.getTask().getId()) &&
@@ -111,19 +113,19 @@ public class TaskStep implements Serializable {
     }
 
     public static TaskStep toDetail(TaskStep taskStep) {
-        if (taskStep != null){
-            if (taskStep.getTask() != null){
-                taskStep.setTask(new Task(taskStep.getTask().getId(),taskStep.getTask().getName()));
+        if (taskStep != null) {
+            if (taskStep.getTask() != null) {
+                taskStep.setTask(new Task(taskStep.getTask().getId(), taskStep.getTask().getName()));
             }
         }
         return taskStep;
     }
 
     public static List<TaskStep> toIndexByList(List<TaskStep> queryTss) {
-        if (!ListUtils.isEmpty(queryTss)){
+        if (!ListUtils.isEmpty(queryTss)) {
             queryTss.forEach(ts -> {
-                if (ts.getTask() != null){
-                    ts.setTask(new Task(ts.getTask().getId(),ts.getTask().getName()));
+                if (ts.getTask() != null) {
+                    ts.setTask(new Task(ts.getTask().getId(), ts.getTask().getName()));
                 }
             });
         }
@@ -132,7 +134,7 @@ public class TaskStep implements Serializable {
 
     public static Collection<TaskStep> toList(String id, List<AddTaskStep> taskSteps) {
         List<TaskStep> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(taskSteps)){
+        if (!ListUtils.isEmpty(taskSteps)) {
 
             taskSteps.forEach(ts -> {
                 ts.setTaskId(id);

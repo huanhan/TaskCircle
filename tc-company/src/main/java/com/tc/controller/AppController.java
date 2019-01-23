@@ -60,13 +60,8 @@ public class AppController {
         QueryTask queryTask = new QueryTask();
         queryTask.setState(TaskState.ISSUE);
         List<Task> taskList = taskService.findByQueryTask(queryTask).getContent();
-        TaskAppDto taskAppDto;
         for (Task task : taskList) {
-            taskAppDto = new TaskAppDto();
-            taskAppDto.setHeadImg(task.getUser().getHeadImg());
-            taskAppDto.setUsername(task.getUser().getUsername());
-            BeanUtils.copyProperties(task, taskAppDto);
-            taskAppDtos.add(taskAppDto);
+            taskAppDtos.add(TaskAppDto.toDetail(task));
         }
         homeAppDto.setTaskAppDtos(taskAppDtos);
 

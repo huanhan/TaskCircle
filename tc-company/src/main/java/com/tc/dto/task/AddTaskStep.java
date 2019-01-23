@@ -2,7 +2,7 @@ package com.tc.dto.task;
 
 
 import com.tc.db.entity.TaskStep;
-
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 /**
@@ -13,8 +13,11 @@ public class AddTaskStep {
 
     private String taskId;
     private Integer step;
+    @NotEmpty(message = "请设置任务步骤的标题信息")
     private String title;
+    @NotEmpty(message = "请设置任务步骤的描述信息")
     private String context;
+
     private String img;
 
     public static TaskStep toTaskStep(AddTaskStep addTaskStep) {
