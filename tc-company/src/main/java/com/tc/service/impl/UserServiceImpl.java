@@ -4,12 +4,17 @@ import com.tc.controller.AuditController;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
+import com.tc.db.entity.UserImg;
+import com.tc.db.entity.pk.UserImgPK;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.UserIMGName;
 import com.tc.db.enums.UserState;
 import com.tc.db.repository.TaskRepository;
+import com.tc.db.repository.UserImgRepository;
 import com.tc.db.repository.UserRepository;
 import com.tc.dto.authority.QueryAuthority;
 import com.tc.dto.user.LoginUser;
+import com.tc.dto.user.ModifyPassword;
 import com.tc.dto.user.QueryUser;
 import com.tc.exception.DBException;
 import com.tc.service.UserService;
@@ -21,6 +26,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.social.security.SocialUserDetails;
 import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Service;
@@ -46,6 +53,9 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private UserImgRepository userImgRepository;
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
@@ -141,6 +151,35 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Override
     public long countByIds(List<Long> lIds) {
         return userRepository.countByIdIn(lIds);
+    }
+
+    @Override
+    public boolean hasPasswordEquals(String encodePassword, String password) {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(password, encodePassword);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean updatePassword(Long id, ModifyPassword modifyPassword) {
+        modifyPassword.setEncoderPassword(modifyPassword.getNewPassword());
+        int count = userRepository.updatePassword(id,modifyPassword.getNewPassword());
+        return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean updateHeader(Long id, String header) {
+        int count = userRepository.updateHeader(id,header);
+        if (count > 0){
+            UserImg query = userImgRepository.findOne(new UserImgPK(id,UserIMGName.VIRTUAL_HEAD));
+            if (query == null){
+                userImgRepository.save(new UserImg(id,UserIMGName.VIRTUAL_HEAD,header));
+            }else {
+                count = userImgRepository.update(header, UserIMGName.VIRTUAL_HEAD, id);
+            }
+        }
+        return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)

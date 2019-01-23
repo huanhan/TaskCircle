@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import javax.xml.bind.ValidationException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -143,7 +142,7 @@ public class AuditServiceImpl extends AbstractBasicServiceImpl<Audit> implements
                             count = taskRepository.updateState(task.getId(),TaskState.AUDIT_SUCCESS);
                         }else {
                             //用户新发布的任务审核不通过
-                            count = taskRepository.updateState(task.getId(),TaskState.AUDIT_FAILUER);
+                            count = taskRepository.updateState(task.getId(),TaskState.AUDIT_FAILURE);
                         }
                     }else {
                         throw new ValidException("任务状态异常");

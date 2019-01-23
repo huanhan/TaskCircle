@@ -18,6 +18,14 @@ public class UserContactPK implements Serializable {
     private Long userId;
     private UserContactName contactName;
 
+    public UserContactPK() {
+    }
+
+    public UserContactPK(Long userId, UserContactName contactName) {
+        this.userId = userId;
+        this.contactName = contactName;
+    }
+
     @Column(name = "user_id")
     @Id
     public Long getUserId() {

@@ -2,6 +2,7 @@ package com.tc.service;
 
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserState;
+import com.tc.dto.user.ModifyPassword;
 import com.tc.dto.user.QueryUser;
 import org.springframework.data.domain.Page;
 
@@ -79,4 +80,28 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     long countByIds(List<Long> lIds);
+
+    /**
+     * 判断两个密码是否相同
+     * @param password
+     * @param oldPassword
+     * @return
+     */
+    boolean hasPasswordEquals(String password, String oldPassword);
+
+    /**
+     * 修改用户密码
+     * @param id
+     * @param modifyPassword
+     * @return
+     */
+    boolean updatePassword(Long id, ModifyPassword modifyPassword);
+
+    /**
+     * 修改用户头像
+     * @param id
+     * @param header
+     * @return
+     */
+    boolean updateHeader(Long id, String header);
 }

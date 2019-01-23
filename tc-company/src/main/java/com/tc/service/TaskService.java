@@ -135,5 +135,11 @@ public interface TaskService extends BasicService<Task> {
     boolean diAbandonTask(Long id, Task task);
 
 
-
+    /**
+     * 管理员修改任务状态
+     * @param id
+     * @param state
+     * @return
+     */
+    boolean adminUpdateState(String id, TaskState state);
 }

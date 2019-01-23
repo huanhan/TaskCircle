@@ -1,6 +1,7 @@
 package com.tc.service;
 
 import com.tc.db.entity.UserContact;
+import com.tc.db.entity.pk.UserContactPK;
 
 import java.util.List;
 
@@ -18,4 +19,17 @@ public interface UserContactService extends BasicService<UserContact> {
     List<UserContact> findByUser(Long id);
 
 
+    /**
+     * 根据联合主键获取
+     * @param userContactPK
+     * @return
+     */
+    UserContact findOne(UserContactPK userContactPK);
+
+    /**
+     * 根据联合主键删除记录
+     * @param userContactPK
+     * @return
+     */
+    boolean deleteById(UserContactPK userContactPK);
 }

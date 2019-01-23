@@ -6,7 +6,6 @@ import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
 import com.tc.dto.StringIds;
-import com.tc.dto.comment.QueryTaskComment;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -21,7 +20,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,6 +49,8 @@ public class TaskController {
     @Autowired
     private TaskClassifyRelationService taskClassifyRelationService;
 
+    @Autowired
+    private UserHunterInterflowService userHunterInterflowService;
 
 
     /**
@@ -175,92 +175,39 @@ public class TaskController {
         return HunterTaskStep.toDetail(result);
     }
 
-
-
     /**
-     * 管理员设置任务状态
-     * @param id 任务编号
-     * @param state 新状态
-     */
-    @PutMapping("/state/{id}")
-    @ApiOperation(value = "管理员设置任务状态")
-    public void updateTaskState(@PathVariable("id") String id,@RequestBody TaskState state){
-        if (state == null){
-            throw new ValidException(StringResourceCenter.CONTEXT_NOT_NULL);
-        }
-        Task task = taskService.findOne(id);
-        if (task.getState().equals(state)){
-            throw new ValidException(StringResourceCenter.VALIDATOR_ADD_TITLE_FAILED);
-        }
-        boolean has = hasUpdate(task.getState(),state);
-        if (has) {
-            boolean isUpdateSuccess = taskService.updateState(id,state);
-            if (!isUpdateSuccess){
-                throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-            }
-        }else {
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
-    }
-
-    private boolean hasUpdate(TaskState old, TaskState news) {
-        switch (old) {
-            case NEW_CREATE:
-                return false;
-            case AWAIT_AUDIT:
-                break;
-            case AUDIT:
-                break;
-            case AUDIT_FAILUER:
-                break;
-            case AUDIT_SUCCESS:
-                break;
-            case OK_ISSUE:
-                break;
-            case ISSUE:
-                break;
-            case RECEIVE:
-                break;
-            case FORBID_RECEIVE:
-                break;
-            case FINISH:
-                break;
-            case DELETE_OK:
-                break;
-            case DELETE:
-                break;
-            case ABANDON_OK:
-                break;
-            case ABANDON:
-                break;
-            case USER_HUNTER_NEGOTIATE:
-                break;
-            case HUNTER_REJECT:
-                break;
-            case ADMIN_NEGOTIATE:
-                break;
-            case USER_COMPENSATION:
-                break;
-            case DEPOSIT:
-                break;
-            default:
-                break;
-        }
-        return true;
-    }
-
-    /**
-     * 获取指定任务与猎刃的聊天记录
+     * 获取指定任务中用户与猎刃的聊天记录
      * @param id 猎刃接任务的单号
      * @param queryTaskInterflow 查询条件
-     * @param result 检查异常结果
      * @return
      */
-    @GetMapping("/interflow/{id:\\d+}")
-    @ApiOperation(value = "获取指定任务与猎刃的聊天记录")
-    public List<UserHunterInterflow> getUserHunterInterflows(@PathVariable("id") Long id,
-                                                             @Valid @RequestBody QueryTaskInterflow queryTaskInterflow,
-                                                             BindingResult result){
-        return new ArrayList<>();
+    @PostMapping("/interflow/{id:\\d+}")
+    @ApiOperation(value = "获取指定任务中用户与猎刃的聊天记录")
+    public Result getUserHunterInterflows(@PathVariable("id") Long id,
+                                          @RequestBody QueryTaskInterflow queryTaskInterflow){
+        queryTaskInterflow.setUserId(id);
+        Page<UserHunterInterflow> query = userHunterInterflowService.findByQueryAndGroup(queryTaskInterflow);
+        return Result.init(UserHunterInterflow.toListInIndex(query.getContent()),queryTaskInterflow);
     }
+
+    /**
+     * 获取指定任务，指定用户，指定猎刃的聊天内容
+     * @param queryTaskInterflow
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping("/interflow/detail")
+    @ApiOperation(value = "获取指定任务，指定用户，指定猎刃的聊天内容")
+    public Result getInterflow(@RequestBody QueryTaskInterflow queryTaskInterflow,BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        Page<UserHunterInterflow> query = userHunterInterflowService.findByQuery(queryTaskInterflow);
+        return Result.init(UserHunterInterflow.toListInIndex(query.getContent()),queryTaskInterflow);
+    }
+
+
+
+
+
 }

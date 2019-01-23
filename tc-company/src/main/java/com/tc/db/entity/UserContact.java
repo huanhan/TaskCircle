@@ -18,11 +18,13 @@ import java.util.Objects;
 @IdClass(UserContactPK.class)
 public class UserContact implements Serializable {
 
+    public static final String CONTACT_NAME = "contactName";
+
     private Long userId;
     private UserContactName contactName;
     private String contact;
-    private Boolean isDefault;
     private User user;
+
 
 
 
@@ -68,15 +70,6 @@ public class UserContact implements Serializable {
         this.contact = contact;
     }
 
-    @Basic
-    @Column(name = "is_default")
-    public Boolean getDefault() {
-        return isDefault;
-    }
-
-    public void setDefault(Boolean aDefault) {
-        isDefault = aDefault;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -84,7 +77,6 @@ public class UserContact implements Serializable {
         if (o == null || getClass() != o.getClass()) {return false;}
         UserContact that = (UserContact) o;
         return user.getId().equals(that.getUser().getId()) &&
-                isDefault.equals(that.getDefault()) &&
                 Objects.equals(contactName, that.getContactName()) &&
                 Objects.equals(contact, that.getContact());
     }
@@ -92,7 +84,7 @@ public class UserContact implements Serializable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(userId, contactName, contact, isDefault);
+        return Objects.hash(userId, contactName, contact);
     }
 
     public static List<UserContact> toListInIndex(List<UserContact> query) {
@@ -105,5 +97,15 @@ public class UserContact implements Serializable {
             });
         }
         return query;
+    }
+
+    public static UserContact toDetail(UserContact userContact) {
+        if (userContact != null){
+            if (userContact.user != null){
+                User user = userContact.user;
+                userContact.setUser(new User(user.getId(),user.getName(),user.getUsername()));
+            }
+        }
+        return userContact;
     }
 }
