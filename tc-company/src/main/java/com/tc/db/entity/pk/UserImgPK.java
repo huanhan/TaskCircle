@@ -18,6 +18,14 @@ public class UserImgPK implements Serializable {
     private Long userId;
     private UserIMGName imgName;
 
+    public UserImgPK() {
+    }
+
+    public UserImgPK(Long userId, UserIMGName imgName) {
+        this.userId = userId;
+        this.imgName = imgName;
+    }
+
     @Column(name = "user_id")
     @Id
     public Long getUserId() {

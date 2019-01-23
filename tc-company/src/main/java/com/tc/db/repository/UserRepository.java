@@ -108,4 +108,25 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      * @return
      */
     long countByIdIn(List<Long> lIds);
+
+    /**
+     * 修改用户密码
+     * @param id
+     * @param newPassword
+     * @return
+     */
+    @Modifying
+    @Query(value = "update User u set u.password = :password where u.id = :id")
+    int updatePassword(@Param("id") Long id,@Param("password") String newPassword);
+
+    /**
+     * 修改用户头像
+     * @param id
+     * @param header
+     * @return
+     */
+    @Modifying
+    @Query(value = "update User u set u.headImg = :header where u.id = :id")
+    int updateHeader(@Param("id") Long id,@Param("header") String header);
+
 }

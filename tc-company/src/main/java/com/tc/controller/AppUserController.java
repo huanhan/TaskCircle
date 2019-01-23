@@ -7,6 +7,7 @@ import com.tc.dto.app.UserAppDto;
 import com.tc.dto.user.CommitHunter;
 import com.tc.dto.user.ModifyUser;
 import com.tc.dto.user.ModifyUserHeader;
+import com.tc.dto.user.RegisterUser;
 import com.tc.exception.ValidException;
 import com.tc.service.CommentUserService;
 import com.tc.service.UserImgService;
@@ -203,6 +204,21 @@ public class AppUserController {
             throw new ValidException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
 
+    }
+
+    /**
+     * 用户注册
+     * @param user 用户信息
+     * @param result 异常结果
+     * @return
+     */
+    @PostMapping("/register")
+    @ApiOperation(value = "用户注册")
+    public User register(@Valid @RequestBody RegisterUser user, BindingResult result){
+        if (result.hasErrors()){
+            throw new ValidException(result.getFieldErrors());
+        }
+        return userService.save(user.toUser());
     }
 
 }

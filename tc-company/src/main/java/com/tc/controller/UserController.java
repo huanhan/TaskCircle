@@ -101,6 +101,11 @@ public class UserController {
     public User detail(@PathVariable("id") Long id){
 
         User user = userService.findOne(id);
+
+        if (!user.getCategory().equals(UserCategory.NORMAL)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
         return User.toDetail(user);
 
     }
@@ -115,6 +120,7 @@ public class UserController {
     @PostMapping("/count/query")
     @ApiOperation(value = "获取查询条件的用户数量")
     public Result userCountByQuery(@RequestBody QueryUser queryUser){
+        queryUser.setCategory(UserCategory.NORMAL);
         long count = userService.countByQuery(queryUser);
         return Result.init(count,queryUser);
     }

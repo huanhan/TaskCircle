@@ -17,6 +17,8 @@ import java.util.Objects;
 @IdClass(UserImgPK.class)
 public class UserImg {
 
+    public static final String IMG_NAME = "imgName";
+
     private Long userId;
     private UserIMGName imgName;
     private String urlLocation;
@@ -30,6 +32,7 @@ public class UserImg {
         this.imgName = imgName;
         this.urlLocation = urlLocation;
     }
+
 
 
 
@@ -100,5 +103,15 @@ public class UserImg {
             });
         }
         return userImgs;
+    }
+
+    public static UserImg toDetail(UserImg userImg) {
+       if (userImg != null){
+           if (userImg.getUser() != null){
+               User user = userImg.user;
+               userImg.setUser(new User(user.getId(),user.getName(),user.getUsername()));
+           }
+       }
+       return userImg;
     }
 }

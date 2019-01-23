@@ -175,34 +175,6 @@ public class TaskController {
         return HunterTaskStep.toDetail(result);
     }
 
-
-
-    /**
-     * 管理员设置任务状态
-     * @param id 任务编号
-     * @param state 新状态
-     */
-    @PutMapping("/state/{id}")
-    @ApiOperation(value = "管理员设置任务状态")
-    public void updateTaskState(@PathVariable("id") String id,@RequestBody TaskState state){
-        if (state == null){
-            throw new ValidException(StringResourceCenter.CONTEXT_NOT_NULL);
-        }
-        Task task = taskService.findOne(id);
-        if (task.getState().equals(state)){
-            throw new ValidException(StringResourceCenter.VALIDATOR_ADD_TITLE_FAILED);
-        }
-        boolean has = hasUpdate(task.getState(),state);
-        if (has) {
-            boolean isUpdateSuccess = taskService.adminUpdateState(id,state);
-            if (!isUpdateSuccess){
-                throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-            }
-        }else {
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
-    }
-
     /**
      * 获取指定任务中用户与猎刃的聊天记录
      * @param id 猎刃接任务的单号
@@ -234,39 +206,6 @@ public class TaskController {
         return Result.init(UserHunterInterflow.toListInIndex(query.getContent()),queryTaskInterflow);
     }
 
-    private boolean hasUpdate(TaskState old, TaskState news) {
-        switch (old) {
-            case NEW_CREATE:
-                return false;
-            case AWAIT_AUDIT:
-                break;
-            case AUDIT:
-                break;
-            case AUDIT_FAILURE:
-                break;
-            case AUDIT_SUCCESS:
-                break;
-            case OK_ISSUE:
-                break;
-            case ISSUE:
-                break;
-
-            case FORBID_RECEIVE:
-                break;
-
-            case ABANDON_OK:
-                break;
-
-            case HUNTER_REJECT:
-                break;
-            case ADMIN_NEGOTIATE:
-                break;
-
-            default:
-                break;
-        }
-        return true;
-    }
 
 
 
