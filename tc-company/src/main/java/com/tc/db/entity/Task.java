@@ -33,6 +33,7 @@ public class Task implements Serializable {
     public static final String BEGIN_TIME = "beginTime";
     public static final String DEADLINE = "deadline";
     public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
+    public static final String ISSUE_TIME = "issueTime";
     public static final String PERMIT_ABANDON_MINUTE = "permitAbandonMinute";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";

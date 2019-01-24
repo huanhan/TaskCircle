@@ -2,6 +2,8 @@ package com.tc.service;
 
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserState;
+import com.tc.dto.TimeScope;
+import com.tc.dto.user.CashPledge;
 import com.tc.dto.user.ModifyPassword;
 import com.tc.dto.user.QueryUser;
 import org.springframework.data.domain.Page;
@@ -104,4 +106,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     boolean updateHeader(Long id, String header);
+
+    /**
+     * 获取普通用户的押金列表
+     * @param scope
+     * @return
+     */
+    List<CashPledge> findByCashPledgeAndUser(TimeScope scope);
 }

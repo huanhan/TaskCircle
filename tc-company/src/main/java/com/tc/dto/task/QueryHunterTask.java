@@ -4,6 +4,7 @@ import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.User;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.dto.TimeScope;
 import com.tc.until.ListUtils;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
@@ -48,6 +49,12 @@ public class QueryHunterTask extends PageRequest {
     public QueryHunterTask(Long id, Timestamp acceptTimeBegin, Timestamp acceptTimeEnd) {
         super(0, 10);
         this.hunterId = id;
+        this.acceptTimeBegin = acceptTimeBegin;
+        this.acceptTimeEnd = acceptTimeEnd;
+    }
+
+    public QueryHunterTask(Timestamp acceptTimeBegin, Timestamp acceptTimeEnd) {
+        super(0, 10);
         this.acceptTimeBegin = acceptTimeBegin;
         this.acceptTimeEnd = acceptTimeEnd;
     }
@@ -259,7 +266,21 @@ public class QueryHunterTask extends PageRequest {
         return predicates;
     }
 
+    public static List<Predicate> initPredicatesBy(TimeScope scope, Root<HunterTask> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.isNotNull(root.get(HunterTask.ACCEPT_TIME)));
+        predicates.add(QueryUtils.between(root,cb,HunterTask.ACCEPT_TIME,scope.getBegin(),scope.getEnd()));
+        predicates.add(QueryUtils.equals(root,cb,HunterTask.HUNTER_ID,scope.getId()));
+        predicates.add(cb.or(cb.isNull(root.get(HunterTask.MONEY)),cb.isNull(root.get(HunterTask.MONEY_TYPE))));
+        predicates.removeIf(Objects::isNull);
+        return predicates;
+    }
+
     public static QueryHunterTask init(Long id, Timestamp begin, Timestamp end) {
         return new QueryHunterTask(id,begin,end);
+    }
+
+    public static QueryHunterTask init(Timestamp begin, Timestamp end) {
+        return new QueryHunterTask(begin,end);
     }
 }

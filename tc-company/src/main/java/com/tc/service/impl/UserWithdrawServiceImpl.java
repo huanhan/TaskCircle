@@ -6,6 +6,7 @@ import com.tc.db.entity.UserWithdraw;
 import com.tc.db.enums.UserState;
 import com.tc.db.enums.WithdrawState;
 import com.tc.db.repository.UserWithdrawRepository;
+import com.tc.dto.TimeScope;
 import com.tc.dto.finance.QueryFinance;
 import com.tc.dto.user.QueryUser;
 import com.tc.service.UserWithdrawService;
@@ -79,6 +80,16 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
     public Boolean updateState(String id, WithdrawState state, Date now) {
         int count = userWithdrawRepository.updateState(id,state,new Timestamp(now.getTime()));
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public Page<UserWithdraw> findByCashPledge(Long id, TimeScope scope) {
+        scope.setId(id);
+        return userWithdrawRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryFinance.initPredicatesBy(scope,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },scope);
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)

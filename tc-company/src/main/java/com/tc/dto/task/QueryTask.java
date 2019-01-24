@@ -4,6 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
+import com.tc.dto.TimeScope;
 import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.PageRequest;
@@ -103,6 +104,12 @@ public class QueryTask extends PageRequest {
         this.createTimeEnd = createTimeEnd;
     }
 
+    public QueryTask(Timestamp createTimeBegin, Timestamp createTimeEnd) {
+        super(0, 10);
+        this.createTimeBegin = createTimeBegin;
+        this.createTimeEnd = createTimeEnd;
+    }
+
     public QueryTask(int page, int size) {
         super(page, size);
     }
@@ -114,6 +121,7 @@ public class QueryTask extends PageRequest {
     public QueryTask(int page, int size, Sort sort) {
         super(page, size, sort);
     }
+
 
 
 
@@ -417,7 +425,29 @@ public class QueryTask extends PageRequest {
         return predicates;
     }
 
+
+    /**
+     * 获取用户的任务赏金的SQL查询条件
+     * @param timeScope
+     * @param root
+     * @param query
+     * @param cb
+     * @return
+     */
+    public static List<Predicate> initPredicatesBy(TimeScope timeScope, Root<Task> root, CriteriaQuery<?> query, CriteriaBuilder cb){
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(root.get(Task.USER_ID),timeScope.getId()));
+        predicates.add(cb.ge(root.get(Task.MONEY),0));
+        predicates.add(cb.isNotNull(root.get(Task.ISSUE_TIME)));
+        predicates.add(QueryUtils.between(root,cb,Task.ISSUE_TIME,timeScope.getBegin(),timeScope.getEnd()));
+        predicates.removeIf(Objects::isNull);
+        return predicates;
+    }
+
     public static QueryTask init(Long id, Timestamp begin, Timestamp end) {
         return new QueryTask(id,begin,end);
+    }
+    public static QueryTask init(Timestamp begin, Timestamp end) {
+        return new QueryTask(begin,end);
     }
 }

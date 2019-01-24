@@ -2,6 +2,7 @@ package com.tc.service;
 
 import com.tc.db.entity.Task;
 import com.tc.db.enums.TaskState;
+import com.tc.dto.TimeScope;
 import com.tc.dto.task.QueryTask;
 import org.springframework.data.domain.Page;
 
@@ -134,4 +135,12 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     boolean adminUpdateState(String id, TaskState state);
+
+    /**
+     * 获取用户的押金列表
+     * @param id
+     * @param scope
+     * @return
+     */
+    Page<Task> findCashPledge(Long id, TimeScope scope);
 }

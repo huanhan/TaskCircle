@@ -63,7 +63,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         return hunterTaskRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryHunterTask.initPredicatesByHunterTask(queryHunterTask,root,query,cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
-        },queryHunterTask.getSort() == null ? new Sort(Sort.Direction.DESC) : queryHunterTask.getSort());
+        },queryHunterTask.getSort() == null ? new Sort(Sort.Direction.DESC,HunterTask.ACCEPT_TIME) : queryHunterTask.getSort());
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

@@ -2,6 +2,7 @@ package com.tc.service;
 
 import com.tc.db.entity.UserWithdraw;
 import com.tc.db.enums.WithdrawState;
+import com.tc.dto.TimeScope;
 import com.tc.dto.finance.QueryFinance;
 import org.springframework.data.domain.Page;
 
@@ -51,4 +52,12 @@ public interface UserWithdrawService extends BasicService<UserWithdraw> {
      * @return
      */
     Boolean updateState(String id, WithdrawState state, Date now);
+
+    /**
+     * 获取审核列表中的用户押金
+     * @param id
+     * @param scope
+     * @return
+     */
+    Page<UserWithdraw> findByCashPledge(Long id, TimeScope scope);
 }

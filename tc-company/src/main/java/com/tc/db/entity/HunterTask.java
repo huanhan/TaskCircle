@@ -37,6 +37,8 @@ public class HunterTask implements Serializable {
     public static final String TASK = "task";
     public static final String HUNTER = "hunter";
     public static final String IS_STOP = "isStop";
+    public static final String MONEY = "money";
+    public static final String MONEY_TYPE = "moneyType";
 
 
 
@@ -341,6 +343,7 @@ public class HunterTask implements Serializable {
                 }
                 hunterTask.commentHunters = null;
                 hunterTask.hunterTaskSteps = null;
+                hunterTask.auditHunterTasksById = null;
             });
         }
         return content;
@@ -372,6 +375,7 @@ public class HunterTask implements Serializable {
             }
             hunterTask.commentHunters = null;
             hunterTask.hunterTaskSteps = null;
+            hunterTask.auditHunterTasksById = null;
         }
         return hunterTask;
     }

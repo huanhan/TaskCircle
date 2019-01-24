@@ -5,6 +5,7 @@ import com.tc.db.enums.AuditType;
 import com.tc.db.enums.MessageState;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Result;
+import com.tc.dto.TimeScope;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.comment.QueryUserComment;
 import com.tc.dto.enums.TaskConditionSelect;
@@ -19,19 +20,15 @@ import com.tc.exception.ValidException;
 import com.tc.service.*;
 import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
-import com.tc.until.TimestampHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.method.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -347,5 +344,19 @@ public class UserController {
         List<Message> queryMessage = messageService.findByQueryAndNotPage(QueryMessage.init(MessageState.NORMAL));
         List<Message> result = Message.byUser(queryMessage,user);
         return Result.init(Message.toListByIndex(result));
+    }
+
+    /**
+     * 获取用户押金列表
+     * @param id
+     * @param scope
+     * @return
+     */
+    @PostMapping("/cp/{id:\\d+}")
+    @ApiOperation(value = "获取用户的押金列表")
+    public Result userCashPledge(@PathVariable("id") Long id, @RequestBody TimeScope scope){
+        scope.setId(id);
+        List<CashPledge> result = userService.findByCashPledgeAndUser(scope);
+        return Result.init(CashPledge.toListInIndex(result),scope);
     }
 }

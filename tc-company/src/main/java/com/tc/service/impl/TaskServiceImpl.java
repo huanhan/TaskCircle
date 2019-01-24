@@ -2,7 +2,6 @@ package com.tc.service.impl;
 
 import com.tc.controller.AppTaskController;
 import com.tc.controller.AuditController;
-import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
@@ -13,6 +12,7 @@ import com.tc.db.repository.HunterRepository;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserRepository;
+import com.tc.dto.TimeScope;
 import com.tc.dto.task.QueryTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -431,5 +431,15 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
     @Override
     public Task findOne(String id) {
         return taskRepository.findOne(id);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public Page<Task> findCashPledge(Long id, TimeScope scope) {
+        scope.setId(id);
+        return taskRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryTask.initPredicatesBy(scope,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },scope);
     }
 }

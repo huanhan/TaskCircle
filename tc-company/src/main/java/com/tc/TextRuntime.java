@@ -3,6 +3,7 @@ package com.tc;
 import com.tc.db.entity.User;
 import com.tc.dto.enums.DateType;
 import com.tc.dto.finance.QueryIE;
+import com.tc.dto.task.QueryHunterTask;
 import com.tc.dto.task.QueryTaskInterflow;
 import com.tc.dto.user.DateCondition;
 import com.tc.dto.user.ModifyPassword;
@@ -93,7 +94,7 @@ public class TextRuntime {
                 DateType.HOURS
         );
 
-        printGson(new AddContact());
+        printGson(new QueryHunterTask());
     }
 
 

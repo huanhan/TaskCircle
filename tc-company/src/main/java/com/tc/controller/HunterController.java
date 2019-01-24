@@ -43,7 +43,7 @@ public class HunterController {
      * @param id 用户编号
      * @return
      */
-    @GetMapping("/hunter/{id:\\d+}")
+    @GetMapping("/{id:\\d+}")
     @ApiOperation(value = "根据用户编号获取猎刃的基本信息")
     public Hunter hunterDetail(@PathVariable("id") Long id){
         Hunter hunter = hunterService.findOne(id);
@@ -55,7 +55,7 @@ public class HunterController {
      * @param id 用户编号
      * @return
      */
-    @GetMapping("/statistics/{id:\\d+}/in/task")
+    @PostMapping("/statistics/{id:\\d+}/in/task")
     @ApiOperation(value = "根据用户编号获取猎刃接受的任务的统计信息")
     public HunterTaskStatistics getHunterTaskStatistics(@PathVariable("id") Long id, @Valid @RequestBody TaskCondition condition, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -78,7 +78,7 @@ public class HunterController {
      * @param queryHunterTask
      * @return
      */
-    @GetMapping("/ht/query")
+    @PostMapping("/ht/query")
     @ApiOperation(value = "根据查询条件获取指定的猎刃的猎刃任务")
     public Result hunterTasks(@RequestBody QueryHunterTask queryHunterTask){
         if (queryHunterTask.getHunterId() == null){

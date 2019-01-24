@@ -1,18 +1,17 @@
 package com.tc.service.impl;
 
 import com.tc.controller.AuditController;
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.User;
-import com.tc.db.entity.UserImg;
+import com.tc.db.entity.*;
 import com.tc.db.entity.pk.UserImgPK;
-import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserIMGName;
 import com.tc.db.enums.UserState;
-import com.tc.db.repository.TaskRepository;
-import com.tc.db.repository.UserImgRepository;
-import com.tc.db.repository.UserRepository;
-import com.tc.dto.authority.QueryAuthority;
+import com.tc.db.repository.*;
+import com.tc.dto.TimeScope;
+import com.tc.dto.finance.QueryFinance;
+import com.tc.dto.task.QueryHunterTask;
+import com.tc.dto.task.QueryTask;
+import com.tc.dto.user.CashPledge;
 import com.tc.dto.user.LoginUser;
 import com.tc.dto.user.ModifyPassword;
 import com.tc.dto.user.QueryUser;
@@ -33,10 +32,7 @@ import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +52,12 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Autowired
     private UserImgRepository userImgRepository;
+
+    @Autowired
+    private UserWithdrawRepository userWithdrawRepository;
+
+    @Autowired
+    private HunterTaskRepository hunterTaskRepository;
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
@@ -184,6 +186,31 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
+    public List<CashPledge> findByCashPledgeAndUser(TimeScope scope) {
+        User user = userRepository.findOne(scope.getId());
+        if (user == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+        List<Task> tasks = taskRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryTask.initPredicatesBy(scope,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+        List<UserWithdraw> userWithdraws = userWithdrawRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryFinance.initPredicatesBy(scope,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+        List<HunterTask> hunterTasks = null;
+        if (user.getCategory().equals(UserCategory.HUNTER)){
+            hunterTasks = hunterTaskRepository.findAll((root, query, cb) -> {
+                List<Predicate> predicates = QueryHunterTask.initPredicatesBy(scope,root,query,cb);
+                return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+            });
+        }
+        return CashPledge.create(tasks,userWithdraws,hunterTasks);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = getUser(s);
         return new LoginUser(user);
@@ -230,5 +257,6 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     public long count() {
         return userRepository.count();
     }
+
 
 }

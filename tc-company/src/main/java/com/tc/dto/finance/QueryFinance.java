@@ -5,6 +5,7 @@ import com.tc.db.entity.UserWithdraw;
 import com.tc.db.enums.DateType;
 import com.tc.db.enums.WithdrawState;
 import com.tc.db.enums.WithdrawType;
+import com.tc.dto.TimeScope;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
 import org.springframework.data.domain.Sort;
@@ -69,6 +70,15 @@ public class QueryFinance extends PageRequest {
         this.auditPassEnd = end;
         this.state = WithdrawState.SUCCESS;
     }
+
+    public QueryFinance(Timestamp begin, Timestamp end) {
+        super(0,10);
+        this.auditPassBegin = begin;
+        this.auditPassEnd = end;
+        this.state = WithdrawState.SUCCESS;
+    }
+
+
 
     public String getId() {
         return id;
@@ -193,7 +203,21 @@ public class QueryFinance extends PageRequest {
         return predicates;
     }
 
+    public static List<Predicate> initPredicatesBy(TimeScope scope, Root<UserWithdraw> root, CriteriaQuery<?> query, CriteriaBuilder cb){
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(QueryUtils.equals(root,cb,UserWithdraw.USER_ID,scope.getId()));
+        predicates.add(cb.equal(root.get(UserWithdraw.STATE),WithdrawState.AUDIT));
+        predicates.add(cb.isNotNull(root.get(UserWithdraw.CREATE_TIME)));
+        predicates.add(QueryUtils.between(root, cb, UserWithdraw.CREATE_TIME, scope.getBegin(), scope.getEnd()));
+        predicates.removeIf(Objects::isNull);
+        return predicates;
+    }
+
     public static QueryFinance init(Long id, Timestamp begin, Timestamp end) {
         return new QueryFinance(id,begin,end);
+    }
+
+    public static QueryFinance init(Timestamp begin, Timestamp end) {
+        return new QueryFinance(begin,end);
     }
 }
