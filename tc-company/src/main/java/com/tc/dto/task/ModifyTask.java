@@ -73,8 +73,7 @@ public class ModifyTask {
         this.taskSteps = taskSteps;
     }
 
-    public static Task toTask(ModifyTask modifyTask) {
-        Task task = new Task();
+    public static Task toTask(Task task, ModifyTask modifyTask) {
         task.setId(modifyTask.id);
         task.setName(modifyTask.name);
         task.setState(TaskState.NEW_CREATE);

@@ -3,6 +3,9 @@ package com.tc.db.repository;
 import com.tc.db.entity.TaskClassifyRelation;
 import com.tc.db.entity.pk.TaskClassifyRelationPK;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -36,10 +39,13 @@ public interface TaskClassifyRelationRepository extends JpaRepository<TaskClassi
 
     /**
      * 删除某个任务的所有分类关系
+     *
      * @param id
      * @return
      */
-    int deleteByTaskId(String id);
+    @Modifying
+    @Query(value = "delete from TaskClassifyRelation t where t.taskId = :id ")
+    int deleteByTaskId(@Param("id") String id);
 
     /**
      * 根据分类编号获取

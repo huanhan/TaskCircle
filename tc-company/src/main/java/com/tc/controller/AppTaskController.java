@@ -74,7 +74,9 @@ public class AppTaskController {
         Task task = AddTaskDto.toTask(addTaskReq);
         task.setUserId(id);
         Task taskResult = taskService.save(task);
-        return TaskDetailAppDto.toDetail(taskResult);
+
+        Task taskRe = taskService.findOne(taskResult.getId());
+        return TaskDetailAppDto.toDetail(taskRe);
     }
 
     /**
@@ -273,7 +275,7 @@ public class AppTaskController {
         //修改任务状态为发布状态，并且在修改完后，从用户账户中扣除发布需要的押金
         Task result = taskService.updateAndUserMoney(task);
 
-        return TaskDetailAppDto.toDetail(result);
+        return TaskDetailAppDto.toDetail(taskService.findOne(result.getId()));
 
     }
 
@@ -701,15 +703,15 @@ public class AppTaskController {
      * @param id
      * @return
      */
-    @GetMapping("/{id:\\d+}")
-    @ApiOperation(value = "获取任务详情信息")
-    public TaskDetailAppDto detail(@PathVariable("id") String id) {
-        //根据Id获取任务
-        Task task = taskService.findOne(id);
-        return TaskDetailAppDto.toDetail(task);
-    }
+     @GetMapping("/{id:\\d+}")
+     @ApiOperation(value = "获取任务详情信息")
+     public TaskDetailAppDto detail(@PathVariable("id") String id) {
+     //根据Id获取任务
+     Task task = taskService.findOne(id);
+     return TaskDetailAppDto.toDetail(task);
+     }
 
-    /**
+     /**
      * todo 未完善 还未加入步骤数据
      * 根据任务编号，获取本人发布的任务的猎刃执行者列表，通过该列表点击获取执行详情
      *
@@ -745,7 +747,10 @@ public class AppTaskController {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        Task taskResult = taskService.modify(ModifyTask.toTask(modifyTask));
+        Task sourceTask = taskService.findOne(modifyTask.getId());
+        Task task = ModifyTask.toTask(sourceTask,modifyTask);
+        task.setUserId(id);
+        Task taskResult = taskService.modify(task);
         return TaskDetailAppDto.toDetail(taskResult);
     }
 

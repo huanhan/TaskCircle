@@ -28,10 +28,10 @@ public class IssueTaskDto {
     @Min(0)
     private Integer peopleNumber;
 
-    @NotEmpty
+    @NotNull
     private Timestamp beginTime;
 
-    @NotEmpty
+    @NotNull
     private Timestamp deadline;
 
     @NotNull

@@ -47,5 +47,7 @@ public interface TaskStepRepository extends JpaRepository<TaskStep,TaskStepPK>,J
      * @param id
      * @return
      */
-    int deleteByTaskId(String id);
+    @Modifying
+    @Query(value = "delete from TaskStep t where t.taskId = :id ")
+    int deleteByTaskId(@Param("id") String id);
 }
