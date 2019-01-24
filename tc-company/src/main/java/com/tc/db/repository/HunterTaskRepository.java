@@ -2,6 +2,7 @@ package com.tc.db.repository;
 
 import com.tc.db.entity.HunterTask;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.MoneyType;
 import com.tc.dto.audit.AuditContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -70,6 +71,21 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = NULL where t.id in (:ids)")
     int updateStateAndAdminAuditTime(@Param("ids") List<String> ids, @Param("state") HunterTaskState state);
 
+    /**
+     * 更新状态，并设置猎刃任务组的金额
+     * @param ids
+     * @param state
+     * @param money
+     * @param type
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.state = :state, t.money = : money, t.moneyType = :moneyType " +
+            "where t.id in (:ids)")
+    int updateState(@Param("ids") List<String> ids,
+                    @Param("state") HunterTaskState state,
+                    @Param("state") Float money,
+                    @Param("moneyType") MoneyType type);
 
     /**
      * 更新任务状态
@@ -80,6 +96,22 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
     @Modifying
     @Query(value = "update HunterTask t set t.state = :state where t.id = :id")
     int updateState(@Param("id") String id, @Param("state") HunterTaskState state);
+
+    /**
+     * 更新状态，并设置猎刃任务的金额
+     * @param id
+     * @param state
+     * @param money
+     * @param type
+     * @return
+     */
+    @Modifying
+    @Query(value = "update HunterTask t set t.state = :state, t.money = : money, t.moneyType = :moneyType " +
+            "where t.id = :id")
+    int updateState(@Param("id") String id,
+                    @Param("state") HunterTaskState state,
+                    @Param("state") Float money,
+                    @Param("moneyType") MoneyType type);
 
     /**
      * 更新猎刃任务状态与审核时间
@@ -156,11 +188,18 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @param id
      * @param state
      * @param context
+     * @param money
+     * @param type
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask  t set t.context = :context,t.state = :state where t.id = :id")
-    int updateStateAndContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
+    @Query(value = "update HunterTask  t set t.context = :context,t.state = :state, t.money = : money, t.moneyType = :moneyType " +
+            "where t.id = :id")
+    int updateStateAndContext(@Param("id") String id,
+                              @Param("state") HunterTaskState state,
+                              @Param("context") String context,
+                              @Param("state") Float money,
+                              @Param("moneyType") MoneyType type);
 
     /**
      * 更新猎刃任务状态，并重置用户拒绝猎刃放弃次数

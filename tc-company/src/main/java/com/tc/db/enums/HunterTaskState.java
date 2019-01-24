@@ -3,7 +3,7 @@ package com.tc.db.enums;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum HunterTaskState {
+public enum HunterTaskState{
 
     /**
      * 猎刃点击接取任务
@@ -45,6 +45,10 @@ public enum HunterTaskState {
 
     HunterTaskState(String state) {
         this.state = state;
+    }
+
+    public String getState() {
+        return state;
     }
 
     /**
@@ -255,6 +259,12 @@ public enum HunterTaskState {
         result.add(TASK_ABANDON);
         result.add(TASK_BE_ABANDON);
         result.add(HUNTER_REPULSE);
+        return result;
+    }
+
+    public static List<HunterTaskState> byStr(List<String> items) {
+        List<HunterTaskState> result = new ArrayList<>();
+        items.forEach(s -> result.add(HunterTaskState.valueOf(s)));
         return result;
     }
 }

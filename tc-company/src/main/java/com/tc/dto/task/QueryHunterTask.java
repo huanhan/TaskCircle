@@ -45,6 +45,13 @@ public class QueryHunterTask extends PageRequest {
     private List<HunterTaskState> states;
     private Boolean isStop;
 
+    public QueryHunterTask(Long id, Timestamp acceptTimeBegin, Timestamp acceptTimeEnd) {
+        super(0, 10);
+        this.hunterId = id;
+        this.acceptTimeBegin = acceptTimeBegin;
+        this.acceptTimeEnd = acceptTimeEnd;
+    }
+
     public QueryHunterTask() {
         super(0, 10);
     }
@@ -60,6 +67,7 @@ public class QueryHunterTask extends PageRequest {
     public QueryHunterTask(int page, int size, Sort sort) {
         super(page, size, sort);
     }
+
 
 
 
@@ -249,5 +257,9 @@ public class QueryHunterTask extends PageRequest {
         predicates.removeIf(Objects::isNull);
 
         return predicates;
+    }
+
+    public static QueryHunterTask init(Long id, Timestamp begin, Timestamp end) {
+        return new QueryHunterTask(id,begin,end);
     }
 }
