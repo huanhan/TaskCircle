@@ -559,7 +559,7 @@ public class AppTaskController {
      * @param htId
      */
     @GetMapping("/abandon/success/{htId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "用户点击审核猎刃任务通过")
+    @ApiOperation(value = "用户点击审核猎刃任务放弃通过")
     public void abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
@@ -602,6 +602,39 @@ public class AppTaskController {
         if (!state.equals("ALL")) {
             queryTask.setState(TaskState.valueOf(state));
         }
+        ArrayList<TaskState> taskStates = new ArrayList<>();
+        switch (state){
+            case "ALL"://全部
+                //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
+                break;
+            case "NEW"://新建
+                taskStates.add(TaskState.NEW_CREATE);//新建
+                taskStates.add(TaskState.AUDIT_FAILURE);//任务审核失败
+                break;
+            case "AUDIT"://待审核
+                taskStates.add(TaskState.AWAIT_AUDIT);//等待审核
+                taskStates.add(TaskState.AUDIT);//审核中
+                taskStates.add(TaskState.AUDIT_SUCCESS);//任务审核成功
+                taskStates.add(TaskState.OK_ISSUE);//任务可以发布
+
+                break;
+            case "ISSUE"://已发布
+                taskStates.add(TaskState.ISSUE);//任务发布中
+                taskStates.add(TaskState.FORBID_RECEIVE);//任务禁止被接取
+                taskStates.add(TaskState.OUT);//任务被撤回
+                break;
+            case "FINISH"://已完成
+                taskStates.add(TaskState.FINISH);//任务完成
+                taskStates.add(TaskState.ABANDON_COMMIT);//用户提交放弃的申请
+                taskStates.add(TaskState.ABANDON_OK);//任务被放弃
+                taskStates.add(TaskState.USER_HUNTER_NEGOTIATE);//与猎刃协商中
+                taskStates.add(TaskState.HUNTER_REJECT);//猎刃拒绝协商
+                taskStates.add(TaskState.COMMIT_AUDIT);//提交管理员协商
+                taskStates.add(TaskState.ADMIN_NEGOTIATE);//管理员协商中
+                taskStates.add(TaskState.HUNTER_COMMIT);//猎刃放弃任务
+                break;
+        }
+        queryTask.setStates(taskStates);
 
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
         List<Task> content = taskPage.getContent();

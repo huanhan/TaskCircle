@@ -1,6 +1,7 @@
 package com.tc.dto.app;
 
 import com.tc.db.entity.Task;
+import com.tc.db.enums.TaskType;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.BeanUtils;
@@ -144,6 +145,7 @@ public class IssueTaskDto {
 
     public static Task toTask(Task task, IssueTaskDto issueTask) {
         BeanUtils.copyProperties(issueTask, task);
+        task.setType(issueTask.peopleNumber == 1 ? TaskType.SOLO : TaskType.MULTI);
         return task;
     }
 }
