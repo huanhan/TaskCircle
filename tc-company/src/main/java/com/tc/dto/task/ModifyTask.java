@@ -33,6 +33,14 @@ public class ModifyTask {
     @Size(min = 1, max = 15, message = "步骤至少要有1步,最多不超过15步")
     private List<AddTaskStep> taskSteps;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }

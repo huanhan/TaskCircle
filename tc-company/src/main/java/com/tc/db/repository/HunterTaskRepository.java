@@ -80,11 +80,11 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask t set t.state = :state, t.money = : money, t.moneyType = :moneyType " +
+    @Query(value = "update HunterTask t set t.state = :state, t.money = :money, t.moneyType = :moneyType " +
             "where t.id in (:ids)")
     int updateState(@Param("ids") List<String> ids,
                     @Param("state") HunterTaskState state,
-                    @Param("state") Float money,
+                    @Param("money") Float money,
                     @Param("moneyType") MoneyType type);
 
     /**
@@ -106,11 +106,11 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask t set t.state = :state, t.money = : money, t.moneyType = :moneyType " +
+    @Query(value = "update HunterTask t set t.state = :state, t.money = :money, t.moneyType = :moneyType " +
             "where t.id = :id")
     int updateState(@Param("id") String id,
                     @Param("state") HunterTaskState state,
-                    @Param("state") Float money,
+                    @Param("money") Float money,
                     @Param("moneyType") MoneyType type);
 
     /**
@@ -193,12 +193,12 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask  t set t.context = :context,t.state = :state, t.money = : money, t.moneyType = :moneyType " +
+    @Query(value = "update HunterTask  t set t.context = :context,t.state = :state, t.money = :money, t.moneyType = :moneyType " +
             "where t.id = :id")
     int updateStateAndContext(@Param("id") String id,
                               @Param("state") HunterTaskState state,
                               @Param("context") String context,
-                              @Param("state") Float money,
+                              @Param("money") Float money,
                               @Param("moneyType") MoneyType type);
 
     /**

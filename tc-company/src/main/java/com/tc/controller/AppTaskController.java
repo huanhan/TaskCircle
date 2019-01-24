@@ -703,7 +703,7 @@ public class AppTaskController {
      */
     @GetMapping("/{id:\\d+}")
     @ApiOperation(value = "获取任务详情信息")
-    public TaskDetailAppDto look(@PathVariable("id") String id) {
+    public TaskDetailAppDto detail(@PathVariable("id") String id) {
         //根据Id获取任务
         Task task = taskService.findOne(id);
         return TaskDetailAppDto.toDetail(task);
@@ -741,7 +741,7 @@ public class AppTaskController {
      */
     @PostMapping("/modify/{id:\\d+}")
     @ApiOperation("修改我的任务")
-    public TaskDetailAppDto update(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
+    public TaskDetailAppDto modifyTask(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
