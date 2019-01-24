@@ -22,6 +22,13 @@ public interface HunterTaskService extends BasicService<HunterTask> {
     Page<HunterTask> findByQueryHunterTask(QueryHunterTask queryHunterTask);
 
     /**
+     * 根据查询条件获取所有记录
+     * @param queryHunterTask
+     * @return
+     */
+    List<HunterTask> findByQueryHunterTaskAndNotPage(QueryHunterTask queryHunterTask);
+
+    /**
      * 自动更新任务状态
      * @param state
      */
@@ -159,6 +166,7 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @return
      */
     boolean abandonNotPassByHunter(String id, String context);
+
 
 
 }

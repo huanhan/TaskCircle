@@ -7,6 +7,7 @@ import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.MoneyType;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.*;
 import com.tc.dto.task.QueryTask;
@@ -30,7 +31,6 @@ import java.util.List;
 
 /**
  * 任务服务的实现
- *
  * @author Cyg
  */
 @Service
@@ -221,7 +221,7 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
         if (!ListUtils.isEmpty(ids)) {
 
             //设置猎刃任务的状态为被放弃
-            count = hunterTaskRepository.updateStateAndAdminAuditTime(ids, HunterTaskState.TASK_BE_ABANDON);
+            count = hunterTaskRepository.updateState(ids, HunterTaskState.TASK_BE_ABANDON,0F,MoneyType.IS_NULL);
 
             if (count != ids.size()) {
                 throw new DBException("修改猎刃任务状态错误");
@@ -349,8 +349,8 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             //获取猎刃任务编号，用来修改状态
             List<String> ids = HunterTask.toIds(queryHts);
             //设置猎刃任务的状态为被放弃
-            count = hunterTaskRepository.updateStateAndAdminAuditTime(ids, HunterTaskState.TASK_BE_ABANDON);
-            if (count != ids.size()) {
+            count = hunterTaskRepository.updateState(ids, HunterTaskState.TASK_BE_ABANDON,0F,MoneyType.IS_NULL);
+            if (count != ids.size()){
                 throw new DBException("修改猎刃任务状态错误");
             }
             //退回猎刃押金

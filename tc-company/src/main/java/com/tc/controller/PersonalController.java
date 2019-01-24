@@ -188,7 +188,7 @@ public class PersonalController {
      * @param bindingResult
      * @return
      */
-    @PostMapping("/contact/modify/{id:\\d+}")
+    @PutMapping("/contact/modify/{id:\\d+}")
     @ApiOperation(value = "管理员修改本人的联系方式")
     public UserContact update(@PathVariable("id") Long id, @Valid @RequestBody AddContact addContact, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -237,7 +237,7 @@ public class PersonalController {
      * @param id
      * @return
      */
-    @GetMapping("/images")
+    @GetMapping("/images/{id:\\d+}")
     @ApiOperation(value = "获取管理员本人的所有图片资料")
     public Result images(@PathVariable("id") Long id){
         List<UserImg> userImgs = userImgService.findByUser(id);

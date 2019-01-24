@@ -3,6 +3,7 @@ package com.tc.service.impl;
 import com.tc.controller.AuditController;
 import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.MoneyType;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
@@ -18,6 +19,7 @@ import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +55,15 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             List<Predicate> predicates = QueryHunterTask.initPredicatesByHunterTask(queryHunterTask,root,query,cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryHunterTask);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<HunterTask> findByQueryHunterTaskAndNotPage(QueryHunterTask queryHunterTask) {
+        return hunterTaskRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryHunterTask.initPredicatesByHunterTask(queryHunterTask,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },queryHunterTask.getSort() == null ? new Sort(Sort.Direction.DESC) : queryHunterTask.getSort());
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -189,7 +200,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //获取对应的任务信息
         Task task = hunterTask.getTask();
         //设置猎刃任务的状态为通过
-        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_OK);
+        count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.END_OK,task.getCompensateMoney(),MoneyType.INCOME);
         if (count <= 0){
             throw new DBException("设置任务状态失败");
         }
@@ -243,7 +254,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //判断用户是否也放弃了任务
         if (task.getState().equals(TaskState.ABANDON_COMMIT) && hunterTask.getStop()){
             //设置猎刃任务状态为放弃任务
-            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+            count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON,0F,MoneyType.IS_NULL);
 
             if (count <= 0){
                 throw new DBException("修改任务状态失败");
@@ -262,7 +273,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             if(TimestampHelper.differByMinute(TimestampHelper.today(),hunterTask.getAcceptTime()) <= task.getPermitAbandonMinute()){
 
                 //设置猎刃任务状态为放弃任务
-                count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+                count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON,0F,MoneyType.IS_NULL);
 
                 if (count <= 0){
                     throw new DBException("修改任务状态失败");
@@ -277,7 +288,11 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             //放弃需要补偿时
 
             //修改成结束未完成的状态，并保存放弃理由
-            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),HunterTaskState.END_NO,context);
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),
+                    HunterTaskState.END_NO,
+                    context,
+                    task.getCompensateMoney(),
+                    MoneyType.PAY);
             if (count <= 0){
                 throw new DBException("修改任务状态失败");
             }
@@ -318,7 +333,11 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             //放弃不需要补偿时
 
             //修改成结束未完成的状态，并保存放弃理由
-            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),HunterTaskState.END_NO,context);
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),
+                    HunterTaskState.END_NO,
+                    context,
+                    0F,
+                    MoneyType.IS_NULL);
             if (count <= 0){
                 throw new DBException("修改任务状态失败");
             }
@@ -377,7 +396,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         Task task = hunterTask.getTask();
 
         //将猎刃任务的状态设置成放弃
-        int count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON);
+        int count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_ABANDON,0F,MoneyType.IS_NULL);
         if (count <= 0){
             throw new DBException("修改任务状态失败");
         }
@@ -423,7 +442,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //获取对应的任务
         Task task = hunterTask.getTask();
         //设置猎人任务状态
-        int count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_BE_ABANDON);
+        int count = hunterTaskRepository.updateState(hunterTask.getId(),HunterTaskState.TASK_BE_ABANDON,0F,MoneyType.IS_NULL);
         if (count <= 0){
             throw new DBException("修改任务状态失败");
         }

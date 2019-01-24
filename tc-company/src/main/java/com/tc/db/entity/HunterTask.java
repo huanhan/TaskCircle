@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.MoneyType;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -56,6 +57,8 @@ public class HunterTask implements Serializable {
     private Integer userRejectCount;
     private HunterTaskState state;
     private Boolean isStop;
+    private Float money;
+    private MoneyType moneyType;
 
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
@@ -224,6 +227,27 @@ public class HunterTask implements Serializable {
 
     public void setStop(Boolean stop) {
         isStop = stop;
+    }
+
+    @Basic
+    @Column(name = "money")
+    public Float getMoney() {
+        return money;
+    }
+
+    public void setMoney(Float money) {
+        this.money = money;
+    }
+
+    @Basic
+    @Enumerated(EnumType.STRING)
+    @Column(name = "money_type")
+    public MoneyType getMoneyType() {
+        return moneyType;
+    }
+
+    public void setMoneyType(MoneyType moneyType) {
+        this.moneyType = moneyType;
     }
 
     @OneToMany(mappedBy = "hunterTask")
