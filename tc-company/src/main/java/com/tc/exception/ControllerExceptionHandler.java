@@ -7,7 +7,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,13 +27,14 @@ public class ControllerExceptionHandler {
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     public MyResponse handlerValidException(ValidException ex){
 
-        Map<String,String> messages = new HashMap<>();
+        List<Message> messages = new ArrayList<>();
 
         if (!ex.getErrors().isEmpty()) {
 
             for (FieldError error :
                     ex.getErrors()) {
-                messages.put(error.getField(), error.getDefaultMessage());
+                String message = error.getField() + error.getDefaultMessage();
+                messages.add(new Message(message));
                 logger.info(error.getField() + ":" + error.getDefaultMessage());
             }
 
@@ -39,7 +42,7 @@ public class ControllerExceptionHandler {
         }
 
 
-        messages.put("message",ex.getMessage());
+        messages.add(new Message(ex.getMessage()));
         return new MyResponse(messages);
     }
 
@@ -47,27 +50,25 @@ public class ControllerExceptionHandler {
     @ResponseBody
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     public MyResponse handlerDBException(DBException ex){
-        Map<String,String> messages = new HashMap<>();
-        messages.put("message",ex.getMessage());
+        List<Message> messages = new ArrayList<>();
+        messages.add(new Message(ex.getMessage()));
         return new MyResponse(messages);
     }
 
 
     private class MyResponse implements Serializable {
 
-        private Map<String,String> messages;
+        private List<Message> messages;
 
-        public MyResponse(Map<String, String> messages) {
+        public MyResponse(List<Message> messages) {
             this.messages = messages;
         }
 
-
-
-        public Map<String, String> getMessages() {
+        public List<Message> getMessages() {
             return messages;
         }
 
-        public void setMessages(Map<String, String> messages) {
+        public void setMessages(List<Message> messages) {
             this.messages = messages;
         }
     }
