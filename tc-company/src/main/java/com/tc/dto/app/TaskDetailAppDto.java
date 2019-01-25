@@ -46,17 +46,21 @@ public class TaskDetailAppDto {
     public static TaskDetailAppDto toDetail(Task task) {
         TaskDetailAppDto taskDetailAppDto = new TaskDetailAppDto();
         BeanUtils.copyProperties(task, taskDetailAppDto);
-        taskDetailAppDto.setHeadImg(task.getUser().getHeadImg());
-        taskDetailAppDto.setUsername(task.getUser().getUsername());
+        if (task.getUser() != null) {
+            taskDetailAppDto.setHeadImg(task.getUser().getHeadImg());
+            taskDetailAppDto.setUsername(task.getUser().getUsername());
+        }
 
         List<TaskClassifyAppDto> taskClassifyAppDtos = new ArrayList<>();
         TaskClassifyAppDto childTaskClassifyAppDto;
         //循环增加子
         for (TaskClassifyRelation taskClassifyRelation : task.getTaskClassifyRelations()) {
             TaskClassify taskClassify = taskClassifyRelation.getTaskClassify();
-            childTaskClassifyAppDto = new TaskClassifyAppDto();
-            BeanUtils.copyProperties(taskClassify, childTaskClassifyAppDto);
-            taskClassifyAppDtos.add(childTaskClassifyAppDto);
+            if (taskClassify != null) {
+                childTaskClassifyAppDto = new TaskClassifyAppDto();
+                BeanUtils.copyProperties(taskClassify, childTaskClassifyAppDto);
+                taskClassifyAppDtos.add(childTaskClassifyAppDto);
+            }
         }
         List<AddTaskStep> taskSteps = new ArrayList<>();
         AddTaskStep addTaskStep;

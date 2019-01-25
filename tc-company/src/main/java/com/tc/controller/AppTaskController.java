@@ -4,10 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.Result;
-import com.tc.dto.app.AddTaskReq;
-import com.tc.dto.app.TaskAppDto;
-import com.tc.dto.app.TaskClassifyAppDto;
-import com.tc.dto.app.TaskDetailAppDto;
+import com.tc.dto.app.*;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.task.*;
 import com.tc.exception.DBException;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -71,14 +67,16 @@ public class AppTaskController {
      */
     @PostMapping("{id:\\d+}")
     @ApiOperation("添加任务")
-    public Task add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskReq addTaskReq, BindingResult bindingResult) {
+    public TaskDetailAppDto add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskDto addTaskReq, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        Task task = AddTaskReq.toTask(addTaskReq);
+        Task task = AddTaskDto.toTask(addTaskReq);
         task.setUserId(id);
         Task taskResult = taskService.save(task);
-        return Task.toDetail(taskResult);
+
+        Task taskRe = taskService.findOne(taskResult.getId());
+        return TaskDetailAppDto.toDetail(taskRe);
     }
 
     /**
@@ -241,7 +239,7 @@ public class AppTaskController {
      */
     @PostMapping("/issue/{id:\\d+}")
     @ApiOperation(value = "发布我的任务")
-    public Task issueTask(@PathVariable("id") Long id, @Valid @RequestBody IssueTask issueTask, BindingResult bindingResult) {
+    public TaskDetailAppDto issueTask(@PathVariable("id") Long id, @Valid @RequestBody IssueTaskDto issueTask, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -259,7 +257,7 @@ public class AppTaskController {
         }
 
         //将DTO转成Entity
-        IssueTask.toTask(task, issueTask);
+        IssueTaskDto.toTask(task, issueTask);
 
         //判断用户的罚金是否在允许范围之内
 //        if (task.getPeopleNumber() <= 10){
@@ -277,7 +275,7 @@ public class AppTaskController {
         //修改任务状态为发布状态，并且在修改完后，从用户账户中扣除发布需要的押金
         Task result = taskService.updateAndUserMoney(task);
 
-        return Task.toDetail(result);
+        return TaskDetailAppDto.toDetail(taskService.findOne(result.getId()));
 
     }
 
@@ -561,7 +559,7 @@ public class AppTaskController {
      * @param htId
      */
     @GetMapping("/abandon/success/{htId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "用户点击审核猎刃任务通过")
+    @ApiOperation(value = "用户点击审核猎刃任务放弃通过")
     public void abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
@@ -586,7 +584,7 @@ public class AppTaskController {
     /**
      * 根据状态获取指定用户的任务列表
      *
-     * @param state 任务状态
+     * @param state 任务状态 查询全部用ALL,其余参考TaskState
      * @param id    用户编号
      * @return
      */
@@ -601,7 +599,43 @@ public class AppTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }*/
         queryTask.setUserId(id);
-        queryTask.setState(TaskState.valueOf(state));
+       /* if (!state.equals("ALL")) {
+            queryTask.setState(TaskState.valueOf(state));
+        }*/
+        ArrayList<TaskState> taskStates = new ArrayList<>();
+        switch (state){
+            case "ALL"://全部
+                //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
+                break;
+            case "NEW"://新建
+                taskStates.add(TaskState.NEW_CREATE);//新建
+                taskStates.add(TaskState.AUDIT_FAILURE);//任务审核失败
+                break;
+            case "AUDIT"://待审核
+                taskStates.add(TaskState.AWAIT_AUDIT);//等待审核
+                taskStates.add(TaskState.AUDIT);//审核中
+                taskStates.add(TaskState.AUDIT_SUCCESS);//任务审核成功
+                taskStates.add(TaskState.OK_ISSUE);//任务可以发布
+
+                break;
+            case "ISSUE"://已发布
+                taskStates.add(TaskState.ISSUE);//任务发布中
+                taskStates.add(TaskState.FORBID_RECEIVE);//任务禁止被接取
+                taskStates.add(TaskState.OUT);//任务被撤回
+                break;
+            case "FINISH"://已完成
+                taskStates.add(TaskState.FINISH);//任务完成
+                taskStates.add(TaskState.ABANDON_COMMIT);//用户提交放弃的申请
+                taskStates.add(TaskState.ABANDON_OK);//任务被放弃
+                taskStates.add(TaskState.USER_HUNTER_NEGOTIATE);//与猎刃协商中
+                taskStates.add(TaskState.HUNTER_REJECT);//猎刃拒绝协商
+                taskStates.add(TaskState.COMMIT_AUDIT);//提交管理员协商
+                taskStates.add(TaskState.ADMIN_NEGOTIATE);//管理员协商中
+                taskStates.add(TaskState.HUNTER_COMMIT);//猎刃放弃任务
+                break;
+        }
+        queryTask.setStates(taskStates);
+
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
         List<Task> content = taskPage.getContent();
         List<TaskAppDto> taskAppDtos = new ArrayList<>();
@@ -702,15 +736,15 @@ public class AppTaskController {
      * @param id
      * @return
      */
-    @GetMapping("/{id:\\d+}")
-    @ApiOperation(value = "获取任务详情信息")
-    public TaskDetailAppDto look(@PathVariable("id") String id) {
-        //根据Id获取任务
-        Task task = taskService.findOne(id);
-        return TaskDetailAppDto.toDetail(task);
-    }
+     @GetMapping("/{id:\\d+}")
+     @ApiOperation(value = "获取任务详情信息")
+     public TaskDetailAppDto detail(@PathVariable("id") String id) {
+     //根据Id获取任务
+     Task task = taskService.findOne(id);
+     return TaskDetailAppDto.toDetail(task);
+     }
 
-    /**
+     /**
      * todo 未完善 还未加入步骤数据
      * 根据任务编号，获取本人发布的任务的猎刃执行者列表，通过该列表点击获取执行详情
      *
@@ -742,13 +776,15 @@ public class AppTaskController {
      */
     @PostMapping("/modify/{id:\\d+}")
     @ApiOperation("修改我的任务")
-    public Task update(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
+    public TaskDetailAppDto modifyTask(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-
-
-        return new Task();
+        Task sourceTask = taskService.findOne(modifyTask.getId());
+        Task task = ModifyTask.toTask(sourceTask,modifyTask);
+        task.setUserId(id);
+        Task taskResult = taskService.modify(task);
+        return TaskDetailAppDto.toDetail(taskResult);
     }
 
     /**

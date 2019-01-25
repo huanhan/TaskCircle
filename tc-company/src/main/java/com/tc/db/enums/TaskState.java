@@ -62,7 +62,7 @@ public enum TaskState {
      */
     USER_HUNTER_NEGOTIATE("与猎刃协商中"),
     /**
-     * 猎刃决绝与用户协商
+     * 猎刃拒绝与用户协商
      */
     HUNTER_REJECT("猎刃拒绝协商"),
     /**

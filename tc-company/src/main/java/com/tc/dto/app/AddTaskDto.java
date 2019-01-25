@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
 
-public class AddTaskReq {
+public class AddTaskDto {
 
     @NotEmpty(message = "请设置任务名")
     @Length(max = 20,message = "任务名最大长度为20")
@@ -60,7 +60,7 @@ public class AddTaskReq {
         this.taskSteps = taskSteps;
     }
 
-    public static Task toTask(AddTaskReq addTask){
+    public static Task toTask(AddTaskDto addTask){
         Task task = new Task();
         task.setId(IdGenerator.INSTANCE.nextId());
         task.setName(addTask.name);
