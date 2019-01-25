@@ -12,11 +12,13 @@ import java.util.List;
 
 /**
  * 评论仓库
+ *
  * @author Cyg
  */
 public interface TaskService extends BasicService<Task> {
     /**
      * 修改任务
+     *
      * @param task
      * @return
      */
@@ -24,6 +26,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 根据查询条件获取任务列表
+     *
      * @param queryTask
      * @return
      */
@@ -31,6 +34,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 根据条件获取任务列表
+     *
      * @param queryTask
      * @return
      */
@@ -38,6 +42,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 修改任务状态
+     *
      * @param id
      * @param state
      * @return
@@ -46,6 +51,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 获取任务信息与任务执行者列表信息
+     *
      * @param id
      * @return
      */
@@ -53,6 +59,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 修改任务状态与审核时间
+     *
      * @param id
      * @param state
      * @param date
@@ -70,14 +77,16 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 用户将任务提交审核
+     *
      * @param taskId 任务编号
-     * @param state 任务状态
+     * @param state  任务状态
      * @return
      */
     boolean commitAudit(String taskId, TaskState state);
 
     /**
      * 用户取消审核
+     *
      * @param taskId
      * @param state
      * @return
@@ -86,6 +95,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 用户放弃任务
+     *
      * @param id
      * @param taskId
      * @return
@@ -94,6 +104,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 保存发布的任务信息与扣除用户押金
+     *
      * @param task
      * @return
      */
@@ -101,6 +112,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 用户撤回任务
+     *
      * @param task
      * @return
      */
@@ -108,6 +120,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 判断任务是否成功
+     *
      * @param taskId
      * @return
      */
@@ -115,6 +128,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 判断任务是否完全被拒绝
+     *
      * @param id
      * @return
      */
@@ -122,6 +136,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 判断任务是否可放弃，可放弃则直接放弃
+     *
      * @param task
      * @return
      */
@@ -129,6 +144,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 用户取消放弃任务
+     *
      * @param id
      * @param task
      * @return
@@ -138,6 +154,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 管理员修改任务状态
+     *
      * @param id
      * @param state
      * @return
@@ -146,6 +163,7 @@ public interface TaskService extends BasicService<Task> {
 
     /**
      * 获取用户的押金列表
+     *
      * @param id
      * @param scope
      * @return
