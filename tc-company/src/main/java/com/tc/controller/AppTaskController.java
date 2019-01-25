@@ -191,8 +191,10 @@ public class AppTaskController {
 
     /**
      * Task步骤2：取消审核
-     *  @param id
-     * @param taskId*/
+     *
+     * @param id
+     * @param taskId
+     */
     @GetMapping("/user/di/upAudit/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "取消审核")
     public ResultApp diUpAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
@@ -289,8 +291,10 @@ public class AppTaskController {
      * 放弃的条件：猎刃任务状态为RECEIVE("任务接取")，并且接取的时间少于用户设置的允许放弃时间
      * 如果满足撤回条件：需要退回猎刃押金，并将猎刃任务状态设置成TASK_BE_ABANDON("任务被放弃")
      * 任务的撤回不影响任务进行中的猎刃进行任务
-     *  @param id     用户编号
-     * @param taskId 任务编号*/
+     *
+     * @param id     用户编号
+     * @param taskId 任务编号
+     */
     @GetMapping("/out/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "撤回我的任务")
     public ResultApp outTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
@@ -319,8 +323,10 @@ public class AppTaskController {
     /**
      * Task步骤4：用户如果撤回了任务，用户可以选择继续上架或者放弃任务，
      * 该步骤针对的是上架按钮，上架成功，任务状态变成ISSUE("任务发布中")
-     *  @param id
-     * @param taskId*/
+     *
+     * @param id
+     * @param taskId
+     */
     @GetMapping("/put/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击重新上架按钮功能")
     public ResultApp putTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
@@ -352,8 +358,10 @@ public class AppTaskController {
      * 放弃成功时，会将任务状态置为ABANDON_OK("任务被放弃")，
      * 并且任务将直接退还押金，并且不能重新发布，此时一个任务的开始-放弃流程完毕
      * 用户放弃任务需要谨慎，因为用户点击放弃任务后，也会直接将猎刃放弃任务的申请直接通过
-     *  @param id
-     * @param taskId*/
+     *
+     * @param id
+     * @param taskId
+     */
     @GetMapping("/user/abandon/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击放弃任务")
     public ResultApp abandonTaskByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
@@ -394,8 +402,10 @@ public class AppTaskController {
     /**
      * Task步骤5：用户点击取消放弃任务，修改任务为撤回状态OUT("任务被撤回")
      * ，并且将猎刃任务继续，
-     *  @param id
-     * @param taskId*/
+     *
+     * @param id
+     * @param taskId
+     */
     @GetMapping("/user/di/abandon/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击取消放弃任务")
     public ResultApp diPassAbandon(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
@@ -433,8 +443,10 @@ public class AppTaskController {
      * 此时，自身的任务流程 新建-完成 的流程完成
      * 猎刃将完成的任务提交用户审核
      * 用户点击审核通过
-     *  @param id
-     * @param htId*/
+     *
+     * @param id
+     * @param htId
+     */
     @GetMapping("/audit/success/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务通过")
     public ResultApp auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
@@ -472,6 +484,7 @@ public class AppTaskController {
      * ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
      * NO_REWORK_NO_COMPENSATE("不能重做，不用补偿"),
      * NO_REWORK_HAVE_COMPENSATE("不能重做，要补偿"),
+     *
      * @param id
      * @param context
      * @param bindingResult
@@ -517,6 +530,7 @@ public class AppTaskController {
 
     /**
      * HunterTask步骤5：用户点击不同意猎刃放弃按钮，此时回将猎刃任务状态设置为USER_REPULSE（用户拒绝猎刃放弃）
+     *
      * @param id
      * @param context
      * @param bindingResult
@@ -550,8 +564,10 @@ public class AppTaskController {
 
     /**
      * HunterTask步骤5：用户点击同意猎刃放弃按钮，此时回将猎刃任务状态设置为TASK_ABANDON（任务放弃）
-     *  @param id
-     * @param htId*/
+     *
+     * @param id
+     * @param htId
+     */
     @GetMapping("/abandon/success/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务放弃通过")
     public ResultApp abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
@@ -585,10 +601,10 @@ public class AppTaskController {
      */
     @GetMapping("/user/{state}/{page}/{size}/{id:\\d+}")
     @ApiOperation(value = "根据状态获取指定用户的任务列表")
-    public Page<TaskAppDto> taskByUser(@PathVariable("state") String state,
-                                       @PathVariable("page") int page,
-                                       @PathVariable("size") int size,
-                                       @PathVariable("id") Long id) {
+    public AppPage taskByUser(@PathVariable("state") String state,
+                              @PathVariable("page") int page,
+                              @PathVariable("size") int size,
+                              @PathVariable("id") Long id) {
         QueryTask queryTask = new QueryTask(page, size);
         /*if (!hasState(queryTask.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
@@ -598,7 +614,7 @@ public class AppTaskController {
             queryTask.setState(TaskState.valueOf(state));
         }*/
         ArrayList<TaskState> taskStates = new ArrayList<>();
-        switch (state){
+        switch (state) {
             case "ALL"://全部
                 //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
                 break;
@@ -637,10 +653,8 @@ public class AppTaskController {
         for (Task task : content) {
             taskAppDtos.add(TaskAppDto.toDetail(task));
         }
-        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
-        BeanUtils.copyProperties(taskPage, appDtoPage);
 
-        return appDtoPage;
+        return AppPage.init(taskAppDtos, taskPage);
     }
 
     /**
@@ -651,9 +665,9 @@ public class AppTaskController {
      */
     @GetMapping("/issue/{classid:\\d+}/{page}/{size}")
     @ApiOperation(value = "查询分类下所有已发布任务")
-    public Page<TaskAppDto> queryByClassid(@PathVariable("classid") long classid,
-                                           @PathVariable("page") int page,
-                                           @PathVariable("size") int size) {
+    public AppPage queryByClassid(@PathVariable("classid") long classid,
+                                  @PathVariable("page") int page,
+                                  @PathVariable("size") int size) {
         QueryTask queryTask = new QueryTask(page, size);
         queryTask.setState(TaskState.ISSUE);
         queryTask.setClassifyId(classid);
@@ -664,10 +678,8 @@ public class AppTaskController {
         for (Task task : content) {
             taskAppDtos.add(TaskAppDto.toDetail(task));
         }
-        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
-        BeanUtils.copyProperties(taskPage, appDtoPage);
 
-        return appDtoPage;
+        return AppPage.init(taskAppDtos, taskPage);
     }
 
     /**
@@ -731,15 +743,15 @@ public class AppTaskController {
      * @param id
      * @return
      */
-     @GetMapping("/{id:\\d+}")
-     @ApiOperation(value = "获取任务详情信息")
-     public TaskDetailAppDto detail(@PathVariable("id") String id) {
-     //根据Id获取任务
-     Task task = taskService.findOne(id);
-     return TaskDetailAppDto.toDetail(task);
-     }
+    @GetMapping("/{id:\\d+}")
+    @ApiOperation(value = "获取任务详情信息")
+    public TaskDetailAppDto detail(@PathVariable("id") String id) {
+        //根据Id获取任务
+        Task task = taskService.findOne(id);
+        return TaskDetailAppDto.toDetail(task);
+    }
 
-     /**
+    /**
      * todo 未完善 还未加入步骤数据
      * 根据任务编号，获取本人发布的任务的猎刃执行者列表，通过该列表点击获取执行详情
      *
@@ -776,7 +788,7 @@ public class AppTaskController {
             throw new ValidException(bindingResult.getFieldErrors());
         }
         Task sourceTask = taskService.findOne(modifyTask.getId());
-        Task task = ModifyTask.toTask(sourceTask,modifyTask);
+        Task task = ModifyTask.toTask(sourceTask, modifyTask);
         task.setUserId(id);
         Task taskResult = taskService.modify(task);
         return TaskDetailAppDto.toDetail(taskResult);
