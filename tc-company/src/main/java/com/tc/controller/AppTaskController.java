@@ -599,9 +599,9 @@ public class AppTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }*/
         queryTask.setUserId(id);
-        if (!state.equals("ALL")) {
+       /* if (!state.equals("ALL")) {
             queryTask.setState(TaskState.valueOf(state));
-        }
+        }*/
         ArrayList<TaskState> taskStates = new ArrayList<>();
         switch (state){
             case "ALL"://全部
