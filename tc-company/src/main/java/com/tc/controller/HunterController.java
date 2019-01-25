@@ -107,5 +107,4 @@ public class HunterController {
         return Result.init(HunterTask.toIndexAsList(query.getContent()),queryHunterTask);
     }
 
-
 }

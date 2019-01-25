@@ -161,4 +161,20 @@ public enum TaskState {
         strings.forEach(s -> result.add(TaskState.valueOf(s)));
         return result;
     }
+
+    /**
+     * 判断任务状态是否允许放弃
+     * @param state
+     * @return
+     */
+    public static boolean isAbandon(TaskState state){
+        switch (state){
+            case FORBID_RECEIVE:
+                return true;
+            case OUT:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

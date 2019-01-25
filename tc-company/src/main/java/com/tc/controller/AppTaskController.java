@@ -372,7 +372,7 @@ public class AppTaskController {
         }
 
         //判断可放弃任务的状态
-        if (!task.getState().equals(TaskState.FORBID_RECEIVE) || !task.getState().equals(TaskState.OUT)) {
+        if (!TaskState.isAbandon(task.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 

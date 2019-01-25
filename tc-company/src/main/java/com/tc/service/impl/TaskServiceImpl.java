@@ -151,9 +151,8 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
         if (state.equals(TaskState.NEW_CREATE) || state.equals(TaskState.HUNTER_REJECT)) {
             //任务提交审核时一般只修改状态与提交审核的时间，不做其他额外的操作
-
-
-            count = taskRepository.updateStateAndAuditTime(taskId, state, new Timestamp(System.currentTimeMillis()));
+            TaskState setState = state.equals(TaskState.NEW_CREATE) ? TaskState.AWAIT_AUDIT : TaskState.COMMIT_AUDIT;
+            count = taskRepository.updateStateAndAuditTime(taskId, setState, new Timestamp(System.currentTimeMillis()));
 
         }
 
