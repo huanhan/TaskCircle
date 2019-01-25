@@ -1,14 +1,10 @@
 package com.tc;
 
-import com.tc.db.entity.User;
+import com.tc.db.entity.*;
+import com.tc.dto.Show;
+import com.tc.dto.authority.*;
 import com.tc.dto.enums.DateType;
-import com.tc.dto.finance.QueryIE;
-import com.tc.dto.task.QueryHunterTask;
-import com.tc.dto.task.QueryTaskInterflow;
 import com.tc.dto.user.DateCondition;
-import com.tc.dto.user.ModifyPassword;
-import com.tc.dto.user.ModifyUserHeader;
-import com.tc.dto.user.contact.AddContact;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import com.tc.until.TimestampHelper;
@@ -93,8 +89,20 @@ public class TextRuntime {
                 TimestampHelper.toTimestamp(LocalDateTime.of(2019,2,28,13,50)),
                 DateType.HOURS
         );
-
-        printGson(new QueryHunterTask());
+        List<Show> authorities = new ArrayList<>();
+        authorities.add(new Show());
+        authorities.add(new Show());
+        List<Show> resources = new ArrayList<>();
+        resources.add(new Show());
+        resources.add(new Show());
+        List<AuthorityResource> ars = new ArrayList<>();
+        ars.add(new AuthorityResource());
+        ars.add(new AuthorityResource());
+        AutResRelation autResRelation = new AutResRelation();
+        autResRelation.setAuthorities(authorities);
+        autResRelation.setResources(resources);
+        autResRelation.setAutResIds(ars);
+        printGson(new RemoveUser(1L,new ArrayList<>(),1L));
     }
 
 

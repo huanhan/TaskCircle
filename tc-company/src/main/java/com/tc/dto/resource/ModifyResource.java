@@ -53,9 +53,6 @@ public class ModifyResource{
         return isModify;
     }
 
-    public void setModify(boolean modify) {
-        isModify = modify;
-    }
 
     public Resource toResource(Resource oldResource) {
 

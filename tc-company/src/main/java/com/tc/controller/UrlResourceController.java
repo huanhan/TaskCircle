@@ -4,7 +4,6 @@ import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
 import com.tc.dto.LongIds;
-import com.tc.dto.MyPage;
 import com.tc.dto.Result;
 import com.tc.dto.Show;
 import com.tc.dto.authority.QueryAR;
@@ -19,11 +18,11 @@ import com.tc.service.AuthorityResourceService;
 import com.tc.service.ResourceService;
 import com.tc.until.ControllerHelper;
 import com.tc.until.ListUtils;
+import com.tc.until.PageRequest;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -128,9 +127,9 @@ public class UrlResourceController {
     /**
      * 一键添加所有未添加的资源
      */
-    @PostMapping("/add/all")
+    @GetMapping("/add/all/{id:\\d+}")
     @ApiOperation(value = "一键添加所有未添加的资源")
-    public void addAll(@RequestBody Long id){
+    public void addAll(@PathVariable("id") Long id){
         List<Resource> list = resourceService.findAll();
         //获取系统中的资源
         List<Resource> urls = ControllerHelper.allUrl(applicationContext);
@@ -273,9 +272,10 @@ public class UrlResourceController {
      * @param queryAR 资源查询信息
      * @return
      */
-    @PostMapping("/authority/query")
+    @PostMapping("/authority/query/{id:\\d+}")
     @ApiOperation(value = "获取使用指定url资源的权限列表")
-    public Result urlResourceAuthority(@RequestBody QueryAR queryAR){
+    public Result urlResourceAuthority(@PathVariable("id") Long id,@RequestBody QueryAR queryAR){
+        queryAR.setResourceId(id);
         Page<AuthorityResource> queryResult = authorityResourceService.findByQuery(queryAR);
         if (queryResult.getContent() == null || queryResult.getContent().size() <= 0){
             throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);

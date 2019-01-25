@@ -28,6 +28,15 @@ public class RemoveUser {
     @Min(value = 1)
     private Long opId;
 
+    public RemoveUser() {
+    }
+
+    public RemoveUser(Long id, List<UserCategory> ids, Long opId) {
+        this.id = id;
+        this.ids = ids;
+        this.opId = opId;
+    }
+
     public Long getId() {
         return id;
     }

@@ -184,11 +184,11 @@ public class QueryUtils {
     public static <T> Predicate in(Path<?> root, CriteriaBuilder cb, String property, List<T> value){
         Predicate predicate = null;
         if (value != null){
-            predicate = cb.in(root.get(property));
-            for (T i:
-                    value) {
-                predicate.in(i);
-            }
+            predicate = cb.in(root.get(property)).value(value);
+//            for (T i:
+//                    value) {
+//                predicate.in(i);
+//            }
         }
         return predicate;
     }

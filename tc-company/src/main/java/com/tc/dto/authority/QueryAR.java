@@ -10,7 +10,7 @@ public class QueryAR extends PageRequest {
     private String authorityName;
     private String resourceName;
 
-    QueryAR(){
+    public QueryAR(){
         super(0,10);
     }
 

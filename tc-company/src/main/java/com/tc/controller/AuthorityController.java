@@ -73,7 +73,7 @@ public class AuthorityController {
 
     @PostMapping(value = "/all/query")
     @ApiOperation(value = "在权限与资源关系管理界面中，获取一次性获取所有权限，所有资源与两者之间的关联关系")
-    public Result all(@RequestBody QueryAuthority queryAuthority){
+    public Result all(@RequestBody QueryAuthority queryAuthority) {
         //根据条件查询权限列表
         List<Authority> authorities = authorityService.findByQueryAuthority(queryAuthority);
         //获取所有数据库中的资源(需要全部展示出来)
@@ -101,22 +101,7 @@ public class AuthorityController {
         List<Show> showResources = TranstionHelper.toShowByResources(resources);
         List<Show> showAuthorities = TranstionHelper.toShowByAuthorities(authorities);
         List<AuthorityResource> autResIds = TranstionHelper.toAuthorityResourceID(authorityResources);
-        return Result.init(AutResRelation.init(showResources,showAuthorities,autResIds),queryAuthority);
-    }
-
-    @PostMapping("/aut/query")
-    @ApiOperation(value = "在权限与资源关系管理界面中，获取所有权限")
-    public Result allAuthority(@RequestBody QueryAuthority queryAuthority){
-        //根据条件查询权限列表
-        List<Authority> authorities = authorityService.findByQueryAuthority(queryAuthority);
-        return Result.init(TranstionHelper.toShowByAuthorities(authorities),queryAuthority);
-    }
-
-    @GetMapping("/aut/{id:\\d+}")
-    @ApiOperation(value = "在权限与资源关系管理界面中，获取权限对应的资源")
-    public List<Long> getResourcesByAuthority(@PathVariable("id") Long id){
-        List<AuthorityResource> authorityResources = authorityResourceService.findByAuthorityID(id);
-        return AuthorityResource.toKey(authorityResources,QueryEnum.RESOURCE);
+        return Result.init(AutResRelation.init(showResources, showAuthorities, autResIds), queryAuthority);
     }
 
     /**
