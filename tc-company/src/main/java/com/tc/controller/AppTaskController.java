@@ -159,7 +159,7 @@ public class AppTaskController {
      */
     @GetMapping("/user/upAudit/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "将用户的任务提交给管理员审核")
-    public void upAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp upAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
@@ -185,17 +185,17 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+
+        return ResultApp.init("提交成功");
     }
 
     /**
      * Task步骤2：取消审核
-     *
-     * @param id
-     * @param taskId
-     */
+     *  @param id
+     * @param taskId*/
     @GetMapping("/user/di/upAudit/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "取消审核")
-    public void diUpAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp diUpAuditByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
@@ -221,6 +221,7 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        return ResultApp.init("取消成功");
     }
 
 
@@ -288,13 +289,11 @@ public class AppTaskController {
      * 放弃的条件：猎刃任务状态为RECEIVE("任务接取")，并且接取的时间少于用户设置的允许放弃时间
      * 如果满足撤回条件：需要退回猎刃押金，并将猎刃任务状态设置成TASK_BE_ABANDON("任务被放弃")
      * 任务的撤回不影响任务进行中的猎刃进行任务
-     *
-     * @param id     用户编号
-     * @param taskId 任务编号
-     */
+     *  @param id     用户编号
+     * @param taskId 任务编号*/
     @GetMapping("/out/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "撤回我的任务")
-    public void outTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp outTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
@@ -313,18 +312,18 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+
+        return ResultApp.init("撤回成功");
     }
 
     /**
      * Task步骤4：用户如果撤回了任务，用户可以选择继续上架或者放弃任务，
      * 该步骤针对的是上架按钮，上架成功，任务状态变成ISSUE("任务发布中")
-     *
-     * @param id
-     * @param taskId
-     */
+     *  @param id
+     * @param taskId*/
     @GetMapping("/put/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击重新上架按钮功能")
-    public void putTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp putTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
 
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
@@ -341,6 +340,8 @@ public class AppTaskController {
 
         //重新上架任务
         taskService.updateState(taskId, TaskState.ISSUE);
+
+        return ResultApp.init("重新上架完成");
     }
 
     /**
@@ -351,13 +352,11 @@ public class AppTaskController {
      * 放弃成功时，会将任务状态置为ABANDON_OK("任务被放弃")，
      * 并且任务将直接退还押金，并且不能重新发布，此时一个任务的开始-放弃流程完毕
      * 用户放弃任务需要谨慎，因为用户点击放弃任务后，也会直接将猎刃放弃任务的申请直接通过
-     *
-     * @param id
-     * @param taskId
-     */
+     *  @param id
+     * @param taskId*/
     @GetMapping("/user/abandon/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击放弃任务")
-    public void abandonTaskByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp abandonTaskByUser(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
@@ -387,20 +386,19 @@ public class AppTaskController {
                 context = "目前有" + count + "猎刃正在执行该任务！不能放弃任务，剩余猎刃将继续执行任务，可以选择与猎刃交流让猎刃放弃";
             }
             throw new ValidException(context);
-
         }
+
+        return ResultApp.init("放弃任务成功");
     }
 
     /**
      * Task步骤5：用户点击取消放弃任务，修改任务为撤回状态OUT("任务被撤回")
      * ，并且将猎刃任务继续，
-     *
-     * @param id
-     * @param taskId
-     */
+     *  @param id
+     * @param taskId*/
     @GetMapping("/user/di/abandon/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击取消放弃任务")
-    public void diPassAbandon(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp diPassAbandon(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
@@ -424,7 +422,7 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
-
+        return ResultApp.init("取消放弃成功");
     }
 
     /**
@@ -435,13 +433,11 @@ public class AppTaskController {
      * 此时，自身的任务流程 新建-完成 的流程完成
      * 猎刃将完成的任务提交用户审核
      * 用户点击审核通过
-     *
-     * @param id
-     * @param htId
-     */
+     *  @param id
+     * @param htId*/
     @GetMapping("/audit/success/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务通过")
-    public void auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp auditSuccess(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
 
@@ -466,6 +462,7 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        return ResultApp.init("审核猎刃任务通过");
     }
 
     /**
@@ -475,14 +472,13 @@ public class AppTaskController {
      * ALLOW_REWORK_ABANDON_NO_COMPENSATE("允许重做，放弃不用补偿"),
      * NO_REWORK_NO_COMPENSATE("不能重做，不用补偿"),
      * NO_REWORK_HAVE_COMPENSATE("不能重做，要补偿"),
-     *
      * @param id
      * @param context
      * @param bindingResult
      */
     @PostMapping("/audit/failure/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务不通过")
-    public Result auditFailure(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+    public ResultApp auditFailure(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -514,21 +510,20 @@ public class AppTaskController {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
         //返回结果
-        return Result.init("提交成功，当前用户"
+        return ResultApp.init("提交成功，当前用户"
                 + (isRework ? "可重做" : "不可重做") + "任务，" +
                 "放弃任务" + (isCompensate ? "不需要" : "需要") + "赔偿");
     }
 
     /**
      * HunterTask步骤5：用户点击不同意猎刃放弃按钮，此时回将猎刃任务状态设置为USER_REPULSE（用户拒绝猎刃放弃）
-     *
      * @param id
      * @param context
      * @param bindingResult
      */
     @PostMapping("/abandon/failure/{id:\\d+}")
     @ApiOperation(value = "用户点击猎刃任务放弃申请不通过")
-    public void abandonNotPass(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+    public ResultApp abandonNotPass(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -550,17 +545,16 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        return ResultApp.init("猎刃放弃申请不通过");
     }
 
     /**
      * HunterTask步骤5：用户点击同意猎刃放弃按钮，此时回将猎刃任务状态设置为TASK_ABANDON（任务放弃）
-     *
-     * @param id
-     * @param htId
-     */
+     *  @param id
+     * @param htId*/
     @GetMapping("/abandon/success/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "用户点击审核猎刃任务放弃通过")
-    public void abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp abandonPass(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //根据编号获取猎刃任务
         HunterTask hunterTask = hunterTaskService.findOne(htId);
 
@@ -579,6 +573,7 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        return ResultApp.init("猎刃任务放弃申请通过");
     }
 
     /**
