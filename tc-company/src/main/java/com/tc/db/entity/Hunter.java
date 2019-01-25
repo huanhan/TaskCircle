@@ -21,6 +21,7 @@ public class Hunter implements Serializable {
 
     public static final String USER_ID = "userId";
     public static final String USER = "user";
+    public static final String CREATE_TIME = "createTime";
 
     private Long userId;
     private User user;
@@ -149,4 +150,19 @@ public class Hunter implements Serializable {
         }
         return hunter;
     }
+
+    public static List<Hunter> toIndexAsList(List<Hunter> content) {
+        if (ListUtils.isNotEmpty(content)){
+            content.forEach(hunter -> {
+                if (hunter.getUser() != null){
+                    hunter.user = User.toDetail(hunter.getUser());
+                }
+                hunter.commentHunters = null;
+                hunter.hunterTasks = null;
+                hunter.userHunterInterflows = null;
+            });
+        }
+        return content;
+    }
+
 }

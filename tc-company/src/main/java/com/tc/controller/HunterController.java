@@ -2,11 +2,15 @@ package com.tc.controller;
 
 import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
+import com.tc.db.entity.User;
+import com.tc.db.enums.UserCategory;
 import com.tc.dto.Result;
 import com.tc.dto.enums.TaskConditionSelect;
 import com.tc.dto.statistics.TaskCondition;
 import com.tc.dto.task.QueryHunterTask;
 import com.tc.dto.user.HunterTaskStatistics;
+import com.tc.dto.user.QueryUser;
+import com.tc.dto.user.hunter.QueryHunter;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.HunterService;
@@ -48,6 +52,21 @@ public class HunterController {
     public Hunter hunterDetail(@PathVariable("id") Long id){
         Hunter hunter = hunterService.findOne(id);
         return Hunter.toDetail(hunter);
+    }
+
+    /**
+     * 根据查询条件获取猎刃列表
+     * @param queryHunter 用户查询条件
+     * @return
+     */
+    @PostMapping
+    @ApiOperation(value = "根据查询条件获取用户列表")
+    public Result all(@RequestBody QueryHunter queryHunter){
+
+        Page<Hunter> queryHunters = hunterService.findByQuery(queryHunter);
+        List<Hunter> result = Hunter.toIndexAsList(queryHunters.getContent());
+        return Result.init(result,queryHunter);
+
     }
 
     /**
