@@ -430,7 +430,7 @@ public class AppHunterTaskController {
      * @param taskId
      */
     @GetMapping("/abandon/success/{taskId:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "猎刃点击提交管理员审核")
+    @ApiOperation(value = "猎刃同意用户放弃任务")
     public void abandonPassByHunter(@PathVariable("id") Long id,@PathVariable("taskId") String taskId){
         //获取需要猎刃同意的任务
         Task task = taskService.findOne(taskId);

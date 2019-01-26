@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -606,6 +607,7 @@ public class AppTaskController {
                               @PathVariable("size") int size,
                               @PathVariable("id") Long id) {
         QueryTask queryTask = new QueryTask(page, size);
+        queryTask.setSort(new Sort(Sort.Direction.DESC,Task.CREATE_TIME));
         /*if (!hasState(queryTask.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }*/
