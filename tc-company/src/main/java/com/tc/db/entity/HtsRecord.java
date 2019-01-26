@@ -15,7 +15,7 @@ import java.util.Objects;
 @IdClass(HtsRecordPK.class)
 public class HtsRecord {
     private String hunterTaskId;
-    private int step;
+    private Integer step;
     private Timestamp createTime;
     private String originalContext;
     private String afterContext;
@@ -36,11 +36,11 @@ public class HtsRecord {
 
     @Id
     @Column(name = "step")
-    public int getStep() {
+    public Integer getStep() {
         return step;
     }
 
-    public void setStep(int step) {
+    public void setStep(Integer step) {
         this.step = step;
     }
 
