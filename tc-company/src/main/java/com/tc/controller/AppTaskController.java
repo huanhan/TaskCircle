@@ -68,16 +68,15 @@ public class AppTaskController {
      */
     @PostMapping("{id:\\d+}")
     @ApiOperation("添加任务")
-    public TaskDetailAppDto add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskDto addTaskReq, BindingResult bindingResult) {
+    public ResultApp add(@PathVariable("id") Long id, @Valid @RequestBody AddTaskDto addTaskReq, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
         Task task = AddTaskDto.toTask(addTaskReq);
         task.setUserId(id);
-        Task taskResult = taskService.save(task);
+        taskService.save(task);
 
-        Task taskRe = taskService.findOne(taskResult.getId());
-        return TaskDetailAppDto.toDetail(taskRe);
+        return  ResultApp.init("增加成功");
     }
 
     /**
@@ -684,65 +683,6 @@ public class AppTaskController {
         return AppPage.init(taskAppDtos, taskPage);
     }
 
-    /**
-     * 根据状态获取指定猎刃的任务列表
-     *
-     * @param id 用户编号
-     * @return
-     */
-    @GetMapping("/hunter/{state}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "根据状态获取指定猎刃的任务列表")
-    public AppPage taskByHunter(@PathVariable("state") String state,
-                                @PathVariable("page") int page,
-                                @PathVariable("size") int size,
-                                @PathVariable("id") Long id) {
-        QueryHunterTask queryHunterTask = new QueryHunterTask(page, size);
-        queryHunterTask.setSort(new Sort(Sort.Direction.DESC, HunterTask.ACCEPT_TIME));
-        queryHunterTask.setHunterId(id);
-        ArrayList<HunterTaskState> hunterTaskStates = new ArrayList<>();
-        switch (state) {
-            case "ALL"://全部
-                //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
-                break;
-            case "NEW"://未开始
-                hunterTaskStates.add(HunterTaskState.RECEIVE);//新建
-                break;
-            case "RUNNING"://进行中
-                hunterTaskStates.add(HunterTaskState.BEGIN);
-                hunterTaskStates.add(HunterTaskState.EXECUTE);
-
-                break;
-            case "AUDIT"://审核中
-                hunterTaskStates.add(HunterTaskState.TASK_COMPLETE);
-                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.NO_REWORK_NO_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.NO_REWORK_HAVE_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.USER_REPULSE);
-                hunterTaskStates.add(HunterTaskState.COMMIT_ADMIN_AUDIT);
-                hunterTaskStates.add(HunterTaskState.COMMIT_TO_ADMIN);
-                hunterTaskStates.add(HunterTaskState.WITH_ADMIN_NEGOTIATE);
-                hunterTaskStates.add(HunterTaskState.ADMIN_AUDIT);
-                break;
-            case "FINISH"://已结束
-                hunterTaskStates.add(HunterTaskState.END_NO);
-                hunterTaskStates.add(HunterTaskState.END_OK);
-                hunterTaskStates.add(HunterTaskState.TASK_ABANDON);
-                hunterTaskStates.add(HunterTaskState.TASK_BE_ABANDON);
-                break;
-        }
-        queryHunterTask.setStates(hunterTaskStates);
-
-        Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
-
-        List<HunterTask> content = hunterTaskPage.getContent();
-        ArrayList<HunterTaskAppDto> hunterTaskAppDtos = new ArrayList<>();
-        content.forEach(it -> {
-            hunterTaskAppDtos.add(HunterTaskAppDto.toDetail(it));
-        });
-
-        return AppPage.init(hunterTaskAppDtos, hunterTaskPage);
-    }
 
     /**
      * 获取所有已发布的任务，排序条件由外部传入，QueryTask支持
@@ -826,7 +766,7 @@ public class AppTaskController {
      */
     @PostMapping("/modify/{id:\\d+}")
     @ApiOperation("修改我的任务")
-    public TaskDetailAppDto modifyTask(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
+    public ResultApp modifyTask(@PathVariable("id") Long id, @Valid @RequestBody ModifyTask modifyTask, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -834,7 +774,7 @@ public class AppTaskController {
         Task task = ModifyTask.toTask(sourceTask, modifyTask);
         task.setUserId(id);
         Task taskResult = taskService.modify(task);
-        return TaskDetailAppDto.toDetail(taskResult);
+        return ResultApp.init("修改成功");
     }
 
     /**
