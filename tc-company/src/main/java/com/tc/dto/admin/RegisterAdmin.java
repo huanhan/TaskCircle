@@ -28,12 +28,6 @@ public class RegisterAdmin {
     @Size(min = 6,message = "密码最少为6位")
     private String password;
 
-    /**
-     * 创建人
-     */
-    @NotNull
-    @Min(value = 1)
-    private Long creation;
 
     public String getUsername() {
         return username;
@@ -51,19 +45,11 @@ public class RegisterAdmin {
         this.password = password;
     }
 
-    public Long getCreation() {
-        return creation;
-    }
-
-    public void setCreation(Long creation) {
-        this.creation = creation;
-    }
-
-    public static Admin toAdmin(RegisterAdmin registerAdmin){
+    public static Admin toAdmin(RegisterAdmin registerAdmin,Long id){
         Admin admin = new Admin();
         admin.setUser(toUser(registerAdmin));
         admin.setEntryTime(new Timestamp(System.currentTimeMillis()));
-        admin.setCreateId(registerAdmin.getCreation());
+        admin.setCreateId(id);
         admin.setAdminState(AdminState.ON_GUARD);
         return admin;
     }

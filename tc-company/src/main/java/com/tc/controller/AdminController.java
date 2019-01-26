@@ -76,13 +76,13 @@ public class AdminController {
      * 添加管理员
      * @param registerAdmin 管理员信息
      */
-    @PostMapping("/add")
+    @PostMapping("/add/{id:\\d+}")
     @ApiOperation(value = "添加管理员")
-    public Admin add(@Valid @RequestBody RegisterAdmin registerAdmin,BindingResult bindingResult){
+    public Admin add(@PathVariable("id") Long id,@Valid @RequestBody RegisterAdmin registerAdmin, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        Admin saveAdmin = RegisterAdmin.toAdmin(registerAdmin);
+        Admin saveAdmin = RegisterAdmin.toAdmin(registerAdmin,id);
         Admin resultAdmin = adminService.save(saveAdmin);
         return Admin.toDetail(resultAdmin);
     }

@@ -65,6 +65,7 @@ public class Task implements Serializable {
     private Integer permitAbandonMinute;
     private Double longitude;
     private Double latitude;
+    private String address;
     private Boolean isTaskRework;
     private Boolean isCompensate;
     private Collection<AuditTask> auditTasks;
@@ -277,6 +278,16 @@ public class Task implements Serializable {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+    @Basic
+    @Column(name = "address")
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Basic

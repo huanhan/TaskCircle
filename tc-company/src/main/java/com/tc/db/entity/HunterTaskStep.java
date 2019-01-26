@@ -6,6 +6,7 @@ import com.tc.until.ListUtils;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
  * 猎刃接取任务的任务步骤完成详情实体
  */
 @Entity
-@Table(name = "hunter_task_step", schema = "tc-company")
+@Table(name = "hunter_task_step", schema = "tc-company", catalog = "")
 @IdClass(value = HunterTaskStepPK.class)
 public class HunterTaskStep implements Serializable {
     public static final String STEP = "step";
@@ -25,6 +26,7 @@ public class HunterTaskStep implements Serializable {
     private String context;
     private String remake;
     private HunterTask hunterTask;
+    private Collection<HtsRecord> htsRecords;
 
     public static List<HunterTaskStep> toListInIndex(List<HunterTaskStep> query) {
         if (ListUtils.isNotEmpty(query)){
@@ -36,6 +38,15 @@ public class HunterTaskStep implements Serializable {
             });
         }
         return query;
+    }
+
+    public static HunterTaskStep toDetail(HunterTaskStep hunterTaskStep) {
+        if (hunterTaskStep != null){
+            if (hunterTaskStep.getHunterTask() != null){
+                hunterTaskStep.hunterTask = new HunterTask(hunterTaskStep.getHunterTaskId(),hunterTaskStep.getHunterTask().getTask());
+            }
+        }
+        return hunterTaskStep;
     }
 
     @Id
@@ -119,12 +130,12 @@ public class HunterTaskStep implements Serializable {
         return Objects.hash(hunterTask.getId(), step, finishTime, context, remake);
     }
 
-    public static HunterTaskStep toDetail(HunterTaskStep hunterTaskStep) {
-        if (hunterTaskStep != null){
-            if (hunterTaskStep.getHunterTask() != null){
-                hunterTaskStep.hunterTask = new HunterTask(hunterTaskStep.getHunterTaskId(),hunterTaskStep.getHunterTask().getTask());
-            }
-        }
-        return hunterTaskStep;
+    @OneToMany(mappedBy = "hunterTaskStep")
+    public Collection<HtsRecord> getHtsRecords() {
+        return htsRecords;
+    }
+
+    public void setHtsRecords(Collection<HtsRecord> htsRecords) {
+        this.htsRecords = htsRecords;
     }
 }
