@@ -68,6 +68,9 @@ public class AuthorityResourceServiceImpl extends AbstractBasicServiceImpl<Autho
             if (!StringUtils.isEmpty(queryAR.getResourceName())){
                 predicates.add(cb.like(root.get("resource").get("name"),"%" + queryAR.getResourceName() + "%"));
             }
+            if (!StringUtils.isEmpty(queryAR.getAuthorityInfo())){
+                predicates.add(cb.like(root.get(AuthorityResource.AUTHORITY).get(Authority.INFO),"%" + queryAR.getResourceName() + "%"));
+            }
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
 
         },queryAR);

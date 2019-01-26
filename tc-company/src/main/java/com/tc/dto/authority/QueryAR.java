@@ -9,6 +9,7 @@ public class QueryAR extends PageRequest {
     private Long authorityId;
     private String authorityName;
     private String resourceName;
+    private String authorityInfo;
 
     public QueryAR(){
         super(0,10);
@@ -57,5 +58,13 @@ public class QueryAR extends PageRequest {
 
     public void setAuthorityId(Long authorityId) {
         this.authorityId = authorityId;
+    }
+
+    public String getAuthorityInfo() {
+        return authorityInfo;
+    }
+
+    public void setAuthorityInfo(String authorityInfo) {
+        this.authorityInfo = authorityInfo;
     }
 }

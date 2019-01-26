@@ -21,6 +21,12 @@ import java.util.Objects;
 @IdClass(AuthorityResourcePK.class)
 public class AuthorityResource implements Serializable {
 
+    public static final String AUTHORITY = "authority";
+    public static final String RESOURCE = "resource";
+    public static final String AUTHORITY_ID = "authorityId";
+    public static final String RESOURCE_ID = "resourceId";
+
+
     private Authority authority;
     private Resource resource;
     private Long authorityId;

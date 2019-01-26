@@ -110,16 +110,19 @@ public class AuthorityController {
      * @param result
      * @return
      */
-    @PostMapping
+    @PostMapping("{id:\\d+}")
     @ApiOperation(value = "添加权限基本信息")
-    public Authority add(@Valid @RequestBody AddAuthority addAuthority,
-                        BindingResult result){
+    public Authority add(@PathVariable("id") Long id, @Valid @RequestBody AddAuthority addAuthority,
+                         BindingResult result){
         if (result.hasErrors()){
             throw new ValidException(result.getFieldErrors());
         }
-        User user = userService.findOne(addAuthority.getCreation());
+        Admin admin = adminService.findOne(id);
+        if (admin == null){
+            throw new DBException("获取用户信息失败");
+        }
         Authority authority = addAuthority.toAuthority(addAuthority);
-        authority.setAdmin(user.getAdmin());
+        authority.setCreation(id);
         Authority ref = authorityService.save(authority);
         if (ref.getId() == null || ref.getId() <= 0) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);

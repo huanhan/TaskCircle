@@ -17,10 +17,6 @@ import javax.validation.constraints.Size;
  */
 public class AddAuthority extends BasicAuthority {
 
-    @NotNull
-    @Min(value = 1)
-    private Long creation;
-
     @NotBlank(message = "权限名不能为空")
     @Size(max = 20,message = "最多20个字符")
     @Name(service = AuthorityServiceImpl.class,message = "已存在相同名称的权限")
@@ -32,14 +28,6 @@ public class AddAuthority extends BasicAuthority {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Long getCreation() {
-        return creation;
-    }
-
-    public void setCreation(Long creation) {
-        this.creation = creation;
     }
 
     @Override

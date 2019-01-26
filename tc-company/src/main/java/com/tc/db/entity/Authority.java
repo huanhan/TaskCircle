@@ -22,6 +22,7 @@ import java.util.Objects;
 public class Authority implements Serializable,GrantedAuthority {
 
     public static final String ADMIN_AUTHORITY = "adminAuthorities";
+    public static final String INFO = "info";
 
     private Long id;
     private String name;
