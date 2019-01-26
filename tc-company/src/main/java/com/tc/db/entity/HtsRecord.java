@@ -3,9 +3,11 @@ package com.tc.db.entity;
 import com.google.gson.Gson;
 import com.tc.db.entity.pk.HtsRecordPK;
 import com.tc.db.enums.OPType;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -19,6 +21,8 @@ public class HtsRecord {
     private String afterContext;
     private OPType operation;
     private HunterTaskStep hunterTaskStep;
+
+
 
     @Id
     @Column(name = "hunter_task_id")
@@ -125,6 +129,26 @@ public class HtsRecord {
         }catch (Exception e){
             return null;
         }
+    }
+
+    public static HunterTaskStep getContext(String jsonContext){
+        try {
+            return new Gson().fromJson(jsonContext,HunterTaskStep.class);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public static List<HtsRecord> toListInIndex(List<HtsRecord> records) {
+        if (ListUtils.isNotEmpty(records)){
+            records.forEach(htsRecord -> {
+                if (htsRecord.hunterTaskStep != null){
+                    HunterTaskStep hunterTaskStep = htsRecord.hunterTaskStep;
+                    htsRecord.hunterTaskStep = HunterTaskStep.toDetail(hunterTaskStep);
+                }
+            });
+        }
+        return records;
     }
 
 }

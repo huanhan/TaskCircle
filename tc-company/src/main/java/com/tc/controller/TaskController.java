@@ -1,6 +1,7 @@
 package com.tc.controller;
 
 import com.tc.db.entity.*;
+import com.tc.db.entity.pk.HtsRecordPK;
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.enums.TaskState;
@@ -20,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -52,6 +54,8 @@ public class TaskController {
     @Autowired
     private UserHunterInterflowService userHunterInterflowService;
 
+    @Autowired
+    private HtsRecordService htsRecordService;
 
     /**
      * 根据查询条件获取任务列表
@@ -174,6 +178,34 @@ public class TaskController {
         }
         return HunterTaskStep.toDetail(result);
     }
+
+    /**
+     * 获取猎刃任务步骤变更情况
+     * @param tid
+     * @param sid
+     * @return
+     */
+    @GetMapping("/hts/record/{tid:\\d+}/{sid:\\d+}")
+    @ApiOperation(value = "获取猎刃任务步骤变更情况列表")
+    public Result getHtsRecords(@PathVariable("tid") String tid, @PathVariable("sid") Integer sid){
+        List<HtsRecord> records = htsRecordService.findAll(tid,sid);
+        return Result.init(HtsRecord.toListInIndex(records));
+    }
+
+    /**
+     * 获取猎刃任务步骤变更情况详情
+     * @param tid
+     * @param sid
+     * @param timestamp
+     * @return
+     */
+    @GetMapping("/hts/record/{tid:\\d+}/{sid:\\d+}/{t}")
+    @ApiOperation(value = "获取猎刃任务步骤变更情况详情")
+    public HtsRecordDto getHtsRecord(@PathVariable("tid") String tid, @PathVariable("sid") Integer sid, @PathVariable("t")Timestamp timestamp){
+        HtsRecord record = htsRecordService.findOne(new HtsRecordPK(tid,sid,timestamp));
+        return HtsRecordDto.by(record);
+    }
+
 
     /**
      * 获取指定任务中用户与猎刃的聊天记录

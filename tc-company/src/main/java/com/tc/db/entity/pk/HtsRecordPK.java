@@ -8,8 +8,17 @@ import java.util.Objects;
 
 public class HtsRecordPK implements Serializable {
     private String hunterTaskId;
-    private int step;
+    private Integer step;
     private Timestamp createTime;
+
+    public HtsRecordPK() {
+    }
+
+    public HtsRecordPK(String hunterTaskId, Integer step, Timestamp createTime) {
+        this.hunterTaskId = hunterTaskId;
+        this.step = step;
+        this.createTime = createTime;
+    }
 
     @Column(name = "hunter_task_id")
     @Id
@@ -23,11 +32,11 @@ public class HtsRecordPK implements Serializable {
 
     @Column(name = "step")
     @Id
-    public int getStep() {
+    public Integer getStep() {
         return step;
     }
 
-    public void setStep(int step) {
+    public void setStep(Integer step) {
         this.step = step;
     }
 
@@ -43,10 +52,14 @@ public class HtsRecordPK implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HtsRecordPK that = (HtsRecordPK) o;
-        return step == that.step &&
+        return step.equals(that.step) &&
                 Objects.equals(hunterTaskId, that.hunterTaskId) &&
                 Objects.equals(createTime, that.createTime);
     }
