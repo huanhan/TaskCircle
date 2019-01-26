@@ -37,6 +37,7 @@ public class TaskDetailAppDto {
     private Integer permitAbandonMinute;
     private Double longitude;
     private Double latitude;
+    private String address;
     private Boolean isTaskRework;
     private Boolean isCompensate;
 
@@ -240,6 +241,14 @@ public class TaskDetailAppDto {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Boolean getTaskRework() {

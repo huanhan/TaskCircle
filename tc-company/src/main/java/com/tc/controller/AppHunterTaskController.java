@@ -194,12 +194,13 @@ public class AppHunterTaskController {
     }
 
     /**
+     * 无效
      * HunterTask步骤3：删除猎刃的任务步骤，需要判断任务状态，满足指定状态才允许删除，删除成功后将修改状态为EXECUTORY("正在执行")
      * @param id
      * @param deleteHunterTaskStep
      * @param bindingResult
      */
-    @PostMapping("/delete/step")
+    /*@PostMapping("/delete/step")
     @ApiOperation(value = "删除猎刃的任务步骤")
     public void delete(@PathVariable("id") Long id, @Valid @RequestBody DeleteHunterTaskStep deleteHunterTaskStep, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -224,9 +225,10 @@ public class AppHunterTaskController {
             throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
         }
     }
-
+*/
 
     /**
+     * 无效
      * HunterTask步骤3：
      * 猎刃修改执行任务的内容
      * @param id
@@ -234,7 +236,7 @@ public class AppHunterTaskController {
      * @param bindingResult
      * @return
      */
-    @PutMapping("/update/{id:\\d+}")
+    /*@PutMapping("/update/{id:\\d+}")
     @ApiOperation(value = "猎刃修改执行的任务的内容")
     public HunterTask update(@PathVariable("id") Long id, @Valid @RequestBody ModifyHunterTask modifyHunterTask, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
@@ -264,7 +266,7 @@ public class AppHunterTaskController {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
         return HunterTask.toDetail(hunterTask);
-    }
+    }*/
 
     /**
      * HunterTask步骤4：提交用户审核，当前猎刃任务的状态必须为TASK_COMPLETE("任务完成")

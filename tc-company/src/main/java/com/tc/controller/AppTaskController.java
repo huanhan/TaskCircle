@@ -600,14 +600,14 @@ public class AppTaskController {
      * @param id    用户编号
      * @return
      */
-    @GetMapping("/user/{state}/{page}/{size}/{id:\\d+}")
+    @GetMapping("/user/{state}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
     @ApiOperation(value = "根据状态获取指定用户的任务列表")
     public AppPage taskByUser(@PathVariable("state") String state,
                               @PathVariable("page") int page,
                               @PathVariable("size") int size,
                               @PathVariable("id") Long id) {
         QueryTask queryTask = new QueryTask(page, size);
-        queryTask.setSort(new Sort(Sort.Direction.DESC,Task.CREATE_TIME));
+        queryTask.setSort(new Sort(Sort.Direction.DESC, Task.CREATE_TIME));
         /*if (!hasState(queryTask.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }*/
@@ -686,21 +686,62 @@ public class AppTaskController {
 
     /**
      * 根据状态获取指定猎刃的任务列表
-     * todo 猎刃相关
      *
-     * @param id              用户编号
-     * @param queryHunterTask 状态不能为空
+     * @param id 用户编号
      * @return
      */
-    @PostMapping("/hunter/{id:\\d+}")
+    @GetMapping("/hunter/{state}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
     @ApiOperation(value = "根据状态获取指定猎刃的任务列表")
-    public Result taskByHunter(@PathVariable("id") Long id, @RequestBody QueryHunterTask queryHunterTask) {
-        if (!hasState(queryHunterTask.getState())) {
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+    public AppPage taskByHunter(@PathVariable("state") String state,
+                                @PathVariable("page") int page,
+                                @PathVariable("size") int size,
+                                @PathVariable("id") Long id) {
+        QueryHunterTask queryHunterTask = new QueryHunterTask(page, size);
+        queryHunterTask.setSort(new Sort(Sort.Direction.DESC, HunterTask.ACCEPT_TIME));
+        queryHunterTask.setHunterId(id);
+        ArrayList<HunterTaskState> hunterTaskStates = new ArrayList<>();
+        switch (state) {
+            case "ALL"://全部
+                //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
+                break;
+            case "NEW"://未开始
+                hunterTaskStates.add(HunterTaskState.RECEIVE);//新建
+                break;
+            case "RUNNING"://进行中
+                hunterTaskStates.add(HunterTaskState.BEGIN);
+                hunterTaskStates.add(HunterTaskState.EXECUTE);
+
+                break;
+            case "AUDIT"://审核中
+                hunterTaskStates.add(HunterTaskState.TASK_COMPLETE);
+                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.NO_REWORK_NO_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.NO_REWORK_HAVE_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.USER_REPULSE);
+                hunterTaskStates.add(HunterTaskState.COMMIT_ADMIN_AUDIT);
+                hunterTaskStates.add(HunterTaskState.COMMIT_TO_ADMIN);
+                hunterTaskStates.add(HunterTaskState.WITH_ADMIN_NEGOTIATE);
+                hunterTaskStates.add(HunterTaskState.ADMIN_AUDIT);
+                break;
+            case "FINISH"://已结束
+                hunterTaskStates.add(HunterTaskState.END_NO);
+                hunterTaskStates.add(HunterTaskState.END_OK);
+                hunterTaskStates.add(HunterTaskState.TASK_ABANDON);
+                hunterTaskStates.add(HunterTaskState.TASK_BE_ABANDON);
+                break;
         }
+        queryHunterTask.setStates(hunterTaskStates);
 
         Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
-        return Result.init(hunterTaskPage);
+
+        List<HunterTask> content = hunterTaskPage.getContent();
+        ArrayList<HunterTaskAppDto> hunterTaskAppDtos = new ArrayList<>();
+        content.forEach(it -> {
+            hunterTaskAppDtos.add(HunterTaskAppDto.toDetail(it));
+        });
+
+        return AppPage.init(hunterTaskAppDtos, hunterTaskPage);
     }
 
     /**
@@ -824,20 +865,6 @@ public class AppTaskController {
     }
 
 
-    /**
-     * 任务执行步骤情况
-     *
-     * @param id
-     * @param addHTS
-     * @param bindingResult
-     */
-    @PostMapping("/hts/{id:\\d+}")
-    @ApiOperation(value = "添加猎刃任务执行步骤情况")
-    public void addHunterTaskStep(@PathVariable("id") Long id, @Valid @RequestBody AddHTS addHTS, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new ValidException(bindingResult.getFieldErrors());
-        }
-    }
 
     /**
      * 判断传入的猎刃任务状态是否允许访问
