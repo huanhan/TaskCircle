@@ -41,7 +41,6 @@ public class HunterTask implements Serializable {
     public static final String MONEY_TYPE = "moneyType";
 
 
-
     private String id;
     private String taskId;
     private Long hunterId;
@@ -71,12 +70,10 @@ public class HunterTask implements Serializable {
 
     public HunterTask(String id, Task task) {
         this.id = id;
-        if (task != null){
-            this.task = new Task(task.getId(),task.getName());
+        if (task != null) {
+            this.task = new Task(task.getId(), task.getName());
         }
     }
-
-
 
 
     @Id
@@ -271,7 +268,7 @@ public class HunterTask implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     public Task getTask() {
         return task;
     }
@@ -281,7 +278,7 @@ public class HunterTask implements Serializable {
     }
 
     @ManyToOne
-    @JoinColumn(name = "hunter_id", referencedColumnName = "user_id", nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "hunter_id", referencedColumnName = "user_id", nullable = false, insertable = false, updatable = false)
     public Hunter getHunter() {
         return hunter;
     }
@@ -301,8 +298,12 @@ public class HunterTask implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HunterTask that = (HunterTask) o;
         return hunter.getUser().getId().equals(that.getHunter().getUser().getId()) &&
                 Objects.equals(id, that.getId()) &&
@@ -321,10 +322,10 @@ public class HunterTask implements Serializable {
     }
 
     public void toDetail() {
-        if (task != null){
-            task = new Task(taskId,task.getName());
+        if (task != null) {
+            task = new Task(taskId, task.getName());
         }
-        if (hunter != null){
+        if (hunter != null) {
             hunter.toDetail();
         }
         commentHunters = null;
@@ -333,12 +334,12 @@ public class HunterTask implements Serializable {
 
 
     public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
-        if (!ListUtils.isEmpty(content)){
+        if (!ListUtils.isEmpty(content)) {
             content.forEach(hunterTask -> {
-                if (hunterTask.getTask() != null){
-                    hunterTask.setTask(new Task(hunterTask.getTask().getId(),hunterTask.getTask().getName()));
+                if (hunterTask.getTask() != null) {
+                    hunterTask.setTask(new Task(hunterTask.getTask().getId(), hunterTask.getTask().getName()));
                 }
-                if (hunterTask.getHunter() != null){
+                if (hunterTask.getHunter() != null) {
                     hunterTask.getHunter().toDetail();
                 }
                 hunterTask.commentHunters = null;
@@ -351,7 +352,7 @@ public class HunterTask implements Serializable {
 
     public static List<String> toIds(List<HunterTask> tasks) {
         List<String> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(tasks)){
+        if (!ListUtils.isEmpty(tasks)) {
             tasks.forEach(task -> result.add(task.id));
         }
         return result;
@@ -359,18 +360,18 @@ public class HunterTask implements Serializable {
 
     public static List<Long> toUserIds(List<HunterTask> tasks) {
         List<Long> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(tasks)){
+        if (!ListUtils.isEmpty(tasks)) {
             tasks.forEach(task -> result.add(task.hunterId));
         }
         return result;
     }
 
     public static HunterTask toDetail(HunterTask hunterTask) {
-        if (hunterTask != null){
-            if (hunterTask.task != null){
-                hunterTask.task = new Task(hunterTask.taskId,hunterTask.task.getName());
+        if (hunterTask != null) {
+            if (hunterTask.task != null) {
+                hunterTask.task = new Task(hunterTask.taskId, hunterTask.task.getName());
             }
-            if (hunterTask.hunter != null){
+            if (hunterTask.hunter != null) {
                 hunterTask.hunter.toDetail();
             }
             hunterTask.commentHunters = null;
@@ -382,13 +383,15 @@ public class HunterTask implements Serializable {
 
     /**
      * 新增一条猎刃任务记录
+     *
      * @return
      */
-    public static HunterTask init(String taskId,Long hunterId) {
+    public static HunterTask init(String taskId, Long hunterId) {
         HunterTask hunterTask = new HunterTask();
         hunterTask.setId(IdGenerator.INSTANCE.nextId());
         hunterTask.setTaskId(taskId);
         hunterTask.setHunterId(hunterId);
+        hunterTask.setStop(false);
         hunterTask.setState(HunterTaskState.RECEIVE);
         return hunterTask;
     }

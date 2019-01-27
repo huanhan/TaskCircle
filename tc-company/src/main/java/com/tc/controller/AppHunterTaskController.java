@@ -1,25 +1,30 @@
 package com.tc.controller;
 
+import com.tc.db.entity.HtsRecord;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.OPType;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.ModifyHunterTaskStep;
 import com.tc.dto.app.AppPage;
 import com.tc.dto.app.HunterTaskAppDto;
+import com.tc.dto.app.HunterTaskStepAppDto;
 import com.tc.dto.app.ResultApp;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.task.QueryHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
+import com.tc.service.HtsRecordService;
 import com.tc.service.HunterTaskService;
 import com.tc.service.HunterTaskStepService;
 import com.tc.service.TaskService;
 import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
+import com.tc.until.TranstionHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,6 +61,9 @@ public class AppHunterTaskController {
 
     @Autowired
     private HunterTaskStepService hunterTaskStepService;
+
+    @Autowired
+    private HtsRecordService htsRecordService;
 
     /**
      * 根据状态获取指定猎刃的任务列表
@@ -143,13 +151,13 @@ public class AppHunterTaskController {
      * HunterTask步骤2：猎刃点击开始任务，如果任务成功开始，则设置状态为BEGIN("开始")
      *
      * @param id
-     * @param taskId
+     * @param htId
      */
-    @GetMapping("/begin/{taskId:\\d+}/{id:\\d+}")
+    @GetMapping("/begin/{htId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "猎刃点击按钮开始任务")
-    public ResultApp beginTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp beginTask(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
         //获取猎刃任务详情
-        HunterTask hunterTask = hunterTaskService.findOne(taskId);
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
         if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
@@ -164,14 +172,14 @@ public class AppHunterTaskController {
         }
         //判断任务是否可被开始
         //判断任务的状态
-        if (!task.getState().equals(TaskState.ISSUE) || !task.getState().equals(TaskState.FORBID_RECEIVE)) {
+        if (!task.getState().equals(TaskState.ISSUE) && !task.getState().equals(TaskState.FORBID_RECEIVE)) {
             throw new ValidException("任务状态异常");
         }
         //判断可以执行的时间
-        if (TimestampHelper.today().after(task.getBeginTime())) {
+        if (!TimestampHelper.today().after(task.getBeginTime())) {
             throw new ValidException("还没到开始时间");
         }
-        boolean isBegin = hunterTaskService.beginTask(taskId);
+        boolean isBegin = hunterTaskService.beginTask(htId);
         if (!isBegin) {
             throw new DBException("任务未能开始！");
         }
@@ -188,7 +196,7 @@ public class AppHunterTaskController {
      * @param bindingResult
      * @return
      */
-    @PostMapping("/add/step")
+    @PostMapping("/add/step/{id:\\d+}")
     @ApiOperation(value = "添加猎刃的任务步骤")
     public ResultApp add(@PathVariable("id") Long id, @Valid @RequestBody AddHunterTaskStep addHunterTaskStep, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -215,6 +223,15 @@ public class AppHunterTaskController {
         if (result == null) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
+
+        HtsRecord htsRecord = new HtsRecord();
+        htsRecord.setHunterTaskId(result.getHunterTaskId());
+        htsRecord.setStep(result.getStep());
+        htsRecord.setAfterContext(TranstionHelper.toGson(new HunterTaskStepAppDto()));
+        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
+        htsRecord.setOperation(OPType.ADD);
+        htsRecordService.save(htsRecord);
+
         return ResultApp.init("步骤添加成功");
     }
 
@@ -248,10 +265,21 @@ public class AppHunterTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_UPDATE_ABNORMAL);
         }
 
+        hunterTaskStep.setContext(modifyHunterTaskStep.getContext());
+        hunterTaskStep.setRemake(modifyHunterTaskStep.getRemake());
+
         HunterTaskStep result = hunterTaskStepService.update(hunterTaskStep);
         if (result == null) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+
+        HtsRecord htsRecord = new HtsRecord();
+        htsRecord.setHunterTaskId(result.getHunterTaskId());
+        htsRecord.setStep(result.getStep());
+        htsRecord.setAfterContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
+        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(hunterTaskStep)));
+        htsRecord.setOperation(OPType.MODIFY);
+        htsRecordService.save(htsRecord);
 
         return ResultApp.init("修改步骤成功");
 
@@ -272,7 +300,7 @@ public class AppHunterTaskController {
         }
 
         //获取删除的任务步骤详情
-        HunterTaskStep hunterTaskStep = hunterTaskStepService.findOne(new HunterTaskStepPK(deleteHunterTaskStep.getHunterTaskId(),deleteHunterTaskStep.getStep()));
+        HunterTaskStepAppDto hunterTaskStep = hunterTaskStepService.findOne(new HunterTaskStepPK(deleteHunterTaskStep.getHunterTaskId(),deleteHunterTaskStep.getStep()));
         if (hunterTaskStep == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }

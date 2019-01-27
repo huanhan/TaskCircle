@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.tc.db.entity.pk.HtsRecordPK;
 import com.tc.db.enums.OPType;
 import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -21,7 +22,6 @@ public class HtsRecord {
     private String afterContext;
     private OPType operation;
     private HunterTaskStep hunterTaskStep;
-
 
 
     @Id
@@ -45,6 +45,7 @@ public class HtsRecord {
     }
 
     @Id
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;
@@ -109,8 +110,8 @@ public class HtsRecord {
     }
 
     @ManyToOne
-    @JoinColumns({@JoinColumn(name = "hunter_task_id", referencedColumnName = "hunter_task_id", nullable = false,insertable = false,updatable = false),
-            @JoinColumn(name = "step", referencedColumnName = "step", nullable = false,insertable = false,updatable = false)})
+    @JoinColumns({@JoinColumn(name = "hunter_task_id", referencedColumnName = "hunter_task_id", nullable = false, insertable = false, updatable = false),
+            @JoinColumn(name = "step", referencedColumnName = "step", nullable = false, insertable = false, updatable = false)})
     public HunterTaskStep getHunterTaskStep() {
         return hunterTaskStep;
     }
@@ -120,29 +121,29 @@ public class HtsRecord {
     }
 
 
-    public static String setContext(HunterTaskStep hunterTaskStep){
-        if (hunterTaskStep == null){
+    public static String setContext(HunterTaskStep hunterTaskStep) {
+        if (hunterTaskStep == null) {
             return null;
         }
         try {
             return new Gson().toJson(hunterTaskStep);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public static HunterTaskStep getContext(String jsonContext){
+    public static HunterTaskStep getContext(String jsonContext) {
         try {
-            return new Gson().fromJson(jsonContext,HunterTaskStep.class);
-        }catch (Exception e){
+            return new Gson().fromJson(jsonContext, HunterTaskStep.class);
+        } catch (Exception e) {
             return null;
         }
     }
 
     public static List<HtsRecord> toListInIndex(List<HtsRecord> records) {
-        if (ListUtils.isNotEmpty(records)){
+        if (ListUtils.isNotEmpty(records)) {
             records.forEach(htsRecord -> {
-                if (htsRecord.hunterTaskStep != null){
+                if (htsRecord.hunterTaskStep != null) {
                     HunterTaskStep hunterTaskStep = htsRecord.hunterTaskStep;
                     htsRecord.hunterTaskStep = HunterTaskStep.toDetail(hunterTaskStep);
                 }

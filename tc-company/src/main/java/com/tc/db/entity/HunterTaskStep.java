@@ -2,6 +2,7 @@ package com.tc.db.entity;
 
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.until.ListUtils;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -80,6 +81,7 @@ public class HunterTaskStep implements Serializable {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "finish_time")
     public Timestamp getFinishTime() {
         return finishTime;

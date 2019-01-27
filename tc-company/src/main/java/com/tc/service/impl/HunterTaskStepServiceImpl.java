@@ -126,7 +126,7 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public HunterTaskStep update(HunterTaskStep user) {
-        return super.update(user);
+    public HunterTaskStep update(HunterTaskStep hunterTaskStep) {
+        return hunterTaskStepRepository.save(hunterTaskStep);
     }
 }
