@@ -10,7 +10,9 @@ public class HunterTaskAppDto {
     private String id;
     private String taskId;
     private Long userId;
+    private Long hunterId;
     private String headImg;
+    private String hunterHeadImg;
     private String name;
     private String taskContext;
     private String context;
@@ -134,10 +136,28 @@ public class HunterTaskAppDto {
         this.curStep = curStep;
     }
 
+    public String getHunterHeadImg() {
+        return hunterHeadImg;
+    }
+
+    public void setHunterHeadImg(String hunterHeadImg) {
+        this.hunterHeadImg = hunterHeadImg;
+    }
+
+    public Long getHunterId() {
+        return hunterId;
+    }
+
+    public void setHunterId(Long hunterId) {
+        this.hunterId = hunterId;
+    }
+
     public static HunterTaskAppDto toDetail(HunterTask task) {
         HunterTaskAppDto hunterTaskAppDto = new HunterTaskAppDto();
         hunterTaskAppDto.setUserId(task.getTask().getUserId());
+        hunterTaskAppDto.setHunterId(task.getHunterId());
         hunterTaskAppDto.setHeadImg(task.getTask().getUser().getHeadImg());
+        hunterTaskAppDto.setHunterHeadImg(task.getHunter().getUser().getHeadImg());
         hunterTaskAppDto.setName(task.getTask().getName());
         hunterTaskAppDto.setTaskContext(task.getTask().getContext());
         hunterTaskAppDto.setCurStep(task.getHunterTaskSteps().size());
