@@ -76,7 +76,7 @@ public class AppTaskController {
         task.setUserId(id);
         taskService.save(task);
 
-        return  ResultApp.init("增加成功");
+        return ResultApp.init("增加成功");
     }
 
     /**
@@ -702,7 +702,7 @@ public class AppTaskController {
      */
     @PostMapping("/issue/query")
     @ApiOperation(value = "根据排序条件获取已发布的任务")
-    public Page<TaskAppDto> taskByAll(@RequestBody QueryTask queryTask) {
+    public AppPage taskByAll(@RequestBody QueryTask queryTask) {
         queryTask.setState(TaskState.ISSUE);
         Page<Task> taskPage = taskService.findByQueryTask(queryTask);
         List<Task> content = taskPage.getContent();
@@ -710,10 +710,8 @@ public class AppTaskController {
         for (Task task : content) {
             taskAppDtos.add(TaskAppDto.toDetail(task));
         }
-        Page<TaskAppDto> appDtoPage = new PageImpl<>(taskAppDtos);
-        BeanUtils.copyProperties(taskPage, appDtoPage);
 
-        return appDtoPage;
+        return AppPage.init(taskAppDtos, taskPage);
     }
 
 
@@ -735,24 +733,36 @@ public class AppTaskController {
     }
 
     /**
-     * todo 未完善 还未加入步骤数据
      * 根据任务编号，获取本人发布的任务的猎刃执行者列表，通过该列表点击获取执行详情
      *
      * @param id
-     * @param queryHunterTask
+     * @param taskid
      * @return
      */
-    @PostMapping("/hunterTask/{id:\\d+}")
+    @GetMapping("/hunterTask/{taskid:\\d+}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
     @ApiOperation(value = "根据任务编号获取猎刃执行者列表")
-    public Result hunterTaskByTaskId(@PathVariable("id") Long id, @RequestBody QueryHunterTask queryHunterTask) {
+    public AppPage hunterTaskByTaskId(@PathVariable("taskid") String taskid,
+                                      @PathVariable("page") int page,
+                                      @PathVariable("size") int size,
+                                      @PathVariable("id") Long id) {
         //任务编号不允许为空
-        if (queryHunterTask.getTaskId() == null) {
+        if (taskid == null) {
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
         }
+        QueryHunterTask queryHunterTask = new QueryHunterTask(page, size);
+        queryHunterTask.setTaskId(taskid);
+
         //获取当前所有的猎刃信息
         Page<HunterTask> hunterTaskPage = hunterTaskService.findByQueryHunterTask(queryHunterTask);
 
-        return Result.init(hunterTaskPage);
+        List<HunterTask> content = hunterTaskPage.getContent();
+        List<HunterTaskAppDto> hunterTaskAppDtos = new ArrayList<>();
+        for (HunterTask hunterTask : content) {
+            hunterTaskAppDtos.add(HunterTaskAppDto.toDetail(hunterTask));
+        }
+
+        return AppPage.init(hunterTaskAppDtos, hunterTaskPage);
+
     }
 
 
@@ -785,7 +795,7 @@ public class AppTaskController {
      */
     @DeleteMapping("/remove/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "删除我的任务")
-    public void delete(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp delete(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
         //根据任务编号获取任务
         Task task = taskService.findOne(taskId);
 
@@ -800,10 +810,17 @@ public class AppTaskController {
         }
 
         //判断当前的任务状态是否允许被删除
+        if (task.getState() != TaskState.NEW_CREATE) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
 
         //删除任务，将任务状态修改为删除状态
+        boolean isSuccess = taskService.updateState(TaskState.DELETE_OK);
+        if (!isSuccess) {
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }
+        return ResultApp.init("删除成功");
     }
-
 
 
     /**

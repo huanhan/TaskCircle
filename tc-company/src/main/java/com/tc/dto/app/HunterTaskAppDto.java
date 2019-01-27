@@ -20,6 +20,7 @@ public class HunterTaskAppDto {
     private HunterTaskState state;
     private Boolean isStop;
     private Float money;
+    private Integer curStep;
 
     public String getId() {
         return id;
@@ -125,12 +126,21 @@ public class HunterTaskAppDto {
         this.money = money;
     }
 
+    public Integer getCurStep() {
+        return curStep;
+    }
+
+    public void setCurStep(Integer curStep) {
+        this.curStep = curStep;
+    }
+
     public static HunterTaskAppDto toDetail(HunterTask task) {
         HunterTaskAppDto hunterTaskAppDto = new HunterTaskAppDto();
         hunterTaskAppDto.setUserId(task.getTask().getUserId());
         hunterTaskAppDto.setHeadImg(task.getTask().getUser().getHeadImg());
         hunterTaskAppDto.setName(task.getTask().getName());
         hunterTaskAppDto.setTaskContext(task.getTask().getContext());
+        hunterTaskAppDto.setCurStep(task.getHunterTaskSteps().size());
         BeanUtils.copyProperties(task, hunterTaskAppDto);
         return hunterTaskAppDto;
     }
