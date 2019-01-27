@@ -80,6 +80,8 @@ public class QueryUserComment extends QueryBasicComment {
         predicates.add(QueryUtils.equals(root.get(CommentUser.COMMENT).get(Comment.ID),cb,queryUserComment.getId()));
         predicates.add(QueryUtils.equals(root.get(CommentUser.COMMENT).get(Comment.TYPE),cb,queryUserComment.getType()));
         predicates.add(QueryUtils.equals(root.get(CommentUser.COMMENT).get(Comment.CREATION_ID),cb,queryUserComment.getCreationId()));
+        predicates.add(QueryUtils.equals(root.get(CommentUser.COMMENT).get(Comment.USER).get(User.NAME),cb,queryUserComment.getCreationName()));
+        predicates.add(QueryUtils.equals(root.get(CommentUser.COMMENT).get(Comment.USER).get(User.USERNAME),cb,queryUserComment.getCreationAccount()));
         predicates.add(QueryUtils.like(root.get(CommentUser.COMMENT).get(Comment.CONTEXT),cb,queryUserComment.getContext()));
 
         predicates.add(QueryUtils.between(root.get(CommentUser.COMMENT).get(Comment.CREATE_TIME), cb, queryUserComment.getCreateTimeBegin(), queryUserComment.getCreateTimeEnd()));

@@ -30,6 +30,8 @@ public class QueryBasicComment extends PageRequest {
     private Float numberBegin;
     private Float numberEnd;
     private Long creationId;
+    private String creationName;
+    private String creationAccount;
 
 
     public QueryBasicComment(int page, int size) {
@@ -108,4 +110,19 @@ public class QueryBasicComment extends PageRequest {
         this.creationId = creationId;
     }
 
+    public String getCreationName() {
+        return creationName;
+    }
+
+    public void setCreationName(String creationName) {
+        this.creationName = creationName;
+    }
+
+    public String getCreationAccount() {
+        return creationAccount;
+    }
+
+    public void setCreationAccount(String creationAccount) {
+        this.creationAccount = creationAccount;
+    }
 }
