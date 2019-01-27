@@ -26,6 +26,8 @@ import java.util.Objects;
 public class QueryAudit extends PageRequest {
 
     private Long adminId;
+    private String adminName;
+    private String adminAccount;
     private String idea;
     private AuditState result;
     private String reason;
@@ -67,6 +69,22 @@ public class QueryAudit extends PageRequest {
 
     public void setAdminId(Long adminId) {
         this.adminId = adminId;
+    }
+
+    public String getAdminName() {
+        return adminName;
+    }
+
+    public void setAdminName(String adminName) {
+        this.adminName = adminName;
+    }
+
+    public String getAdminAccount() {
+        return adminAccount;
+    }
+
+    public void setAdminAccount(String adminAccount) {
+        this.adminAccount = adminAccount;
     }
 
     public Long getAuditId() {
@@ -169,6 +187,12 @@ public class QueryAudit extends PageRequest {
         List<Predicate> predicates = new ArrayList<>();
         if (queryAudit.getAdminId() != null && queryAudit.getAdminId() > 0){
             predicates.add(cb.equal(root.get(Audit.ADMIN_ID),queryAudit.getAdminId()));
+        }
+        if (!StringUtils.isEmpty(queryAudit.getAdminName())){
+            predicates.add(cb.equal(root.get(Audit.ADMIN).get(Admin.USER).get(User.NAME),queryAudit.adminName));
+        }
+        if (!StringUtils.isEmpty(queryAudit.getAdminAccount())){
+            predicates.add(cb.equal(root.get(Audit.ADMIN).get(Admin.USER).get(User.USERNAME),queryAudit.adminAccount));
         }
         if (queryAudit.getResult() != null){
             predicates.add(cb.equal(root.get(Audit.RESULT),queryAudit.getResult()));
