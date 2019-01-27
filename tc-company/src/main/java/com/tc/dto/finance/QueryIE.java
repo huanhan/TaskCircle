@@ -3,6 +3,7 @@ package com.tc.dto.finance;
 import com.tc.db.entity.Comment;
 import com.tc.db.entity.User;
 import com.tc.db.entity.UserIeRecord;
+import com.tc.dto.enums.IEType;
 import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.PageRequest;
@@ -24,11 +25,16 @@ public class QueryIE extends PageRequest {
     private String id;
     private Timestamp createTimeBegin;
     private Timestamp createTimeEnd;
+    private IEType ieType;
     private Float moneyBegin;
     private Float moneyEnd;
     private String context;
     private Long me;
+    private String meName;
+    private String meAccount;
     private Long to;
+    private String toName;
+    private String toAccount;
 
     public QueryIE() {
         super(0, 10);
@@ -110,18 +116,79 @@ public class QueryIE extends PageRequest {
         this.to = to;
     }
 
+    public String getMeName() {
+        return meName;
+    }
+
+    public void setMeName(String meName) {
+        this.meName = meName;
+    }
+
+    public String getMeAccount() {
+        return meAccount;
+    }
+
+    public void setMeAccount(String meAccount) {
+        this.meAccount = meAccount;
+    }
+
+    public String getToName() {
+        return toName;
+    }
+
+    public void setToName(String toName) {
+        this.toName = toName;
+    }
+
+    public String getToAccount() {
+        return toAccount;
+    }
+
+    public void setToAccount(String toAccount) {
+        this.toAccount = toAccount;
+    }
+
+    public IEType getIeType() {
+        return ieType;
+    }
+
+    public void setIeType(IEType ieType) {
+        this.ieType = ieType;
+    }
+
     public static List<Predicate> initPredicates(QueryIE queryIE, Root<UserIeRecord> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(QueryUtils.equals(root,cb,UserIeRecord.ID,queryIE.id));
 
-        if (!FloatHelper.isNull(queryIE.getMe()) && !FloatHelper.isNull(queryIE.getTo())){
-            predicates.add(cb.or(cb.equal(root.get(UserIeRecord.ME),queryIE.me),cb.equal(root.get(UserIeRecord.TO),queryIE.to)));
-        }else if (!FloatHelper.isNull(queryIE.getMe()) ){
-            predicates.add(cb.equal(root.get(UserIeRecord.ME),queryIE.me));
+        if (queryIE.getIeType() != null){
+            switch (queryIE.getIeType()){
+                case OUT:
+                    predicates.add(cb.equal(root.get(UserIeRecord.TO), queryIE.to));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_TO).get(User.NAME),cb,queryIE.toName));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_TO).get(User.USERNAME),cb,queryIE.toAccount));
+                    predicates.add(cb.equal(root.get(UserIeRecord.ME), queryIE.me));
+                    break;
+                case IN:
+                    predicates.add(cb.equal(root.get(UserIeRecord.ME), queryIE.me));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_ME).get(User.NAME),cb,queryIE.meName));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_ME).get(User.USERNAME),cb,queryIE.meAccount));
+                    predicates.add(cb.equal(root.get(UserIeRecord.TO), queryIE.to));
+                    break;
+                default:
+                    break;
+            }
         }else {
-            predicates.add(cb.equal(root.get(UserIeRecord.TO),queryIE.to));
-        }
 
+
+            if (!FloatHelper.isNull(queryIE.getMe()) && !FloatHelper.isNull(queryIE.getTo())) {
+                predicates.add(cb.or(cb.equal(root.get(UserIeRecord.ME), queryIE.me), cb.equal(root.get(UserIeRecord.TO), queryIE.to)));
+            } else if (!FloatHelper.isNull(queryIE.getMe())) {
+                predicates.add(cb.equal(root.get(UserIeRecord.ME), queryIE.me));
+            } else {
+                predicates.add(cb.equal(root.get(UserIeRecord.TO), queryIE.to));
+            }
+
+        }
         predicates.add(QueryUtils.like(root,cb,UserIeRecord.CONTEXT,queryIE.context));
         predicates.add(QueryUtils.between(root,cb,UserIeRecord.MONEY,queryIE.getMoneyBegin(),queryIE.getMoneyEnd()));
         predicates.add(QueryUtils.between(root,cb,UserIeRecord.CREATE_TIME,queryIE.createTimeBegin,queryIE.createTimeEnd));

@@ -280,8 +280,22 @@ public class UserController {
     @PostMapping("/ie/query/{id:\\d+}")
     @ApiOperation(value = "获取用户转账记录列表")
     public Result userIERecord(@PathVariable("id") Long id, @RequestBody QueryIE queryIE){
-        queryIE.setMe(id);
-        queryIE.setTo(id);
+
+        if (queryIE.getIeType() != null){
+            switch (queryIE.getIeType()){
+                case IN:
+                    queryIE.setTo(id);
+                    break;
+                case OUT:
+                    queryIE.setMe(id);
+                    break;
+                default:
+                    break;
+            }
+        }else {
+            queryIE.setMe(id);
+            queryIE.setTo(id);
+        }
         Page<UserIeRecord> query = userIeRecordService.findByQuery(queryIE);
         return Result.init(UserIeRecord.toListInIndex(query.getContent()),queryIE);
     }
