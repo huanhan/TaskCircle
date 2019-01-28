@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * 猎刃任务步骤更新记录服务的实现
+ *
  * @author Cyg
  */
 @Service
@@ -20,15 +21,21 @@ public class HtsRecordServiceImpl extends AbstractBasicServiceImpl<HtsRecord> im
     @Autowired
     private HtsRecordRepository htsRecordRepository;
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<HtsRecord> findAll(String tid, Integer sid) {
-        return htsRecordRepository.findByHunterTaskIdAndStep(tid,sid);
+        return htsRecordRepository.findByHunterTaskIdAndStep(tid, sid);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public HtsRecord findOne(HtsRecordPK htsRecordPK) {
         return htsRecordRepository.findOne(htsRecordPK);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
+    public HtsRecord save(HtsRecord htsRecord) {
+        return htsRecordRepository.save(htsRecord);
     }
 }

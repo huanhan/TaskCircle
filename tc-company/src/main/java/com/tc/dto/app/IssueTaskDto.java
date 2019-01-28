@@ -55,6 +55,9 @@ public class IssueTaskDto {
     @Min(0)
     private Float compensateMoney;
 
+    @NotEmpty
+    private String address;
+
     public String getId() {
         return id;
     }
@@ -141,6 +144,14 @@ public class IssueTaskDto {
 
     public void setCompensateMoney(Float compensateMoney) {
         this.compensateMoney = compensateMoney;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public static Task toTask(Task task, IssueTaskDto issueTask) {
