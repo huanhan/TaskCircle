@@ -142,13 +142,7 @@ public class QueryTaskClassify extends PageRequest {
             predicates.add(cb.equal(root.get(TaskClassify.CREATION).get(Admin.USER).get(User.NAME),queryTaskClassify.creationName));
         }
 
-        if (queryTaskClassify.getExistTask() != null){
-            if (queryTaskClassify.getExistTask()) {
-                predicates.add(cb.isEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
-            }else {
-                predicates.add(cb.isNotEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
-            }
-        }
+
         if (queryTaskClassify.getCreateTimeBegin() != null || queryTaskClassify.getCreateTimeEnd() != null){
             if (queryTaskClassify.getCreateTimeBegin() != null && queryTaskClassify.getCreateTimeEnd() != null){
                 predicates.add(cb.between(root.get(TaskClassify.CREATE_TIME),queryTaskClassify.getCreateTimeBegin(),queryTaskClassify.getCreateTimeEnd()));
@@ -166,10 +160,24 @@ public class QueryTaskClassify extends PageRequest {
                 if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
                     predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
                 }
+                if (queryTaskClassify.getExistTask() != null){
+                    if (queryTaskClassify.getExistTask()) {
+                        predicates.add(cb.isEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
+                    }else {
+                        predicates.add(cb.isNotEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
+                    }
+                }
             }
         }else {
             if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
                 predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
+            }
+            if (queryTaskClassify.getExistTask() != null){
+                if (queryTaskClassify.getExistTask()) {
+                    predicates.add(cb.isEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
+                }else {
+                    predicates.add(cb.isNotEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
+                }
             }
         }
         return predicates;
