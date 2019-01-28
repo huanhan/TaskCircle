@@ -5,6 +5,7 @@ import com.tc.db.entity.Task;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.dto.task.QueryHunterTask;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -161,12 +162,11 @@ public interface HunterTaskService extends BasicService<HunterTask> {
 
     /**
      * 猎刃不同意用户放弃任务
-     * @param id
+     * @param hunterTask
      * @param context
      * @return
      */
-    boolean abandonNotPassByHunter(String id, String context);
-
+    boolean abandonNotPassByHunter(HunterTask hunterTask, String context);
 
 
 }

@@ -464,10 +464,29 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //设置猎人任务状态
         int count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_BE_ABANDON, 0F, MoneyType.IS_NULL);
         if (count <= 0) {
-            throw new DBException("修改任务状态失败");
+            throw new DBException("修改猎刃任务状态失败");
         }
         this.outMoneyToHunter(task, hunterTask);
-        return false;
+
+        //当通过时，判断是否需要放弃用户的任务
+        //判断是否还有猎刃在执行任务
+        List<HunterTask> hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(), HunterTaskState.notAbandon());
+        if (ListUtils.isEmpty(hts)) {
+            //放弃任务
+            count = taskRepository.updateState(task.getId(), TaskState.ABANDON_OK);
+            if (count <= 0) {
+                throw new DBException("修改用户任务状态失败");
+            }
+            //获取发布该任务的用户信息
+            User user = task.getUser();
+            Float dMoney = FloatHelper.sub(user.getMoney(), task.getMoney());
+            count = userRepository.update(dMoney, task.getUserId());
+            if (count <= 0) {
+                throw new DBException("退还用户押金失败");
+            }
+        }
+
+        return true;
     }
 
     @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
@@ -484,9 +503,21 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean abandonNotPassByHunter(String id, String context) {
-        int count = hunterTaskRepository.updateStateAndHunterRejectContext(id, HunterTaskState.HUNTER_REPULSE, context);
-        return count > 0;
+    public boolean abandonNotPassByHunter(HunterTask hunterTask, String context) {
+        Task task = hunterTask.getTask();
+        int count = hunterTaskRepository.updateStateAndHunterRejectContext(hunterTask.getId(), HunterTaskState.HUNTER_REPULSE, context);
+        if (count <= 0) {
+            throw new DBException("更新猎刃任务状态失败");
+        }
+        //获取除了已拒绝外的剩下猎刃任务数
+        count = hunterTaskRepository.countByTaskIdAndHunterTaskStateNotIn(task.getId(), HunterTaskState.notAbandonState());
+        if (count <= 0) {
+            count = taskRepository.updateState(task.getId(), TaskState.HUNTER_REJECT);
+            if (count <= 0) {
+                throw new DBException("更新用户任务状态失败");
+            }
+        }
+        return true;
     }
 
     /**
@@ -504,7 +535,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             //退回猎刃押金
             count = userRepository.update(dMoney, hunterTask.getHunterId());
             if (count <= 0) {
-                throw new DBException("退回押金失败");
+                throw new DBException("退回猎刃押金失败");
             }
         }
     }

@@ -557,11 +557,6 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
-        //判断是否需要放弃用户的任务
-        isSuccess = taskService.hasAbandon(task);
-        if (!isSuccess) {
-            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-        }
         return ResultApp.init("已同意用户放弃任务");
     }
 
