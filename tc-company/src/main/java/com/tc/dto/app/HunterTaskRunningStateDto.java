@@ -25,11 +25,13 @@ public class HunterTaskRunningStateDto {
     private Timestamp taskFinishTime;//任务完成时间
     private Timestamp auditTime;//提交审核时间
     private Timestamp taskBeginTime;//任务开始时间
+    private Integer currStep;//当前步骤
+    private Integer totalStep;//所有步骤数
     private HunterTaskState state;//任务状态
 
     private Collection<HunterRunningStepDto> taskSteps;
 
-    public static HunterTaskRunningStateDto toDetail(Task task,HunterTask hunterTask) {
+    public static HunterTaskRunningStateDto toDetail(Task task, HunterTask hunterTask) {
         HunterTaskRunningStateDto hunterTaskRunningStateDto = new HunterTaskRunningStateDto();
 
         hunterTaskRunningStateDto.setUserId(task.getUserId());
@@ -43,6 +45,9 @@ public class HunterTaskRunningStateDto {
         hunterTaskRunningStateDto.setDeadline(task.getDeadline());
         hunterTaskRunningStateDto.setTaskFinishTime(hunterTask.getFinishTime());
         hunterTaskRunningStateDto.setAuditTime(hunterTask.getAuditTime());
+        hunterTaskRunningStateDto.setTaskBeginTime(hunterTask.getBeginTime());
+        hunterTaskRunningStateDto.setCurrStep(hunterTask.getHunterTaskSteps().size());
+        hunterTaskRunningStateDto.setTotalStep(task.getTaskSteps().size());
         hunterTaskRunningStateDto.setTaskBeginTime(hunterTask.getBeginTime());
         hunterTaskRunningStateDto.setState(hunterTask.getState());
 
@@ -187,6 +192,22 @@ public class HunterTaskRunningStateDto {
 
     public void setState(HunterTaskState state) {
         this.state = state;
+    }
+
+    public Integer getCurrStep() {
+        return currStep;
+    }
+
+    public void setCurrStep(Integer currStep) {
+        this.currStep = currStep;
+    }
+
+    public Integer getTotalStep() {
+        return totalStep;
+    }
+
+    public void setTotalStep(Integer totalStep) {
+        this.totalStep = totalStep;
     }
 
     public Collection<HunterRunningStepDto> getTaskSteps() {

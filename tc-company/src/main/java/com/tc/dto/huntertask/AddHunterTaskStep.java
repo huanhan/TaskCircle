@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * 添加猎刃任务步骤
+ *
  * @author Cyg
  */
 public class AddHunterTaskStep {
@@ -25,7 +26,6 @@ public class AddHunterTaskStep {
     private String context;
     @Length(max = 100)
     private String remake;
-
 
 
     public String getId() {
@@ -62,8 +62,9 @@ public class AddHunterTaskStep {
 
     public static HunterTaskStep toHunterTaskStep(AddHunterTaskStep addHunterTaskStep) {
         HunterTaskStep hunterTaskStep = new HunterTaskStep();
-        BeanUtils.copyProperties(addHunterTaskStep,hunterTaskStep);
+        BeanUtils.copyProperties(addHunterTaskStep, hunterTaskStep);
         hunterTaskStep.setFinishTime(TimestampHelper.today());
+        hunterTaskStep.setHunterTaskId(addHunterTaskStep.getId());
         return hunterTaskStep;
     }
 }

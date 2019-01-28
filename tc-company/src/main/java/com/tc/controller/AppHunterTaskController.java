@@ -20,6 +20,7 @@ import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import com.tc.until.TranstionHelper;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -206,8 +207,8 @@ public class AppHunterTaskController {
         }
 
         //验证指定的猎刃任务是否可以添加
-        if (!query.getState().equals(HunterTaskState.BEGIN)
-                || !query.getState().equals(HunterTaskState.EXECUTE)
+        if ((!query.getState().equals(HunterTaskState.BEGIN)
+                && !query.getState().equals(HunterTaskState.EXECUTE))
                 || query.getStop()) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
@@ -224,10 +225,14 @@ public class AppHunterTaskController {
         HtsRecord htsRecord = new HtsRecord();
         htsRecord.setHunterTaskId(result.getHunterTaskId());
         htsRecord.setStep(result.getStep());
-        htsRecord.setAfterContext(TranstionHelper.toGson(new HunterTaskStepAppDto()));
-        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
+        htsRecord.setCreateTime(TimestampHelper.today());
+        htsRecord.setAfterContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
+        htsRecord.setOriginalContext(TranstionHelper.toGson(new HunterTaskStepAppDto()));
         htsRecord.setOperation(OPType.ADD);
-        htsRecordService.save(htsRecord);
+        HtsRecord save = htsRecordService.save(htsRecord);
+        if (save == null) {
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
 
         return ResultApp.init("步骤添加成功");
     }
@@ -262,6 +267,8 @@ public class AppHunterTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_UPDATE_ABNORMAL);
         }
 
+        HunterTaskStep hunterTaskStepTemp = new HunterTaskStep();
+        BeanUtils.copyProperties(hunterTaskStep,hunterTaskStepTemp);
         hunterTaskStep.setContext(modifyHunterTaskStep.getContext());
         hunterTaskStep.setRemake(modifyHunterTaskStep.getRemake());
 
@@ -273,10 +280,14 @@ public class AppHunterTaskController {
         HtsRecord htsRecord = new HtsRecord();
         htsRecord.setHunterTaskId(result.getHunterTaskId());
         htsRecord.setStep(result.getStep());
+        htsRecord.setCreateTime(TimestampHelper.today());
         htsRecord.setAfterContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
-        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(hunterTaskStep)));
+        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(hunterTaskStepTemp)));
         htsRecord.setOperation(OPType.MODIFY);
-        htsRecordService.save(htsRecord);
+        HtsRecord save = htsRecordService.save(htsRecord);
+        if (save == null) {
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
 
         return ResultApp.init("修改步骤成功");
 
