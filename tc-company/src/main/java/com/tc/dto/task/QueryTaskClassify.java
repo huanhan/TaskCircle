@@ -141,9 +141,7 @@ public class QueryTaskClassify extends PageRequest {
         if (!StringUtils.isEmpty(queryTaskClassify.creationName)){
             predicates.add(cb.equal(root.get(TaskClassify.CREATION).get(Admin.USER).get(User.NAME),queryTaskClassify.creationName));
         }
-        if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
-            predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
-        }
+
         if (queryTaskClassify.getExistTask() != null){
             if (queryTaskClassify.getExistTask()) {
                 predicates.add(cb.isEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
@@ -165,6 +163,13 @@ public class QueryTaskClassify extends PageRequest {
                 predicates.add(cb.isNull(root.get(TaskClassify.PARENTS)));
             }else {
                 predicates.add(cb.isNotNull(root.get(TaskClassify.PARENTS)));
+                if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
+                    predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
+                }
+            }
+        }else {
+            if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
+                predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
             }
         }
         return predicates;
