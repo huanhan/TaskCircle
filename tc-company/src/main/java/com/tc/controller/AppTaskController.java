@@ -612,6 +612,23 @@ public class AppTaskController {
         switch (state) {
             case "ALL"://全部
                 //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
+                taskStates.add(TaskState.NEW_CREATE);
+                taskStates.add(TaskState.AWAIT_AUDIT);
+                taskStates.add(TaskState.AUDIT);
+                taskStates.add(TaskState.AUDIT_FAILURE);
+                taskStates.add(TaskState.AUDIT_SUCCESS);
+                taskStates.add(TaskState.OK_ISSUE);
+                taskStates.add(TaskState.ISSUE);
+                taskStates.add(TaskState.FORBID_RECEIVE);
+                taskStates.add(TaskState.OUT);
+                taskStates.add(TaskState.FINISH);
+                taskStates.add(TaskState.ABANDON_COMMIT);
+                taskStates.add(TaskState.ABANDON_OK);
+                taskStates.add(TaskState.USER_HUNTER_NEGOTIATE);
+                taskStates.add(TaskState.HUNTER_REJECT);
+                taskStates.add(TaskState.COMMIT_AUDIT);
+                taskStates.add(TaskState.ADMIN_NEGOTIATE);
+                taskStates.add(TaskState.HUNTER_COMMIT);
                 break;
             case "NEW"://新建
                 taskStates.add(TaskState.NEW_CREATE);//新建
@@ -809,7 +826,7 @@ public class AppTaskController {
         }
 
         //删除任务，将任务状态修改为删除状态
-        boolean isSuccess = taskService.updateState(TaskState.DELETE_OK);
+        boolean isSuccess = taskService.updateState(taskId,TaskState.DELETE_OK);
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
