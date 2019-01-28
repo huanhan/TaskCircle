@@ -1,18 +1,12 @@
 package com.tc.controller;
 
-import com.tc.db.entity.HtsRecord;
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.HunterTaskStep;
-import com.tc.db.entity.Task;
+import com.tc.db.entity.*;
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.OPType;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.ModifyHunterTaskStep;
-import com.tc.dto.app.AppPage;
-import com.tc.dto.app.HunterTaskAppDto;
-import com.tc.dto.app.HunterTaskStepAppDto;
-import com.tc.dto.app.ResultApp;
+import com.tc.dto.app.*;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.task.QueryHunterTask;
@@ -36,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -286,6 +281,17 @@ public class AppHunterTaskController {
         return ResultApp.init("修改步骤成功");
 
     }
+
+    @GetMapping("/query/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "根据猎刃任务id获取猎刃任务执行情况")
+    public HunterTaskRunningStateDto query(@PathVariable("htId") String htId, @PathVariable("id") Long id) {
+
+        //获取猎刃任务详情
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+        Task task = taskService.findOne(hunterTask.getTaskId());
+        return HunterTaskRunningStateDto.toDetail(task,hunterTask);
+    }
+
 
     /**
      * 无效
