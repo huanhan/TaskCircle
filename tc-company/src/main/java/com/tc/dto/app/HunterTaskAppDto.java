@@ -11,6 +11,7 @@ public class HunterTaskAppDto {
     private String taskId;
     private Long userId;
     private Long hunterId;
+    private String hunterName;
     private String headImg;
     private String hunterHeadImg;
     private String name;
@@ -54,6 +55,14 @@ public class HunterTaskAppDto {
 
     public void setHeadImg(String headImg) {
         this.headImg = headImg;
+    }
+
+    public String getHunterName() {
+        return hunterName;
+    }
+
+    public void setHunterName(String hunterName) {
+        this.hunterName = hunterName;
     }
 
     public String getName() {
@@ -156,6 +165,7 @@ public class HunterTaskAppDto {
         HunterTaskAppDto hunterTaskAppDto = new HunterTaskAppDto();
         hunterTaskAppDto.setUserId(task.getTask().getUserId());
         hunterTaskAppDto.setHunterId(task.getHunterId());
+        hunterTaskAppDto.setHunterName(task.getHunter().getUser().getName());
         hunterTaskAppDto.setHeadImg(task.getTask().getUser().getHeadImg());
         hunterTaskAppDto.setHunterHeadImg(task.getHunter().getUser().getHeadImg());
         hunterTaskAppDto.setName(task.getTask().getName());

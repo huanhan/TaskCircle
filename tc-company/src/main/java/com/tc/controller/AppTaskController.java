@@ -559,7 +559,7 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
-        return ResultApp.init("猎刃放弃申请不通过");
+        return ResultApp.init("已拒绝猎刃放弃任务申请");
     }
 
     /**
@@ -589,7 +589,7 @@ public class AppTaskController {
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
-        return ResultApp.init("猎刃任务放弃申请通过");
+        return ResultApp.init("已同意猎刃放弃任务申请");
     }
 
     /**
