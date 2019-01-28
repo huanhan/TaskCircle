@@ -463,14 +463,8 @@ public class AppTaskController {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
-        //提交审核完成结果
+        //提交审核完成结果,兵器判断本人任务是否被全部完成
         boolean isSuccess = hunterTaskService.auditPassByUser(hunterTask);
-        if (!isSuccess) {
-            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-        }
-
-        //判断本人的任务是否已被全部完成
-        isSuccess = taskService.taskIsSuccess(hunterTask.getTaskId());
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

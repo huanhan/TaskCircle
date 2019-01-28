@@ -235,6 +235,21 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         if (count <= 0) {
             throw new DBException("设置任务金额失败");
         }
+
+        //判断用户的任务是否全部完成
+        //根据猎刃任务已经完成的人数判断任务成功与否
+        long peopleNumber = hunterTaskRepository.count((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get(HunterTask.TASK_ID), task.getId()));
+            predicates.add(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE), HunterTaskState.END_OK));
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+        if (task.getPeopleNumber().equals(peopleNumber)) {
+            count = taskRepository.updateState(task.getId(), TaskState.FINISH);
+            if (count <= 0){
+                throw new DBException("修改任务状态失败");
+            }
+        }
         return true;
     }
 

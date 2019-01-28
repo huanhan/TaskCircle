@@ -393,7 +393,10 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             return false;
         }
         int count = taskRepository.updateState(taskId, TaskState.FINISH);
-        return count > 0;
+        if (count <= 0){
+            throw new DBException("修改任务状态失败");
+        }
+        return true;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
