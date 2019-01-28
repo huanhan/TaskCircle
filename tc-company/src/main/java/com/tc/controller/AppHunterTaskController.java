@@ -111,6 +111,8 @@ public class AppHunterTaskController {
                 hunterTaskStates.add(HunterTaskState.TASK_ABANDON);
                 hunterTaskStates.add(HunterTaskState.TASK_BE_ABANDON);
                 break;
+            default:
+                break;
         }
         queryHunterTask.setStates(hunterTaskStates);
 
