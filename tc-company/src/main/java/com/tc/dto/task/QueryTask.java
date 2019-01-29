@@ -83,6 +83,8 @@ public class QueryTask extends PageRequest {
     private Timestamp beginTimeEnd;
     private Timestamp deadlineBegin;
     private Timestamp deadlineEnd;
+    private Timestamp auditTimeBegin;
+    private Timestamp auditTimeEnd;
     private Integer permitAbandonMinuteBegin;
     private Integer permitAbandonMinuteEnd;
     private Boolean isTaskRework;
@@ -309,6 +311,22 @@ public class QueryTask extends PageRequest {
         this.deadlineEnd = deadlineEnd;
     }
 
+    public Timestamp getAuditTimeBegin() {
+        return auditTimeBegin;
+    }
+
+    public void setAuditTimeBegin(Timestamp auditTimeBegin) {
+        this.auditTimeBegin = auditTimeBegin;
+    }
+
+    public Timestamp getAuditTimeEnd() {
+        return auditTimeEnd;
+    }
+
+    public void setAuditTimeEnd(Timestamp auditTimeEnd) {
+        this.auditTimeEnd = auditTimeEnd;
+    }
+
     public Integer getPermitAbandonMinuteBegin() {
         return permitAbandonMinuteBegin;
     }
@@ -413,6 +431,7 @@ public class QueryTask extends PageRequest {
         predicates.add(QueryUtils.between(root,cb,Task.CREATE_TIME,queryTask.createTimeBegin,queryTask.createTimeEnd));
         predicates.add(QueryUtils.between(root,cb,Task.BEGIN_TIME,queryTask.beginTimeBegin,queryTask.beginTimeEnd));
         predicates.add(QueryUtils.between(root,cb,Task.DEADLINE,queryTask.deadlineBegin,queryTask.deadlineEnd));
+        predicates.add(QueryUtils.between(root,cb,Task.AUDIT_TIME,queryTask.auditTimeBegin,queryTask.auditTimeEnd));
         predicates.add(QueryUtils.between(root,cb,Task.PERMIT_ABANDON_MINUTE,queryTask.permitAbandonMinuteBegin,queryTask.permitAbandonMinuteEnd));
 
         if (!QueryUtils.hasNull(queryTask.getCommentAvgBegin()) || !QueryUtils.hasNull(queryTask.getCommentAvgEnd())){

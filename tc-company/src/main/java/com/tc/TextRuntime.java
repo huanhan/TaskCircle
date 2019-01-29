@@ -1,5 +1,6 @@
 package com.tc;
 
+import com.google.gson.Gson;
 import com.tc.db.entity.*;
 import com.tc.dto.Show;
 import com.tc.dto.authority.*;
@@ -102,7 +103,14 @@ public class TextRuntime {
         autResRelation.setAuthorities(authorities);
         autResRelation.setResources(resources);
         autResRelation.setAutResIds(ars);
-        printGson(new RemoveUser(1L,new ArrayList<>(),1L));
+
+        Comment comment = new Comment();
+        comment.setCreateTime(now);
+
+
+
+        String json = printGson(comment);
+        getDTO(json);
     }
 
 
@@ -130,8 +138,16 @@ public class TextRuntime {
 
     }
 
-    public static void printGson(Object o){
+    public static String printGson(Object o){
         String json = TranstionHelper.toGson(o);
         System.out.println(json);
+        return json;
     }
+
+    public static void getDTO(String Gson){
+        Comment comment = new Gson().fromJson(Gson,Comment.class);
+        System.out.println(comment.getCreateTime());
+        System.out.println(comment.getCreateTime().getTime());
+    }
+
 }
