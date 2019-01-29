@@ -82,30 +82,40 @@ public class AppHunterTaskController {
                 //queryTask.setState(TaskState.valueOf(state)); 查询全部不需要设置
                 break;
             case "NEW"://未开始
-                hunterTaskStates.add(HunterTaskState.RECEIVE);//新建
+                hunterTaskStates.add(HunterTaskState.RECEIVE);//接取
                 break;
             case "RUNNING"://进行中
                 hunterTaskStates.add(HunterTaskState.BEGIN);
                 hunterTaskStates.add(HunterTaskState.EXECUTE);
-
+                hunterTaskStates.add(HunterTaskState.TASK_COMPLETE);
+                hunterTaskStates.add(HunterTaskState.COMMIT_ADMIN_AUDIT);
                 break;
             case "AUDIT"://审核中
-                hunterTaskStates.add(HunterTaskState.TASK_COMPLETE);
+                hunterTaskStates.add(HunterTaskState.AWAIT_USER_AUDIT);
+                hunterTaskStates.add(HunterTaskState.USER_AUDIT);
+                hunterTaskStates.add(HunterTaskState.USER_AUDIT_FAILURE);
+                hunterTaskStates.add(HunterTaskState.ADMIN_AUDIT);
+                break;
+            case "FINISH"://已完成
+                hunterTaskStates.add(HunterTaskState.AWAIT_SETTLE_ACCOUNTS);
+                hunterTaskStates.add(HunterTaskState.SETTLE_ACCOUNTS_SUCCESS);
+                hunterTaskStates.add(HunterTaskState.SETTLE_ACCOUNTS_EXCEPTION);
+                hunterTaskStates.add(HunterTaskState.END_OK);
+                hunterTaskStates.add(HunterTaskState.END_NO);
                 hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
                 hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE);
                 hunterTaskStates.add(HunterTaskState.NO_REWORK_NO_COMPENSATE);
                 hunterTaskStates.add(HunterTaskState.NO_REWORK_HAVE_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.USER_REPULSE);
-                hunterTaskStates.add(HunterTaskState.COMMIT_ADMIN_AUDIT);
-                hunterTaskStates.add(HunterTaskState.COMMIT_TO_ADMIN);
-                hunterTaskStates.add(HunterTaskState.WITH_ADMIN_NEGOTIATE);
-                hunterTaskStates.add(HunterTaskState.ADMIN_AUDIT);
-                break;
-            case "FINISH"://已结束
-                hunterTaskStates.add(HunterTaskState.END_NO);
-                hunterTaskStates.add(HunterTaskState.END_OK);
+                hunterTaskStates.add(HunterTaskState.AWAIT_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.COMPENSATE_SUCCESS);
+                hunterTaskStates.add(HunterTaskState.COMPENSATE_EXCEPTION);
                 hunterTaskStates.add(HunterTaskState.TASK_ABANDON);
                 hunterTaskStates.add(HunterTaskState.TASK_BE_ABANDON);
+                hunterTaskStates.add(HunterTaskState.WITH_USER_NEGOTIATE);
+                hunterTaskStates.add(HunterTaskState.USER_REPULSE);
+                hunterTaskStates.add(HunterTaskState.HUNTER_REPULSE);
+                hunterTaskStates.add(HunterTaskState.COMMIT_TO_ADMIN);
+                hunterTaskStates.add(HunterTaskState.WITH_ADMIN_NEGOTIATE);
                 break;
             default:
                 break;
@@ -258,7 +268,8 @@ public class AppHunterTaskController {
         }
 
         //对状态进行判断
-        if (!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTE)
+        if ((!hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.EXECUTE) &&
+                !hunterTaskStep.getHunterTask().getState().equals(HunterTaskState.TASK_COMPLETE))
                 || hunterTaskStep.getHunterTask().getStop()) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
@@ -268,7 +279,7 @@ public class AppHunterTaskController {
         }
 
         HunterTaskStep hunterTaskStepTemp = new HunterTaskStep();
-        BeanUtils.copyProperties(hunterTaskStep,hunterTaskStepTemp);
+        BeanUtils.copyProperties(hunterTaskStep, hunterTaskStepTemp);
         hunterTaskStep.setContext(modifyHunterTaskStep.getContext());
         hunterTaskStep.setRemake(modifyHunterTaskStep.getRemake());
 
@@ -300,7 +311,7 @@ public class AppHunterTaskController {
         //获取猎刃任务详情
         HunterTask hunterTask = hunterTaskService.findOne(htId);
         Task task = taskService.findOne(hunterTask.getTaskId());
-        return HunterTaskRunningStateDto.toDetail(task,hunterTask);
+        return HunterTaskRunningStateDto.toDetail(task, hunterTask);
     }
 
 
@@ -407,7 +418,7 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
-        return ResultApp.init("已提交给用户");
+        return ResultApp.init("申请已提交");
     }
 
     /**

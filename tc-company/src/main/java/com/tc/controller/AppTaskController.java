@@ -459,11 +459,11 @@ public class AppTaskController {
         }
 
         //判断哪些猎刃任务状态允许被用户审核
-        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())) {
+        if (!HunterTaskState.isAuditToUser(hunterTask.getState())) {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
-        //提交审核完成结果,兵器判断本人任务是否被全部完成
+        //提交审核完成结果,并且判断本人任务是否被全部完成
         boolean isSuccess = hunterTaskService.auditPassByUser(hunterTask);
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
@@ -499,7 +499,7 @@ public class AppTaskController {
         }
 
         //判断哪些猎刃任务状态允许被用户审核
-        if (!HunterTaskState.isUpAuditToUser(hunterTask.getState())) {
+        if (!HunterTaskState.isAuditToUser(hunterTask.getState())) {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 

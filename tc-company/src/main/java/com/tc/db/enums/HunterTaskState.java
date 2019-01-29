@@ -9,7 +9,6 @@ public enum HunterTaskState{
      * 猎刃点击接取任务
      */
     RECEIVE("任务接取"),
-    AWAIT_BEGIN("等待开始"),
     BEGIN("开始"),
     EXECUTE("正在执行"),
     TASK_COMPLETE("任务完成"),
@@ -30,10 +29,8 @@ public enum HunterTaskState{
     AWAIT_COMPENSATE("等待补偿"),
     COMPENSATE_SUCCESS("补偿成功"),
     COMPENSATE_EXCEPTION("补偿异常"),
-    TASK_STOP("任务暂停"),
     TASK_ABANDON("任务放弃"),
     TASK_BE_ABANDON("任务被放弃"),
-    NEGOTIATE_VALIDATOR("协商校验"),
     WITH_USER_NEGOTIATE("与用户协商"),
     USER_REPULSE("用户拒绝猎刃放弃"),
     HUNTER_REPULSE("猎刃拒绝用户放弃"),
@@ -66,14 +63,11 @@ public enum HunterTaskState{
 
     public static List<HunterTaskState> notAbandon(){
         List<HunterTaskState> result = new ArrayList<>();
-        result.add(AWAIT_BEGIN);
         result.add(BEGIN);
         result.add(EXECUTE);
         result.add(TASK_COMPLETE);
         result.add(AWAIT_USER_AUDIT);
-        result.add(TASK_STOP);
         result.add(USER_AUDIT);
-        result.add(AWAIT_BEGIN);
         result.add(AWAIT_SETTLE_ACCOUNTS);
         result.add(SETTLE_ACCOUNTS_SUCCESS);
         result.add(SETTLE_ACCOUNTS_EXCEPTION);
@@ -87,7 +81,6 @@ public enum HunterTaskState{
         result.add(AWAIT_COMPENSATE);
         result.add(COMPENSATE_SUCCESS);
         result.add(COMPENSATE_EXCEPTION);
-        result.add(NEGOTIATE_VALIDATOR);
         result.add(WITH_USER_NEGOTIATE);
         result.add(HUNTER_REPULSE);
         return result;
@@ -108,6 +101,19 @@ public enum HunterTaskState{
             case NO_REWORK_NO_COMPENSATE:
                 return true;
             case NO_REWORK_HAVE_COMPENSATE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 用户是否能审核
+     * @return
+     */
+    public static boolean isAuditToUser(HunterTaskState state){
+        switch (state){
+            case AWAIT_USER_AUDIT:
                 return true;
             default:
                 return false;
