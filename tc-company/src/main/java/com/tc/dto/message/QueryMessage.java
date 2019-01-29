@@ -5,6 +5,7 @@ import com.tc.db.entity.Message;
 import com.tc.db.entity.User;
 import com.tc.db.entity.Message;
 import com.tc.db.enums.MessageState;
+import com.tc.db.enums.MessageType;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
 import org.springframework.data.domain.Sort;
@@ -32,7 +33,7 @@ public class QueryMessage extends PageRequest {
     private Long creation;
     private String creationName;
     private String account;
-    private String type;
+    private MessageType type;
     private MessageState state;
 
 
@@ -118,11 +119,11 @@ public class QueryMessage extends PageRequest {
         this.account = account;
     }
 
-    public String getType() {
+    public MessageType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(MessageType type) {
         this.type = type;
     }
 
