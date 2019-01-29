@@ -26,9 +26,8 @@ import java.util.Objects;
  */
 public class QueryHtsRecords extends PageRequest {
     private String taskId;
-    private Integer taskStep;
+    private Integer step;
     private String hunterTaskId;
-    private String hunterTaskStep;
     private Timestamp createTimeBegin;
     private Timestamp createTimeEnd;
     private OPType operation;
@@ -57,28 +56,12 @@ public class QueryHtsRecords extends PageRequest {
         this.taskId = taskId;
     }
 
-    public Integer getTaskStep() {
-        return taskStep;
-    }
-
-    public void setTaskStep(Integer taskStep) {
-        this.taskStep = taskStep;
-    }
-
     public String getHunterTaskId() {
         return hunterTaskId;
     }
 
     public void setHunterTaskId(String hunterTaskId) {
         this.hunterTaskId = hunterTaskId;
-    }
-
-    public String getHunterTaskStep() {
-        return hunterTaskStep;
-    }
-
-    public void setHunterTaskStep(String hunterTaskStep) {
-        this.hunterTaskStep = hunterTaskStep;
     }
 
     public Timestamp getCreateTimeBegin() {
@@ -97,6 +80,14 @@ public class QueryHtsRecords extends PageRequest {
         this.createTimeEnd = createTimeEnd;
     }
 
+    public Integer getStep() {
+        return step;
+    }
+
+    public void setStep(Integer step) {
+        this.step = step;
+    }
+
     public OPType getOperation() {
         return operation;
     }
@@ -111,12 +102,11 @@ public class QueryHtsRecords extends PageRequest {
 
         if (StringUtils.isNotEmpty(queryHtsRecords.hunterTaskId)){
             predicates.add(QueryUtils.equals(root.get(HtsRecord.HUNTER_TASK_STEP).get(HunterTaskStep.HUNTER_TASK_ID),cb,queryHtsRecords.hunterTaskId));
-            predicates.add(QueryUtils.equals(root.get(HtsRecord.HUNTER_TASK_STEP).get(HunterTaskStep.STEP),cb,queryHtsRecords.hunterTaskId));
         }else {
             predicates.add(QueryUtils.equals(root.get(HtsRecord.HUNTER_TASK_STEP).get(HunterTaskStep.HUNTER_TASK).get(HunterTask.TASK_ID),cb,queryHtsRecords.taskId));
-            predicates.add(QueryUtils.equals(root.get(HtsRecord.HUNTER_TASK_STEP).get(HunterTaskStep.STEP),cb,queryHtsRecords.taskStep));
-        }
 
+        }
+        predicates.add(QueryUtils.equals(root.get(HtsRecord.HUNTER_TASK_STEP).get(HunterTaskStep.STEP),cb,queryHtsRecords.step));
         predicates.add(QueryUtils.between(root,cb,HtsRecord.CREATE_TIME,queryHtsRecords.createTimeBegin,queryHtsRecords.createTimeEnd));
         predicates.add(QueryUtils.equals(root,cb,HtsRecord.OPERATION,queryHtsRecords.operation));
         predicates.removeIf(Objects::isNull);
