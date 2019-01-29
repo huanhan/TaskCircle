@@ -179,6 +179,15 @@ public class TaskController {
         return HunterTaskStep.toDetail(result);
     }
 
+
+    @PostMapping("/hts/record/query")
+    @ApiOperation(value = "根据查询条件获取猎刃任务步骤变更情况列表")
+    public Result getHtsRecords(@RequestBody QueryHtsRecords queryHtsRecords){
+        Page<HtsRecord> records = htsRecordService.findByQuery(queryHtsRecords);
+        return Result.init(HtsRecord.toListInIndex(records.getContent()),queryHtsRecords);
+    }
+
+
     /**
      * 获取猎刃任务步骤变更情况
      * @param tid

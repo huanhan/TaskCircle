@@ -20,6 +20,8 @@ import java.util.Objects;
 @IdClass(value = HunterTaskStepPK.class)
 public class HunterTaskStep implements Serializable {
     public static final String STEP = "step";
+    public static final String HUNTER_TASK_ID = "hunterTaskId";
+    public static final String HUNTER_TASK = "hunterTask";
 
     private String hunterTaskId;
     private Integer step;
