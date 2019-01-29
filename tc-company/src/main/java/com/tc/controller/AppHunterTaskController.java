@@ -1,18 +1,12 @@
 package com.tc.controller;
 
-import com.tc.db.entity.HtsRecord;
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.HunterTaskStep;
-import com.tc.db.entity.Task;
+import com.tc.db.entity.*;
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.OPType;
 import com.tc.db.enums.TaskState;
 import com.tc.dto.ModifyHunterTaskStep;
-import com.tc.dto.app.AppPage;
-import com.tc.dto.app.HunterTaskAppDto;
-import com.tc.dto.app.HunterTaskStepAppDto;
-import com.tc.dto.app.ResultApp;
+import com.tc.dto.app.*;
 import com.tc.dto.audit.AuditContext;
 import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.task.QueryHunterTask;
@@ -26,6 +20,7 @@ import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import com.tc.until.TranstionHelper;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -36,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -211,8 +207,8 @@ public class AppHunterTaskController {
         }
 
         //验证指定的猎刃任务是否可以添加
-        if (!query.getState().equals(HunterTaskState.BEGIN)
-                || !query.getState().equals(HunterTaskState.EXECUTE)
+        if ((!query.getState().equals(HunterTaskState.BEGIN)
+                && !query.getState().equals(HunterTaskState.EXECUTE))
                 || query.getStop()) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
@@ -229,10 +225,14 @@ public class AppHunterTaskController {
         HtsRecord htsRecord = new HtsRecord();
         htsRecord.setHunterTaskId(result.getHunterTaskId());
         htsRecord.setStep(result.getStep());
-        htsRecord.setAfterContext(TranstionHelper.toGson(new HunterTaskStepAppDto()));
-        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
+        htsRecord.setCreateTime(TimestampHelper.today());
+        htsRecord.setAfterContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
+        htsRecord.setOriginalContext(TranstionHelper.toGson(new HunterTaskStepAppDto()));
         htsRecord.setOperation(OPType.ADD);
-        htsRecordService.save(htsRecord);
+        HtsRecord save = htsRecordService.save(htsRecord);
+        if (save == null) {
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
 
         return ResultApp.init("步骤添加成功");
     }
@@ -267,6 +267,8 @@ public class AppHunterTaskController {
             throw new ValidException(StringResourceCenter.VALIDATOR_UPDATE_ABNORMAL);
         }
 
+        HunterTaskStep hunterTaskStepTemp = new HunterTaskStep();
+        BeanUtils.copyProperties(hunterTaskStep,hunterTaskStepTemp);
         hunterTaskStep.setContext(modifyHunterTaskStep.getContext());
         hunterTaskStep.setRemake(modifyHunterTaskStep.getRemake());
 
@@ -278,14 +280,29 @@ public class AppHunterTaskController {
         HtsRecord htsRecord = new HtsRecord();
         htsRecord.setHunterTaskId(result.getHunterTaskId());
         htsRecord.setStep(result.getStep());
+        htsRecord.setCreateTime(TimestampHelper.today());
         htsRecord.setAfterContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(result)));
-        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(hunterTaskStep)));
+        htsRecord.setOriginalContext(TranstionHelper.toGson(HunterTaskStepAppDto.toDetail(hunterTaskStepTemp)));
         htsRecord.setOperation(OPType.MODIFY);
-        htsRecordService.save(htsRecord);
+        HtsRecord save = htsRecordService.save(htsRecord);
+        if (save == null) {
+            throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+        }
 
         return ResultApp.init("修改步骤成功");
 
     }
+
+    @GetMapping("/query/{htId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "根据猎刃任务id获取猎刃任务执行情况")
+    public HunterTaskRunningStateDto query(@PathVariable("htId") String htId, @PathVariable("id") Long id) {
+
+        //获取猎刃任务详情
+        HunterTask hunterTask = hunterTaskService.findOne(htId);
+        Task task = taskService.findOne(hunterTask.getTaskId());
+        return HunterTaskRunningStateDto.toDetail(task,hunterTask);
+    }
+
 
     /**
      * 无效
