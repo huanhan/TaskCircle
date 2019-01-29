@@ -46,6 +46,7 @@ public class User implements Serializable {
     public static final String MONEY = "money";
     public static final String TASKS = "tasks";
     public static final String ADMIN_AUDIT_TIME = "adminAuditTime";
+    public static final String AUDIT_TIME = "auditTime";
 
 
     /**

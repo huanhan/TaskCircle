@@ -55,6 +55,8 @@ public class QueryUser extends PageRequest {
      * 创建时间结束
      */
     private Timestamp createTimeEnd;
+    private Timestamp auditTimeBegin;
+    private Timestamp auditTimeEnd;
     /**
      * 账户余额开始
      */
@@ -203,6 +205,22 @@ public class QueryUser extends PageRequest {
 
     public void setCreateTimeEnd(Timestamp createTimeEnd) {
         this.createTimeEnd = createTimeEnd;
+    }
+
+    public Timestamp getAuditTimeBegin() {
+        return auditTimeBegin;
+    }
+
+    public void setAuditTimeBegin(Timestamp auditTimeBegin) {
+        this.auditTimeBegin = auditTimeBegin;
+    }
+
+    public Timestamp getAuditTimeEnd() {
+        return auditTimeEnd;
+    }
+
+    public void setAuditTimeEnd(Timestamp auditTimeEnd) {
+        this.auditTimeEnd = auditTimeEnd;
     }
 
     public Float getMoneyBegin() {
@@ -376,6 +394,7 @@ public class QueryUser extends PageRequest {
 
         predicates.add(QueryUtils.between(root,cb,User.LAST_LOGIN,queryUser.getLastLoginBegin(),queryUser.getLastLoginEnd()));
         predicates.add(QueryUtils.between(root,cb,User.CREATE_TIME,queryUser.getCreateTimeBegin(),queryUser.getCreateTimeEnd()));
+        predicates.add(QueryUtils.between(root,cb,User.AUDIT_TIME,queryUser.getAuditTimeBegin(),queryUser.getAuditTimeEnd()));
         predicates.add(QueryUtils.between(root,cb,User.HEIGHT,queryUser.getHeightBegin(),queryUser.getHeightEnd()));
         predicates.add(QueryUtils.between(root,cb,User.WEIGHT,queryUser.getWeightBegin(),queryUser.getWeightEnd()));
         predicates.add(QueryUtils.between(root,cb,User.BIRTHDAY,queryUser.getBirthdayBegin(),queryUser.getBirthdayEnd()));
