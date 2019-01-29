@@ -1,14 +1,11 @@
 package com.tc.dto.user.hunter;
 
-import com.tc.db.entity.Hunter;
-import com.tc.db.entity.User;
+import com.tc.db.entity.*;
 import com.tc.dto.user.QueryUser;
+import com.tc.until.QueryUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +18,14 @@ public class QueryHunter extends QueryUser {
 
     private Timestamp hunterCreateBegin;
     private Timestamp hunterCreateEnd;
+
+    private Integer hunterTaskCountBegin;
+
+    private Integer hunterTaskCountEnd;
+
+    private Float hunterCommentAvgBegin;
+
+    private Float hunterCommentAvgEnd;
 
     public Timestamp getHunterCreateBegin() {
         return hunterCreateBegin;
@@ -38,6 +43,37 @@ public class QueryHunter extends QueryUser {
         this.hunterCreateEnd = hunterCreateEnd;
     }
 
+    public Integer getHunterTaskCountBegin() {
+        return hunterTaskCountBegin;
+    }
+
+    public void setHunterTaskCountBegin(Integer hunterTaskCountBegin) {
+        this.hunterTaskCountBegin = hunterTaskCountBegin;
+    }
+
+    public Integer getHunterTaskCountEnd() {
+        return hunterTaskCountEnd;
+    }
+
+    public void setHunterTaskCountEnd(Integer hunterTaskCountEnd) {
+        this.hunterTaskCountEnd = hunterTaskCountEnd;
+    }
+
+    public Float getHunterCommentAvgBegin() {
+        return hunterCommentAvgBegin;
+    }
+
+    public void setHunterCommentAvgBegin(Float hunterCommentAvgBegin) {
+        this.hunterCommentAvgBegin = hunterCommentAvgBegin;
+    }
+
+    public Float getHunterCommentAvgEnd() {
+        return hunterCommentAvgEnd;
+    }
+
+    public void setHunterCommentAvgEnd(Float hunterCommentAvgEnd) {
+        this.hunterCommentAvgEnd = hunterCommentAvgEnd;
+    }
 
     public static List<Predicate> initPredicates(QueryHunter queryHunter, Root<Hunter> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
@@ -136,6 +172,15 @@ public class QueryHunter extends QueryUser {
             }else if (queryHunter.getHunterCreateEnd() != null){
                 predicates.add(cb.lessThan(root.get(Hunter.CREATE_TIME),queryHunter.getHunterCreateEnd()));
             }
+        }
+        if (!QueryUtils.hasNull(queryHunter.getHunterTaskCountBegin()) || !QueryUtils.hasNull(queryHunter.getHunterTaskCountEnd())){
+            Subquery<Integer> count = QueryUtils.countQuery(root,query,cb,HunterTask.class,HunterTask.HUNTER_ID,User.ID);
+            predicates.add(QueryUtils.between(cb,count,queryHunter.getHunterTaskCountBegin(),queryHunter.getHunterTaskCountEnd()));
+        }
+
+        if (!QueryUtils.hasNull(queryHunter.getHunterCommentAvgBegin()) || !QueryUtils.hasNull(queryHunter.getHunterCommentAvgEnd())){
+            Subquery<Float> avg = QueryUtils.avgQuery(root,query,cb,CommentHunter.class,CommentHunter.COMMENT,Comment.NUMBER,CommentHunter.HUNTER_ID,User.ID);
+            predicates.add(QueryUtils.between(cb,avg,queryHunter.getCommentAvgBegin(),queryHunter.getCommentAvgEnd()));
         }
         return predicates;
     }

@@ -2,6 +2,8 @@ package com.tc.service;
 
 import com.tc.db.entity.HtsRecord;
 import com.tc.db.entity.pk.HtsRecordPK;
+import com.tc.dto.task.QueryHtsRecords;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -25,4 +27,10 @@ public interface HtsRecordService extends BasicService<HtsRecord> {
      */
     HtsRecord findOne(HtsRecordPK htsRecordPK);
 
+    /**
+     * 根据查询条件获取
+     * @param queryHtsRecords
+     * @return
+     */
+    Page<HtsRecord> findByQuery(QueryHtsRecords queryHtsRecords);
 }

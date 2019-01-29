@@ -15,6 +15,13 @@ import java.util.Objects;
 @Table(name = "hts_record", schema = "tc-company")
 @IdClass(HtsRecordPK.class)
 public class HtsRecord {
+
+    public static final String HUNTER_TASK_ID = "hunterTaskId";
+    public static final String STEP = "step";
+    public static final String CREATE_TIME = "createTime";
+    public static final String OPERATION = "operation";
+    public static final String HUNTER_TASK_STEP = "hunterTaskStep";
+
     private String hunterTaskId;
     private Integer step;
     private Timestamp createTime;

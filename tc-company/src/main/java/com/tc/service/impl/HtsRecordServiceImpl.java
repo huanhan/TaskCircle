@@ -3,11 +3,14 @@ package com.tc.service.impl;
 import com.tc.db.entity.HtsRecord;
 import com.tc.db.entity.pk.HtsRecordPK;
 import com.tc.db.repository.HtsRecordRepository;
+import com.tc.dto.task.QueryHtsRecords;
 import com.tc.service.HtsRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.Predicate;
 import java.util.List;
 
 /**
@@ -34,6 +37,16 @@ public class HtsRecordServiceImpl extends AbstractBasicServiceImpl<HtsRecord> im
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Page<HtsRecord> findByQuery(QueryHtsRecords queryHtsRecords) {
+        return htsRecordRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryHtsRecords.initPredicates(queryHtsRecords,root,query,cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },queryHtsRecords);
+
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public HtsRecord save(HtsRecord htsRecord) {
         return htsRecordRepository.saveAndFlush(htsRecord);
