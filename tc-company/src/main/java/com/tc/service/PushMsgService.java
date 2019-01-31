@@ -15,21 +15,26 @@ public interface PushMsgService {
 
     void sendPush(PushPayload payload);
 
+    //推送任务状态
     void pushTask(String title, String content, String taskid, List<String> userids);
 
     void pushTask(String title, String content, String taskid, String... userid);
 
+    //推送猎刃任务状态
     void pushHunterTask(String title, String content, String hunterTaskid, List<String> userids);
 
     void pushHunterTask(String title, String content, String hunterTaskid, String userid);
 
+    //推送猎刃列表
     void pushHunterList(String title, String content, String taskid, List<String> userids);
 
     void pushHunterList(String title, String content, String taskid, String userid);
 
+    //推送公共通知
     void pushNotice(String title, String content);
 
     void pushNotice(String title, String content, List<String> userids);
 
+    //推送新消息
     void pushNewChat(String userid, ChatMsgDto chatMsgDto);
 }

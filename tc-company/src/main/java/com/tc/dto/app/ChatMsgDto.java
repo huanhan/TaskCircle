@@ -1,36 +1,40 @@
 package com.tc.dto.app;
 
+import com.tc.db.entity.UserHunterInterflow;
+import org.springframework.beans.BeanUtils;
+
 import java.sql.Timestamp;
 
 public class ChatMsgDto {
 
-    private String content;
-    private String userId;
-    private String hunterId;
+    private String context;
+    private Long userId;
+    private Long hunterId;
     private String taskId;
-    private Timestamp time;
+    private Timestamp createTime;
+    private String icon;
 
-    public String getContent() {
-        return content;
+    public String getContext() {
+        return context;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setContext(String context) {
+        this.context = context;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public String getHunterId() {
+    public Long getHunterId() {
         return hunterId;
     }
 
-    public void setHunterId(String hunterId) {
+    public void setHunterId(Long hunterId) {
         this.hunterId = hunterId;
     }
 
@@ -42,11 +46,19 @@ public class ChatMsgDto {
         this.taskId = taskId;
     }
 
-    public Timestamp getTime() {
-        return time;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setTime(Timestamp time) {
-        this.time = time;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }

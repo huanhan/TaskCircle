@@ -90,7 +90,7 @@ public class PushMsgServiceImpl implements PushMsgService {
     public void pushNewChat(String userid, ChatMsgDto chatMsgDto) {
         PushPayload payload = PushPayload.newBuilder()
                 .setPlatform(Platform.android())
-                .setMessage(Message.newBuilder().addExtra("msg", TranstionHelper.toGson(chatMsgDto)).build())
+                .setMessage(Message.newBuilder().setMsgContent("信息").addExtra("msg", TranstionHelper.toGson(chatMsgDto)).build())
                 .setAudience(Audience.alias(userid))
                 .build();
         sendPush(payload);

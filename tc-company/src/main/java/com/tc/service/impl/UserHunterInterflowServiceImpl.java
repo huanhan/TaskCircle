@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Tuple;
 import javax.persistence.criteria.*;
-import javax.persistence.metamodel.SingularAttribute;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,5 +49,11 @@ public class UserHunterInterflowServiceImpl extends AbstractBasicServiceImpl<Use
                     .where(predicates.toArray(new Predicate[predicates.size()]))
                     .groupBy(exceptions).getRestriction();
         },queryTaskInterflow);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public UserHunterInterflow save(UserHunterInterflow userHunterInterflow) {
+        return userHunterInterflowRepository.save(userHunterInterflow);
     }
 }
