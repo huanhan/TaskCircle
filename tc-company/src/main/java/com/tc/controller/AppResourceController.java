@@ -1,4 +1,4 @@
-package com.tc.web.controller;
+package com.tc.controller;
 
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
@@ -7,16 +7,40 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleRequest;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleResponse;
-import org.junit.Test;
+import com.tc.dto.app.HomeAppDto;
+import com.tc.dto.app.OssToken;
+import com.tc.exception.ValidException;
+import com.tc.until.StringResourceCenter;
+import io.swagger.annotations.ApiOperation;
+import net.bytebuddy.implementation.bytecode.Throw;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-public class TestUntil {
-    @Test
-    public void testOss() {
 
-        String endpoint = "sts.aliyuncs.com";
-        String accessKeyId = "LTAIS17qvNECIMxb";
-        String accessKeySecret = "VSFSlJ6mJ2XsZb35Dmw1H33XCQwyfA";
-        String roleArn = "acs:ram::1631359334772636:role/aliyunosstokengeneratorrole";
+@RestController
+@ResponseStatus(code = HttpStatus.OK)
+@RequestMapping(value = "/app/resource")
+public class AppResourceController {
+
+    @Value("${taskcircle.oss.Endpoint}")
+    private String endpoint;
+
+    @Value("${taskcircle.oss.AccessKeyID}")
+    private String accessKeyId;
+
+    @Value("${taskcircle.oss.AccessKeySecret}")
+    private String accessKeySecret;
+
+    @Value("${taskcircle.oss.RoleArn}")
+    private String roleArn;
+
+    @GetMapping("/osstoken")
+    @ApiOperation(value = "获取阿里云oss图片上传token")
+    public OssToken osstoken() {
         String roleSessionName = "session-name";
         String policy = "{\n" +
                 "    \"Version\": \"1\", \n" +
@@ -45,17 +69,14 @@ public class TestUntil {
             request.setRoleSessionName(roleSessionName);
             request.setPolicy(policy); // Optional
             final AssumeRoleResponse response = client.getAcsResponse(request);
-            System.out.println("Expiration: " + response.getCredentials().getExpiration());
-            System.out.println("Access Key Id: " + response.getCredentials().getAccessKeyId());
-            System.out.println("Access Key Secret: " + response.getCredentials().getAccessKeySecret());
-            System.out.println("Security Token: " + response.getCredentials().getSecurityToken());
-            System.out.println("RequestId: " + response.getRequestId());
+            return new OssToken(response.getCredentials().getExpiration(),
+                    response.getCredentials().getAccessKeyId(),
+                    response.getCredentials().getAccessKeySecret(),
+                    response.getCredentials().getSecurityToken());
         } catch (ClientException e) {
-            System.out.println("Failed：");
-            System.out.println("Error code: " + e.getErrCode());
-            System.out.println("Error message: " + e.getErrMsg());
-            System.out.println("RequestId: " + e.getRequestId());
+            throw new ValidException(StringResourceCenter.VALIDATOR_OSS_TOKEN_FAILED);
         }
-    }
 
+
+    }
 }

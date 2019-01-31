@@ -46,7 +46,7 @@ public class HtsRecordServiceImpl extends AbstractBasicServiceImpl<HtsRecord> im
 
     }
 
-    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public HtsRecord save(HtsRecord htsRecord) {
         return htsRecordRepository.saveAndFlush(htsRecord);
