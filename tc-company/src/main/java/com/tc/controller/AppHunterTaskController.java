@@ -12,10 +12,7 @@ import com.tc.dto.huntertask.AddHunterTaskStep;
 import com.tc.dto.task.QueryHunterTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
-import com.tc.service.HtsRecordService;
-import com.tc.service.HunterTaskService;
-import com.tc.service.HunterTaskStepService;
-import com.tc.service.TaskService;
+import com.tc.service.*;
 import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import com.tc.until.TranstionHelper;
@@ -31,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -60,6 +56,9 @@ public class AppHunterTaskController {
 
     @Autowired
     private HtsRecordService htsRecordService;
+
+    @Autowired
+    private PushMsgService pushMsgService;
 
     /**
      * 根据状态获取指定猎刃的任务列表
@@ -152,6 +151,7 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new DBException("接任务失败！");
         }
+
         return ResultApp.init("任务接取成功");
     }
 

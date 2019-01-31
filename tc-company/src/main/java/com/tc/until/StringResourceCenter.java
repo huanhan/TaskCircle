@@ -24,6 +24,8 @@ public class StringResourceCenter {
     public static final String VALIDATOR_TASK_STATE_FAILED = "任务状态有误";
 
     public static final String VALIDATOR_OSS_TOKEN_FAILED = "验证资源上传权限失败";
+    public static final String VALIDATOR_CONNECTION_ERROR = "连接推送服务器请求失败，请重试";
+    public static final String VALIDATOR_REQUEST_ERROR = "请求参数错误，请重试";
 
     public static final String CONTEXT_NOT_NULL = "内容不能为空";
 

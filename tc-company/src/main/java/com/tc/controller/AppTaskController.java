@@ -50,14 +50,10 @@ public class AppTaskController {
     private HunterTaskService hunterTaskService;
 
     @Autowired
-    private TaskStepService taskStepService;
-
-    @Autowired
-    private HunterTaskStepService hunterTaskStepService;
-
-    @Autowired
     private TaskClassifyService taskClassifyService;
 
+    @Autowired
+    private PushMsgService pushMsgService;
     /**
      * Task步骤1：新建任务在保存成功后的状态为NEW_CREATE("新建")
      * 用户添加任务

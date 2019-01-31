@@ -28,6 +28,7 @@ public class HunterTaskRunningStateDto {
     private Integer currStep;//当前步骤
     private Integer totalStep;//所有步骤数
     private HunterTaskState state;//任务状态
+    private Boolean isStop;//是否暂停
 
     private Collection<HunterRunningStepDto> taskSteps;
 
@@ -50,6 +51,8 @@ public class HunterTaskRunningStateDto {
         hunterTaskRunningStateDto.setTotalStep(task.getTaskSteps().size());
         hunterTaskRunningStateDto.setTaskBeginTime(hunterTask.getBeginTime());
         hunterTaskRunningStateDto.setState(hunterTask.getState());
+        hunterTaskRunningStateDto.setState(hunterTask.getState());
+        hunterTaskRunningStateDto.setStop(hunterTask.getStop());
 
         //获取任务步骤和执行步骤的结合体
         Collection<HunterTaskStep> hunterTaskSteps = hunterTask.getHunterTaskSteps();
@@ -216,5 +219,13 @@ public class HunterTaskRunningStateDto {
 
     public void setTaskSteps(Collection<HunterRunningStepDto> taskSteps) {
         this.taskSteps = taskSteps;
+    }
+
+    public Boolean getStop() {
+        return isStop;
+    }
+
+    public void setStop(Boolean stop) {
+        isStop = stop;
     }
 }
