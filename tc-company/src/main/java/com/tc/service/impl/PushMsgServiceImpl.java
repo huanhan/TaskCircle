@@ -12,6 +12,7 @@ import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.Notification;
 import com.tc.dto.app.ChatMsgDto;
 import com.tc.dto.app.PushMsgState;
+import com.tc.dto.app.TaskMsg;
 import com.tc.service.PushMsgService;
 import com.tc.until.TranstionHelper;
 import org.slf4j.Logger;
@@ -33,32 +34,32 @@ public class PushMsgServiceImpl implements PushMsgService {
     private String jgMasterSecret;
 
     @Override
-    public void pushTask(String title, String content, String taskid, List<String> userids) {
+    public void pushTask(String title, String content, String taskid, List<Long> userids) {
         initPushPayload(title, content, PushMsgState.TASK, taskid, userids);
     }
 
     @Override
-    public void pushTask(String title, String content, String taskid, String... userid) {
+    public void pushTask(String title, String content, String taskid, Long... userid) {
         initPushPayload(title, content, PushMsgState.TASK, taskid, userid);
     }
 
     @Override
-    public void pushHunterTask(String title, String content, String hunterTaskid, List<String> userids) {
+    public void pushHunterTask(String title, String content, String hunterTaskid, List<Long> userids) {
         initPushPayload(title, content, PushMsgState.HUNTER_TASK, hunterTaskid, userids);
     }
 
     @Override
-    public void pushHunterTask(String title, String content, String hunterTaskid, String userid) {
+    public void pushHunterTask(String title, String content, String hunterTaskid, Long userid) {
         initPushPayload(title, content, PushMsgState.HUNTER_TASK, hunterTaskid, userid);
     }
 
     @Override
-    public void pushHunterList(String title, String content, String taskid, List<String> userids) {
+    public void pushHunterList(String title, String content, String taskid, List<Long> userids) {
         initPushPayload(title, content, PushMsgState.HUNTER_LIST, taskid, userids);
     }
 
     @Override
-    public void pushHunterList(String title, String content, String taskid, String userid) {
+    public void pushHunterList(String title, String content, String taskid, Long userid) {
         initPushPayload(title, content, PushMsgState.HUNTER_LIST, taskid, userid);
     }
 
@@ -87,34 +88,55 @@ public class PushMsgServiceImpl implements PushMsgService {
     }
 
     @Override
-    public void pushNewChat(String userid, ChatMsgDto chatMsgDto) {
+    public void pushNewChat(Long userid, ChatMsgDto chatMsgDto) {
         PushPayload payload = PushPayload.newBuilder()
                 .setPlatform(Platform.android())
-                .setMessage(Message.newBuilder().setMsgContent("信息").addExtra("msg", TranstionHelper.toGson(chatMsgDto)).build())
-                .setAudience(Audience.alias(userid))
+                .setAudience(Audience.alias(u2p(userid)))
+                .setMessage(Message.newBuilder().setMsgContent("")
+                        .addExtra("type", PushMsgState.CHAT.name())
+                        .addExtra("extra", TranstionHelper.toGson(chatMsgDto))
+                        .build())
                 .build();
         sendPush(payload);
     }
 
+    public String u2p(Long id) {
+        return "app_" + id;
+    }
+
     @Override
-    public void initPushPayload(String title, String content, PushMsgState state, String taskid, String... userids) {
+    public void initPushPayload(String title, String content, PushMsgState state, String taskid, Long... userids) {
         initPushPayload(title, content, state, taskid, Arrays.asList(userids));
     }
 
     @Override
-    public void initPushPayload(String title, String content, PushMsgState state, String taskid, List<String> userids) {
-        Map<String, String> param = new HashMap<>();
-        param.put("type", state.name());
-        param.put("extra", taskid);
+    public void initPushPayload(String title, String content, PushMsgState state, String taskid, List<Long> userids) {
+        TaskMsg taskMsg = new TaskMsg();
+        taskMsg.setContent(content);
+        taskMsg.setExtraData(taskid);
+        taskMsg.setTitle(title);
 
+        List<String> userIdList = new ArrayList<>();
+        for (Long userid : userids) {
+            userIdList.add(u2p(userid));
+        }
+        initPushPayload(state, taskMsg, userIdList);
+    }
+
+    @Override
+    public void initPushPayload(PushMsgState state, TaskMsg taskMsg, List<String> userids) {
         PushPayload payload = PushPayload.newBuilder()
                 .setPlatform(Platform.android())
                 .setAudience(Audience.alias(userids))
-                .setNotification(Notification.android(content, title, param))
+                .setMessage(Message.newBuilder().setMsgContent("")
+                        .addExtra("type", state.name())
+                        .addExtra("extra", TranstionHelper.toGson(taskMsg))
+                        .build())//自定义消息用的
                 .build();
         sendPush(payload);
     }
 
+    @Override
     public void sendPush(PushPayload payload) {
         JPushClient jpushClient = new JPushClient(jgMasterSecret, jgAppKey, null, ClientConfig.getInstance());
         try {

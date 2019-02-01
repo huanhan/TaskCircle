@@ -22,6 +22,7 @@ public class UserHunterInterflow implements Serializable {
     public static final String HUNTER_ID = "hunterId";
     public static final String USER_ID = "userId";
     public static final String TASK_ID = "taskId";
+    public static final String SENDER = "sender";
     public static final String CREATE_TIME = "createTime";
     public static final String CONTEXT = "context";
     public static final String TASK = "task";
@@ -33,6 +34,7 @@ public class UserHunterInterflow implements Serializable {
 
     private Long hunterId;
     private Long userId;
+    private Long sender;
     private String taskId;
     private Timestamp createTime;
     private String context;
@@ -79,6 +81,15 @@ public class UserHunterInterflow implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    @Column(name = "sender")
+    public Long getSender() {
+        return sender;
+    }
+
+    public void setSender(Long sender) {
+        this.sender = sender;
     }
 
     @Id
@@ -161,6 +172,7 @@ public class UserHunterInterflow implements Serializable {
                 hunter.getUser().getId().equals(that.getHunter().getUser().getId()) &&
                 taskId.equals(that.getTaskId()) &&
                 userId.equals(that.getUserId()) &&
+                sender.equals(that.getSender()) &&
                 hunterId.equals(that.getHunterId());
     }
 

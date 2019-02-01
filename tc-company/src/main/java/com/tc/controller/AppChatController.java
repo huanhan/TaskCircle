@@ -3,13 +3,13 @@ package com.tc.controller;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
 import com.tc.db.entity.UserHunterInterflow;
-import com.tc.dto.Result;
 import com.tc.dto.app.*;
 import com.tc.dto.task.QueryTaskInterflow;
 import com.tc.exception.ValidException;
 import com.tc.service.PushMsgService;
 import com.tc.service.UserHunterInterflowService;
 import com.tc.service.UserService;
+import com.tc.until.TimestampHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,31 +56,48 @@ public class AppChatController {
         queryTaskInterflow.setTaskId(taskid);
         Page<UserHunterInterflow> query = userHunterInterflowService.findByQuery(queryTaskInterflow);
         List<UserHunterInterflow> content = query.getContent();
-        List<ChatDto> data = ChatDto.init(content);
+        List<ChatDto> data = ChatDto.initList(content);
 
         return AppPage.init(data, query);
     }
 
     @PostMapping("/{id:\\d+}")
     @ApiOperation(value = "保存聊天记录")
-    public ResultApp saveChat(@PathVariable("id") Long id, @Valid @RequestBody ChatDtoReq addChat, BindingResult bindingResult) {
+    public ChatDto saveChat(@PathVariable("id") Long id, @Valid @RequestBody ChatDtoReq addChat, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
-        UserHunterInterflow save = userHunterInterflowService.save(ChatDtoReq.init(addChat));
+        UserHunterInterflow init = ChatDtoReq.init(addChat);
+        init.setSender(id);
+        UserHunterInterflow save = userHunterInterflowService.save(init);
+
+        //发送给对方聊天信息
         ChatMsgDto chatMsgDto = new ChatMsgDto();
         BeanUtils.copyProperties(save, chatMsgDto);
-        if (id == save.getUserId()) {
-            User one = userService.findOne(save.getUserId());
-            chatMsgDto.setIcon(one.getHeadImg());
+        User user = userService.findOne(save.getUserId());
+        User hunter = userService.findOne(save.getHunterId());
+
+        chatMsgDto.setContent(save.getContext());
+        chatMsgDto.setUserIcon(user.getHeadImg());
+        chatMsgDto.setHunterIcon(hunter.getHeadImg());
+        chatMsgDto.setCreateTime(TimestampHelper.today());
+
+        if (save.getUserId() == save.getSender()) {//如果发送的信息是当前用户发送的
+            chatMsgDto.setTitle("收到来自 " + user.getName() + " 的新消息");
+            //发送给猎刃新新消息
+            pushMsgService.pushNewChat(save.getHunterId(), chatMsgDto);
         } else {
-            User one = userService.findOne(save.getHunterId());
-            chatMsgDto.setIcon(one.getHeadImg());
+            chatMsgDto.setTitle("收到来自 " + hunter.getName() + " 的新消息");
+            //发送给用户新新消息
+            pushMsgService.pushNewChat(save.getUserId(), chatMsgDto);
         }
-//        pushMsgService.pushNewChat("" + save.getHunterId(), chatMsgDto);
-        pushMsgService.pushNotice("收到了聊天信息", chatMsgDto.getContext());
-        return ResultApp.init("增加成功");
+
+        ChatDto result = ChatDto.init(save);
+        result.setUserIcon(user.getHeadImg());
+        result.setHunterIcon(hunter.getHeadImg());
+
+        return result;
     }
 
 }

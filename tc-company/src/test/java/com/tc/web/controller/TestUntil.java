@@ -16,8 +16,14 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleRequest;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleResponse;
+import com.sun.org.apache.bcel.internal.generic.NEW;
+import com.tc.dto.app.ChatMsgDto;
+import com.tc.dto.app.PushMsgState;
+import com.tc.dto.app.TaskMsg;
 import com.tc.exception.ValidException;
 import com.tc.until.StringResourceCenter;
+import com.tc.until.TimestampHelper;
+import com.tc.until.TranstionHelper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -82,17 +88,22 @@ public class TestUntil {
     private String jgMasterSecret = "47019aa537adedb5b6b3c6e7";
 
     @Test
-    public void testPush() {
+    public void testTaskPush() {
         JPushClient jpushClient = new JPushClient(jgMasterSecret, jgAppKey, null, ClientConfig.getInstance());
 
-        Map<String, String> stringObjectHashMap = new HashMap<>();
-        stringObjectHashMap.put("test", "1212");
+        TaskMsg taskMsg = new TaskMsg();
+        taskMsg.setContent("测试任务推送");
+        taskMsg.setExtraData("20190201040203278856064");
+        taskMsg.setTitle("测试标题");
 
         PushPayload payload = PushPayload.newBuilder()
                 .setPlatform(Platform.android())
-                .setAudience(Audience.alias("123"))
-                .setNotification(Notification.android("出现的内容", "测试标题", stringObjectHashMap))//最后一个用来携带参数
-                //.setMessage(Message.newBuilder().setTitle("Message测试标题").setMsgContent("Message测试内容").build())//自定义消息用的
+                .setAudience(Audience.all())
+                //.setNotification(Notification.android("出现的内容", "测试标题", stringObjectHashMap))//最后一个用来携带参数
+                .setMessage(Message.newBuilder().setMsgContent("")
+                        .addExtra("type", PushMsgState.TASK.name())
+                        .addExtra("extra", TranstionHelper.toGson(taskMsg))
+                        .build())//自定义消息用的
                 .build();
         try {
             PushResult result = jpushClient.sendPush(payload);
@@ -102,6 +113,94 @@ public class TestUntil {
             throw new ValidException(StringResourceCenter.VALIDATOR_REQUEST_ERROR);
         }
     }
+
+    @Test
+    public void testHunterTaskPush() {
+        JPushClient jpushClient = new JPushClient(jgMasterSecret, jgAppKey, null, ClientConfig.getInstance());
+
+        TaskMsg taskMsg = new TaskMsg();
+        taskMsg.setContent("测试猎刃任务推送");
+        taskMsg.setExtraData("20190201040254723856064");
+        taskMsg.setTitle("测试标题");
+
+        PushPayload payload = PushPayload.newBuilder()
+                .setPlatform(Platform.android())
+                .setAudience(Audience.all())
+                //.setNotification(Notification.android("出现的内容", "测试标题", stringObjectHashMap))//最后一个用来携带参数
+                .setMessage(Message.newBuilder().setMsgContent("")
+                        .addExtra("type", PushMsgState.HUNTER_TASK.name())
+                        .addExtra("extra", TranstionHelper.toGson(taskMsg))
+                        .build())//自定义消息用的
+                .build();
+        try {
+            PushResult result = jpushClient.sendPush(payload);
+        } catch (APIConnectionException e) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_CONNECTION_ERROR);
+        } catch (APIRequestException e) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_REQUEST_ERROR);
+        }
+    }
+
+    @Test
+    public void testHunterListPush() {
+        JPushClient jpushClient = new JPushClient(jgMasterSecret, jgAppKey, null, ClientConfig.getInstance());
+
+        TaskMsg taskMsg = new TaskMsg();
+        taskMsg.setContent("测试猎刃列表推送");
+        taskMsg.setExtraData("20190201040203278856064");
+        taskMsg.setTitle("测试标题");
+
+        PushPayload payload = PushPayload.newBuilder()
+                .setPlatform(Platform.android())
+                .setAudience(Audience.all())
+                //.setNotification(Notification.android("出现的内容", "测试标题", stringObjectHashMap))//最后一个用来携带参数
+                .setMessage(Message.newBuilder().setMsgContent("")
+                        .addExtra("type", PushMsgState.HUNTER_LIST.name())
+                        .addExtra("extra", TranstionHelper.toGson(taskMsg))
+                        .build())//自定义消息用的
+                .build();
+        try {
+            PushResult result = jpushClient.sendPush(payload);
+        } catch (APIConnectionException e) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_CONNECTION_ERROR);
+        } catch (APIRequestException e) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_REQUEST_ERROR);
+        }
+    }
+
+    @Test
+    public void testChatMsgPush() {
+        JPushClient jpushClient = new JPushClient(jgMasterSecret, jgAppKey, null, ClientConfig.getInstance());
+
+        ChatMsgDto chatMsgDto = new ChatMsgDto();
+        chatMsgDto.setTitle("来自xx用户的新消息");
+        chatMsgDto.setUserIcon("https://i0.hdslb.com/bfs/face/156d5d3b3f4b66d940365b3b0e3a809e1fcc0d97.jpg");
+        chatMsgDto.setHunterIcon("https://i0.hdslb.com/bfs/face/156d5d3b3f4b66d940365b3b0e3a809e1fcc0d97.jpg");
+        chatMsgDto.setContent("你看我帅吗你看我我帅吗你看我帅吗");
+        chatMsgDto.setCreateTime(TimestampHelper.today());
+        chatMsgDto.setHunterId(13l);
+        chatMsgDto.setTaskId("20190201040203278856064");
+        chatMsgDto.setUserId(6l);
+        chatMsgDto.setSender(6l);
+
+        PushPayload payload = PushPayload.newBuilder()
+                .setPlatform(Platform.android())
+                .setAudience(Audience.all())
+                //.setNotification(Notification.android("出现的内容", "测试标题", stringObjectHashMap))//最后一个用来携带参数
+                .setMessage(Message.newBuilder().setMsgContent("")
+                        .addExtra("type", PushMsgState.CHAT.name())
+                        .addExtra("extra", TranstionHelper.toGson(chatMsgDto))
+                        .build())//自定义消息用的
+                .build();
+        try {
+            PushResult result = jpushClient.sendPush(payload);
+        } catch (APIConnectionException e) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_CONNECTION_ERROR);
+        } catch (APIRequestException e) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_REQUEST_ERROR);
+        }
+    }
+
     @Test
     public void testPush2() {
         JPushClient jpushClient = new JPushClient(jgMasterSecret, jgAppKey, null, ClientConfig.getInstance());

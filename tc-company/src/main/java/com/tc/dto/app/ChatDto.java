@@ -12,12 +12,13 @@ public class ChatDto {
     private Long hunterId;
     private Long userId;
     private String taskId;
+    private Long sender;
     private Timestamp createTime;
     private String context;
     private String userIcon;
     private String hunterIcon;
 
-    public static List<ChatDto> init(List<UserHunterInterflow> content) {
+    public static List<ChatDto> initList(List<UserHunterInterflow> content) {
         ArrayList<ChatDto> chatDtos = new ArrayList<>();
         ChatDto chatDto;
         for (UserHunterInterflow userHunterInterflow : content) {
@@ -25,9 +26,17 @@ public class ChatDto {
             BeanUtils.copyProperties(userHunterInterflow, chatDto);
             chatDto.setUserIcon(userHunterInterflow.getUser().getHeadImg());
             chatDto.setHunterIcon(userHunterInterflow.getHunter().getUser().getHeadImg());
+
             chatDtos.add(chatDto);
         }
         return chatDtos;
+    }
+
+    public static ChatDto init(UserHunterInterflow content) {
+        ChatDto chatDto = new ChatDto();
+        BeanUtils.copyProperties(content, chatDto);
+        //这里没设置图片
+        return chatDto;
     }
 
     public Long getHunterId() {
@@ -44,6 +53,14 @@ public class ChatDto {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getSender() {
+        return sender;
+    }
+
+    public void setSender(Long sender) {
+        this.sender = sender;
     }
 
     public String getTaskId() {
