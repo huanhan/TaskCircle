@@ -24,6 +24,8 @@ public class HunterTaskAppDto {
     private Boolean isStop;
     private Float money;
     private Integer curStep;
+    private String auditContext;
+    private String hunterRejectContext;
 
     public String getId() {
         return id;
@@ -159,6 +161,22 @@ public class HunterTaskAppDto {
 
     public void setHunterId(Long hunterId) {
         this.hunterId = hunterId;
+    }
+
+    public String getAuditContext() {
+        return auditContext;
+    }
+
+    public void setAuditContext(String auditContext) {
+        this.auditContext = auditContext;
+    }
+
+    public String getHunterRejectContext() {
+        return hunterRejectContext;
+    }
+
+    public void setHunterRejectContext(String hunterRejectContext) {
+        this.hunterRejectContext = hunterRejectContext;
     }
 
     public static HunterTaskAppDto toDetail(HunterTask task) {

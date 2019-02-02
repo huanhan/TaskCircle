@@ -37,9 +37,9 @@ public class AppMessageController {
     private UserService userService;
 
     //查询公告
-    @GetMapping("/{id:\\d+}/{page:\\d+}/{size:\\d+}")
+    @GetMapping("/{page:\\d+}/{size:\\d+}/{id:\\d+}")
     @ApiOperation(value = "查询所有可见公告")
-    public AppPage all(@PathVariable Long id, @PathVariable int page, @PathVariable int size) {
+    public AppPage all(@PathVariable int page, @PathVariable int size, @PathVariable Long id) {
         User user = userService.findOne(id);
         if (user == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
