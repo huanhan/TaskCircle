@@ -32,7 +32,7 @@ public class UserAppDto {
     /**
      * 账户余额
      */
-    private Float money = 0.00f;
+    private Float money = 0.0f;
     /**
      * 身份证号码
      */
