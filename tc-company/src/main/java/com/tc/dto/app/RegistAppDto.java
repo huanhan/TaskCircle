@@ -1,4 +1,4 @@
-package com.tc.dto.user;
+package com.tc.dto.app;
 
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
@@ -6,16 +6,11 @@ import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
 import com.tc.validator.Username;
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 
-/**
- * @author Cyg
- * 用户注册DTO
- */
-public class RegisterUser implements Serializable {
+public class RegistAppDto {
 
     @NotBlank
     @Size(min = 8,message = "账户最少8位")
@@ -26,14 +21,8 @@ public class RegisterUser implements Serializable {
     @Size(min = 6,message = "密码最少为6位")
     private String password;
 
-    public RegisterUser() {
-    }
-
-    public RegisterUser(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
+    @NotEmpty(message = "请输入验证码")
+    private String imageCode;
 
     public String getUsername() {
         return username;
@@ -49,6 +38,14 @@ public class RegisterUser implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getImageCode() {
+        return imageCode;
+    }
+
+    public void setImageCode(String imageCode) {
+        this.imageCode = imageCode;
     }
 
     public User toUser(){
