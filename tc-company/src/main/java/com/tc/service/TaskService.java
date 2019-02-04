@@ -5,6 +5,7 @@ import com.tc.db.enums.TaskState;
 import com.tc.dto.TimeScope;
 import com.tc.dto.task.QueryTask;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -169,4 +170,6 @@ public interface TaskService extends BasicService<Task> {
      * @return
      */
     Page<Task> findCashPledge(Long id, TimeScope scope);
+
+    Page<Task> search(String key, Pageable pageable);
 }
