@@ -274,7 +274,13 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         //判断用户是否也放弃了任务
         if (task.getState().equals(TaskState.ABANDON_COMMIT) && hunterTask.getStop()) {
             //设置猎刃任务状态为放弃任务
-            count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_ABANDON, 0F, MoneyType.IS_NULL);
+//            count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_ABANDON, 0F, MoneyType.IS_NULL);
+
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),
+                    HunterTaskState.TASK_ABANDON,
+                    context,
+                    0F,
+                    MoneyType.IS_NULL);
 
             if (count <= 0) {
                 throw new DBException("修改任务状态失败");
@@ -293,7 +299,13 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             if (TimestampHelper.differByMinute(TimestampHelper.today(), hunterTask.getAcceptTime()) <= task.getPermitAbandonMinute()) {
 
                 //设置猎刃任务状态为放弃任务
-                count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_ABANDON, 0F, MoneyType.IS_NULL);
+//                count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_ABANDON, 0F, MoneyType.IS_NULL);
+
+                count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),
+                        HunterTaskState.TASK_ABANDON,
+                        context,
+                        0F,
+                        MoneyType.IS_NULL);
 
                 if (count <= 0) {
                     throw new DBException("修改任务状态失败");

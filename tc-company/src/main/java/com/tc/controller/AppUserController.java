@@ -3,24 +3,31 @@ package com.tc.controller;
 import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserState;
+import com.tc.dto.app.RegistAppDto;
+import com.tc.dto.app.ResultApp;
 import com.tc.dto.app.UserAppDto;
-import com.tc.dto.user.CommitHunter;
 import com.tc.dto.user.ModifyUser;
 import com.tc.dto.user.ModifyUserHeader;
-import com.tc.dto.user.RegisterUser;
 import com.tc.exception.ValidException;
+import com.tc.security.app.validate.code.impl.RedisValidateCodeRepository;
+import com.tc.security.core.validate.code.ValidateCode;
+import com.tc.security.core.validate.code.ValidateCodeException;
+import com.tc.security.core.validate.code.ValidateCodeProcessorHolder;
+import com.tc.security.core.validate.code.ValidateCodeType;
 import com.tc.service.CommentUserService;
 import com.tc.service.UserImgService;
 import com.tc.service.UserService;
-import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
 
@@ -42,6 +49,12 @@ public class AppUserController {
 
     @Autowired
     private UserImgService userImgService;
+
+    @Autowired
+    private RedisValidateCodeRepository redisValidateCodeRepository;
+
+    @Autowired
+    private ValidateCodeProcessorHolder validateCodeProcessorHolder;
 
     /**
      * 用来获取用户详情信息
@@ -70,7 +83,7 @@ public class AppUserController {
      */
     @PutMapping("/{id:\\d+}")
     @ApiOperation(value = "修改用户信息")
-    public UserAppDto update(@PathVariable("id") Long id, @Valid @RequestBody ModifyUser modifyUser, BindingResult bindingResult) {
+    public ResultApp update(@PathVariable("id") Long id, @Valid @RequestBody ModifyUser modifyUser, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -82,7 +95,7 @@ public class AppUserController {
         Long count = commentUserService.countByUserId(id);
         userAppDto.setCommentsNum(count);
 
-        return userAppDto;
+        return ResultApp.init("更新成功");
     }
 
 
@@ -95,13 +108,14 @@ public class AppUserController {
      */
     @PutMapping("/header/{id:\\d+}")
     @ApiOperation(value = "修改用户头像")
-    public void updateHead(@PathVariable("id") Long id, @Valid @RequestBody ModifyUserHeader modifyUserHeader, BindingResult bindingResult) {
+    public ResultApp updateHead(@PathVariable("id") Long id, @Valid @RequestBody ModifyUserHeader modifyUserHeader, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
         User user = userService.findOne(id);
         user.setHeadImg(modifyUserHeader.getHeader());
         userService.update(user);
+        return ResultApp.init("更新成功");
     }
 
     /**
@@ -109,9 +123,9 @@ public class AppUserController {
      *
      * @param id
      */
-    @GetMapping("/upAudit/{id:\\d+}")
+    @PostMapping("/upAudit/{id:\\d+}")
     @ApiOperation(value = "提交成为猎刃的申请")
-    public void upAudit(@PathVariable("id") Long id) {
+    public ResultApp upAudit(@PathVariable("id") Long id) {
         //根据编号获取详情信息
         User user = userService.findOne(id);
         //验证用户的准确性
@@ -174,51 +188,85 @@ public class AppUserController {
 
         //修改用户状态为申请状态
         userService.updateState(id, UserState.AUDIT_HUNTER, new Date());
+        return ResultApp.init("更新成功");
     }
 
     /**
-     * 提交猎刃审核申请
-     * @param commitHunter 提交申请的必要信息
+     * 提交猎刃审核申请(废弃)
+     *
+     * @param commitHunter  提交申请的必要信息
      * @param bindingResult
      */
-    @PostMapping("/commit/hunter")
+    /*@PostMapping("/commit/hunter")
     @ApiOperation(value = "提交猎刃审核申请")
-    public void commitByHunter(@Valid @RequestBody CommitHunter commitHunter, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
+    public ResultApp commitByHunter(@Valid @RequestBody CommitHunter commitHunter, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
 
         User user = userService.findOne(commitHunter.getId());
-        if (user == null){
+        if (user == null) {
             throw new ValidException(StringResourceCenter.DB_QUERY_ABNORMAL);
         }
-        if (user.getCategory() != UserCategory.NORMAL){
+        if (user.getCategory() != UserCategory.NORMAL) {
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
-        if (user.getState() != UserState.NORMAL){
+        if (user.getState() != UserState.NORMAL) {
             throw new ValidException(StringResourceCenter.VALIDATOR_STATE_FAILED);
         }
 
-        User result = userService.save(CommitHunter.toUser(user,commitHunter));
-        if (result == null){
+        User result = userService.save(CommitHunter.toUser(user, commitHunter));
+        if (result == null) {
             throw new ValidException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
-
-    }
+        return ResultApp.init("已提交");
+    }*/
 
     /**
      * 用户注册
-     * @param user 用户信息
+     *
+     * @param user   用户信息
      * @param result 异常结果
      * @return
      */
     @PostMapping("/register")
     @ApiOperation(value = "用户注册")
-    public User register(@Valid @RequestBody RegisterUser user, BindingResult result){
-        if (result.hasErrors()){
+    public ResultApp register(@Valid @RequestBody RegistAppDto user, HttpServletRequest req, HttpServletResponse resp, BindingResult result) {
+        if (result.hasErrors()) {
             throw new ValidException(result.getFieldErrors());
         }
-        return userService.save(user.toUser());
+        //验证验证码是否正确
+        ServletWebRequest servletWebRequest = new ServletWebRequest(req, resp);
+        ValidateCode codeInSession = redisValidateCodeRepository.get(servletWebRequest, ValidateCodeType.IMAGE);
+        String codeInRequest = user.getImageCode();
+
+        if (StringUtils.isBlank(codeInRequest)) {
+            throw new ValidException("验证码的值不能为空");
+        }
+
+        if (codeInSession == null) {
+            throw new ValidException("验证码不存在");
+        }
+
+        if (codeInSession.isExpried()) {
+            redisValidateCodeRepository.remove(servletWebRequest, ValidateCodeType.IMAGE);
+            throw new ValidException("验证码已过期");
+        }
+
+        if (!org.apache.commons.lang.StringUtils.equals(codeInSession.getCode(), codeInRequest)) {
+            throw new ValidException("验证码不匹配");
+        }
+
+        redisValidateCodeRepository.remove(servletWebRequest, ValidateCodeType.IMAGE);
+
+        User save = userService.save(user.toUser());
+        return ResultApp.init("注册成功");
+    }
+
+
+    @GetMapping("/{time:\\d+}/code/Image")
+    public void validateCode(HttpServletRequest request, HttpServletResponse response, @PathVariable("time") Long time) throws Exception {
+        validateCodeProcessorHolder.findValidateCodeProcessor("Image").create(new ServletWebRequest(request, response));
     }
 
 }

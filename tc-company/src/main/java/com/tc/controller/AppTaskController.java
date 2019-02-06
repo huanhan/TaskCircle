@@ -14,9 +14,7 @@ import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -50,13 +48,10 @@ public class AppTaskController {
     private HunterTaskService hunterTaskService;
 
     @Autowired
-    private TaskStepService taskStepService;
-
-    @Autowired
-    private HunterTaskStepService hunterTaskStepService;
-
-    @Autowired
     private TaskClassifyService taskClassifyService;
+
+    @Autowired
+    private PushMsgService pushMsgService;
 
     /**
      * Task步骤1：新建任务在保存成功后的状态为NEW_CREATE("新建")
@@ -117,6 +112,7 @@ public class AppTaskController {
 
         return taskClassifyAppDtos;
     }
+
 
     /**
      * Task步骤1：属于添加任务
@@ -587,6 +583,37 @@ public class AppTaskController {
     }
 
     /**
+     * 搜索任务
+     *
+     * @return
+     */
+    @GetMapping("/search/{key}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "搜索任务")
+    public AppPage search(@PathVariable("key") String key,
+                          @PathVariable("page") int page,
+                          @PathVariable("size") int size,
+                          @PathVariable("id") Long id) {
+//        QueryTask queryTask = new QueryTask(page, size);
+//        queryTask.setSort(new Sort(Sort.Direction.DESC, Task.CREATE_TIME));
+//        //        queryTask.setContext(key);
+//        queryTask.setTaskName(key);
+//        queryTask.setState(TaskState.ISSUE);
+//        Page<Task> taskPage = taskService.findByQueryTask(queryTask);
+
+        Pageable pageable = new PageRequest(page, size, new Sort(Sort.Direction.DESC, Task.CREATE_TIME));
+
+        Page<Task> taskPage = taskService.search(key, pageable);
+
+        List<Task> content = taskPage.getContent();
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+
+        return AppPage.init(taskAppDtos, taskPage);
+    }
+
+    /**
      * 根据状态获取指定用户的任务列表
      *
      * @param state 任务状态 查询全部用ALL,其余参考TaskState
@@ -826,7 +853,7 @@ public class AppTaskController {
         }
 
         //删除任务，将任务状态修改为删除状态
-        boolean isSuccess = taskService.updateState(taskId,TaskState.DELETE_OK);
+        boolean isSuccess = taskService.updateState(taskId, TaskState.DELETE_OK);
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

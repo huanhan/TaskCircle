@@ -6,6 +6,13 @@ import com.tc.db.enums.UserGender;
 import java.sql.Timestamp;
 
 public class UserAppDto {
+
+
+
+    /**
+     * 用户编号
+     */
+    private Long id;
     /**
      * 用户姓名
      */
@@ -25,7 +32,7 @@ public class UserAppDto {
     /**
      * 账户余额
      */
-    private Float money = 0.00f;
+    private Float money = 0.0f;
     /**
      * 身份证号码
      */
@@ -74,6 +81,14 @@ public class UserAppDto {
      * 获取所有评论数
      */
     private Long commentsNum;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

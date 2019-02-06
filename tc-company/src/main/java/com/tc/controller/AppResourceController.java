@@ -1,5 +1,14 @@
 package com.tc.controller;
 
+import cn.jiguang.common.ClientConfig;
+import cn.jiguang.common.resp.APIConnectionException;
+import cn.jiguang.common.resp.APIRequestException;
+import cn.jpush.api.JPushClient;
+import cn.jpush.api.push.PushResult;
+import cn.jpush.api.push.model.Platform;
+import cn.jpush.api.push.model.PushPayload;
+import cn.jpush.api.push.model.audience.Audience;
+import cn.jpush.api.push.model.notification.Notification;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
@@ -7,18 +16,13 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleRequest;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleResponse;
-import com.tc.dto.app.HomeAppDto;
 import com.tc.dto.app.OssToken;
 import com.tc.exception.ValidException;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -37,6 +41,7 @@ public class AppResourceController {
 
     @Value("${taskcircle.oss.RoleArn}")
     private String roleArn;
+
 
     @GetMapping("/osstoken")
     @ApiOperation(value = "获取阿里云oss图片上传token")
@@ -76,7 +81,7 @@ public class AppResourceController {
         } catch (ClientException e) {
             throw new ValidException(StringResourceCenter.VALIDATOR_OSS_TOKEN_FAILED);
         }
-
-
     }
+
+
 }
