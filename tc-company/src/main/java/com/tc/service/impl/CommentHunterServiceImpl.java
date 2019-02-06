@@ -36,4 +36,9 @@ public class CommentHunterServiceImpl extends AbstractBasicServiceImpl<CommentHu
     public CommentHunter findOne(Long id) {
         return commentHunterRepository.findOne(id);
     }
+
+    @Override
+    public CommentHunter save(CommentHunter commentHunter) {
+        return commentHunterRepository.save(commentHunter);
+    }
 }

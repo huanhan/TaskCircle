@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * 评论用户服务的实现
+ *
  * @author Cyg
  */
 @Service
@@ -22,24 +23,29 @@ public class CommentUserServiceImpl extends AbstractBasicServiceImpl<CommentUser
     @Autowired
     private CommentUserRepository commentUserRepository;
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Long countByUserId(Long userid) {
         return commentUserRepository.countByUserId(userid);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Page<CommentUser> findByQuery(QueryUserComment queryUserComment) {
         return commentUserRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = QueryUserComment.initPredicates(queryUserComment,root,query,cb);
+            List<Predicate> predicates = QueryUserComment.initPredicates(queryUserComment, root, query, cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
-        },queryUserComment);
+        }, queryUserComment);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public CommentUser findOne(Long id) {
         return commentUserRepository.findOne(id);
+    }
+
+    @Override
+    public CommentUser save(CommentUser commentUser) {
+        return commentUserRepository.save(commentUser);
     }
 }

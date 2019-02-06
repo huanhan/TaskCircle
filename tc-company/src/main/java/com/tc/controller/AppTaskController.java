@@ -129,7 +129,7 @@ public class AppTaskController {
             throw new ValidException(bindingResult.getFieldErrors());
         }
         //根据任务编号获取任务
-        Task task = taskService.findOne(addTaskStep.getTaskId());
+        Task task = taskService.findOne(addTaskStep.getHunterTaskId());
 
         //判断查询的任务是否存在
         if (task == null){

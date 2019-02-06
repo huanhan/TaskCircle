@@ -37,4 +37,9 @@ public class CommentTaskServiceImpl extends AbstractBasicServiceImpl<CommentTask
     public CommentTask findOne(Long id) {
         return commentTaskRepository.findOne(id);
     }
+
+    @Override
+    public CommentTask save(CommentTask commentTask) {
+        return commentTaskRepository.save(commentTask);
+    }
 }

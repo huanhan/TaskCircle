@@ -2,6 +2,7 @@ package com.tc.service.impl;
 
 import com.tc.controller.AuditController;
 import com.tc.db.entity.*;
+import com.tc.db.enums.CommentType;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.MoneyType;
 import com.tc.db.enums.TaskState;
@@ -246,7 +247,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         });
         if (task.getPeopleNumber().equals(peopleNumber)) {
             count = taskRepository.updateState(task.getId(), TaskState.FINISH);
-            if (count <= 0){
+            if (count <= 0) {
                 throw new DBException("修改任务状态失败");
             }
         }
@@ -550,5 +551,33 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
                 throw new DBException("退回猎刃押金失败");
             }
         }
+    }
+
+    /**
+     * 更新评价
+     * @param id
+     * @param type
+     * @return
+     */
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public HunterTask updateEvaState(String id, CommentType type) {
+        HunterTask hunterTask = hunterTaskRepository.findOne(id);
+        switch (type) {
+            case COMMENT_TASK:
+                hunterTask.setHunterCTask(true);
+                break;
+            case HUNTER_COMMENT_USER:
+                hunterTask.setHunterCUser(true);
+                break;
+            case USER_COMMENT_HUNTER:
+                hunterTask.setUserCHunter(true);
+                break;
+        }
+        HunterTask save = hunterTaskRepository.save(hunterTask);
+        if (save != null) {
+            return hunterTask;
+        }
+        return null;
     }
 }
