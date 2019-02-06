@@ -2,14 +2,12 @@ package com.tc;
 
 import com.google.gson.Gson;
 import com.tc.db.entity.*;
+import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.authority.*;
 import com.tc.dto.enums.DateType;
 import com.tc.dto.user.DateCondition;
-import com.tc.until.IdGenerator;
-import com.tc.until.ListUtils;
-import com.tc.until.TimestampHelper;
-import com.tc.until.TranstionHelper;
+import com.tc.until.*;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -107,9 +105,16 @@ public class TextRuntime {
         Comment comment = new Comment();
         comment.setCreateTime(now);
 
+        Admin admin = new Admin();
+        admin.setUser(new User());
+        admin.setAdmin(new Admin());
 
 
-        String json = printGson(comment);
+        if (ValidateUtil.isSpecialChar("||")){
+            System.out.println("ssss");
+        }
+
+        String json = printGson(UserCategory.toList());
         getDTO(json);
     }
 

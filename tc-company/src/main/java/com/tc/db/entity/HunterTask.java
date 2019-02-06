@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,6 +65,9 @@ public class HunterTask implements Serializable {
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
     private Collection<AuditHunterTask> auditHunterTasksById;
+    private Boolean userCHunter;
+    private Boolean hunterCUser;
+    private Boolean hunterCTask;
 
     public HunterTask() {
     }
@@ -75,6 +79,68 @@ public class HunterTask implements Serializable {
         }
     }
 
+    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
+        if (!ListUtils.isEmpty(content)) {
+            content.forEach(hunterTask -> {
+                if (hunterTask.getTask() != null) {
+                    hunterTask.setTask(new Task(hunterTask.getTask().getId(), hunterTask.getTask().getName()));
+                }
+                if (hunterTask.getHunter() != null) {
+                    hunterTask.getHunter().toDetail();
+                }
+                hunterTask.commentHunters = null;
+                hunterTask.hunterTaskSteps = null;
+                hunterTask.auditHunterTasksById = null;
+            });
+        }
+        return content;
+    }
+
+    public static List<String> toIds(List<HunterTask> tasks) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)) {
+            tasks.forEach(task -> result.add(task.id));
+        }
+        return result;
+    }
+
+    public static List<Long> toUserIds(List<HunterTask> tasks) {
+        List<Long> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(tasks)) {
+            tasks.forEach(task -> result.add(task.hunterId));
+        }
+        return result;
+    }
+
+    public static HunterTask toDetail(HunterTask hunterTask) {
+        if (hunterTask != null) {
+            if (hunterTask.task != null) {
+                hunterTask.task = new Task(hunterTask.taskId, hunterTask.task.getName());
+            }
+            if (hunterTask.hunter != null) {
+                hunterTask.hunter.toDetail();
+            }
+            hunterTask.commentHunters = null;
+            hunterTask.hunterTaskSteps = null;
+            hunterTask.auditHunterTasksById = null;
+        }
+        return hunterTask;
+    }
+
+    /**
+     * 新增一条猎刃任务记录
+     *
+     * @return
+     */
+    public static HunterTask init(String taskId, Long hunterId) {
+        HunterTask hunterTask = new HunterTask();
+        hunterTask.setId(IdGenerator.INSTANCE.nextId());
+        hunterTask.setTaskId(taskId);
+        hunterTask.setHunterId(hunterId);
+        hunterTask.setStop(false);
+        hunterTask.setState(HunterTaskState.RECEIVE);
+        return hunterTask;
+    }
 
     @Id
     @Column(name = "id")
@@ -296,6 +362,35 @@ public class HunterTask implements Serializable {
         this.auditHunterTasksById = auditHunterTasksById;
     }
 
+    @Basic
+    @Column(name = "user_c_hunter")
+    public Boolean getUserCHunter() {
+        return userCHunter;
+    }
+
+    public void setUserCHunter(Boolean userCHunter) {
+        this.userCHunter = userCHunter;
+    }
+
+    @Basic
+    @Column(name = "hunter_c_user")
+    public Boolean getHunterCUser() {
+        return hunterCUser;
+    }
+
+    public void setHunterCUser(Boolean hunterCUser) {
+        this.hunterCUser = hunterCUser;
+    }
+
+    @Basic
+    @Column(name = "hunter_c_task")
+    public Boolean getHunterCTask() {
+        return hunterCTask;
+    }
+
+    public void setHunterCTask(Boolean hunterCTask) {
+        this.hunterCTask = hunterCTask;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -333,66 +428,4 @@ public class HunterTask implements Serializable {
     }
 
 
-    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
-        if (!ListUtils.isEmpty(content)) {
-            content.forEach(hunterTask -> {
-                if (hunterTask.getTask() != null) {
-                    hunterTask.setTask(new Task(hunterTask.getTask().getId(), hunterTask.getTask().getName()));
-                }
-                if (hunterTask.getHunter() != null) {
-                    hunterTask.getHunter().toDetail();
-                }
-                hunterTask.commentHunters = null;
-                hunterTask.hunterTaskSteps = null;
-                hunterTask.auditHunterTasksById = null;
-            });
-        }
-        return content;
-    }
-
-    public static List<String> toIds(List<HunterTask> tasks) {
-        List<String> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(tasks)) {
-            tasks.forEach(task -> result.add(task.id));
-        }
-        return result;
-    }
-
-    public static List<Long> toUserIds(List<HunterTask> tasks) {
-        List<Long> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(tasks)) {
-            tasks.forEach(task -> result.add(task.hunterId));
-        }
-        return result;
-    }
-
-    public static HunterTask toDetail(HunterTask hunterTask) {
-        if (hunterTask != null) {
-            if (hunterTask.task != null) {
-                hunterTask.task = new Task(hunterTask.taskId, hunterTask.task.getName());
-            }
-            if (hunterTask.hunter != null) {
-                hunterTask.hunter.toDetail();
-            }
-            hunterTask.commentHunters = null;
-            hunterTask.hunterTaskSteps = null;
-            hunterTask.auditHunterTasksById = null;
-        }
-        return hunterTask;
-    }
-
-    /**
-     * 新增一条猎刃任务记录
-     *
-     * @return
-     */
-    public static HunterTask init(String taskId, Long hunterId) {
-        HunterTask hunterTask = new HunterTask();
-        hunterTask.setId(IdGenerator.INSTANCE.nextId());
-        hunterTask.setTaskId(taskId);
-        hunterTask.setHunterId(hunterId);
-        hunterTask.setStop(false);
-        hunterTask.setState(HunterTaskState.RECEIVE);
-        return hunterTask;
-    }
 }

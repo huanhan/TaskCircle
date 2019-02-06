@@ -4,12 +4,19 @@ import com.tc.db.entity.Admin;
 import com.tc.db.entity.User;
 import com.tc.db.enums.AdminState;
 import com.tc.db.enums.UserGender;
+import com.tc.validator.IDCard;
+import com.tc.validator.NoSpecial;
+import com.tc.validator.Phone;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
+import org.junit.Before;
 
+import javax.persistence.IdClass;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.sql.Timestamp;
 
 /**
@@ -37,42 +44,59 @@ public class ModifyAdmin {
     /**
      * 身份证号码
      */
+    @Length(max = 18)
+    @IDCard
     private String idCard;
     /**
      * 家庭住址
      */
+    @NoSpecial
+    @Length(max = 100)
     private String address;
     /**
      * 毕业学校
      */
+    @NoSpecial
+    @Length(max = 30)
     private String school;
     /**
      * 职业
      */
+    @NoSpecial
+    @Length(max = 20)
     private String major;
     /**
      * 兴趣
      */
+    @NoSpecial
+    @Length(max = 100)
     private String interest;
     /**
      * 简介
      */
+    @NoSpecial
+    @Length(max = 100)
     private String intro;
     /**
      * 身高
      */
+    @Max(999)
     private Integer height;
     /**
      * 体重
      */
+    @Max(999)
     private Integer weight;
     /**
      * 生日
      */
+    @Past
     private Timestamp birthday;
     /**
      * 用户手机号码
      */
+    @Length(max = 16)
+    @Phone
     private String phone;
     /**
      * 管理员状态

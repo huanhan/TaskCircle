@@ -1,8 +1,10 @@
 package com.tc.db.enums;
 
 import com.tc.dto.Show;
+import com.tc.dto.TransEnum;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +24,14 @@ public enum UserCategory {
 
     UserCategory(String category) {
         this.category = category;
+    }
+
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (UserCategory userCategory : UserCategory.values()) {
+            result.add(TransEnum.init(userCategory.name(),userCategory.getCategory()));
+        }
+        return result;
     }
 
     public String getCategory() {

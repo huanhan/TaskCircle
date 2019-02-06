@@ -35,6 +35,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: com.aliyun:aliyun-java-sdk-sts:3.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.aliyun:aliyun-java-sdk-core:3.5.0" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20140107" level="project" />
     <orderEntry type="module" module-name="tc-security-app" />
     <orderEntry type="module" module-name="tc-security-core" />
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-starter-oauth2:1.2.1.RELEASE" level="project" />

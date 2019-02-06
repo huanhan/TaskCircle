@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.db.enums.CommentType;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -90,6 +91,7 @@ public class Comment {
     }
 
     @Basic
+    @CreationTimestamp
     @Column(name = "create_time")
     public Timestamp getCreateTime() {
         return createTime;

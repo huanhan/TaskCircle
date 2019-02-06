@@ -1,15 +1,22 @@
 package com.tc.validator.impl;
 
-import com.tc.validator.IDCard;
-import com.tc.until.IDCardHelper;
+import com.tc.until.ValidateUtil;
+import com.tc.validator.NoSpecial;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class IDCardValidator implements ConstraintValidator<IDCard,Object> {
+@Component
+public class SpecialValidator implements ConstraintValidator<NoSpecial,Object> {
+
+
+
+
     @Override
-    public void initialize(IDCard idCard) {
+    public void initialize(NoSpecial name) {
+
 
     }
 
@@ -18,6 +25,7 @@ public class IDCardValidator implements ConstraintValidator<IDCard,Object> {
         if (StringUtils.isEmpty(o.toString())){
             return true;
         }
-        return IDCardHelper.isValidIdNo(o.toString());
+        return ValidateUtil.isSpecialChar(o.toString());
+
     }
 }

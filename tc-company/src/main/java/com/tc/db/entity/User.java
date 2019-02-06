@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
+import com.tc.dto.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
@@ -204,6 +205,16 @@ public class User implements Serializable {
      * 用户的提现与充值记录
      */
     private Collection<UserWithdraw> userWithdraws;
+
+    /**
+     * 所有的用户类别
+     */
+    private List<TransEnum> categories;
+
+    /**
+     * 用户性别
+     */
+    private List<TransEnum> genders;
 
     public User() {
     }
@@ -652,12 +663,31 @@ public class User implements Serializable {
         this.userWithdraws = userWithdrawsById;
     }
 
+    @Transient
+    public List<TransEnum> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<TransEnum> categories) {
+        this.categories = categories;
+    }
+
+    @Transient
+    public List<TransEnum> getGenders() {
+        return genders;
+    }
+
+    public void setGenders(List<TransEnum> genders) {
+        this.genders = genders;
+    }
 
     public interface UserBasicView {}
 
     public interface UserBasicDetailView extends UserBasicView{}
 
     public static User toDetail(User user) {
+        user.setGenders(UserGender.toList());
+        user.setCategories(UserCategory.toList());
         user.setPassword(null);
         user.setAdmin(null);
         user.setAuditHunters(null);

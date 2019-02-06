@@ -3,6 +3,7 @@ package com.tc.db.entity;
 import com.sun.org.apache.regexp.internal.RE;
 import com.tc.db.enums.AdminState;
 import com.tc.dto.Show;
+import com.tc.dto.TransEnum;
 import com.tc.dto.admin.QueryAdmin;
 import com.tc.until.ListUtils;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,8 @@ public class Admin {
     private Collection<Authority> authorities;
     private Collection<Message> messages;
     private Collection<TaskClassify> taskClassifies;
+
+    private List<TransEnum> adminStates;
 
     public Admin() {
     }
@@ -109,8 +112,9 @@ public class Admin {
 
     public static Admin toDetail(Admin admin){
         if (admin != null){
+            admin.setAdminStates(AdminState.toList());
             admin.setUser(User.toDetail(admin.getUser()));
-            admin.setAdmin(new Admin(admin.getCreateId()));
+admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
             admin.setAdmins(null);
             admin.setAdminAuthorities(null);
             admin.setAudits(null);
@@ -255,4 +259,12 @@ public class Admin {
         this.taskClassifies = taskClassifies;
     }
 
+    @Transient
+    public List<TransEnum> getAdminStates() {
+        return adminStates;
+    }
+
+    public void setAdminStates(List<TransEnum> adminStates) {
+        this.adminStates = adminStates;
+    }
 }
