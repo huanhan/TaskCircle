@@ -3,11 +3,7 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.db.enums.CommentType;
-import com.tc.dto.Result;
-import com.tc.dto.app.AppPage;
-import com.tc.dto.app.CommentUserDto;
-import com.tc.dto.app.HunterCommentDto;
-import com.tc.dto.app.ResultApp;
+import com.tc.dto.app.*;
 import com.tc.dto.comment.*;
 import com.tc.exception.ValidException;
 import com.tc.service.*;
@@ -64,6 +60,14 @@ public class AppCommentController {
 
         if (hunterTask.getHunterId() != id) {
             throw new ValidException("只能评价自己的任务");
+        }
+
+        if (comment.getEvaUserId() == hunterTask.getTask().getUser().getId()) {
+            throw new ValidException("当前任务的用户和提交用户不一致");
+        }
+
+        if (!hunterTask.getHunterCTask() && !hunterTask.getHunterCUser()) {
+            throw new ValidException("任务已经评价过了，请勿重复评价");
         }
 
         //评价任务
@@ -168,6 +172,11 @@ public class AppCommentController {
         if (hunterTask.getTask().getUser().getId() != id) {
             throw new ValidException("只能评价自己的任务");
         }
+
+        if (!hunterTask.getUserCHunter()) {
+            throw new ValidException("任务已经评价过了，请勿重复评价");
+        }
+
         //用户的评论
         Comment userComment = new Comment();
         userComment.setType(CommentType.USER_COMMENT_HUNTER);
@@ -189,13 +198,13 @@ public class AppCommentController {
     }
 
     /**
-     * 获取猎刃对我的评论
+     * 用户获取猎刃对用户的评论
      *
      * @param id
      * @return
      */
-    @PostMapping("/{page:\\d+}/{size:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "获取我收到的评论")
+    @GetMapping("/evaUserByUser/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户获取猎刃对用户的评论")
     public AppPage received(@PathVariable("page") int page,
                             @PathVariable("size") int size,
                             @PathVariable("id") Long id) {
@@ -207,23 +216,77 @@ public class AppCommentController {
         for (CommentUser commentUser : commentUsers) {
             commentUserDtos.add(CommentUserDto.init(commentUser));
         }
-        return AppPage.init(commentUserDtos,query);
+        return AppPage.init(commentUserDtos, query);
     }
 
     /**
-     * 获取我对猎刃的评论
+     * 用户获取用户对猎刃的评论
      *
      * @param id
      * @return
      */
-    @PostMapping("/{id:\\d+}")
-    @ApiOperation(value = "获取我发出的评论")
-    public Result issue(@PathVariable("page") int page,
-                        @PathVariable("size") int size,
-                        @PathVariable("id") Long id) {
+    @GetMapping("/evaHunterByUser/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户获取用户对猎刃的评论")
+    public AppPage issue(@PathVariable("page") int page,
+                         @PathVariable("size") int size,
+                         @PathVariable("id") Long id) {
         QueryComment queryComment = new QueryComment(page, size);
+        queryComment.setType(CommentType.USER_COMMENT_HUNTER);
+        queryComment.setCreationId(id);
 
-        return Result.init(new ArrayList<Comment>(), queryComment);
+        Page<Comment> query = commentService.findByQuery(queryComment);
+        List<Comment> comments = query.getContent();
+        List<CommentHunterDto> commentHunterDtos = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentHunterDtos.add(CommentHunterDto.init(comment));
+        }
+        return AppPage.init(commentHunterDtos, query);
+    }
+
+    /**
+     * 猎刃获取猎刃对用户的评论
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/evaUserByHunter/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃获取猎刃对用户的评论")
+    public AppPage hunterReceived(@PathVariable("page") int page,
+                                  @PathVariable("size") int size,
+                                  @PathVariable("id") Long id) {
+        QueryComment queryComment = new QueryComment(page, size);
+        queryComment.setCreationId(id);
+        queryComment.setType(CommentType.HUNTER_COMMENT_USER);
+        Page<Comment> query = commentService.findByQuery(queryComment);
+        List<Comment> comments = query.getContent();
+        List<CommentUserDto> commentUserDtos = new ArrayList<>();
+        for (Comment comment : comments) {
+            commentUserDtos.add(CommentUserDto.init(comment));
+        }
+        return AppPage.init(commentUserDtos, query);
+    }
+
+    /**
+     * 猎刃获取用户对猎刃的评论
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/evaHunterByHunter/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "猎刃获取用户对猎刃的评论")
+    public AppPage hunterIssue(@PathVariable("page") int page,
+                               @PathVariable("size") int size,
+                               @PathVariable("id") Long id) {
+        QueryHunterComment queryHunterComment = new QueryHunterComment(page, size);
+        queryHunterComment.setHunterId(id);
+        Page<CommentHunter> query = commentHunterService.findByQuery(queryHunterComment);
+        List<CommentHunter> commentHunters = query.getContent();
+        List<CommentHunterDto> commentHunterDtos = new ArrayList<>();
+        for (CommentHunter commentHunter : commentHunters) {
+            commentHunterDtos.add(CommentHunterDto.init(commentHunter));
+        }
+        return AppPage.init(commentHunterDtos, query);
+
     }
 
     /**
