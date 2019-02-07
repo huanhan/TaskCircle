@@ -3,6 +3,7 @@ package com.tc.controller;
 
 import com.tc.db.entity.*;
 import com.tc.db.enums.CommentType;
+import com.tc.dto.Result;
 import com.tc.dto.app.*;
 import com.tc.dto.comment.*;
 import com.tc.exception.ValidException;
@@ -283,6 +284,30 @@ public class AppCommentController {
         }
         return AppPage.init(commentHunterDtos, query);
 
+    }
+
+    /**
+     * 根据任务id，获取某个任务的评价
+     *
+     * @return
+     */
+    @GetMapping("/task/{taskid:\\d+}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "根据任务编号获取任务的评论列表")
+    public AppPage taskComment(@PathVariable("page") int page,
+                                  @PathVariable("size") int size,
+                                  @PathVariable("taskid") String taskid,
+                                  @PathVariable("id") Long id) {
+        QueryTaskComment queryTaskComment = new QueryTaskComment(page, size);
+        queryTaskComment.setTaskId(taskid);
+        Page<CommentTask> query = commentTaskService.findByQuery(queryTaskComment);
+        List<CommentTask> commentTasks = query.getContent();
+
+        List<CommentTaskDto> commentTaskDtos = new ArrayList<>();
+        for (CommentTask commentTask : commentTasks) {
+            commentTaskDtos.add(CommentTaskDto.init(commentTask));
+        }
+
+        return AppPage.init(commentTaskDtos,query );
     }
 
     /**
