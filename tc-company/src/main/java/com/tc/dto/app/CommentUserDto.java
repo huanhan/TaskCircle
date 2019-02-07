@@ -14,6 +14,7 @@ public class CommentUserDto {
     private Long userId;
     private String name;
     private String taskId;
+    private String img;
 
     public static CommentUserDto init(CommentUser commentUser) {
         CommentUserDto commentUserDto = new CommentUserDto();
@@ -25,6 +26,7 @@ public class CommentUserDto {
         commentUserDto.setTaskId(commentUser.getTaskId());
         commentUserDto.setName(commentUser.getUser().getName());
         commentUserDto.setStart(commentUser.getComment().getNumber());
+        commentUserDto.setImg(commentUser.getComment().getCreation().getHeadImg());
         return commentUserDto;
     }
 
@@ -38,6 +40,7 @@ public class CommentUserDto {
         commentUserDto.setTaskId(comment.getCommentUser().getTaskId());
         commentUserDto.setName(comment.getCommentUser().getUser().getName());
         commentUserDto.setStart(comment.getNumber());
+        commentUserDto.setImg(comment.getCommentUser().getUser().getHeadImg());
         return commentUserDto;
     }
 
@@ -103,5 +106,13 @@ public class CommentUserDto {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 }

@@ -13,7 +13,7 @@ public class CommentHunterDto {
     private Long hunterId;
     private String name;
     private String hunterTaskId;
-
+    private String img;
 
     public static CommentHunterDto init(Comment comment) {
         CommentHunterDto commentDto = new CommentHunterDto();
@@ -24,6 +24,7 @@ public class CommentHunterDto {
         commentDto.setHunterTaskId(comment.getCommentHunter().getHunterTaskId());
         commentDto.setName(comment.getCommentHunter().getHunter().getUser().getName());
         commentDto.setStart(comment.getNumber());
+        commentDto.setImg(comment.getCommentHunter().getHunter().getUser().getHeadImg());
         return commentDto;
     }
 
@@ -36,6 +37,7 @@ public class CommentHunterDto {
         commentDto.setHunterTaskId(commentHunter.getHunterTaskId());
         commentDto.setName(commentHunter.getHunter().getUser().getName());
         commentDto.setStart(commentHunter.getComment().getNumber());
+        commentDto.setImg(commentHunter.getComment().getCreation().getHeadImg());
         return commentDto;
     }
 
@@ -93,5 +95,13 @@ public class CommentHunterDto {
 
     public void setHunterTaskId(String hunterTaskId) {
         this.hunterTaskId = hunterTaskId;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 }
