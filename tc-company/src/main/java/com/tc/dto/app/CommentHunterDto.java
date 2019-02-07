@@ -12,7 +12,6 @@ public class CommentHunterDto {
     private Float start;
     private Long hunterId;
     private String name;
-
     private String hunterTaskId;
 
 

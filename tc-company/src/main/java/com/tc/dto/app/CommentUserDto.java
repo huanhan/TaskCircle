@@ -13,7 +13,6 @@ public class CommentUserDto {
     private Long hunterId;
     private Long userId;
     private String name;
-
     private String taskId;
 
     public static CommentUserDto init(CommentUser commentUser) {

@@ -19,10 +19,6 @@ public class HunterCommentDto {
     @NotEmpty(message = "任务id不能为空")
     private String hunterTaskId;
 
-    //被评价的用户
-    @NotNull(message = "用户id不能为空")
-    private Long evaUserId;
-
     //评价用户的内容
     @NotEmpty(message = "评价用户内容不能为空")
     private String userContext;
@@ -53,14 +49,6 @@ public class HunterCommentDto {
 
     public void setHunterTaskId(String hunterTaskId) {
         this.hunterTaskId = hunterTaskId;
-    }
-
-    public Long getEvaUserId() {
-        return evaUserId;
-    }
-
-    public void setEvaUserId(Long evaUserId) {
-        this.evaUserId = evaUserId;
     }
 
     public String getUserContext() {

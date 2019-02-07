@@ -62,11 +62,7 @@ public class AppCommentController {
             throw new ValidException("只能评价自己的任务");
         }
 
-        if (comment.getEvaUserId() == hunterTask.getTask().getUser().getId()) {
-            throw new ValidException("当前任务的用户和提交用户不一致");
-        }
-
-        if (!hunterTask.getHunterCTask() && !hunterTask.getHunterCUser()) {
+        if (hunterTask.getHunterCTask() || hunterTask.getHunterCUser()) {
             throw new ValidException("任务已经评价过了，请勿重复评价");
         }
 
@@ -99,7 +95,7 @@ public class AppCommentController {
         CommentUser commentUser = new CommentUser();
         commentUser.setCommentId(saveUser.getId());
         commentUser.setTaskId(hunterTask.getTaskId());
-        commentUser.setUserId(comment.getEvaUserId());
+        commentUser.setUserId(hunterTask.getTask().getUser().getId());
         commentUserService.save(commentUser);
 
         hunterTaskService.updateEvaState(hunterTask.getId(), CommentType.HUNTER_COMMENT_USER);
@@ -159,7 +155,7 @@ public class AppCommentController {
      */
     @PostMapping("/hunter/{id:\\d+}")
     @ApiOperation(value = "用户对猎刃进行评论")
-    public ResultApp toHunter(@PathVariable("id") Long id, @Valid @RequestBody HunterComment hunterComment, BindingResult bindingResult) {
+    public ResultApp toHunter(@PathVariable("id") Long id, @Valid @RequestBody UserCommentDto hunterComment, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -173,7 +169,7 @@ public class AppCommentController {
             throw new ValidException("只能评价自己的任务");
         }
 
-        if (!hunterTask.getUserCHunter()) {
+        if (hunterTask.getUserCHunter()) {
             throw new ValidException("任务已经评价过了，请勿重复评价");
         }
 
@@ -189,7 +185,7 @@ public class AppCommentController {
 
         CommentHunter commentHunter = new CommentHunter();
         commentHunter.setCommentId(saveUser.getId());
-        commentHunter.setHunterId(hunterComment.getEvaHunterId());
+        commentHunter.setHunterId(hunterTask.getHunterId());
         commentHunter.setHunterTaskId(hunterComment.getHunterTaskId());
         commentHunterService.save(commentHunter);
 
