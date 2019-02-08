@@ -40,6 +40,7 @@ public class TaskDetailAppDto {
     private String address;
     private Boolean isTaskRework;
     private Boolean isCompensate;
+    private Boolean pick;
 
     private Collection<TaskClassifyAppDto> taskClassifyAppDtos;
     private Collection<AddTaskStep> taskSteps;
@@ -281,5 +282,13 @@ public class TaskDetailAppDto {
 
     public void setTaskSteps(Collection<AddTaskStep> taskSteps) {
         this.taskSteps = taskSteps;
+    }
+
+    public Boolean getPick() {
+        return pick;
+    }
+
+    public void setPick(Boolean pick) {
+        this.pick = pick;
     }
 }

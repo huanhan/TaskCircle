@@ -762,12 +762,38 @@ public class AppTaskController {
      * @param id
      * @return
      */
-    @GetMapping("/{id:\\d+}")
+    @GetMapping("/{taskId:\\d+}/{id:\\d+}")
     @ApiOperation(value = "获取任务详情信息")
-    public TaskDetailAppDto detail(@PathVariable("id") String id) {
+    public TaskDetailAppDto detail(@PathVariable("taskId") String taskId, @PathVariable("id") Long id) {
         //根据Id获取任务
-        Task task = taskService.findOne(id);
-        return TaskDetailAppDto.toDetail(task);
+        Task task = taskService.findOne(taskId);
+        //task.getId(),id
+        QueryHunterTask queryHunterTask = new QueryHunterTask();
+        queryHunterTask.setTaskId(task.getId());
+        queryHunterTask.setHunterId(id);
+
+        List<HunterTask> hunterTasks = hunterTaskService.findByQueryHunterTaskAndNotPage(queryHunterTask);
+
+        TaskDetailAppDto detailAppDto = TaskDetailAppDto.toDetail(task);
+
+        boolean pick = false;
+        if (hunterTasks.size() > 0) {
+            for (HunterTask hunterTask : hunterTasks) {
+                if (hunterTask.getState() == HunterTaskState.END_NO ||
+                        hunterTask.getState() == HunterTaskState.END_OK ||
+                        hunterTask.getState() == HunterTaskState.TASK_ABANDON ||
+                        hunterTask.getState() == HunterTaskState.TASK_BE_ABANDON) {
+
+                } else {
+                    pick = false;
+                    break;
+                }
+            }
+        } else {
+            pick = true;
+        }
+        detailAppDto.setPick(pick);
+        return detailAppDto;
     }
 
     /**

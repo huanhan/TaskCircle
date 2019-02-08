@@ -148,9 +148,9 @@ public class AppUserController {
 
         UserImg idcardBack = userImgService.findOne(new UserImgPK(id, UserIMGName.IDCARD_BACK));
         if (idcardBack == null) {
-            userImgService.save(new UserImg(id, UserIMGName.IDCARD_FRONT, hunterAuditReq.getIdCardImgBack()));
+            userImgService.save(new UserImg(id, UserIMGName.IDCARD_BACK, hunterAuditReq.getIdCardImgBack()));
         } else {
-            userImgService.update(new UserImg(id, UserIMGName.IDCARD_FRONT, hunterAuditReq.getIdCardImgBack()));
+            userImgService.update(new UserImg(id, UserIMGName.IDCARD_BACK, hunterAuditReq.getIdCardImgBack()));
         }
 
 
