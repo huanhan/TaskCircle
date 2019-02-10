@@ -35,9 +35,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: cn.jpush.api:jpush-client:3.3.10" level="project" />
-    <orderEntry type="library" name="Maven: cn.jpush.api:jiguang-common:1.1.3" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.56.Final" level="project" />
     <orderEntry type="module" module-name="tc-security-app" />
     <orderEntry type="module" module-name="tc-security-core" />
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-starter-oauth2:1.2.1.RELEASE" level="project" />

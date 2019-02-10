@@ -18,5 +18,5 @@
             <version>${tc.security.version}</version>
         </dependency>
     </dependencies>
-    
+
 </project>
