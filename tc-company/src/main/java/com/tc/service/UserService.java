@@ -113,4 +113,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     List<CashPledge> findByCashPledgeAndUser(TimeScope scope);
+
+    /**
+     * 根据账户获取编号
+     * @param account
+     * @return
+     */
+    Long loadId(String account);
 }

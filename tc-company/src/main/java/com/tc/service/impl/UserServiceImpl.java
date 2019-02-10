@@ -209,6 +209,11 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return CashPledge.create(tasks,userWithdraws,hunterTasks);
     }
 
+    @Override
+    public Long loadId(String account) {
+        return userRepository.loadId(account);
+    }
+
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {

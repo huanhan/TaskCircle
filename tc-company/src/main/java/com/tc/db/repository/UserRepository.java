@@ -129,4 +129,11 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
     @Query(value = "update User u set u.headImg = :header where u.id = :id")
     int updateHeader(@Param("id") Long id,@Param("header") String header);
 
+    /**
+     * 获取用户编号
+     * @param account
+     * @return
+     */
+    @Query(value = "select u.id from User u where u.username = :account")
+    Long loadId(@Param("account") String account);
 }

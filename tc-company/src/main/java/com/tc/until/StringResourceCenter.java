@@ -1,7 +1,15 @@
 package com.tc.until;
 
+import com.tc.security.core.properties.SecurityProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 public class StringResourceCenter {
+
+
+
+    public static final String USER_ID = "userId";
+
     public static final String SERVICE_INIT_FAILED = "初始化服务失败";
     public static final String DB_QUERY_FAILED = "数据库查询失败";
     public static final String DB_QUERY_ABNORMAL = "数据库查询失败,查询结果不存在";

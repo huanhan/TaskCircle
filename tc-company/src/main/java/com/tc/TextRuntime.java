@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.tc.db.entity.*;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
+import com.tc.dto.admin.ModifyAdmin;
 import com.tc.dto.authority.*;
 import com.tc.dto.enums.DateType;
 import com.tc.dto.user.DateCondition;
@@ -114,7 +115,7 @@ public class TextRuntime {
             System.out.println("ssss");
         }
 
-        String json = printGson(UserCategory.toList());
+        String json = printGson(new ModifyAdmin());
         getDTO(json);
     }
 

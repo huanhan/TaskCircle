@@ -17,17 +17,22 @@ import com.tc.dto.user.contact.AddContact;
 import com.tc.dto.user.images.AddImages;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
+import com.tc.security.MyJwtTokenEnhacer;
 import com.tc.service.*;
 import com.tc.until.StringResourceCenter;
 import com.tc.until.ValidateUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -39,6 +44,8 @@ import java.util.List;
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping(value = "/admin/me")
 public class PersonalController {
+
+    private Logger logger = LoggerFactory.getLogger(PersonalController.class);
 
     @Autowired
     private AdminService adminService;
@@ -57,12 +64,13 @@ public class PersonalController {
 
     /**
      * 用户基本信息
-     * @param id 当前登陆的用户
+     * @param request 当前登陆的用户
      * @return
      */
-    @GetMapping("/{id:\\d+}")
-    public Admin me(@PathVariable("id") Long id){
-        Admin resultAdmin = adminService.findOne(id);
+    @GetMapping()
+    public Admin me(HttpServletRequest request){
+        logger.info("userId:" + request.getAttribute(StringResourceCenter.USER_ID));
+        Admin resultAdmin = adminService.findOne(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()));
         return Admin.toDetail(resultAdmin);
     }
 

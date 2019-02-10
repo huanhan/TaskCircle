@@ -15,7 +15,7 @@ public class IDCardValidator implements ConstraintValidator<IDCard,Object> {
 
     @Override
     public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) {
-        if (StringUtils.isEmpty(o.toString())){
+        if (o == null || StringUtils.isEmpty(o.toString())){
             return true;
         }
         return IDCardHelper.isValidIdNo(o.toString());

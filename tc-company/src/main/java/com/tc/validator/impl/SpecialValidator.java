@@ -22,10 +22,10 @@ public class SpecialValidator implements ConstraintValidator<NoSpecial,Object> {
 
     @Override
     public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) {
-        if (StringUtils.isEmpty(o.toString())){
+        if (o == null || StringUtils.isEmpty(o.toString())){
             return true;
         }
-        return ValidateUtil.isSpecialChar(o.toString());
+        return !ValidateUtil.isSpecialChar(o.toString());
 
     }
 }

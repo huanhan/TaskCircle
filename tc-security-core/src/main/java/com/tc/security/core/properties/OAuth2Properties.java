@@ -8,6 +8,8 @@ public class OAuth2Properties {
 
     private String storeType = "jwt";
 
+    private String userId = "userId";
+
     public OAuth2ClientProperties[] getClients() {
         return clients;
     }
@@ -30,5 +32,13 @@ public class OAuth2Properties {
 
     public void setStoreType(String storeType) {
         this.storeType = storeType;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
