@@ -57,7 +57,7 @@ public class AppController {
 
         //拷贝所有任务
         List<TaskAppDto> taskAppDtos = new ArrayList<>();
-        QueryTask queryTask = new QueryTask();
+        QueryTask queryTask = new QueryTask(0,20);
         queryTask.setState(TaskState.ISSUE);
         List<Task> taskList = taskService.findByQueryTask(queryTask).getContent();
         for (Task task : taskList) {
