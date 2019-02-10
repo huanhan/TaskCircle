@@ -152,6 +152,10 @@ public class AppHunterTaskController {
             throw new DBException("接任务失败！");
         }
 
+        HunterTask hunterTask = hunterTaskService.findOne(taskId);
+
+        pushMsgService.pushHunterList("任务通知", "猎刃： " + hunterTask.getHunter().getUser().getName() + " 接取了你的任务，点击查看", taskId, hunterTask.getTask().getUserId());
+
         return ResultApp.init("任务接取成功");
     }
 
@@ -191,6 +195,16 @@ public class AppHunterTaskController {
         if (!isBegin) {
             throw new DBException("任务未能开始！");
         }
+
+        pushMsgService.pushHunterTask("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 开始执行" +
+                        hunterTask.getTask().getName() +
+                        "任务，点击查看",
+                hunterTask.getId(),
+                hunterTask.getTask().getUserId());
+
         return ResultApp.init("任务已开始");
     }
 
@@ -243,7 +257,14 @@ public class AppHunterTaskController {
         if (save == null) {
             throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
         }
-
+        pushMsgService.pushHunterTask("任务通知",
+                "猎刃： " +
+                        query.getHunter().getUser().getName() +
+                        " 完成" +
+                        query.getTask().getName() +
+                        "任务的第" + result.getStep() + "步，点击查看",
+                query.getId(),
+                query.getTask().getUserId());
         return ResultApp.init("步骤添加成功");
     }
 
@@ -418,6 +439,15 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+
+        pushMsgService.pushHunterList("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 完成" +
+                        hunterTask.getTask().getName() +
+                        "任务并提交了审核等待验收中，点击查看",
+                hunterTask.getTaskId(),
+                hunterTask.getTask().getUserId());
         return ResultApp.init("申请已提交");
     }
 
@@ -444,6 +474,14 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        pushMsgService.pushHunterTask("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 开始重做" +
+                        hunterTask.getTask().getName() +
+                        "任务，点击查看",
+                hunterTask.getId(),
+                hunterTask.getTask().getUserId());
         return ResultApp.init("操作成功，请重做改任务");
     }
 
@@ -482,6 +520,14 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        pushMsgService.pushHunterList("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 放弃了" +
+                        hunterTask.getTask().getName() +
+                        "任务，点击查看",
+                hunterTask.getTaskId(),
+                hunterTask.getTask().getUserId());
         return ResultApp.init("放弃任务成功");
     }
 
@@ -585,6 +631,14 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        pushMsgService.pushHunterList("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 同意了您" +
+                        hunterTask.getTask().getName() +
+                        "的放弃请求，点击查看",
+                hunterTask.getTaskId(),
+                hunterTask.getTask().getUserId());
         return ResultApp.init("已同意用户放弃任务");
     }
 
@@ -618,6 +672,14 @@ public class AppHunterTaskController {
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
+        pushMsgService.pushHunterList("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 不同意了您" +
+                        hunterTask.getTask().getName() +
+                        "的放弃请求，点击查看",
+                hunterTask.getTaskId(),
+                hunterTask.getTask().getUserId());
         return ResultApp.init("已拒绝申请");
     }
 

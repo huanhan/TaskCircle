@@ -2,6 +2,7 @@ package com.tc.service;
 
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
+import com.tc.db.enums.CommentType;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.dto.task.QueryHunterTask;
 import org.springframework.data.domain.Page;
@@ -169,4 +170,6 @@ public interface HunterTaskService extends BasicService<HunterTask> {
     boolean abandonNotPassByHunter(HunterTask hunterTask, String context);
 
 
+    @Transactional(rollbackFor = RuntimeException.class)
+    HunterTask updateEvaState(String id, CommentType type);
 }

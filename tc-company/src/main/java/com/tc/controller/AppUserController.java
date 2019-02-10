@@ -1,17 +1,17 @@
 package com.tc.controller;
 
 import com.tc.db.entity.User;
+import com.tc.db.entity.UserImg;
+import com.tc.db.entity.pk.UserImgPK;
 import com.tc.db.enums.UserCategory;
+import com.tc.db.enums.UserIMGName;
 import com.tc.db.enums.UserState;
-import com.tc.dto.app.RegistAppDto;
-import com.tc.dto.app.ResultApp;
-import com.tc.dto.app.UserAppDto;
+import com.tc.dto.app.*;
 import com.tc.dto.user.ModifyUser;
 import com.tc.dto.user.ModifyUserHeader;
 import com.tc.exception.ValidException;
 import com.tc.security.app.validate.code.impl.RedisValidateCodeRepository;
 import com.tc.security.core.validate.code.ValidateCode;
-import com.tc.security.core.validate.code.ValidateCodeException;
 import com.tc.security.core.validate.code.ValidateCodeProcessorHolder;
 import com.tc.security.core.validate.code.ValidateCodeType;
 import com.tc.service.CommentUserService;
@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * APP用户控制器
@@ -125,70 +126,59 @@ public class AppUserController {
      */
     @PostMapping("/upAudit/{id:\\d+}")
     @ApiOperation(value = "提交成为猎刃的申请")
-    public ResultApp upAudit(@PathVariable("id") Long id) {
+    public ResultApp upAudit(@RequestBody HunterAuditReq hunterAuditReq, @PathVariable("id") Long id) {
         //根据编号获取详情信息
         User user = userService.findOne(id);
         //验证用户的准确性
         if (user.getCategory() != UserCategory.NORMAL || user.getState() != UserState.NORMAL) {
             throw new ValidException("只有用户未审核状态才能才能提交审核！");
         }
-        //验证用户信息完整度
-        if (userImgService.countByUserId(user.getId()) == 0) {
-            throw new ValidException("未上传证件图片");
+        user.setAddress(hunterAuditReq.getAddress());
+        user.setIdCard(hunterAuditReq.getIdCard());
+        user.setPhone(hunterAuditReq.getPhone());
+        userService.update(user);
+
+        //判断身份证正面图和反面图是否已经上传
+        UserImg idcardFront = userImgService.findOne(new UserImgPK(id, UserIMGName.IDCARD_FRONT));
+        if (idcardFront == null) {
+            userImgService.save(new UserImg(id, UserIMGName.IDCARD_FRONT, hunterAuditReq.getIdCardImgFront()));
+        } else {
+            userImgService.update(new UserImg(id, UserIMGName.IDCARD_FRONT, hunterAuditReq.getIdCardImgFront()));
         }
 
-        if (StringUtils.isEmpty(user.getIdCard())) {
-            throw new ValidException("身份证不能为空");
+        UserImg idcardBack = userImgService.findOne(new UserImgPK(id, UserIMGName.IDCARD_BACK));
+        if (idcardBack == null) {
+            userImgService.save(new UserImg(id, UserIMGName.IDCARD_BACK, hunterAuditReq.getIdCardImgBack()));
+        } else {
+            userImgService.update(new UserImg(id, UserIMGName.IDCARD_BACK, hunterAuditReq.getIdCardImgBack()));
         }
-
-        if (StringUtils.isEmpty(user.getAddress())) {
-            throw new ValidException("家庭住址不能为空");
-        }
-
-        if (StringUtils.isEmpty(user.getPhone())) {
-            throw new ValidException("用户手机号码还未设置");
-        }
-       /*
-        if (StringUtils.isEmpty(user.getName())) {
-            throw new ValidException("昵称不能为空");
-        }
-
-        if (StringUtils.isEmpty(user.getSchool())) {
-            throw new ValidException("毕业学校不能为空");
-        }
-
-        if (StringUtils.isEmpty(user.getMajor())) {
-            throw new ValidException("职业不能为空");
-        }
-
-        if (StringUtils.isEmpty(user.getInterest())) {
-            throw new ValidException("兴趣不能为空");
-        }
-
-        if (StringUtils.isEmpty(user.getIntro())) {
-            throw new ValidException("简介不能为空");
-        }
-
-        if (user.getHeight()!=null&&user.getHeight()!=0) {
-            throw new ValidException("身高还未设置");
-        }
-
-        if (user.getWeight()!=null&&user.getWeight()!=0) {
-            throw new ValidException("体重还未设置");
-        }
-
-        if (user.getBirthday()!=null) {
-            throw new ValidException("生日还未设置");
-        }
-
-        if (StringUtils.isEmpty(user.getHeadImg())) {
-            throw new ValidException("用户头像还未设置");
-        }*/
 
 
         //修改用户状态为申请状态
         userService.updateState(id, UserState.AUDIT_HUNTER, new Date());
-        return ResultApp.init("更新成功");
+        return ResultApp.init("提交成功");
+    }
+
+    @GetMapping("/hunterAudit/{id:\\d+}")
+    @ApiOperation(value = "猎刃审核的数据")
+    public HunterAuditDto hunterAudit(@PathVariable("id") Long id) {
+        User user = userService.findOne(id);
+        List<UserImg> userImgs = userImgService.findByUser(id);
+        HunterAuditDto hunterAuditDto = new HunterAuditDto();
+        hunterAuditDto.setAddress(user.getAddress());
+        hunterAuditDto.setIdCard(user.getIdCard());
+        hunterAuditDto.setPhone(user.getPhone());
+        hunterAuditDto.setState(user.getState());
+
+        for (UserImg userImg : userImgs) {
+            if (userImg.getImgName() == UserIMGName.IDCARD_FRONT) {
+                hunterAuditDto.setIdCardImgFront(userImg.getUrlLocation());
+            }
+            if (userImg.getImgName() == UserIMGName.IDCARD_BACK) {
+                hunterAuditDto.setIdCardImgBack(userImg.getUrlLocation());
+            }
+        }
+        return hunterAuditDto;
     }
 
     /**

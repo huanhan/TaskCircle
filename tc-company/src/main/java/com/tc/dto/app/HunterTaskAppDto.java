@@ -26,6 +26,9 @@ public class HunterTaskAppDto {
     private Integer curStep;
     private String auditContext;
     private String hunterRejectContext;
+    private Boolean userCHunter;
+    private Boolean hunterCUser;
+    private Boolean hunterCTask;
 
     public String getId() {
         return id;
@@ -177,6 +180,30 @@ public class HunterTaskAppDto {
 
     public void setHunterRejectContext(String hunterRejectContext) {
         this.hunterRejectContext = hunterRejectContext;
+    }
+
+    public Boolean getUserCHunter() {
+        return userCHunter;
+    }
+
+    public void setUserCHunter(Boolean userCHunter) {
+        this.userCHunter = userCHunter;
+    }
+
+    public Boolean getHunterCUser() {
+        return hunterCUser;
+    }
+
+    public void setHunterCUser(Boolean hunterCUser) {
+        this.hunterCUser = hunterCUser;
+    }
+
+    public Boolean getHunterCTask() {
+        return hunterCTask;
+    }
+
+    public void setHunterCTask(Boolean hunterCTask) {
+        this.hunterCTask = hunterCTask;
     }
 
     public static HunterTaskAppDto toDetail(HunterTask task) {
