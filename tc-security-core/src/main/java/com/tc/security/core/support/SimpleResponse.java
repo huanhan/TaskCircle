@@ -1,17 +1,17 @@
 package com.tc.security.core.support;
 
 public class SimpleResponse {
-    private Object content;
+    private Object message;
 
     public SimpleResponse(Object content) {
-        this.content = content;
+        this.message = content;
     }
 
     public Object getContent() {
-        return content;
+        return message;
     }
 
-    public void setContent(Object content) {
-        this.content = content;
+    public void setContent(Object message) {
+        this.message = message;
     }
 }
