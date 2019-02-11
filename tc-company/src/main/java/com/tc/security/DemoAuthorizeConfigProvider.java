@@ -16,8 +16,8 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
                 "/user/register",
                 "/login",
                 "/app/user/register",
-                "/app/user/*/code/Image",
-                "/**"
+                "/app/user/*/code/Image"
+                //"/**"
         ).permitAll()
                 .antMatchers("/swagger-ui.html", "/doc.html")
                 .permitAll()
