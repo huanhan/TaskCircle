@@ -172,4 +172,6 @@ public interface TaskService extends BasicService<Task> {
     Page<Task> findCashPledge(Long id, TimeScope scope);
 
     Page<Task> search(String key, Pageable pageable);
+
+    List<Task> taskByDistance(Double lat, Double log );
 }

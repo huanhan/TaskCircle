@@ -24,6 +24,7 @@ public class Task implements Serializable {
     public static final String USER_ID = "userId";
     public static final String NAME = "name";
     public static final String MONEY = "money";
+    public static final String ORIGINALMONEY = "originalMoney";
     public static final String TASK_STATE = "state";
     public static final String TASK_TYPE = "type";
     public static final String PEOPLE_NUMBER = "peopleNumber";
