@@ -14,10 +14,12 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
 
         config.antMatchers(
                 "/user/register",
-                "/login"
+                "/login",
+                "/app/user/register",
+                "/app/user/*/code/Image"
                 //"/**"
         ).permitAll()
-                .antMatchers("/swagger-ui.html","/doc.html")
+                .antMatchers("/swagger-ui.html", "/doc.html")
                 .permitAll()
                 .antMatchers("/swagger-resources/**")
                 .permitAll()
@@ -31,7 +33,7 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
                 .permitAll()
                 .antMatchers("/configuration/security")
                 .permitAll()
-        .anyRequest().authenticated();
+                .anyRequest().authenticated();
 
     }
 }
