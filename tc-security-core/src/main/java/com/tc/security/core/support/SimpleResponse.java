@@ -7,11 +7,11 @@ public class SimpleResponse {
         this.message = content;
     }
 
-    public Object getContent() {
+    public Object getMessage() {
         return message;
     }
 
-    public void setContent(Object message) {
+    public void setMessage(Object message) {
         this.message = message;
     }
 }

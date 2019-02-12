@@ -635,7 +635,7 @@ public class User implements Serializable {
         this.userExpense = expense;
     }
 
-    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE})
+    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE},fetch = FetchType.EAGER)
     @JsonView(UserBasicView.class)
     public Collection<UserImg> getUserImgs() {
         return userImgs;
@@ -698,7 +698,12 @@ public class User implements Serializable {
         user.setTasks(null);
         user.setUserExpense(null);
         user.setUserHunterInterflows(null);
-        user.setUserImgs(null);
+        if (user.getUserImgs() != null){
+            Collection<UserImg> userImgs = new ArrayList<>();
+            user.getUserImgs().forEach(userImg ->
+                    userImgs.add(new UserImg(userImg.getUserId(),userImg.getImgName(),userImg.getUrlLocation())));
+            user.setUserImgs(userImgs);
+        }
         user.setUserIncome(null);
         user.setUserOperationLogs(null);
         user.setUserWithdraws(null);

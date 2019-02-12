@@ -114,7 +114,7 @@ public class Admin {
         if (admin != null){
             admin.setAdminStates(AdminState.toList());
             admin.setUser(User.toDetail(admin.getUser()));
-admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
+            admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
             admin.setAdmins(null);
             admin.setAdminAuthorities(null);
             admin.setAudits(null);
