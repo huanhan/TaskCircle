@@ -1,5 +1,10 @@
 package com.tc.db.enums;
 
+import com.tc.dto.TransEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 审核类别
  * @author Cyg
@@ -15,6 +20,10 @@ public enum  AuditType {
     HUNTER_OK_TASK("猎刃完成任务"),
     ;
     private String type;
+
+    public String getType() {
+        return type;
+    }
 
     AuditType(String type) {
         this.type = type;
@@ -57,5 +66,13 @@ public enum  AuditType {
                 default:
                     return false;
         }
+    }
+
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (AuditType auditType : AuditType.values()) {
+            result.add(TransEnum.init(auditType.name(),auditType.getType()));
+        }
+        return result;
     }
 }

@@ -1,5 +1,7 @@
 package com.tc.db.enums;
 
+import com.tc.dto.TransEnum;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,14 @@ public enum  TaskType {
     public static List<TaskType> byStrs(List<String> items) {
         List<TaskType> result = new ArrayList<>();
         items.forEach(s -> result.add(TaskType.valueOf(s)));
+        return result;
+    }
+
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (TaskType value : TaskType.values()) {
+            result.add(TransEnum.init(value.name(),value.getType()));
+        }
         return result;
     }
 

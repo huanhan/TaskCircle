@@ -80,12 +80,13 @@ public class PersonalController {
      * @param bindingResult
      * @return
      */
-    @PutMapping("/{id:\\d+}")
+    @PutMapping()
     @ApiOperation(value = "修改管理员信息")
-    public Admin update(@PathVariable("id") Long id,@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult bindingResult){
+    public Admin update(HttpServletRequest request,@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(modifyAdmin.getId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -103,12 +104,13 @@ public class PersonalController {
      * @param bindingResult
      * @return
      */
-    @PutMapping("/pw/{id:\\d+}")
+    @PutMapping("/pw")
     @ApiOperation(value = "修改管理员密码")
-    public void update(@PathVariable("id") Long id, @Valid @RequestBody ModifyPassword modifyPassword, BindingResult bindingResult){
+    public void update(HttpServletRequest request, @Valid @RequestBody ModifyPassword modifyPassword, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(modifyPassword.getId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -132,16 +134,17 @@ public class PersonalController {
 
     /**
      * 修改管理员的个人头像(虚拟)
-     * @param id
+     * @param request
      * @param modifyUserHeader
      * @param bindingResult
      */
-    @PutMapping("/header/{id:\\d+}")
+    @PutMapping("/header")
     @ApiOperation(value = "修改管理员的个人头像(虚拟)")
-    public void update(@PathVariable("id") Long id, @Valid @RequestBody ModifyUserHeader modifyUserHeader,BindingResult bindingResult){
+    public void update(HttpServletRequest request, @Valid @RequestBody ModifyUserHeader modifyUserHeader,BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(modifyUserHeader.getId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -153,29 +156,30 @@ public class PersonalController {
 
     /**
      * 获取本人的所有联系方式
-     * @param id
+     * @param request
      * @return
      */
-    @GetMapping("/contact/{id:\\d+}")
+    @GetMapping("/contact")
     @ApiOperation(value = "获取我的所有联系方式")
-    public Result contacts(@PathVariable("id") Long id){
-        List<UserContact> query = userContactService.findByUser(id);
+    public Result contacts(HttpServletRequest request){
+        List<UserContact> query = userContactService.findByUser(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()));
         return Result.init(UserContact.toListInIndex(query));
     }
 
     /**
      * 管理员添加联系方式
-     * @param id
+     * @param request
      * @param addContact
      * @param bindingResult
      * @return
      */
-    @PostMapping("/contact/add/{id:\\d+}")
+    @PostMapping("/contact/add")
     @ApiOperation(value = "管理员添加本人的联系方式")
-    public UserContact add(@PathVariable("id") Long id, @Valid @RequestBody AddContact addContact, BindingResult bindingResult){
+    public UserContact add(HttpServletRequest request, @Valid @RequestBody AddContact addContact, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(addContact.getUserId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -191,17 +195,18 @@ public class PersonalController {
 
     /**
      * 管理员修改本人的联系方式
-     * @param id
+     * @param request
      * @param addContact
      * @param bindingResult
      * @return
      */
-    @PutMapping("/contact/modify/{id:\\d+}")
+    @PutMapping("/contact/modify")
     @ApiOperation(value = "管理员修改本人的联系方式")
-    public UserContact update(@PathVariable("id") Long id, @Valid @RequestBody AddContact addContact, BindingResult bindingResult){
+    public UserContact update(HttpServletRequest request, @Valid @RequestBody AddContact addContact, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(addContact.getUserId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -224,12 +229,13 @@ public class PersonalController {
 
     /**
      * 管理员删除自己的联系方式
-     * @param id
+     * @param request
      * @param name
      */
-    @DeleteMapping("/contact/{name}/{id:\\d+}")
+    @DeleteMapping("/contact/{name}")
     @ApiOperation(value = "管理员删除自己的联系方式")
-    public void deleteContact(@PathVariable("id") Long id, @PathVariable("name")UserContactName name){
+    public void deleteContact(HttpServletRequest request, @PathVariable("name")UserContactName name){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         UserContact query = userContactService.findOne(new UserContactPK(id,name));
         if (query == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
@@ -242,29 +248,31 @@ public class PersonalController {
 
     /**
      * 获取管理员本人的所有图片资料
-     * @param id
+     * @param request
      * @return
      */
-    @GetMapping("/images/{id:\\d+}")
+    @GetMapping("/images")
     @ApiOperation(value = "获取管理员本人的所有图片资料")
-    public Result images(@PathVariable("id") Long id){
+    public Result images(HttpServletRequest request){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         List<UserImg> userImgs = userImgService.findByUser(id);
         return Result.init(UserImg.toListInIndex(userImgs));
     }
 
     /**
      * 添加管理员本人的图片资料
-     * @param id
+     * @param request
      * @param addImages
      * @param bindingResult
      * @return
      */
-    @PostMapping("/images/add/{id:\\d+}")
+    @PostMapping("/images/add")
     @ApiOperation(value = "添加管理员本人的图片资料")
-    public UserImg add(@PathVariable("id") Long id, @Valid @RequestBody AddImages addImages, BindingResult bindingResult){
+    public UserImg add(HttpServletRequest request, @Valid @RequestBody AddImages addImages, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(addImages.getUserId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -277,17 +285,18 @@ public class PersonalController {
 
     /**
      * 修改管理员本人的图片资料
-     * @param id
+     * @param request
      * @param addImages
      * @param bindingResult
      * @return
      */
-    @PutMapping("/images/modify/{id:\\d+}")
+    @PutMapping("/images/modify")
     @ApiOperation(value = "修改管理员本人的图片资料")
-    public UserImg update(@PathVariable("id") Long id, @Valid @RequestBody AddImages addImages, BindingResult bindingResult){
+    public UserImg update(HttpServletRequest request, @Valid @RequestBody AddImages addImages, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!id.equals(addImages.getUserId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
@@ -307,12 +316,13 @@ public class PersonalController {
 
     /**
      * 管理员删除自己的图片资料
-     * @param id
+     * @param request
      * @param name
      */
-    @DeleteMapping("/images/{name}/{id:\\d+}")
+    @DeleteMapping("/images/{name}")
     @ApiOperation(value = "管理员删除自己的图片资料")
-    public void deleteImages(@PathVariable("id") Long id, @PathVariable("name")UserIMGName name){
+    public void deleteImages(HttpServletRequest request, @PathVariable("name")UserIMGName name){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         UserImg query = userImgService.findOne(new UserImgPK(id,name));
         if (query == null){
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
@@ -329,13 +339,13 @@ public class PersonalController {
      * @param queryAudit 审核查询条件
      * @return
      */
-    @PostMapping("/audit/query/{id:\\d+}")
+    @PostMapping("/audit/query")
     @ApiOperation(value = "获取管理员本人的审核历史列表")
-    public Result getAuditByAdmin(@PathVariable("id") Long id,@RequestBody QueryAudit queryAudit){
+    public Result getAuditByAdmin(HttpServletRequest request,@RequestBody QueryAudit queryAudit){
         if (queryAudit.getAdminId() == null || queryAudit.getAdminId() <= 0){
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_ADMIN_FAILED);
         }
-        queryAudit.setUserId(id);
+        queryAudit.setUserId(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()));
         Page<Audit> queryAudits = auditService.findByQueryAudit(queryAudit);
         return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit);
     }
@@ -345,11 +355,12 @@ public class PersonalController {
      * @param id 审核编号
      * @return
      */
-    @GetMapping("/audit/detail/{aid:\\d+}/{id:\\d+}")
+    @GetMapping("/audit/detail/{id:\\d+}")
     @ApiOperation(value = "查看管理员本人的审核详情信息")
-    public Audit auditDetail(@PathVariable("id") Long id,@PathVariable("aid") String aid){
-        Audit result = auditService.findOne(aid);
-        if (!id.equals(result.getAdminId())){
+    public Audit auditDetail(@PathVariable("id") Long id,HttpServletRequest request){
+        Audit result = auditService.findOne(id);
+        Long aid = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        if (!aid.equals(result.getAdminId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
         return Audit.toDetail(result);

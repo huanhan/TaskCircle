@@ -1,5 +1,10 @@
 package com.tc.db.enums;
 
+import com.tc.dto.TransEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 用户状态
  */
@@ -16,6 +21,15 @@ public enum  UserState {
 
     UserState(String state) {
         this.state = state;
+    }
+
+    public static List<TransEnum> toList() {
+
+        List<TransEnum> result = new ArrayList<>();
+        for (UserState value : UserState.values()) {
+            result.add(TransEnum.init(value.name(),value.getState()));
+        }
+        return result;
     }
 
     public String getState() {

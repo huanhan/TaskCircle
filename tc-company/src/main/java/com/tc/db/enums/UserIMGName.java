@@ -1,5 +1,10 @@
 package com.tc.db.enums;
 
+import com.tc.dto.TransEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public enum UserIMGName {
 
     IDCARD_FRONT("身份证正面"),
@@ -15,6 +20,14 @@ public enum UserIMGName {
 
     UserIMGName(String IMGName) {
         this.IMGName = IMGName;
+    }
+
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (UserIMGName value : UserIMGName.values()) {
+            result.add(TransEnum.init(value.name(),value.getIMGName()));
+        }
+        return result;
     }
 
     public String getIMGName() {

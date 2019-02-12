@@ -1,5 +1,7 @@
 package com.tc.db.enums;
 
+import com.tc.dto.TransEnum;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,14 @@ public enum HunterTaskState{
 
     HunterTaskState(String state) {
         this.state = state;
+    }
+
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (HunterTaskState value : HunterTaskState.values()) {
+            result.add(TransEnum.init(value.name(),value.getState()));
+        }
+        return result;
     }
 
     public String getState() {

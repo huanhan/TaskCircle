@@ -1,5 +1,10 @@
 package com.tc.db.enums;
 
+import com.tc.dto.TransEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public enum AuditState {
 
     PASS("通过"),
@@ -12,6 +17,10 @@ public enum AuditState {
 
 
     private String state;
+
+    public String getState() {
+        return state;
+    }
 
     AuditState(String state) {
         this.state = state;
@@ -42,5 +51,13 @@ public enum AuditState {
             default:
                 return false;
         }
+    }
+
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (AuditState auditState : AuditState.values()) {
+            result.add(TransEnum.init(auditState.name(),auditState.getState()));
+        }
+        return result;
     }
 }
