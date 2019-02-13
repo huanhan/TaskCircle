@@ -116,12 +116,12 @@ public class AppFinanceController {
      * @param tid
      * @param id
      */
-    @GetMapping("/transfer/detail/{tid:\\d+}/{id:\\d+}")
+    /*@GetMapping("/transfer/detail/{tid:\\d+}/{id:\\d+}")
     @ApiOperation(value = "获取我的转账记录详情")
     public UserIeRecord transferDetail(@PathVariable("tid") String tid, @PathVariable("id") Long id) {
 
         return new UserIeRecord();
-    }
+    }*/
 
     /**
      * 我的充值与提现记录详情
@@ -130,11 +130,11 @@ public class AppFinanceController {
      * @param id
      * @return
      */
-    @GetMapping("/detail/{tid:\\d+}/{id:\\d+}")
+    /*@GetMapping("/detail/{tid:\\d+}/{id:\\d+}")
     @ApiOperation(value = "获取我的充值与提现记录详情")
     public UserWithdraw financeDetail(@PathVariable("tid") String tid, @PathVariable("id") Long id) {
         return new UserWithdraw();
-    }
+    }*/
 
     /**
      * 我的押金详情
@@ -143,11 +143,11 @@ public class AppFinanceController {
      * @param id
      * @return
      */
-    @GetMapping("/money/detail/{tid:\\d+}/{id:\\d+}")
+   /* @GetMapping("/money/detail/{tid:\\d+}/{id:\\d+}")
     @ApiOperation(value = "获取我的充值与提现记录详情")
     public Money moneyDetail(@PathVariable("tid") String tid, @PathVariable("id") Long id) {
         return new Money();
-    }
+    }*/
 
     /**
      * 新增提现记录，并提交审核

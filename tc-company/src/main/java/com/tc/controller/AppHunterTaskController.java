@@ -61,6 +61,9 @@ public class AppHunterTaskController {
     @Autowired
     private PushMsgService pushMsgService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * 根据状态获取指定猎刃的任务列表
      *
@@ -155,7 +158,9 @@ public class AppHunterTaskController {
 
         HunterTask hunterTask = hunterTaskService.findOne(htsId);
 
-        pushMsgService.pushHunterList("任务通知", "猎刃： " + hunterTask.getHunter().getUser().getName() + " 接取了你的任务，点击查看", taskId, hunterTask.getTask().getUserId());
+        User hunter = userService.findOne(hunterTask.getHunterId());
+        Task task = taskService.findOne(taskId);
+        pushMsgService.pushHunterList("任务通知", "猎刃： " + hunter.getName() + " 接取了你的任务，点击查看", taskId, task.getUserId());
 
         return ResultApp.init("任务接取成功");
     }

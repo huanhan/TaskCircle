@@ -838,7 +838,7 @@ public class AppTaskController {
 
         TaskDetailAppDto detailAppDto = TaskDetailAppDto.toDetail(task);
 
-        boolean pick = false;
+        boolean pick = true;
         if (hunterTasks.size() > 0) {
             for (HunterTask hunterTask : hunterTasks) {
                 if (hunterTask.getState() == HunterTaskState.END_NO ||
