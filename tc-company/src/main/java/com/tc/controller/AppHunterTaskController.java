@@ -518,9 +518,6 @@ public class AppHunterTaskController {
 
         //猎刃放弃任务
         boolean isSuccess = hunterTaskService.abandonTask(hunterTask, context.getContext());
-        if (!isSuccess) {
-            throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
-        }
         pushMsgService.pushHunterList("任务通知",
                 "猎刃： " +
                         hunterTask.getHunter().getUser().getName() +
@@ -529,7 +526,14 @@ public class AppHunterTaskController {
                         "任务，点击查看",
                 hunterTask.getTaskId(),
                 hunterTask.getTask().getUserId());
-        return ResultApp.init("放弃任务成功");
+        String msg;
+        if (isSuccess){
+            msg = "放弃任务成功";
+        }else {
+            msg = "放弃任务的申请已经提交给用户了";
+        }
+
+        return ResultApp.init(msg);
     }
 
     /**
