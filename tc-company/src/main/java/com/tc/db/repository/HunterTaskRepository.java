@@ -180,8 +180,8 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state, t.userRejectCount = t.userRejectCount + 1 where t.id = :id")
-    int updateStateAndAuditContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
+    @Query(value = "update HunterTask  t set t.auditContext = :context,t.state = :state, t.userRejectCount = :iCount where t.id = :id")
+    int updateStateAndAuditContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context,@Param("iCount") Integer count);
 
     /**
      * 设置状态与内容
@@ -239,8 +239,8 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask,String>,J
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask  t set t.hunterRejectContext = :context,t.state = :state,t.hunterRejectCount = t.hunterRejectCount + 1 where t.id = :id")
-    int updateStateAndHunterRejectContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context);
+    @Query(value = "update HunterTask  t set t.hunterRejectContext = :context,t.state = :state,t.hunterRejectCount = :iCount where t.id = :id")
+    int updateStateAndHunterRejectContext(@Param("id") String id, @Param("state") HunterTaskState state, @Param("context") String context,@Param("iCount") Integer count);
 
     /**
      * 取消猎刃任务的暂停，并重置猎刃拒绝用户次数

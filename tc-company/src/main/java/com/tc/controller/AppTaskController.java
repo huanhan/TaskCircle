@@ -541,7 +541,7 @@ public class AppTaskController {
         HunterTaskState hunterTaskState = HunterTaskState.getBy(isRework, isCompensate);
 
         //设置状态，并添加不同意的原因
-        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(), hunterTaskState, context.getContext());
+        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(), hunterTaskState, context.getContext(),hunterTask.getUserRejectCount());
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }
@@ -587,7 +587,7 @@ public class AppTaskController {
         }
 
         //设置状态为用户拒绝放弃
-        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(), HunterTaskState.USER_REPULSE, context.getContext());
+        boolean isSuccess = hunterTaskService.auditNotPassByUser(hunterTask.getId(), HunterTaskState.USER_REPULSE, context.getContext(),hunterTask.getUserRejectCount());
         if (!isSuccess) {
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

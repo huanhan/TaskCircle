@@ -105,7 +105,7 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @param context
      * @return
      */
-    boolean auditNotPassByUser(String id, HunterTaskState state, String context);
+    boolean auditNotPassByUser(String id, HunterTaskState state, String context,Integer iCount);
 
     /**
      * 猎刃放弃任务
@@ -165,9 +165,10 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * 猎刃不同意用户放弃任务
      * @param hunterTask
      * @param context
+     * @param iCount
      * @return
      */
-    boolean abandonNotPassByHunter(HunterTask hunterTask, String context);
+    boolean abandonNotPassByHunter(HunterTask hunterTask, String context,Integer iCount);
 
 
     @Transactional(rollbackFor = RuntimeException.class)

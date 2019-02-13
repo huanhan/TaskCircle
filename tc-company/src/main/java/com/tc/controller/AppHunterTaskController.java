@@ -669,7 +669,7 @@ public class AppHunterTaskController {
         }
         hunterTask.setTask(task);
         //设置猎刃任务状态为不同意用户放弃
-        boolean isSuccess = hunterTaskService.abandonNotPassByHunter(hunterTask, context.getContext());
+        boolean isSuccess = hunterTaskService.abandonNotPassByHunter(hunterTask, context.getContext(),hunterTask.getHunterRejectCount());
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

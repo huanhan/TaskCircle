@@ -256,8 +256,8 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean auditNotPassByUser(String id, HunterTaskState state, String context) {
-        int count = hunterTaskRepository.updateStateAndAuditContext(id, state, context);
+    public boolean auditNotPassByUser(String id, HunterTaskState state, String context,Integer iCount) {
+        int count = hunterTaskRepository.updateStateAndAuditContext(id, state, context,iCount + 1);
         return count > 0;
     }
 
@@ -516,9 +516,9 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean abandonNotPassByHunter(HunterTask hunterTask, String context) {
+    public boolean abandonNotPassByHunter(HunterTask hunterTask, String context,Integer iCount) {
         Task task = hunterTask.getTask();
-        int count = hunterTaskRepository.updateStateAndHunterRejectContext(hunterTask.getId(), HunterTaskState.HUNTER_REPULSE, context);
+        int count = hunterTaskRepository.updateStateAndHunterRejectContext(hunterTask.getId(), HunterTaskState.HUNTER_REPULSE, context,iCount + 1);
         if (count <= 0) {
             throw new DBException("更新猎刃任务状态失败");
         }
