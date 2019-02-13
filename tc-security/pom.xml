@@ -52,5 +52,6 @@
         <module>../tc-security-browser</module>
         <module>../tc-security-core</module>
         <module>../tc-security-demo</module>
+        <module>../tc-company</module>
     </modules>
 </project>

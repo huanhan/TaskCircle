@@ -95,4 +95,6 @@ public interface TaskRepository extends JpaRepository<Task, String>, JpaSpecific
     @Query(value = "from Task t  where ( t.name like %:str% or t.context like %:str% ) and t.state = 'ISSUE'")
     Page<Task> searchTask(@Param("str") String str, @Param("pageable") Pageable pageable);
 
+    @Query(value = "select *,6378137*2*ASIN(SQRT(POWER(SIN((:lat-latitude)*ACOS(-1)/360),2) +COS(:lat*ACOS(-1)/180)*COS(latitude*ACOS(-1)/180)*POWER(SIN((:log-longitude)*ACOS(-1)/360),2))) as distance FROM task WHERE state='ISSUE' ORDER BY distance limit 0,30", nativeQuery = true)
+    List<Task> taskByDistance(@Param("lat") Double lat, @Param("log") Double log );
 }

@@ -15,6 +15,7 @@ public class TaskAppDto {
     private String username;
     private String headImg;
     private Float money;
+    private Float originalMoney;
     private TaskState state;
     private TaskType type;
     private Double longitude;
@@ -85,6 +86,14 @@ public class TaskAppDto {
 
     public void setMoney(Float money) {
         this.money = money;
+    }
+
+    public Float getOriginalMoney() {
+        return originalMoney;
+    }
+
+    public void setOriginalMoney(Float originalMoney) {
+        this.originalMoney = originalMoney;
     }
 
     public Double getLongitude() {

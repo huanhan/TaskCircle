@@ -1,0 +1,66 @@
+Manifest-Version: 1.0
+Class-Path: spring-security-config-4.2.8.RELEASE.jar aliyun-java-sdk-s
+ ts-3.0.0.jar gson-2.8.5.jar spring-jdbc-4.3.19.RELEASE.jar springfox-
+ swagger-common-2.8.0.jar spring-data-keyvalue-1.2.15.RELEASE.jar comm
+ ons-beanutils-1.9.3.jar spring-social-security-1.1.6.RELEASE.jar logb
+ ack-core-1.1.11.jar hibernate-commons-annotations-5.0.1.Final.jar jav
+ ax.transaction-api-1.2.jar tomcat-annotations-api-8.5.34.jar jedis-2.
+ 9.0.jar spring-security-jwt-1.0.9.RELEASE.jar spring-plugin-metadata-
+ 1.2.0.RELEASE.jar spring-security-rsa-1.0.3.RELEASE.jar wiremock-2.19
+ .0.jar spring-social-web-1.1.6.RELEASE.jar spring-webmvc-4.3.19.RELEA
+ SE.jar httpclient-4.5.2.jar commons-pool2-2.4.3.jar jpush-client-3.3.
+ 10.jar spring-data-jpa-1.11.15.RELEASE.jar spring-security-core-4.2.8
+ .RELEASE.jar spring-cloud-starter-security-1.2.1.RELEASE.jar jackson-
+ core-2.8.11.jar classmate-1.3.4.jar reflections-0.9.11.jar springfox-
+ swagger-ui-2.8.0.jar spring-boot-test-autoconfigure-1.5.16.RELEASE.ja
+ r spring-boot-starter-data-redis-1.5.16.RELEASE.jar springfox-spi-2.8
+ .0.jar jjwt-0.9.0.jar spring-boot-actuator-1.5.16.RELEASE.jar commons
+ -io-2.5.jar jiguang-common-1.1.3.jar spring-cloud-security-1.2.1.RELE
+ ASE.jar aliyun-java-sdk-core-3.5.0.jar swagger-models-1.5.14.jar spri
+ ng-data-redis-1.8.15.RELEASE.jar commons-lang-2.6.jar jandex-2.0.0.Fi
+ nal.jar slf4j-api-1.7.25.jar spring-cloud-context-1.2.5.RELEASE.jar n
+ etty-all-4.0.56.Final.jar spring-social-config-1.1.6.RELEASE.jar acce
+ ssors-smart-1.1.jar mapstruct-1.2.0.Final.jar junit-4.12.jar spring-a
+ op-4.3.19.RELEASE.jar mysql-connector-java-5.1.47.jar assertj-core-2.
+ 6.0.jar asm-5.0.3.jar byte-buddy-1.7.9.jar tomcat-embed-core-8.5.34.j
+ ar tomcat-embed-websocket-8.5.34.jar aopalliance-1.0.jar xmlunit-lega
+ cy-2.5.1.jar bcprov-jdk15on-1.56.jar guava-20.0.jar commons-collectio
+ ns-3.2.2.jar spring-boot-starter-data-jpa-1.5.16.RELEASE.jar spring-t
+ x-4.3.19.RELEASE.jar zjsonpatch-0.4.4.jar json-20140107.jar swagger-a
+ nnotations-1.5.14.jar jackson-mapper-asl-1.9.13.jar xmlunit-core-2.5.
+ 1.jar spring-boot-test-1.5.16.RELEASE.jar objenesis-2.5.1.jar hamcres
+ t-library-1.3.jar spring-security-web-4.2.8.RELEASE.jar springfox-cor
+ e-2.8.0.jar antlr-2.7.7.jar log4j-over-slf4j-1.7.25.jar spring-contex
+ t-4.3.19.RELEASE.jar json-smart-2.2.1.jar hamcrest-core-1.3.jar sprin
+ g-test-4.3.19.RELEASE.jar spring-expression-4.3.19.RELEASE.jar spring
+ fox-spring-web-2.8.0.jar spring-boot-starter-jdbc-1.5.16.RELEASE.jar 
+ antlr4-runtime-4.7.1.jar spring-social-core-1.1.6.RELEASE.jar tomcat-
+ jdbc-8.5.34.jar android-json-0.0.20131108.vaadin1.jar handlebars-help
+ ers-4.0.7.jar bcpkix-jdk15on-1.56.jar spring-plugin-core-1.2.0.RELEAS
+ E.jar spring-boot-starter-1.5.16.RELEASE.jar spring-core-4.3.19.RELEA
+ SE.jar tomcat-embed-el-8.5.34.jar spring-data-commons-1.13.15.RELEASE
+ .jar springfox-schema-2.8.0.jar mockito-core-1.10.19.jar commons-code
+ c-1.10.jar jul-to-slf4j-1.7.25.jar jackson-core-asl-1.9.13.jar spring
+ -beans-4.3.19.RELEASE.jar hibernate-jpa-2.1-api-1.0.0.Final.jar sprin
+ g-orm-4.3.19.RELEASE.jar spring-boot-starter-aop-1.5.16.RELEASE.jar s
+ pring-cloud-starter-1.2.5.RELEASE.jar javax.inject-1.jar jackson-anno
+ tations-2.8.0.jar spring-boot-1.5.16.RELEASE.jar handlebars-4.0.7.jar
+  javassist-3.21.0-GA.jar jackson-databind-2.8.11.2.jar spring-aspects
+ -4.3.19.RELEASE.jar commons-lang3-3.5.jar spring-boot-starter-securit
+ y-1.5.16.RELEASE.jar hibernate-entitymanager-5.0.12.Final.jar jcl-ove
+ r-slf4j-1.7.25.jar httpcore-4.4.10.jar spring-cloud-commons-1.2.5.REL
+ EASE.jar jboss-logging-3.3.2.Final.jar jsonassert-1.4.0.jar springfox
+ -swagger2-2.8.0.jar spring-context-support-4.3.19.RELEASE.jar spring-
+ boot-autoconfigure-1.5.16.RELEASE.jar spring-security-oauth2-2.0.15.R
+ ELEASE.jar json-path-2.2.0.jar spring-web-4.3.19.RELEASE.jar spring-b
+ oot-starter-test-1.5.16.RELEASE.jar snakeyaml-1.17.jar hibernate-vali
+ dator-5.3.6.Final.jar spring-cloud-starter-oauth2-1.2.1.RELEASE.jar t
+ omcat-juli-8.5.34.jar swagger-bootstrap-ui-1.7.7.jar logback-classic-
+ 1.1.11.jar spring-boot-starter-actuator-1.5.16.RELEASE.jar spring-sec
+ urity-crypto-4.2.8.RELEASE.jar validation-api-1.1.0.Final.jar aspectj
+ weaver-1.8.13.jar hibernate-core-5.0.12.Final.jar spring-oxm-4.3.19.R
+ ELEASE.jar spring-boot-starter-logging-1.5.16.RELEASE.jar dom4j-1.6.1
+ .jar spring-boot-starter-tomcat-1.5.16.RELEASE.jar spring-boot-starte
+ r-web-1.5.16.RELEASE.jar
+Main-Class: com.tc.TcCompanyApplication
+

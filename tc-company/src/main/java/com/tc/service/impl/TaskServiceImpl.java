@@ -394,7 +394,7 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             return false;
         }
         int count = taskRepository.updateState(taskId, TaskState.FINISH);
-        if (count <= 0){
+        if (count <= 0) {
             throw new DBException("修改任务状态失败");
         }
         return true;
@@ -461,7 +461,12 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
     }
 
     @Override
-    public Page<Task> search(String key,Pageable pageable) {
-        return taskRepository.searchTask(key,pageable);
+    public Page<Task> search(String key, Pageable pageable) {
+        return taskRepository.searchTask(key, pageable);
+    }
+
+    @Override
+    public List<Task> taskByDistance(Double lat, Double log ) {
+        return taskRepository.taskByDistance(lat, log );
     }
 }

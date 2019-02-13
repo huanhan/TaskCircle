@@ -7,6 +7,12 @@
     <groupId>com.tc.company</groupId>
     <artifactId>tc-company</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <parent>
+        <groupId>com.tc.security</groupId>
+        <artifactId>tc-security</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../tc-security</relativePath>
+    </parent>
 
     <dependencyManagement>
         <dependencies>
@@ -31,7 +37,7 @@
         <dependency>
             <groupId>com.tc.security</groupId>
             <artifactId>tc-security-app</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${tc.security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -115,6 +121,21 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.tc.TcCompanyApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
+        <finalName>tccompany</finalName>
     </build>
 </project>

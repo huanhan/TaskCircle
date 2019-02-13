@@ -156,6 +156,7 @@ public class IssueTaskDto {
 
     public static Task toTask(Task task, IssueTaskDto issueTask) {
         BeanUtils.copyProperties(issueTask, task);
+        task.setOriginalMoney(issueTask.money);
         task.setType(issueTask.peopleNumber == 1 ? TaskType.SOLO : TaskType.MULTI);
         return task;
     }

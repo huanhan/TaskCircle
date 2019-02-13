@@ -61,7 +61,7 @@
         </dependency>
     </dependencies>
 
-    <build>
+<!--    <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -77,5 +77,5 @@
             </plugin>
         </plugins>
         <finalName>demo</finalName>
-    </build>
+    </build>-->
 </project>

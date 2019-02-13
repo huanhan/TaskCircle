@@ -12,11 +12,9 @@ import com.tc.service.TaskService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +55,7 @@ public class AppController {
 
         //拷贝所有任务
         List<TaskAppDto> taskAppDtos = new ArrayList<>();
-        QueryTask queryTask = new QueryTask(0,20);
+        QueryTask queryTask = new QueryTask(0, 20);
         queryTask.setState(TaskState.ISSUE);
         List<Task> taskList = taskService.findByQueryTask(queryTask).getContent();
         for (Task task : taskList) {
@@ -69,5 +67,36 @@ public class AppController {
         return homeAppDto;
     }
 
+    @GetMapping("/task/{sort}/{lat}/{log}/{id:\\d+}")
+    @ApiOperation(value = "获取距离最近的任务")
+    public List<TaskAppDto> taskByDistance(@PathVariable("sort") String sort,
+                                           @PathVariable("lat") Double lat,
+                                           @PathVariable("log") Double log,
+                                           @PathVariable("id") Long id) {
+        List<Task> content=null;
+        QueryTask queryTask = new QueryTask(0, 20);
+        queryTask.setState(TaskState.ISSUE);
+        switch (sort) {
+            case "def":
+                content = taskService.findByQueryTask(queryTask).getContent();
+                break;
+            case "distance":
+                content = taskService.taskByDistance(lat, log);
+                break;
+            case "price":
+                queryTask.setSort(new Sort(Sort.Direction.DESC, Task.ORIGINALMONEY));
+                content = taskService.findByQueryTask(queryTask).getContent();
+                break;
+            case "time":
+                queryTask.setSort(new Sort(Sort.Direction.DESC, Task.CREATE_TIME));
+                content = taskService.findByQueryTask(queryTask).getContent();
+                break;
+        }
 
+        List<TaskAppDto> taskAppDtos = new ArrayList<>();
+        for (Task task : content) {
+            taskAppDtos.add(TaskAppDto.toDetail(task));
+        }
+        return taskAppDtos;
+    }
 }
