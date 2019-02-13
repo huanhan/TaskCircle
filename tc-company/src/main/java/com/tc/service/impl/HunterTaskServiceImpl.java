@@ -114,7 +114,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean acceptTask(Long id, String taskId) {
+    public String acceptTask(Long id, String taskId) {
 
         int count;
 
@@ -162,7 +162,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             throw new DBException("扣除押金失败");
         }
 
-        return true;
+        return result.getId();
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

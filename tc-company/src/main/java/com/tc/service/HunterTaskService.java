@@ -66,7 +66,7 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @param taskId
      * @return
      */
-    boolean acceptTask(Long id, String taskId);
+    String acceptTask(Long id, String taskId);
 
     /**
      * 猎刃开始任务

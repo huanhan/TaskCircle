@@ -166,6 +166,18 @@ public class PersonalController {
         return Result.init(UserContact.toListInIndex(query));
     }
 
+    @GetMapping("/contact/{name}")
+    @ApiOperation(value = "获取联系方式详情信息")
+    public UserContact detail(HttpServletRequest request,@PathVariable("name")UserContactName name){
+        UserContact detail = userContactService.findOne(
+                new UserContactPK(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()),
+                        name));
+        if (detail == null){
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        return UserContact.toDetail(detail);
+    }
+
     /**
      * 管理员添加联系方式
      * @param request

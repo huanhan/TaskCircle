@@ -17,6 +17,7 @@ import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import com.tc.until.TranstionHelper;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -147,12 +148,12 @@ public class AppHunterTaskController {
     public ResultApp acceptTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
 
         //在service中添加猎刃任务信息，需要做如下判断：任务是否允许被接，接完后是否需要修改任务状态，接完任务猎刃需要缴纳的押金
-        boolean isSuccess = hunterTaskService.acceptTask(id, taskId);
-        if (!isSuccess) {
+        String htsId = hunterTaskService.acceptTask(id, taskId);
+        if (StringUtils.isEmpty(htsId)) {
             throw new DBException("接任务失败！");
         }
 
-        HunterTask hunterTask = hunterTaskService.findOne(taskId);
+        HunterTask hunterTask = hunterTaskService.findOne(htsId);
 
         pushMsgService.pushHunterList("任务通知", "猎刃： " + hunterTask.getHunter().getUser().getName() + " 接取了你的任务，点击查看", taskId, hunterTask.getTask().getUserId());
 
