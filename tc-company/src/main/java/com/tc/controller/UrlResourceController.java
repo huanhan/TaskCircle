@@ -29,6 +29,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ public class UrlResourceController {
                 new Sort.Order(Sort.Direction.DESC,Resource.SORT_CLASSNAME),
                 new Sort.Order(Sort.Direction.DESC,Resource.SORT_CREATETIME)
         ));
-        List<Resource> list = resourceService.findByQuery(queryResource);
+        Page<Resource> list = resourceService.findByQuery(queryResource);
         list.forEach(Resource::initResource);
         //获取系统中的资源
         List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
@@ -70,7 +71,7 @@ public class UrlResourceController {
                 dbr.setNormal(true);
             }
         }));
-        return Result.init(list,queryResource);
+        return Result.init(list,queryResource.append(list.getTotalElements(),(long) list.getTotalPages()));
     }
 
     @PostMapping("/urls/controller")
@@ -79,18 +80,25 @@ public class UrlResourceController {
         List<Resource> list = resourceService.findAll();
         //获取系统中的资源
         List<Resource> urls = ControllerHelper.allUrl(applicationContext);
+        Page pageList;
         if (list == null || list.size() <= 0) {
-            return Result.init(urls);
+            pageList = ListUtils.paging(urls, myPage.getPageNumber(), myPage.getPageSize());
+        }else {
+            //去除数据库中已添加的资源
+            for (Resource has : list) {
+                urls.removeIf(resource ->
+                        resource.getPath().equals(has.getPath()) &&
+                                resource.getType().equals(has.getType())
+                );
+            }
+            pageList = ListUtils.paging(urls, myPage.getPageNumber(), myPage.getPageSize());
+            System.out.println("getTotalElements:" + pageList.getTotalElements() + "\n" +
+                    "getTotalPages" + pageList.getTotalPages() + "\n" +
+                    "getSize" + pageList.getSize() + "\n" +
+                    "getNumber" + pageList.getNumber() + "\n" +
+                    "getNumberOfElements" + pageList.getNumberOfElements());
         }
-        //去除数据库中已添加的资源
-        for (Resource has : list) {
-            urls.removeIf(resource ->
-                    resource.getPath().equals(has.getPath()) &&
-                            resource.getType().equals(has.getType())
-            );
-        }
-        Page pageList = ListUtils.paging(urls, myPage.getPageNumber(), myPage.getPageSize());
-        return Result.init(pageList);
+        return Result.init(pageList.getContent(),myPage.append(pageList.getTotalElements(),(long)pageList.getTotalPages()));
     }
 
     @GetMapping(value = "{id:\\d+}")
@@ -127,9 +135,9 @@ public class UrlResourceController {
     /**
      * 一键添加所有未添加的资源
      */
-    @GetMapping("/add/all/{id:\\d+}")
+    @GetMapping("/add/all")
     @ApiOperation(value = "一键添加所有未添加的资源")
-    public void addAll(@PathVariable("id") Long id){
+    public void addAll(HttpServletRequest request){
         List<Resource> list = resourceService.findAll();
         //获取系统中的资源
         List<Resource> urls = ControllerHelper.allUrl(applicationContext);
@@ -145,6 +153,7 @@ public class UrlResourceController {
             urls.removeIf(resource -> (resource.getName() == null || resource.getName().length() <= 0));
         }
         //遍历设置需要添加的内容
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         urls.forEach(resource -> {
             resource.setCreation(new User(id));
         });
@@ -281,7 +290,7 @@ public class UrlResourceController {
             throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
         }
         List<Show> resultList = AuthorityResource.toShows(queryResult.getContent(),QueryEnum.AUTHORITY);
-        return Result.init(resultList,queryAR);
+        return Result.init(resultList,queryAR.append(queryResult.getTotalElements(),(long) queryResult.getTotalPages()));
     }
 
     /**

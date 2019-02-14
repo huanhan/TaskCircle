@@ -30,11 +30,11 @@ public abstract class AbstractPageRequest implements Pageable, Serializable {
         return this.page;
     }
 
-    public void setPage(int page) {
+    public void setPageNumber(int page) {
         this.page = page;
     }
 
-    public void setSize(int size) {
+    public void setPageSize(int size) {
         this.size = size;
     }
 

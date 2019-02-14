@@ -6,6 +6,7 @@ import com.tc.dto.resource.QueryResource;
 import com.tc.service.ResourceService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +98,7 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
-    public List<Resource> findByQuery(QueryResource queryResource) {
+    public Page<Resource> findByQuery(QueryResource queryResource) {
 
         return resourceRepository.findAll(
                 (root, query, cb) -> {
@@ -128,6 +129,6 @@ public class ResourceServiceImpl extends AbstractBasicServiceImpl<Resource> impl
                     }
                     return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
                 },queryResource
-        ).getContent();
+        );
     }
 }

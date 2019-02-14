@@ -1,6 +1,6 @@
 package com.tc.dto.authority;
 
-import org.springframework.data.domain.PageRequest;
+import com.tc.until.PageRequest;
 import org.springframework.data.domain.Sort;
 
 public class QueryAR extends PageRequest {

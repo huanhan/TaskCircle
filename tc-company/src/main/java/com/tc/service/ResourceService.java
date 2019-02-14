@@ -2,6 +2,7 @@ package com.tc.service;
 
 import com.tc.db.entity.Resource;
 import com.tc.dto.resource.QueryResource;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -17,6 +18,6 @@ public interface ResourceService extends BasicService<Resource> {
      * @param queryResource
      * @return
      */
-    List<Resource> findByQuery(QueryResource queryResource);
+    Page<Resource> findByQuery(QueryResource queryResource);
 
 }

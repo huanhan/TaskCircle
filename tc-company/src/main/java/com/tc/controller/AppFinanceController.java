@@ -103,7 +103,7 @@ public class AppFinanceController {
     public List<CashPledgeAppDto> allByMoney(@PathVariable("id") Long id) {
 
         TimeScope timeScope = new TimeScope();
-        timeScope.setSize(30);
+        timeScope.setPageSize(30);
         timeScope.setId(id);
         List<CashPledge> result = userService.findByCashPledgeAndUser(timeScope);
 

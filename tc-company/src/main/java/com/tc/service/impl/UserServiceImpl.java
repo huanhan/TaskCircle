@@ -229,10 +229,10 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     }
 
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
-    User getUser(String username){
+    User getUser(String username) throws UsernameNotFoundException{
         User user = userRepository.queryFirstByUsername(username);
         if (user == null){
-            throw new DBException("账户名有误");
+            throw new UsernameNotFoundException("账户名有误");
         }
         return user;
     }

@@ -5,6 +5,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.admin.ModifyAdmin;
+import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.*;
 import com.tc.dto.enums.DateType;
 import com.tc.dto.user.DateCondition;
@@ -115,7 +116,7 @@ public class TextRuntime {
             System.out.println("ssss");
         }
 
-        String json = printGson(new ModifyAdmin());
+        String json = printGson(new PageRequest(0,10));
         getDTO(json);
     }
 

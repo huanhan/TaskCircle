@@ -3,6 +3,8 @@ package com.tc.until;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.io.Serializable;
+
 
 /**
  * 分页与排序
@@ -12,6 +14,11 @@ public class PageRequest extends AbstractPageRequest {
 
     private static final long serialVersionUID = -4541509938956089562L;
     private Sort sort;
+    private Page pageDto;
+
+    public PageRequest() {
+        super(0,10);
+    }
 
     public PageRequest(int page, int size) {
         this(page, size, (Sort)null);
@@ -33,6 +40,14 @@ public class PageRequest extends AbstractPageRequest {
 
     public void setSort(Sort sort) {
         this.sort = sort;
+    }
+
+    public Page getPageDto() {
+        return pageDto;
+    }
+
+    public void setPageDto(Page pageDto) {
+        this.pageDto = pageDto;
     }
 
     @Override
@@ -71,5 +86,15 @@ public class PageRequest extends AbstractPageRequest {
     @Override
     public String toString() {
         return String.format("Page request [number: %d, size %d, sort: %s]", this.getPageNumber(), this.getPageSize(), this.sort == null ? null : this.sort.toString());
+    }
+
+    public PageRequest append(Page page){
+        this.pageDto = page;
+        return this;
+    }
+
+    public PageRequest append(Long count,Long pages){
+        this.pageDto = new Page(count,pages,(long) this.getPageNumber(),(long) this.getPageSize());
+        return this;
     }
 }

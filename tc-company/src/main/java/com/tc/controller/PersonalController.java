@@ -20,6 +20,7 @@ import com.tc.exception.ValidException;
 import com.tc.security.MyJwtTokenEnhacer;
 import com.tc.service.*;
 import com.tc.until.StringResourceCenter;
+import com.tc.until.TranstionHelper;
 import com.tc.until.ValidateUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -68,6 +69,7 @@ public class PersonalController {
      * @return
      */
     @GetMapping()
+    @ApiOperation(value = "管理员本人信息")
     public Admin me(HttpServletRequest request){
         logger.info("userId:" + request.getAttribute(StringResourceCenter.USER_ID));
         Admin resultAdmin = adminService.findOne(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()));
@@ -354,12 +356,17 @@ public class PersonalController {
     @PostMapping("/audit/query")
     @ApiOperation(value = "获取管理员本人的审核历史列表")
     public Result getAuditByAdmin(HttpServletRequest request,@RequestBody QueryAudit queryAudit){
-        if (queryAudit.getAdminId() == null || queryAudit.getAdminId() <= 0){
-            throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_ADMIN_FAILED);
-        }
-        queryAudit.setUserId(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()));
+        queryAudit.setAdminId(Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString()));
         Page<Audit> queryAudits = auditService.findByQueryAudit(queryAudit);
-        return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit);
+//        System.out.println("getTotalElements:" + queryAudits.getTotalElements() + "\n" +
+//            "getTotalPages" + queryAudits.getTotalPages() + "\n" +
+//            "getSize" + queryAudits.getSize() + "\n" +
+//            "getNumber" + queryAudits.getNumber() + "\n" +
+//            "getNumberOfElements" + queryAudits.getNumberOfElements());
+        return Result.init(
+                Audit.toListInIndex(queryAudits.getContent()),
+                queryAudit.append(queryAudits.getTotalElements(),(long) queryAudits.getTotalPages())
+        );
     }
 
     /**
@@ -367,9 +374,9 @@ public class PersonalController {
      * @param id 审核编号
      * @return
      */
-    @GetMapping("/audit/detail/{id:\\d+}")
+    @GetMapping("/audit/detail/{id}")
     @ApiOperation(value = "查看管理员本人的审核详情信息")
-    public Audit auditDetail(@PathVariable("id") Long id,HttpServletRequest request){
+    public Audit auditDetail(@PathVariable("id") String id,HttpServletRequest request){
         Audit result = auditService.findOne(id);
         Long aid = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (!aid.equals(result.getAdminId())){
