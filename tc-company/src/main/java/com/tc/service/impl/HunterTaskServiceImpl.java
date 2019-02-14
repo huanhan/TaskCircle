@@ -397,6 +397,99 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         return false;
     }
 
+    //猎刃直接放弃任务
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean forceAbandonTask(HunterTask hunterTask, String context) {
+
+        int count;
+
+        //获取对应的任务
+        Task task = hunterTask.getTask();
+        //获取对应的状态
+//        HunterTaskState hunterTaskState = hunterTask.getState();
+
+        //获取判断需要的状态
+        boolean isRework = task.getTaskRework();
+        boolean isCompensate = task.getCompensate();
+        HunterTaskState hunterTaskState = HunterTaskState.getBy(isRework, isCompensate);
+
+        if (hunterTaskState.equals(HunterTaskState.NO_REWORK_HAVE_COMPENSATE) ||
+                hunterTaskState.equals(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE)) {
+            //放弃需要补偿时
+
+            //修改成结束未完成的状态，并保存放弃理由
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),
+                    HunterTaskState.END_NO,
+                    context,
+                    task.getCompensateMoney(),
+                    MoneyType.PAY);
+            if (count <= 0) {
+                throw new DBException("修改任务状态失败");
+            }
+
+            if (task.getCompensateMoney() > 0) {
+                //获取对应用户信息
+                User user = task.getUser();
+                Float dMoney = FloatHelper.add(user.getMoney(), task.getCompensateMoney());
+                //将押金给与用户补偿
+                count = userRepository.update(dMoney, task.getUserId());
+                if (count <= 0) {
+                    throw new DBException("用户补偿失败");
+                }
+                //新增转账记录
+                UserIeRecord userIeRecord = userIeRecordRepository.save(UserIeRecord.init(
+                        hunterTask.getHunterId(),
+                        task.getUserId(),
+                        "来自（" + task.getName() + "）的猎刃放弃补偿",
+                        task.getCompensateMoney()
+                ));
+                if (userIeRecord == null) {
+                    throw new DBException("添加转账记录失败");
+                }
+            }
+
+            //判断用户任务的状态是否需要重新发布任务
+            if (task.getState().equals(TaskState.FORBID_RECEIVE)) {
+                //重新发布用户任务
+                count = taskRepository.updateStateAndIssueTime(task.getId(), TaskState.ISSUE, TimestampHelper.today());
+                if (count <= 0) {
+                    throw new DBException("修改任务状态失败");
+                }
+            }
+
+            return true;
+        } else if (hunterTaskState.equals(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE) ||
+                hunterTaskState.equals(HunterTaskState.NO_REWORK_NO_COMPENSATE)) {
+            //放弃不需要补偿时
+
+            //修改成结束未完成的状态，并保存放弃理由
+            count = hunterTaskRepository.updateStateAndContext(hunterTask.getId(),
+                    HunterTaskState.END_NO,
+                    context,
+                    0F,
+                    MoneyType.IS_NULL);
+            if (count <= 0) {
+                throw new DBException("修改任务状态失败");
+            }
+
+            outMoneyToHunter(task, hunterTask);
+
+            //判断用户任务的状态是否需要重新发布任务
+            if (task.getState().equals(TaskState.FORBID_RECEIVE)) {
+                //重新发布用户任务
+                count = taskRepository.updateStateAndIssueTime(task.getId(), TaskState.ISSUE, TimestampHelper.today());
+                if (count <= 0) {
+                    throw new DBException("修改任务状态失败");
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean toAdminAudit(String htId, HunterTaskState state) {

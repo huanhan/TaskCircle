@@ -1,6 +1,7 @@
 package com.tc.dto.app;
 
 import com.tc.db.entity.Task;
+import com.tc.db.entity.TaskStep;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
 import org.springframework.beans.BeanUtils;
@@ -25,8 +26,11 @@ public class TaskAppDto {
     private Timestamp deadline;
 
     public static TaskAppDto toDetail(Task task) {
+        TaskStep taskStep = task.getTaskSteps().iterator().next();
+        String headImg = taskStep.getImg() == null || taskStep.getImg().isEmpty() ? task.getUser().getHeadImg() : taskStep.getImg();
+
         TaskAppDto taskAppDto = new TaskAppDto();
-        taskAppDto.setHeadImg(task.getUser().getHeadImg());
+        taskAppDto.setHeadImg(headImg);
         taskAppDto.setUsername(task.getUser().getUsername());
         BeanUtils.copyProperties(task, taskAppDto);
         return taskAppDto;

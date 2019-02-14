@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -139,6 +138,11 @@ public class HunterTask implements Serializable {
         hunterTask.setHunterId(hunterId);
         hunterTask.setStop(false);
         hunterTask.setState(HunterTaskState.RECEIVE);
+        hunterTask.setUserCHunter(false);
+        hunterTask.setHunterCUser(false);
+        hunterTask.setHunterCTask(false);
+        hunterTask.setHunterRejectCount(0);
+        hunterTask.setUserRejectCount(0);
         return hunterTask;
     }
 
@@ -391,6 +395,7 @@ public class HunterTask implements Serializable {
     public void setHunterCTask(Boolean hunterCTask) {
         this.hunterCTask = hunterCTask;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

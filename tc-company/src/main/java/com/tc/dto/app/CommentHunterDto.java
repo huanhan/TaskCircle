@@ -35,7 +35,7 @@ public class CommentHunterDto {
         commentDto.setCreateTime(commentHunter.getComment().getCreateTime());
         commentDto.setHunterId(commentHunter.getComment().getCreationId());
         commentDto.setHunterTaskId(commentHunter.getHunterTaskId());
-        commentDto.setName(commentHunter.getHunter().getUser().getName());
+        commentDto.setName(commentHunter.getComment().getCreation().getName());
         commentDto.setStart(commentHunter.getComment().getNumber());
         commentDto.setImg(commentHunter.getComment().getCreation().getHeadImg());
         return commentDto;

@@ -61,6 +61,9 @@ public class AppHunterTaskController {
     @Autowired
     private PushMsgService pushMsgService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * 根据状态获取指定猎刃的任务列表
      *
@@ -155,7 +158,9 @@ public class AppHunterTaskController {
 
         HunterTask hunterTask = hunterTaskService.findOne(htsId);
 
-        pushMsgService.pushHunterList("任务通知", "猎刃： " + hunterTask.getHunter().getUser().getName() + " 接取了你的任务，点击查看", taskId, hunterTask.getTask().getUserId());
+        User hunter = userService.findOne(hunterTask.getHunterId());
+        Task task = taskService.findOne(taskId);
+        pushMsgService.pushHunterList("任务通知", "猎刃： " + hunter.getName() + " 接取了你的任务，点击查看", taskId, task.getUserId());
 
         return ResultApp.init("任务接取成功");
     }
@@ -522,6 +527,35 @@ public class AppHunterTaskController {
                 "猎刃： " +
                         hunterTask.getHunter().getUser().getName() +
                         " 放弃了" +
+                        hunterTask.getTask().getName() +
+                        "任务，点击查看",
+                hunterTask.getTaskId(),
+                hunterTask.getTask().getUserId());
+        String msg;
+        if (isSuccess){
+            msg = "放弃任务成功";
+        }else {
+            msg = "放弃任务的申请已经提交给用户了";
+        }
+
+        return ResultApp.init(msg);
+    }
+
+    @PostMapping("/forceAbandon/{id:\\d+}")
+    @ApiOperation(value = "猎刃点击强行放弃任务")
+    public ResultApp forceAbandonTask(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+        //获取猎刃任务信息
+        HunterTask hunterTask = hunterTaskService.findOne(context.getId());
+        if (hunterTask == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
+        }
+
+        //猎刃放弃任务
+        boolean isSuccess = hunterTaskService.forceAbandonTask(hunterTask, context.getContext());
+        pushMsgService.pushHunterList("任务通知",
+                "猎刃： " +
+                        hunterTask.getHunter().getUser().getName() +
+                        " 强行放弃了" +
                         hunterTask.getTask().getName() +
                         "任务，点击查看",
                 hunterTask.getTaskId(),

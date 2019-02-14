@@ -195,6 +195,9 @@ public enum HunterTaskState{
             case NO_REWORK_HAVE_COMPENSATE:
                 isFailure = true;
                 break;
+            case USER_REPULSE:
+                isFailure = true;
+                break;
             default:
                 isFailure = false;
                 break;
