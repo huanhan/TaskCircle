@@ -115,6 +115,10 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      */
     boolean abandonTask(HunterTask hunterTask, String context);
 
+    //猎刃直接放弃任务
+    @Transactional(rollbackFor = RuntimeException.class)
+    boolean forceAbandonTask(HunterTask hunterTask, String context);
+
     /**
      * 将任务交给管理员审核
      * @param htId
