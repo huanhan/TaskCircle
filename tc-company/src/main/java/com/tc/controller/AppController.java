@@ -37,8 +37,8 @@ public class AppController {
         HomeAppDto homeAppDto = new HomeAppDto();
         ArrayList<String> bannsers = new ArrayList<>();
 
-        bannsers.add("https://fuss10.elemecdn.com/7/90/8012dcb83434050f0363316f24809jpeg.jpeg?imageMogr/format/webp/thumbnail/568x/");
-        bannsers.add("https://fuss10.elemecdn.com/d/f5/456ea6285819f7932d8606bffeb35jpeg.jpeg?imageMogr/format/webp/thumbnail/568x/");
+        bannsers.add("http://src.taskcircle.lrvik.xin/banner1.png");
+        bannsers.add("http://src.taskcircle.lrvik.xin/banner2.png");
         homeAppDto.setBanners(bannsers);
 
         //拷贝所有分类
