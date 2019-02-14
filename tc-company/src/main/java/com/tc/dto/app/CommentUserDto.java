@@ -24,7 +24,7 @@ public class CommentUserDto {
         commentUserDto.setHunterId(commentUser.getComment().getCreation().getId());
         commentUserDto.setUserId(commentUser.getUserId());
         commentUserDto.setTaskId(commentUser.getTaskId());
-        commentUserDto.setName(commentUser.getUser().getName());
+        commentUserDto.setName(commentUser.getComment().getCreation().getName());
         commentUserDto.setStart(commentUser.getComment().getNumber());
         commentUserDto.setImg(commentUser.getComment().getCreation().getHeadImg());
         return commentUserDto;
