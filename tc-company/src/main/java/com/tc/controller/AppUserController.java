@@ -225,6 +225,7 @@ public class AppUserController {
         if (result.hasErrors()) {
             throw new ValidException(result.getFieldErrors());
         }
+
         //验证验证码是否正确
         ServletWebRequest servletWebRequest = new ServletWebRequest(req, resp);
         ValidateCode codeInSession = redisValidateCodeRepository.get(servletWebRequest, ValidateCodeType.IMAGE);
