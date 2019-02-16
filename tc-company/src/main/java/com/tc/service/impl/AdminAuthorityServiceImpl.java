@@ -70,6 +70,12 @@ public class AdminAuthorityServiceImpl extends AbstractBasicServiceImpl<AdminAut
         return count > 0;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<AdminAuthority> findBy(Long id, List<Long> ids) {
+        return adminAuthorityRepository.findByUserIdInAndAuthorityIdEquals(ids,id);
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public List<AdminAuthority> save(List<AdminAuthority> adminAuthority) {

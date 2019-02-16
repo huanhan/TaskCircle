@@ -3,6 +3,8 @@ package com.tc.db.entity;
 import com.tc.db.entity.pk.UserAuthorityPK;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
+import com.tc.dto.TransEnum;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class UserAuthority {
         this.authorityId = authorityId;
         this.category = category;
     }
+
+
+
 
     @Id
     @Column(name = "authority_id")
@@ -92,6 +97,20 @@ public class UserAuthority {
         return result;
     }
 
+    public static Show toShow(List<UserAuthority> list, List<TransEnum> categories, Authority query) {
+        Show result = new Show();
+        List<Show> children = new ArrayList<>();
+        if (!list.isEmpty()){
+            list.forEach(userAuthority ->
+                    children.add(new Show(userAuthority.getCategory().name(),userAuthority.getCategory().getCategory())));
+        }
+        result.setChildren(children);
+        result.setTransEnums(categories);
+        result.setId(query.getId());
+        result.setName(query.getName());
+        return result;
+    }
+
     public static List<UserAuthority> reset(List<UserAuthority> userAuthorities){
         if (!userAuthorities.isEmpty()){
             userAuthorities.forEach(userAuthority -> {
@@ -99,5 +118,13 @@ public class UserAuthority {
             });
         }
         return userAuthorities;
+    }
+
+    public static List<UserAuthority> by(Long id, List<UserCategory> ids) {
+        List<UserAuthority> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(ids)){
+            ids.forEach(userCategory -> result.add(new UserAuthority(id,userCategory)));
+        }
+        return result;
     }
 }

@@ -23,6 +23,8 @@ public class Authority implements Serializable,GrantedAuthority {
 
     public static final String ADMIN_AUTHORITY = "adminAuthorities";
     public static final String INFO = "info";
+    public static final String ID = "id";
+    public static final String CREATION = "creation";
 
     private Long id;
     private String name;
@@ -165,7 +167,13 @@ public class Authority implements Serializable,GrantedAuthority {
     }
 
     public static Authority toDetail(Authority authority) {
-        authority.setAdmin(new Admin(authority.getAdmin().getUserId(),authority.getAdmin().getUser().getName(),authority.getAdmin().getUser().getUsername()));
+        if (authority.getAdmin() != null) {
+            if (authority.getAdmin().getUser() != null) {
+                authority.setAdmin(new Admin(authority.getAdmin().getUserId(), authority.getAdmin().getUser().getName(), authority.getAdmin().getUser().getUsername()));
+            }else {
+                authority.setAdmin(new Admin(authority.getAdmin().getUserId()));
+            }
+        }
         authority.setAdminAuthorities(null);
         authority.setAuthorityResources(null);
         authority.setUserAuthorities(null);

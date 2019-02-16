@@ -196,7 +196,7 @@ public class Resource implements Serializable {
 
     public void initResource() {
 
-        this.setCreation(new User(this.getCreation().getId(), this.getCreation().getName()));
+        this.setCreation(new User(this.getCreation().getId(), this.getCreation().getName(), this.getCreation().getUsername()));
         if (!this.getAuthorityResources().isEmpty()){
             this.getAuthorityResources().forEach(ar -> {
                 ar.setAuthority(new Authority(ar.getAuthority().getId(),ar.getAuthority().getName()));

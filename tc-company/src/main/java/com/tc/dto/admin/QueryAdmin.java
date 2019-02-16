@@ -8,8 +8,8 @@ import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
 import com.tc.dto.enums.AuthorityState;
+import com.tc.until.PageRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.CriteriaBuilder;

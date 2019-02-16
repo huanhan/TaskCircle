@@ -26,4 +26,11 @@ public interface AuthorityService extends BasicService<Authority> {
      * @return
      */
     Page<Authority> findByAdmin(Long id, QueryAuthority queryAuthority);
+
+    /**
+     * 获取没有使用指定url资源的权限列表
+     * @param id url资源编号
+     * @return
+     */
+    List<Authority> findByNotId(Long id);
 }

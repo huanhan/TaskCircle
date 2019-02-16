@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * 管理员仓库
  * @author Cyg
@@ -27,4 +29,11 @@ public interface AdminRepository extends JpaRepository<Admin,Long>,JpaSpecificat
             "where a.userId = :id")
     int updateByAdminState(@Param("adminState") AdminState adminState,@Param("id") Long id);
 
+    /**
+     * 获取没有指定权限的管理员
+     * @param id
+     * @return
+     */
+    @Query(value = "select a from Admin a where a.userId not in (select b.userId from AdminAuthority b where b.authorityId = :authorityId )")
+    List<Admin> findByNotAuthority(@Param("authorityId") Long id);
 }

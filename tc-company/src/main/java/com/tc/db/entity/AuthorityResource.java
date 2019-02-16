@@ -1,9 +1,10 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.AuthorityResourcePK;
+import com.tc.dto.LongIds;
 import com.tc.dto.Show;
 import com.tc.dto.enums.QueryEnum;
-import org.apache.commons.collections.ListUtils;
+import com.tc.until.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.persistence.*;
@@ -52,6 +53,8 @@ public class AuthorityResource implements Serializable {
         authorityId = authority.getId();
         resourceId = resource.getId();
     }
+
+
 
 
     @Id
@@ -151,6 +154,24 @@ public class AuthorityResource implements Serializable {
                     result.add(authorityResource.authorityId);
                 });
             }
+        }
+        return result;
+    }
+
+    public static List<AuthorityResource> transIds(LongIds ids) {
+        List<AuthorityResource> result = new ArrayList<>();
+        ids.getIds().forEach(aLong -> {
+            result.add(new AuthorityResource(aLong,ids.getId()));
+        });
+        return result;
+    }
+
+    public static List<Long> toAuthorityIds(List<AuthorityResource> queryAr) {
+        List<Long> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(queryAr)){
+            queryAr.forEach(authorityResource -> {
+                result.add(authorityResource.authorityId);
+            });
         }
         return result;
     }

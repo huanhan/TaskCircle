@@ -58,6 +58,10 @@ public class UserAuthorityServiceImpl extends AbstractBasicServiceImpl<UserAutho
         return count == ids.size();
     }
 
+    @Override
+    public List<UserAuthority> findBy(Long id, List<UserCategory> ids) {
+        return userAuthorityRepository.findByCategoryInAndAuthorityIdEquals(ids,id);
+    }
 
 
 }

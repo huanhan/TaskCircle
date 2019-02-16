@@ -5,6 +5,8 @@ import com.tc.db.enums.AdminState;
 import com.tc.dto.Show;
 import com.tc.dto.TransEnum;
 import com.tc.dto.admin.QueryAdmin;
+import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransAdmin;
 import com.tc.until.ListUtils;
 import org.springframework.data.domain.Page;
 
@@ -124,6 +126,8 @@ public class Admin {
         }
         return admin;
     }
+
+
 
     @Id
     @Column(name = "user_id")
@@ -266,5 +270,23 @@ public class Admin {
 
     public void setAdminStates(List<TransEnum> adminStates) {
         this.adminStates = adminStates;
+    }
+
+
+    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query) {
+        TransAdmin result = new TransAdmin();
+        List<Trans> trans = new ArrayList<>();
+        List<Trans> transAdmins = new ArrayList<>();
+        if (ListUtils.isNotEmpty(content)){
+            content.forEach(con -> transAdmins.add(new TransAdmin(con.userId,con.user.getUsername() + "(" + con.user.getName() + ")")));
+        }
+        if (ListUtils.isNotEmpty(notAuthAdmins)){
+            notAuthAdmins.forEach(con -> trans.add(new TransAdmin(con.userId,con.user.getUsername() + "(" + con.user.getName() + ")")));
+        }
+        result.setKey(query.getId());
+        result.setValue(query.getName());
+        result.setAdmins(transAdmins);
+        result.setTrans(trans);
+        return result;
     }
 }

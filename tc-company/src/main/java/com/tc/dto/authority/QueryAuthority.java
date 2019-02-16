@@ -1,8 +1,9 @@
 package com.tc.dto.authority;
 
 import com.tc.db.entity.Authority;
+import com.tc.until.FloatHelper;
+import com.tc.until.PageRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -111,7 +112,9 @@ public class QueryAuthority extends PageRequest {
         if (!StringUtils.isEmpty(queryAuthority.getUsername())){
             predicates.add(cb.equal(root.get("admin").get("user").get("username"),queryAuthority.getUsername()));
         }
-
+        if (FloatHelper.isNotNull(queryAuthority.adminId)){
+            predicates.add(cb.equal(root.get(Authority.CREATION),queryAuthority.adminId));
+        }
         return predicates;
     }
 }

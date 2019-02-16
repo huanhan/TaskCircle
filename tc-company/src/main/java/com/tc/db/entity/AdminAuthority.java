@@ -3,6 +3,8 @@ package com.tc.db.entity;
 import com.tc.db.entity.pk.AdminAuthorityPK;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
+import com.tc.dto.trans.Trans;
+import com.tc.until.ListUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -34,6 +36,9 @@ public class AdminAuthority {
         this.authorityId = authorityId;
         this.userId = userId;
     }
+
+
+
 
     @Id
     @Column(name = "authority_id")
@@ -104,5 +109,23 @@ public class AdminAuthority {
             );
         }
         return list;
+    }
+
+    public static List<AdminAuthority> by(Long id, List<Long> ids) {
+        List<AdminAuthority> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(ids)){
+            ids.forEach(aLong -> result.add(new AdminAuthority(id,aLong)));
+        }
+        return result;
+    }
+
+    public static List<Trans> toTrans(List<AdminAuthority> adminAuthorities) {
+        List<Trans> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(adminAuthorities)){
+            adminAuthorities.forEach(adminAuthority -> {
+                result.add(new Trans(adminAuthority.userId));
+            });
+        }
+        return result;
     }
 }

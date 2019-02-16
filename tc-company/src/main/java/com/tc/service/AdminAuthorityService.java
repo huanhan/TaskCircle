@@ -42,4 +42,12 @@ public interface AdminAuthorityService extends BasicService<AdminAuthority> {
      * @return
      */
     boolean deleteByAuthorityIds(List<Long> authorityIds, Long id);
+
+    /**
+     * 获取指定权限的管理员权限列表
+     * @param id
+     * @param ids
+     * @return
+     */
+    List<AdminAuthority> findBy(Long id, List<Long> ids);
 }

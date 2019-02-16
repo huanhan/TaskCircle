@@ -78,6 +78,8 @@ public class AuthorityOPClassify {
             inDefault = new ArrayList<>();
             inDelete = new ArrayList<>();
             inAdd = new ArrayList<>(news);
+        }else {
+            return null;
         }
 
         return new AuthorityOPClassify(inDefault,inDelete,inAdd);

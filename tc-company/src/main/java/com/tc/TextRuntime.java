@@ -5,11 +5,14 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.admin.ModifyAdmin;
+import com.tc.dto.admin.QueryAdmin;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.*;
 import com.tc.dto.enums.DateType;
+import com.tc.dto.resource.QueryResource;
 import com.tc.dto.user.DateCondition;
 import com.tc.until.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -116,8 +119,11 @@ public class TextRuntime {
             System.out.println("ssss");
         }
 
-        String json = printGson(new PageRequest(0,10));
-        getDTO(json);
+        String json = printGson(new QueryAdmin());
+
+
+        String name = StringUtils.substringAfterLast("com.tc.controller.TaskController",".");
+        System.out.println(name);
     }
 
 

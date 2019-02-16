@@ -38,7 +38,7 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
         return adminRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryAdmin.initPredicates(queryAdmin,root,query,cb);
             predicates.add(cb.equal(root.join(Admin.ADMIN_AUTHORITIES).get(AdminAuthority.AUTHORITY_ID),authority));
-            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
+            //predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryAdmin);
     }
@@ -74,6 +74,12 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
     public boolean leaveOffice(Long id) {
         int count = adminRepository.updateByAdminState(AdminState.LEAVE_FOOICE,id);
         return count == 1;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Admin> findByNotAuthority(Long id) {
+        return adminRepository.findByNotAuthority(id);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

@@ -1,5 +1,6 @@
 package com.tc.controller;
 
+import com.tc.db.entity.Authority;
 import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
 import com.tc.db.entity.User;
@@ -15,6 +16,7 @@ import com.tc.dto.resource.SelectAddResource;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.AuthorityResourceService;
+import com.tc.service.AuthorityService;
 import com.tc.service.ResourceService;
 import com.tc.until.ControllerHelper;
 import com.tc.until.ListUtils;
@@ -52,6 +54,9 @@ public class UrlResourceController {
     @Autowired
     private AuthorityResourceService authorityResourceService;
 
+    @Autowired
+    private AuthorityService authorityService;
+
     @PostMapping("/urls/db")
     @ApiOperation(value = "获取数据库中的url资源")
     public Result allUrl(@RequestBody QueryResource queryResource){
@@ -71,7 +76,7 @@ public class UrlResourceController {
                 dbr.setNormal(true);
             }
         }));
-        return Result.init(list,queryResource.append(list.getTotalElements(),(long) list.getTotalPages()));
+        return Result.init(list.getContent(),queryResource.append(list.getTotalElements(),(long) list.getTotalPages()));
     }
 
     @PostMapping("/urls/controller")
@@ -124,6 +129,8 @@ public class UrlResourceController {
         }
 
         if (exist){
+            resource.setResourceState(ResourceState.NORMAL.getState());
+            resource.setNormal(true);
             resource.initResource();
             return resource;
         } else {
@@ -149,9 +156,9 @@ public class UrlResourceController {
                                 resource.getType().equals(has.getType())
                 );
             }
-            //去除不允许添加的内容
-            urls.removeIf(resource -> (resource.getName() == null || resource.getName().length() <= 0));
         }
+        //去除不允许添加的内容
+        urls.removeIf(resource -> (resource.getName() == null || resource.getName().length() <= 0));
         //遍历设置需要添加的内容
         Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         urls.forEach(resource -> {
@@ -206,6 +213,12 @@ public class UrlResourceController {
         );
         if (newQueryList.size() <= 0){
             throw new DBException(StringResourceCenter.VALIDATOR_INSERT_ABNORMAL);
+        }else {
+            //去除不允许添加的内容
+            newQueryList.removeIf(resource -> (resource.getName() == null || resource.getName().length() <= 0));
+            if (newQueryList.size() <= 0){
+                throw new ValidException("名字为空的不允许添加到数据库");
+            }
         }
 
         //保存用户选择的资源
@@ -309,7 +322,46 @@ public class UrlResourceController {
         }
     }
 
+    /**
+     * 获取指定url资源未添加的权限列表
+     * @param id
+     */
+    @GetMapping("/authority/{id:\\d+}")
+    @ApiOperation(value = "获取指定url资源未添加的权限列表")
+    public Result authorities(@PathVariable("id") Long id){
+        List<Authority> queryResult = authorityService.findByNotId(id);
+        if (ListUtils.isNotEmpty(queryResult)){
+            List<Show> result = Authority.toShows(queryResult);
+            return Result.init(result);
+        }else {
+            throw new DBException("不存在未添加的权限");
+        }
+    }
 
-
-
+    /**
+     * 添加资源的使用者
+     * @param ids
+     * @param bindingResult
+     */
+    @PostMapping("/authority/add")
+    @ApiOperation(value = "添加资源的使用者")
+    public void addAuthority(@Valid @RequestBody LongIds ids, BindingResult bindingResult){
+        if (bindingResult.hasErrors()){
+            throw new ValidException(bindingResult.getFieldErrors());
+        }
+        List<Long> res = new ArrayList<>();
+        res.add(ids.getId());
+        List<AuthorityResource> query = authorityResourceService.findByKeys(res,ids.getIds());
+        if (ListUtils.isNotEmpty(query)){
+            query.forEach(authorityResource -> ids.getIds().removeIf(aLong -> aLong.equals(authorityResource.getAuthorityId())));
+        }
+        if (ListUtils.isNotEmpty(ids.getIds())){
+            List<AuthorityResource> result = authorityResourceService.save(AuthorityResource.transIds(ids));
+            if (ListUtils.isEmpty(result)) {
+                throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
+            }
+        }else {
+            throw new ValidException("权限已配置");
+        }
+    }
 }

@@ -40,4 +40,12 @@ public interface AdminService extends BasicService<Admin> {
      * @return
      */
     boolean leaveOffice(Long id);
+
+
+    /**
+     * 获取没有指定权限的管理员
+     * @param id
+     * @return
+     */
+    List<Admin> findByNotAuthority(Long id);
 }

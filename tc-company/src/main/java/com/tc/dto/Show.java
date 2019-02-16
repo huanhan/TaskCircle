@@ -1,48 +1,45 @@
 package com.tc.dto;
 
+import java.util.List;
+
 /**
  * @author Cyg
  *
  * {id:name}的记录信息
  */
 public class Show {
-    private Long id;
-    private String sid;
+    private Object id;
     private String name;
     private Long queryId;
+    private List<Show> children;
+    private List<TransEnum> transEnums;
+
 
     public Show() {
     }
 
-    public Show(String sid, String name) {
-        this.sid = sid;
-        this.name = name;
-    }
-
-    public Show(Long id, String name) {
+    public Show(Object id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Show(Long id, String name,Long queryId) {
+    public Show(Object id, String name, List<Show> children) {
+        this.id = id;
+        this.name = name;
+        this.children = children;
+    }
+
+    public Show(Object id, String name, Long queryId) {
         this.id = id;
         this.name = name;
         this.queryId = queryId;
     }
 
-    public String getSid() {
-        return sid;
-    }
-
-    public void setSid(String sid) {
-        this.sid = sid;
-    }
-
-    public Long getId() {
+    public Object getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Object id) {
         this.id = id;
     }
 
@@ -60,5 +57,21 @@ public class Show {
 
     public void setQueryId(Long queryId) {
         this.queryId = queryId;
+    }
+
+    public List<Show> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Show> children) {
+        this.children = children;
+    }
+
+    public List<TransEnum> getTransEnums() {
+        return transEnums;
+    }
+
+    public void setTransEnums(List<TransEnum> transEnums) {
+        this.transEnums = transEnums;
     }
 }

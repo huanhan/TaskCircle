@@ -38,6 +38,14 @@ public interface UserAuthorityRepository extends JpaRepository<UserAuthority,Use
     List<UserAuthority> findByCategoryEquals(UserCategory userCategory);
 
     /**
+     * 根据权限编号与用户分类列表获取数据
+     * @param categories
+     * @param authorityId
+     * @return
+     */
+    List<UserAuthority> findByCategoryInAndAuthorityIdEquals(List<UserCategory> categories,Long authorityId);
+
+    /**
      * 根据权限组删除关系
      * @param ids
      * @return
