@@ -256,8 +256,8 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean auditNotPassByUser(String id, HunterTaskState state, String context,Integer iCount) {
-        int count = hunterTaskRepository.updateStateAndAuditContext(id, state, context,iCount + 1);
+    public boolean auditNotPassByUser(String id, HunterTaskState state, String context, Integer iCount) {
+        int count = hunterTaskRepository.updateStateAndAuditContext(id, state, context, iCount + 1);
         return count > 0;
     }
 
@@ -554,9 +554,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         });
 
         boolean isRemove = hunterTasks.removeIf(hunterTask -> HunterTaskState.isOk(hunterTask.getState()));
-        if (isRemove && hunterTasks.size() == 1) {
-            return hunterTasks.get(0);
-        } else if (hunterTasks.size() == 1) {
+        if (hunterTasks.size() >= 1) {
             return hunterTasks.get(0);
         }
         return null;
@@ -609,9 +607,9 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean abandonNotPassByHunter(HunterTask hunterTask, String context,Integer iCount) {
+    public boolean abandonNotPassByHunter(HunterTask hunterTask, String context, Integer iCount) {
         Task task = hunterTask.getTask();
-        int count = hunterTaskRepository.updateStateAndHunterRejectContext(hunterTask.getId(), HunterTaskState.HUNTER_REPULSE, context,iCount + 1);
+        int count = hunterTaskRepository.updateStateAndHunterRejectContext(hunterTask.getId(), HunterTaskState.HUNTER_REPULSE, context, iCount + 1);
         if (count <= 0) {
             throw new DBException("更新猎刃任务状态失败");
         }
@@ -648,6 +646,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     /**
      * 更新评价
+     *
      * @param id
      * @param type
      * @return
