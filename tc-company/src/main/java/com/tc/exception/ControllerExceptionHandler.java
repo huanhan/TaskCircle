@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
@@ -52,6 +53,18 @@ public class ControllerExceptionHandler {
     public MyResponse handlerDBException(DBException ex){
         List<Message> messages = new ArrayList<>();
         messages.add(new Message(ex.getMessage()));
+        return new MyResponse(messages);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public MyResponse handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex){
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+        List<Message> messages = new ArrayList<>();
+        for (FieldError fieldError : fieldErrors) {
+            messages.add(new Message(fieldError.getDefaultMessage()));
+        }
         return new MyResponse(messages);
     }
 

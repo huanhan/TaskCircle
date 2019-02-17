@@ -341,8 +341,16 @@ public class AppTaskController {
             throw new ValidationException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
         }
 
-        //重新上架任务
-        taskService.updateState(taskId, TaskState.ISSUE);
+        //判断任务已接人数和可接人数是否一致，如果一致的话就就把任务状态改成 任务禁止被接取
+        List<HunterTask> hunterTasks = hunterTaskService.findByTaskId(taskId);
+        if (hunterTasks.size()==task.getPeopleNumber()) {
+            //任务禁止被接取
+            taskService.updateState(taskId, TaskState.FORBID_RECEIVE);
+        }else{
+            //重新上架任务
+            taskService.updateState(taskId, TaskState.ISSUE);
+        }
+
 
         return ResultApp.init("重新上架完成");
     }
@@ -390,7 +398,7 @@ public class AppTaskController {
             } else {
                 context = "目前有" + count + "猎刃正在执行该任务！不能放弃任务，剩余猎刃将继续执行任务，可以选择与猎刃交流让猎刃放弃";
             }
-            throw new ValidException(context);
+            return ResultApp.init(context);
         }
 
         Collection<HunterTask> hunterTasks = task.getHunterTasks();
@@ -734,15 +742,15 @@ public class AppTaskController {
                 taskStates.add(TaskState.ISSUE);//任务发布中
                 taskStates.add(TaskState.FORBID_RECEIVE);//任务禁止被接取
                 taskStates.add(TaskState.OUT);//任务被撤回
-                break;
-            case "FINISH"://已完成
-                taskStates.add(TaskState.FINISH);//任务完成
                 taskStates.add(TaskState.ABANDON_COMMIT);//用户提交放弃的申请
-                taskStates.add(TaskState.ABANDON_OK);//任务被放弃
                 taskStates.add(TaskState.USER_HUNTER_NEGOTIATE);//与猎刃协商中
                 taskStates.add(TaskState.HUNTER_REJECT);//猎刃拒绝协商
                 taskStates.add(TaskState.COMMIT_AUDIT);//提交管理员协商
                 taskStates.add(TaskState.ADMIN_NEGOTIATE);//管理员协商中
+                break;
+            case "FINISH"://已完成
+                taskStates.add(TaskState.FINISH);//任务完成
+                taskStates.add(TaskState.ABANDON_OK);//任务被放弃
                 taskStates.add(TaskState.HUNTER_COMMIT);//猎刃放弃任务
                 break;
         }

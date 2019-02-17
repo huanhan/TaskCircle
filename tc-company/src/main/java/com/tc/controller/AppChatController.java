@@ -1,11 +1,13 @@
 package com.tc.controller;
 
+import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
 import com.tc.db.entity.UserHunterInterflow;
 import com.tc.dto.app.*;
 import com.tc.dto.task.QueryTaskInterflow;
 import com.tc.exception.ValidException;
+import com.tc.service.HunterTaskService;
 import com.tc.service.PushMsgService;
 import com.tc.service.UserHunterInterflowService;
 import com.tc.service.UserService;
@@ -36,6 +38,9 @@ public class AppChatController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private HunterTaskService hunterTaskService;
+
     /**
      * 获取指定任务，指定用户，指定猎刃的聊天内容
      *
@@ -64,10 +69,16 @@ public class AppChatController {
     @PostMapping("/{id:\\d+}")
     @ApiOperation(value = "保存聊天记录")
     public ChatDto saveChat(@PathVariable("id") Long id, @Valid @RequestBody ChatDtoReq addChat, BindingResult bindingResult) {
-
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
+
+        HunterTask hunterTask = hunterTaskService.findByTaskIsNotOk(addChat.getTaskId(), addChat.getHunterId());
+        if (hunterTask == null) {
+            throw new ValidException("任务已结束，不能在于对方沟通了哦！");
+        }
+
+
         UserHunterInterflow init = ChatDtoReq.init(addChat);
         init.setSender(id);
         UserHunterInterflow save = userHunterInterflowService.save(init);

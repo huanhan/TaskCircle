@@ -21,7 +21,7 @@ import java.sql.Timestamp;
 public class RegisterAdmin {
     @NotBlank
     @Size(min = 8,message = "账户最少8位")
-    @Username(message = "账户以存在")
+    @Username(message = "账户已存在")
     private String username;
 
     @NotBlank
