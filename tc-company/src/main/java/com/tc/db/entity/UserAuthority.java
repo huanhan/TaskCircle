@@ -4,6 +4,7 @@ import com.tc.db.entity.pk.UserAuthorityPK;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.TransEnum;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
@@ -33,7 +34,6 @@ public class UserAuthority {
         this.authorityId = authorityId;
         this.category = category;
     }
-
 
 
 
@@ -124,6 +124,15 @@ public class UserAuthority {
         List<UserAuthority> result = new ArrayList<>();
         if (ListUtils.isNotEmpty(ids)){
             ids.forEach(userCategory -> result.add(new UserAuthority(id,userCategory)));
+        }
+        return result;
+    }
+
+
+    public static List<Trans> toTrans(List<UserAuthority> list) {
+        List<Trans> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(list)){
+            list.forEach(userAuthority -> result.add(new Trans(userAuthority.authorityId,userAuthority.category.name())));
         }
         return result;
     }

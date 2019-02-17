@@ -36,4 +36,20 @@ public interface AdminRepository extends JpaRepository<Admin,Long>,JpaSpecificat
      */
     @Query(value = "select a from Admin a where a.userId not in (select b.userId from AdminAuthority b where b.authorityId = :authorityId )")
     List<Admin> findByNotAuthority(@Param("authorityId") Long id);
+
+    /**
+     * 获取没有指定权限,并且创建者是自己的管理员
+     * @param id
+     * @param creation
+     * @return
+     */
+    @Query(value = "select a from Admin a where a.userId not in (select b.userId from AdminAuthority b where b.authorityId = :authorityId ) and a.createId = :creation")
+    List<Admin> findByNotAuthority(@Param("authorityId") Long id,@Param("creation") Long creation);
+
+    /**
+     * 根据用户编号获取
+     * @param ids
+     * @return
+     */
+    List<Admin> findByUserIdIn(List<Long> ids);
 }

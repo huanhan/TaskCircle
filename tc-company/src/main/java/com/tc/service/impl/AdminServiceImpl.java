@@ -82,6 +82,11 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
         return adminRepository.findByNotAuthority(id);
     }
 
+    @Override
+    public List<Admin> findByNotAuthority(Long id, Long creation) {
+        return adminRepository.findByNotAuthority(id,creation);
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Admin save(Admin admin) {
@@ -100,5 +105,11 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
     @Override
     public Admin update(Admin user) {
         return adminRepository.saveAndFlush(user);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Admin> findByIds(List<Long> ids) {
+        return adminRepository.findByUserIdIn(ids);
     }
 }

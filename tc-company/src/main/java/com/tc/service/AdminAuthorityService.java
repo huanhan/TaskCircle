@@ -50,4 +50,13 @@ public interface AdminAuthorityService extends BasicService<AdminAuthority> {
      * @return
      */
     List<AdminAuthority> findBy(Long id, List<Long> ids);
+
+    /**
+     * 删除旧的，保存新的
+     * @param news
+     * @param old
+     * @param id
+     * @return
+     */
+    Boolean saveNewsAndRemoveOld(List<AdminAuthority> news, List<Long> old, Long id);
 }

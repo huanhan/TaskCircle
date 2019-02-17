@@ -7,6 +7,8 @@ import com.tc.dto.TransEnum;
 import com.tc.dto.admin.QueryAdmin;
 import com.tc.dto.trans.Trans;
 import com.tc.dto.trans.TransAdmin;
+import com.tc.dto.trans.TransID;
+import com.tc.dto.trans.TransOP;
 import com.tc.until.ListUtils;
 import org.springframework.data.domain.Page;
 
@@ -126,6 +128,7 @@ public class Admin {
         }
         return admin;
     }
+
 
 
 
@@ -273,12 +276,14 @@ public class Admin {
     }
 
 
-    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query) {
+    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query,Long me) {
         TransAdmin result = new TransAdmin();
         List<Trans> trans = new ArrayList<>();
-        List<Trans> transAdmins = new ArrayList<>();
+        List<TransOP> transAdmins = new ArrayList<>();
         if (ListUtils.isNotEmpty(content)){
-            content.forEach(con -> transAdmins.add(new TransAdmin(con.userId,con.user.getUsername() + "(" + con.user.getName() + ")")));
+            content.forEach(con -> transAdmins.add(new TransOP(con.userId,
+                    con.user.getUsername() + "(" + con.user.getName() + ")",
+                    con.createId.equals(me))));
         }
         if (ListUtils.isNotEmpty(notAuthAdmins)){
             notAuthAdmins.forEach(con -> trans.add(new TransAdmin(con.userId,con.user.getUsername() + "(" + con.user.getName() + ")")));
@@ -287,6 +292,14 @@ public class Admin {
         result.setValue(query.getName());
         result.setAdmins(transAdmins);
         result.setTrans(trans);
+        return result;
+    }
+
+    public static List<Trans> toTrans(List<Admin> queryAdmins) {
+        List<Trans> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(queryAdmins)){
+            queryAdmins.forEach(adm -> result.add(new Trans(adm.userId,adm.user.getUsername() + "(" + adm.user.getName() + ")")));
+        }
         return result;
     }
 }

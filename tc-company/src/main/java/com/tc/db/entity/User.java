@@ -216,6 +216,12 @@ public class User implements Serializable {
      */
     private List<TransEnum> genders;
 
+    /**
+     * 用户权限
+     */
+    private List<UserAuthority> userAuthorities;
+
+
     public User() {
     }
 
@@ -679,6 +685,15 @@ public class User implements Serializable {
 
     public void setGenders(List<TransEnum> genders) {
         this.genders = genders;
+    }
+
+    @Transient
+    public List<UserAuthority> getUserAuthorities() {
+        return userAuthorities;
+    }
+
+    public void setUserAuthorities(List<UserAuthority> userAuthorities) {
+        this.userAuthorities = userAuthorities;
     }
 
     public interface UserBasicView {}

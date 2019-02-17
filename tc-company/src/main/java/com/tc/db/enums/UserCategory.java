@@ -2,6 +2,8 @@ package com.tc.db.enums;
 
 import com.tc.dto.Show;
 import com.tc.dto.TransEnum;
+import com.tc.dto.trans.Trans;
+import com.tc.until.ListUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +18,7 @@ public enum UserCategory {
 
     NORMAL("普通用户"),
     HUNTER("猎刃"),
+    SUPPER_ADMIN("超级管理员"),
     ADMINISTRATOR("管理员"),
     DEVELOPER("开发人员")
     ;
@@ -26,13 +29,7 @@ public enum UserCategory {
         this.category = category;
     }
 
-    public static List<TransEnum> toList() {
-        List<TransEnum> result = new ArrayList<>();
-        for (UserCategory userCategory : UserCategory.values()) {
-            result.add(TransEnum.init(userCategory.name(),userCategory.getCategory()));
-        }
-        return result;
-    }
+
 
     public String getCategory() {
         return category;
@@ -68,6 +65,25 @@ public enum UserCategory {
         return result;
     }
 
+    public static List<TransEnum> toList() {
+        List<TransEnum> result = new ArrayList<>();
+        for (UserCategory userCategory : UserCategory.values()) {
+            if (!userCategory.equals(UserCategory.SUPPER_ADMIN)){
+                result.add(TransEnum.init(userCategory.name(),userCategory.getCategory()));
+            }
+        }
+        return result;
+    }
+
+    public static List<Trans> toTrans(List<UserCategory> list) {
+        List<Trans> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(list)){
+            list.forEach(userCategory -> {
+                result.add(new Trans(userCategory.name(),userCategory.getCategory()));
+            });
+        }
+        return result;
+    }
 
 
 }

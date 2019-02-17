@@ -48,4 +48,13 @@ public interface AdminService extends BasicService<Admin> {
      * @return
      */
     List<Admin> findByNotAuthority(Long id);
+
+    /**
+     * 获取没有指定权限，并且创建者是本人的管理员
+     * @param id
+     * @param creation
+     * @return
+     */
+    List<Admin> findByNotAuthority(Long id, Long creation);
+
 }

@@ -4,6 +4,7 @@ import com.tc.db.entity.pk.AdminAuthorityPK;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransID;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
@@ -124,6 +125,16 @@ public class AdminAuthority {
         if (ListUtils.isNotEmpty(adminAuthorities)){
             adminAuthorities.forEach(adminAuthority -> {
                 result.add(new Trans(adminAuthority.userId));
+            });
+        }
+        return result;
+    }
+
+    public static List<TransID> toTransID(List<AdminAuthority> adminAuthorities) {
+        List<TransID> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(adminAuthorities)){
+            adminAuthorities.forEach(adminAuthority -> {
+                result.add(new TransID(adminAuthority.userId,adminAuthority.authorityId));
             });
         }
         return result;

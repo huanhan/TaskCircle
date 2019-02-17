@@ -279,13 +279,14 @@ public class AuthorityController {
      */
     @PostMapping("/admin/query/{id:\\d+}")
     @ApiOperation(value = "获取权限的使用者列表（管理员）")
-    public Result authorityAdmins(@RequestBody QueryAdmin queryAdmin, @PathVariable("id") Long id){
+    public Result authorityAdmins(HttpServletRequest request,@RequestBody QueryAdmin queryAdmin, @PathVariable("id") Long id){
+        Long creation = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         Authority query = authorityService.findOne(id);
         if (query != null) {
 
             Page<Admin> admins = adminService.findByQueryAdminAndAuthority(queryAdmin,id);
-            List<Admin> notAuthAdmins = adminService.findByNotAuthority(id);
-            return Result.init(Admin.toTrans(admins.getContent(),notAuthAdmins,query),queryAdmin.append(admins.getTotalElements(),(long) admins.getTotalPages()));
+            List<Admin> notAuthAdmins = adminService.findByNotAuthority(id,creation);
+            return Result.init(Admin.toTrans(admins.getContent(),notAuthAdmins,query,id),queryAdmin.append(admins.getTotalElements(),(long) admins.getTotalPages()));
 
         }else {
             throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
@@ -328,6 +329,7 @@ public class AuthorityController {
     @PostMapping("/admin/select/add")
     @ApiOperation(value = "添加一个或多个使用者（管理员）")
     public Result addAdmins(HttpServletRequest request,@Valid @RequestBody LongIds ids,BindingResult bindingResult){
+        Long creation = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -336,8 +338,22 @@ public class AuthorityController {
 
             List<AdminAuthority> queryResult = adminAuthorityService.findBy(ids.getId(),ids.getIds());
             if (ListUtils.isNotEmpty(queryResult)){
+                //遍历移除已存在该权限的管理员
                 for (AdminAuthority adminAuthority : queryResult) {
                     ids.getIds().removeIf(id -> adminAuthority.getUserId().equals(id));
+                }
+            }
+            if (ListUtils.isNotEmpty(ids.getIds())){
+                List<Admin> admins = adminService.findByIds(ids.getIds());
+                if (ListUtils.isNotEmpty(admins)){
+                    //遍历移除不符合自身权限的管理员
+                    admins.forEach(admin -> {
+                        if (!admin.getCreateId().equals(creation)){
+                            ids.getIds().removeIf(aLong -> aLong.equals(admin.getUserId()));
+                        }
+                    });
+                }else {
+                    throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
                 }
             }
             if (ListUtils.isNotEmpty(ids.getIds())){

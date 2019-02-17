@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.dto.Show;
+import com.tc.dto.trans.TransOP;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -47,7 +49,33 @@ public class Authority implements Serializable,GrantedAuthority {
         this.name = name;
     }
 
+    public static List<TransOP> toTrans(List<Authority> list,Long me) {
+        List<TransOP> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(list)){
 
+            for (Authority authority : list) {
+                AtomicBoolean isSelect = new AtomicBoolean(false);
+                result.forEach(transOP -> {
+                    if (transOP.getKey().equals(authority.getAdmin().getUser().getUsername())){
+                        transOP.getChildren().add(new TransOP(
+                                authority.getId(),
+                                authority.getName(),
+                                authority.getCreation().equals(me)));
+                        isSelect.set(true);
+                    }
+                });
+                if (!isSelect.get()){
+                    List<TransOP> children = new ArrayList<>();
+                    children.add(new TransOP(authority.getId(),authority.getName(),authority.getCreation().equals(me)));
+                    result.add(new TransOP(authority.getAdmin().getUser().getUsername(),
+                            authority.getAdmin().getUser().getUsername() + "(" + authority.getAdmin().getUser().getName() + ")",
+                            false,children));
+                }
+            }
+
+        }
+        return result;
+    }
 
 
     @Id
@@ -135,7 +163,7 @@ public class Authority implements Serializable,GrantedAuthority {
     @Override
     @Transient
     public String getAuthority() {
-        return this.name;
+        return this.id.toString();
     }
 
 
@@ -148,7 +176,7 @@ public class Authority implements Serializable,GrantedAuthority {
         this.userAuthorities = userAuthorities;
     }
 
-    @OneToMany(mappedBy = "authority",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "authority",cascade = CascadeType.REMOVE,fetch = FetchType.EAGER)
     public Collection<AuthorityResource> getAuthorityResources() {
         return authorityResources;
     }

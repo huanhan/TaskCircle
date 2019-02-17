@@ -5,7 +5,7 @@ import java.util.List;
 public class TransAdmin extends Trans {
 
     private List<Trans> trans;
-    private List<Trans> admins;
+    private List<TransOP> admins;
 
     public TransAdmin() {
     }
@@ -14,7 +14,7 @@ public class TransAdmin extends Trans {
         super(key, value);
     }
 
-    public TransAdmin(Object key, String value, List<Trans> trans, List<Trans> admins) {
+    public TransAdmin(Object key, String value, List<Trans> trans, List<TransOP> admins) {
         super(key, value);
         this.trans = trans;
         this.admins = admins;
@@ -29,11 +29,11 @@ public class TransAdmin extends Trans {
         this.trans = trans;
     }
 
-    public List<Trans> getAdmins() {
+    public List<TransOP> getAdmins() {
         return admins;
     }
 
-    public void setAdmins(List<Trans> admins) {
+    public void setAdmins(List<TransOP> admins) {
         this.admins = admins;
     }
 

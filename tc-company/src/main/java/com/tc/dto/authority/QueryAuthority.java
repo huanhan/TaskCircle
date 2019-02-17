@@ -19,6 +19,7 @@ import java.util.List;
  * @author Cyg
  */
 public class QueryAuthority extends PageRequest {
+    private Long id;
     private String authorityName;
     private String info;
     private Timestamp begin;
@@ -40,6 +41,14 @@ public class QueryAuthority extends PageRequest {
 
     public QueryAuthority(int page, int size, Sort sort) {
         super(page, size, sort);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getAuthorityName() {
@@ -93,6 +102,10 @@ public class QueryAuthority extends PageRequest {
     public static List<Predicate> initPredicates(QueryAuthority queryAuthority, Root<Authority> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 
         List<Predicate> predicates = new ArrayList<>();
+
+        if (FloatHelper.isNotNull(queryAuthority.id)){
+            predicates.add(cb.equal(root.get(Authority.ID),queryAuthority.id));
+        }
 
         if (!StringUtils.isEmpty(queryAuthority.getAuthorityName())){
             predicates.add(cb.like(root.get("name"),"%" + queryAuthority.getAuthorityName() + "%"));

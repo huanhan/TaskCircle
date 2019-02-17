@@ -18,7 +18,7 @@ public class TcAuthorizeConfigManager implements AuthorizeConfigManager {
     @Override
     public void config(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry config) {
         authorizeConfigProviders.forEach(authorizeConfigProvider -> authorizeConfigProvider.config(config));
-        config.anyRequest().authenticated();
+        //config.anyRequest().authenticated();
     }
     
     
