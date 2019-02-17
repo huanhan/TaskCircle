@@ -672,4 +672,46 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         }
         return null;
     }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean abandonHunterTask(String hunterTaskId) {
+
+        int count = hunterTaskRepository.updateState(hunterTaskId, HunterTaskState.WITH_HUNTER_NEGOTIATE);
+        if (count <= 0) {
+            throw new DBException("任务状态修改失败");
+        }
+        return true;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean forceAbandonHunterTask(HunterTask hunterTask) {
+        Task task = hunterTask.getTask();
+        int count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_BE_ABANDON, 0F, MoneyType.IS_NULL);
+        if (count <= 0) {
+            throw new DBException("修改猎刃任务状态失败");
+        }
+        //退还猎刃押金 todo 可能要增加赔偿金
+        this.outMoneyToHunter(hunterTask.getTask(), hunterTask);
+
+        //判断是否还有猎刃在执行任务
+        List<HunterTask> hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(), HunterTaskState.notAbandon());
+        if (ListUtils.isEmpty(hts)) {
+            //放弃任务
+            count = taskRepository.updateState(task.getId(), TaskState.ABANDON_OK);
+            if (count <= 0) {
+                throw new DBException("修改用户任务状态失败");
+            }
+            //获取发布该任务的用户信息 todo 增加赔偿金
+            User user = task.getUser();
+            Float dMoney = FloatHelper.sub(user.getMoney(), task.getMoney());
+            count = userRepository.update(dMoney, task.getUserId());
+            if (count <= 0) {
+                throw new DBException("退还用户押金失败");
+            }
+        }
+
+        return true;
+    }
 }

@@ -36,7 +36,7 @@ public class HunterTask implements Serializable {
     public static final String HUNTER_REJECT_CONTEXT = "hunterRejectContext";
     public static final String TASK = "task";
     public static final String HUNTER = "hunter";
-    public static final String IS_STOP = "isStop";
+    public static final String IS_STOP = "stop";
     public static final String MONEY = "money";
     public static final String MONEY_TYPE = "moneyType";
 
@@ -57,6 +57,7 @@ public class HunterTask implements Serializable {
     private Integer hunterRejectCount;
     private Integer userRejectCount;
     private HunterTaskState state;
+    private HunterTaskState oldState;
     private Boolean isStop;
     private Float money;
     private MoneyType moneyType;
@@ -286,6 +287,17 @@ public class HunterTask implements Serializable {
 
     public void setState(HunterTaskState state) {
         this.state = state;
+    }
+
+    @Basic
+    @Enumerated(EnumType.STRING)
+    @Column(name = "old_state")
+    public HunterTaskState getOldState() {
+        return oldState;
+    }
+
+    public void setOldState(HunterTaskState oldState) {
+        this.oldState = oldState;
     }
 
     @Basic

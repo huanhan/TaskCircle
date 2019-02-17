@@ -63,7 +63,7 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
     int update(@Param("state") UserState state, @Param("category") UserCategory category, @Param("id") Long id);
 
     /**
-     * 跟新用户金额
+     * 更新用户金额
      * @param money
      * @param id
      * @return

@@ -465,6 +465,82 @@ public class AppTaskController {
     }
 
     /**
+     * 单独放弃某个猎刃的任务,任务必须得点击放弃后被猎刃拒绝了才能运行此功能，需要被猎刃审核
+     * @param id
+     * @param hunterTaskId
+     * @return
+     */
+    @GetMapping("/user/abandonHunterTask/{hunterTaskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击放弃某个猎刃的任务")
+    public ResultApp abandonHunterTask(@PathVariable("id") Long id, @PathVariable("hunterTaskId") String hunterTaskId) {
+        HunterTask hunterTask = hunterTaskService.findOne(hunterTaskId);
+
+        Task task = hunterTask.getTask();
+
+        //任务状态必须是 ABANDON_COMMIT 用户提交放弃的申请
+        if (task.getState()!=TaskState.ABANDON_COMMIT) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //猎刃任务状态必须是 HUNTER_REPULSE 猎刃拒绝用户放弃
+        if (hunterTask.getState()!=HunterTaskState.HUNTER_REPULSE) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        hunterTaskService.abandonHunterTask(hunterTaskId);
+
+        //推送通知猎刃
+        pushMsgService.pushHunterTask("任务通知",
+                "用户： " +
+                        task.getUser().getName() +
+                        " 申请放弃" +
+                        task.getName() +
+                        " 任务，点击查看",
+                hunterTask.getId(),
+                hunterTask.getHunterId());
+
+        return ResultApp.init("已将放弃申请提交给猎刃");
+    }
+
+    /**
+     * 单独强制放弃某个猎刃的任务,任务必须得点击放弃后被猎刃拒绝了才能运行此功能
+     * @param id
+     * @param hunterTaskId
+     * @return
+     */
+    @GetMapping("/user/forceAbandonHunterTask/{hunterTaskId:\\d+}/{id:\\d+}")
+    @ApiOperation(value = "用户点击强制放弃某个猎刃的任务")
+    public ResultApp forceAbandonHunterTask(@PathVariable("id") Long id, @PathVariable("hunterTaskId") String hunterTaskId) {
+        HunterTask hunterTask = hunterTaskService.findOne(hunterTaskId);
+
+        Task task = hunterTask.getTask();
+
+        //任务状态必须是 ABANDON_COMMIT
+        if (task.getState()!=TaskState.ABANDON_COMMIT) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        //猎刃任务状态必须是 HUNTER_REPULSE
+        if (hunterTask.getState()!=HunterTaskState.HUNTER_REPULSE) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+        hunterTaskService.forceAbandonHunterTask(hunterTask);
+
+        //推送通知猎刃
+        pushMsgService.pushHunterTask("任务通知",
+                "用户： " +
+                        task.getUser().getName() +
+                        " 申请放弃" +
+                        task.getName() +
+                        " 任务，点击查看",
+                hunterTask.getId(),
+                hunterTask.getHunterId());
+
+        return ResultApp.init("已将放弃申请提交给猎刃");
+    }
+
+    /**
      * HunterTask步骤4：用户点击审核成功按钮，通过后修改猎刃任务的状态为END_OK("任务结束并且完成")
      * 并且将押金退回与发放赏金
      * 此时猎刃任务的流程 新建-接完并完成 的流程完成

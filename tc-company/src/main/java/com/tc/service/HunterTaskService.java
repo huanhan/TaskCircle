@@ -1,12 +1,10 @@
 package com.tc.service;
 
 import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.Task;
 import com.tc.db.enums.CommentType;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.dto.task.QueryHunterTask;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -116,7 +114,6 @@ public interface HunterTaskService extends BasicService<HunterTask> {
     boolean abandonTask(HunterTask hunterTask, String context);
 
     //猎刃直接放弃任务
-    @Transactional(rollbackFor = RuntimeException.class)
     boolean forceAbandonTask(HunterTask hunterTask, String context);
 
     /**
@@ -174,7 +171,9 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      */
     boolean abandonNotPassByHunter(HunterTask hunterTask, String context,Integer iCount);
 
-
-    @Transactional(rollbackFor = RuntimeException.class)
     HunterTask updateEvaState(String id, CommentType type);
+
+    boolean abandonHunterTask(String hunterTaskId);
+
+    boolean forceAbandonHunterTask(HunterTask hunterTaskId);
 }

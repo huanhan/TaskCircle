@@ -98,6 +98,7 @@ public class AppHunterTaskController {
                 hunterTaskStates.add(HunterTaskState.USER_AUDIT);
                 hunterTaskStates.add(HunterTaskState.USER_AUDIT_FAILURE);
                 hunterTaskStates.add(HunterTaskState.ADMIN_AUDIT);
+                hunterTaskStates.add(HunterTaskState.WITH_HUNTER_NEGOTIATE);
                 break;
             case "FINISH"://已完成
                 hunterTaskStates.add(HunterTaskState.AWAIT_SETTLE_ACCOUNTS);
@@ -532,9 +533,9 @@ public class AppHunterTaskController {
                 hunterTask.getTaskId(),
                 hunterTask.getTask().getUserId());
         String msg;
-        if (isSuccess){
+        if (isSuccess) {
             msg = "放弃任务成功";
-        }else {
+        } else {
             msg = "放弃任务的申请已经提交给用户了";
         }
 
@@ -561,9 +562,9 @@ public class AppHunterTaskController {
                 hunterTask.getTaskId(),
                 hunterTask.getTask().getUserId());
         String msg;
-        if (isSuccess){
+        if (isSuccess) {
             msg = "放弃任务成功";
-        }else {
+        } else {
             msg = "放弃任务的申请已经提交给用户了";
         }
 
@@ -594,7 +595,7 @@ public class AppHunterTaskController {
         }
 
         //判断与用户协商的次数是否达标
-        if (hunterTask.getUserRejectCount() < OK_AUDIT_ADMIN_COUNT) {
+        if (!(hunterTask.getUserRejectCount() > OK_AUDIT_ADMIN_COUNT || hunterTask.getHunterRejectCount() > OK_AUDIT_ADMIN_COUNT)) {
             throw new ValidException("请先与用户协商" + OK_AUDIT_ADMIN_COUNT + "次后，在提交审核");
         }
 
@@ -665,6 +666,12 @@ public class AppHunterTaskController {
         if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
+
+        //判断任务的状态是否需要猎刃同意
+        if (!hunterTask.getState().equals(HunterTaskState.WITH_HUNTER_NEGOTIATE)) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
         //猎刃同意用户放弃任务
         boolean isSuccess = hunterTaskService.abandonPassByHunter(hunterTask);
         if (!isSuccess) {
@@ -705,9 +712,15 @@ public class AppHunterTaskController {
         if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
+
+        //判断任务的状态是否需要猎刃同意
+        if (!hunterTask.getState().equals(HunterTaskState.WITH_HUNTER_NEGOTIATE)) {
+            throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
         hunterTask.setTask(task);
         //设置猎刃任务状态为不同意用户放弃
-        boolean isSuccess = hunterTaskService.abandonNotPassByHunter(hunterTask, context.getContext(),hunterTask.getHunterRejectCount());
+        boolean isSuccess = hunterTaskService.abandonNotPassByHunter(hunterTask, context.getContext(), hunterTask.getHunterRejectCount());
         if (!isSuccess) {
             throw new ValidationException(StringResourceCenter.DB_UPDATE_ABNORMAL);
         }

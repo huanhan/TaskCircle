@@ -187,7 +187,8 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
         //将猎刃任务取消暂停
-        count = hunterTaskRepository.diStop(HunterTask.toIds(hunterTasks));
+//        count = hunterTaskRepository.diStop(HunterTask.toIds(hunterTasks));
+        count = hunterTaskRepository.diStopAndState(HunterTask.toIds(hunterTasks));
         if (count != hunterTasks.size()) {
             throw new DBException("取消猎刃任务暂停失败");
         }
@@ -284,9 +285,9 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
                     throw new DBException("更新任务状态失败");
                 }
 
-
                 //将猎刃的任务状态置为暂停状态，阻止猎刃继续进行任务
-                count = hunterTaskRepository.stopTask(HunterTask.toIds(hts));
+//                count = hunterTaskRepository.stopTask(HunterTask.toIds(hts));
+                count = hunterTaskRepository.stopAndStateTask(HunterTask.toIds(hts));
                 if (count != hts.size()) {
                     throw new DBException("暂停猎刃任务失败");
                 }
