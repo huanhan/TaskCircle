@@ -4,14 +4,17 @@ import com.tc.db.entity.Admin;
 import com.tc.db.entity.Audit;
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.User;
+import com.tc.db.enums.AdminState;
 import com.tc.dto.LongIds;
 import com.tc.dto.Result;
 import com.tc.dto.admin.*;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.QueryAuthority;
+import com.tc.dto.trans.TransStates;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.*;
+import com.tc.until.FloatHelper;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,22 +70,24 @@ public class AdminController {
      */
     @PostMapping("/query")
     @ApiOperation(value = "获取管理员列表，根据查询条件")
-    public Result all(@Valid @RequestBody QueryAdmin queryAdmin){
+    public Result all(HttpServletRequest request, @Valid @RequestBody QueryAdmin queryAdmin){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         Page<Admin> queryAdmins = adminService.findByQueryAdmin(queryAdmin);
-        List<Admin> resultAdmins = Admin.toListInIndex(queryAdmins.getContent());
-        return Result.init(resultAdmins,queryAdmin);
+        List<Admin> resultAdmins = Admin.toListInIndex(queryAdmins.getContent(),id);
+        return Result.init(new TransStates(AdminState.toList(),resultAdmins),queryAdmin.append(queryAdmins.getTotalElements(),(long)queryAdmins.getTotalPages()));
     }
 
     /**
      * 添加管理员
      * @param registerAdmin 管理员信息
      */
-    @PostMapping("/add/{id:\\d+}")
+    @PostMapping("/add")
     @ApiOperation(value = "添加管理员")
-    public Admin add(@PathVariable("id") Long id,@Valid @RequestBody RegisterAdmin registerAdmin, BindingResult bindingResult){
+    public Admin add(HttpServletRequest request, @Valid @RequestBody RegisterAdmin registerAdmin, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         Admin saveAdmin = RegisterAdmin.toAdmin(registerAdmin,id);
         Admin resultAdmin = adminService.save(saveAdmin);
         return Admin.toDetail(resultAdmin);
@@ -94,6 +100,9 @@ public class AdminController {
     @PostMapping("/authority/query")
     @ApiOperation(value = "管理员权限列表")
     public Result adminAuthority(@RequestBody QueryAuthority queryAuthority){
+        if (FloatHelper.isNull(queryAuthority.getAdminId())){
+            throw new ValidException("需要指定管理员");
+        }
         Page<Authority> queryAuthorities = authorityService.findByAdmin(queryAuthority.getAdminId(),queryAuthority);
         return Result.init(Authority.toDetail(queryAuthorities.getContent()),queryAuthority);
     }
@@ -118,7 +127,15 @@ public class AdminController {
      */
     @DeleteMapping("/{id:\\d+}")
     @ApiOperation(value = "管理员离职")
-    public void removeAdmin(@PathVariable("id") Long id){
+    public void removeAdmin(HttpServletRequest request,@PathVariable("id") Long id){
+        Long me = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        Admin leave = adminService.findOne(id);
+        if (leave == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        if (!leave.getCreateId().equals(me)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
         boolean isLeave = adminService.leaveOffice(id);
         if (!isLeave){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
@@ -133,13 +150,17 @@ public class AdminController {
      */
     @PutMapping
     @ApiOperation(value = "修改管理员信息")
-    public Admin update(@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult bindingResult){
+    public Admin update(HttpServletRequest request,@Valid @RequestBody ModifyAdmin modifyAdmin,BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
+        Long me = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         Admin admin = adminService.findOne(modifyAdmin.getId());
         if (admin == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        if (!admin.getCreateId().equals(me)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
         Admin result = adminService.save(ModifyAdmin.toAdmin(admin,modifyAdmin));
         return Admin.toDetail(result);
@@ -157,12 +178,13 @@ public class AdminController {
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_ADMIN_FAILED);
         }
         Page<Audit> queryAudits = auditService.findByQueryAudit(queryAudit);
-        return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit);
+        return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit.append(queryAudits.getTotalElements(),(long)queryAudits.getTotalPages()));
     }
 
     /**
      * 查看管理员的审核详情信息
-     * @param id 审核编号
+     * @param aid 审核编号
+     * @param id 管理员编号
      * @return
      */
     @GetMapping("/audit/detail/{aid:\\d+}/{id:\\d+}")

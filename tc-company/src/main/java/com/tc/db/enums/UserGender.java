@@ -1,10 +1,9 @@
 package com.tc.db.enums;
 
 
-import com.tc.dto.TransEnum;
+import com.tc.dto.trans.TransEnum;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
-import com.tc.dto.TransEnum;
+import com.tc.dto.trans.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
@@ -605,7 +605,7 @@ public class User implements Serializable {
         this.tasks = tasksById;
     }
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
     public Collection<UserContact> getUserContacts() {
         return userContacts;
     }

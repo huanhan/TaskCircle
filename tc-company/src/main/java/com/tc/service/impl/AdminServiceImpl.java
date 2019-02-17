@@ -64,7 +64,6 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
     public Page<Admin> findByQueryAdmin(QueryAdmin queryAdmin) {
         return adminRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryAdmin.initPredicates(queryAdmin,root,query,cb);
-            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryAdmin);
     }

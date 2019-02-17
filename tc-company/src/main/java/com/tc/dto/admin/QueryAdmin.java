@@ -379,6 +379,9 @@ public class QueryAdmin extends PageRequest {
         if (FloatHelper.isNotNull(queryAdmin.creation)){
             predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
         }
+        if (FloatHelper.isNotNull(queryAdmin.getCreation())){
+            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
+        }
         if (!StringUtils.isEmpty(queryAdmin.getAddress())){
             predicates.add(cb.like(root.get(Admin.USER).get(User.ADDRESS),"%" + queryAdmin.getAddress() + "%"));
         }
@@ -394,9 +397,10 @@ public class QueryAdmin extends PageRequest {
         if (!StringUtils.isEmpty(queryAdmin.getInterest())){
             predicates.add(cb.like(root.get(Admin.USER).get(User.INTEREST),"%" + queryAdmin.getInterest() + "%"));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getInterest())){
-            predicates.add(cb.like(root.get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getInterest() + "%"));
+        if (!StringUtils.isEmpty(queryAdmin.getIntro())){
+            predicates.add(cb.like(root.get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getIntro() + "%"));
         }
+
 
         if (queryAdmin.getLastLoginBegin() != null || queryAdmin.getLastLoginEnd() != null){
             if (queryAdmin.getLastLoginBegin() != null && queryAdmin.getLastLoginEnd() != null){
@@ -487,8 +491,8 @@ public class QueryAdmin extends PageRequest {
         if (!StringUtils.isEmpty(queryAdmin.getInterest())){
             predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTEREST),"%" + queryAdmin.getInterest() + "%"));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getInterest())){
-            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getInterest() + "%"));
+        if (!StringUtils.isEmpty(queryAdmin.getIntro())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getIntro() + "%"));
         }
         if (queryAdmin.getLastLoginBegin() != null || queryAdmin.getLastLoginEnd() != null){
             if (queryAdmin.getLastLoginBegin() != null && queryAdmin.getLastLoginEnd() != null){

@@ -3,7 +3,7 @@ package com.tc.db.entity;
 import com.tc.db.entity.pk.UserAuthorityPK;
 import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
-import com.tc.dto.TransEnum;
+import com.tc.dto.trans.TransEnum;
 import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 

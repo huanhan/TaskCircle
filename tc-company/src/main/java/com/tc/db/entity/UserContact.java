@@ -25,8 +25,14 @@ public class UserContact implements Serializable {
     private String contact;
     private User user;
 
+    public UserContact() {
+    }
 
-
+    public UserContact(Long userId, UserContactName contactName, String contact) {
+        this.userId = userId;
+        this.contactName = contactName;
+        this.contact = contact;
+    }
 
     @Id
     @Column(name = "user_id")

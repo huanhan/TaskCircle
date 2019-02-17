@@ -1,4 +1,4 @@
-package com.tc.dto;
+package com.tc.dto.trans;
 
 public class TransEnum {
     private String key;

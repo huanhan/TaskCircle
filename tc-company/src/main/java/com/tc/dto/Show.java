@@ -1,5 +1,7 @@
 package com.tc.dto;
 
+import com.tc.dto.trans.TransEnum;
+
 import java.util.List;
 
 /**

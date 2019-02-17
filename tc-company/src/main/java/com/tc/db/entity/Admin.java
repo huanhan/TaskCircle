@@ -1,16 +1,12 @@
 package com.tc.db.entity;
 
-import com.sun.org.apache.regexp.internal.RE;
 import com.tc.db.enums.AdminState;
 import com.tc.dto.Show;
-import com.tc.dto.TransEnum;
-import com.tc.dto.admin.QueryAdmin;
+import com.tc.dto.trans.TransEnum;
 import com.tc.dto.trans.Trans;
 import com.tc.dto.trans.TransAdmin;
-import com.tc.dto.trans.TransID;
 import com.tc.dto.trans.TransOP;
 import com.tc.until.ListUtils;
-import org.springframework.data.domain.Page;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -49,6 +45,8 @@ public class Admin {
     private Collection<TaskClassify> taskClassifies;
 
     private List<TransEnum> adminStates;
+    private boolean isManager = false;
+    private Trans trans;
 
     public Admin() {
     }
@@ -69,64 +67,6 @@ public class Admin {
         if (user != null){
             this.user = new User(userId,user.getName(),user.getUsername());
         }
-    }
-
-    public static List<Show> toShows(List<Admin> admins){
-        List<Show> result = new ArrayList<>();
-        if (!admins.isEmpty()){
-            admins.forEach(admin ->{
-                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
-            });
-        }
-        return result;
-    }
-
-    public static List<Long> toKeys(List<Admin> list) {
-        List<Long> result = new ArrayList<>();
-        if (!list.isEmpty()){
-            list.forEach(admin -> result.add(admin.getUserId()));
-        }
-        return result;
-    }
-
-    /**
-     * 管理员管理列表
-     * @param admins
-     * @return
-     */
-    public static List<Admin> toListInIndex(List<Admin> admins) {
-        if (!ListUtils.isEmpty(admins)){
-            admins.forEach(admin ->{
-                User user = new User(admin.getUserId(),admin.getUser().getName());
-                user.setUsername(admin.getUser().getUsername());
-                user.setPhone(admin.getUser().getPhone());
-                user.setAddress(admin.getUser().getAddress());
-                admin.setUser(user);
-                admin.setAdmin(null);
-                admin.setAdmins(null);
-                admin.setAdminAuthorities(null);
-                admin.setAudits(null);
-                admin.setAuthorities(null);
-                admin.setMessages(null);
-                admin.setTaskClassifies(null);
-            });
-        }
-        return admins;
-    }
-
-    public static Admin toDetail(Admin admin){
-        if (admin != null){
-            admin.setAdminStates(AdminState.toList());
-            admin.setUser(User.toDetail(admin.getUser()));
-            admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
-            admin.setAdmins(null);
-            admin.setAdminAuthorities(null);
-            admin.setAudits(null);
-            admin.setAuthorities(null);
-            admin.setMessages(null);
-            admin.setTaskClassifies(null);
-        }
-        return admin;
     }
 
 
@@ -275,8 +215,25 @@ public class Admin {
         this.adminStates = adminStates;
     }
 
+    @Transient
+    public boolean isManager() {
+        return isManager;
+    }
 
-    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query,Long me) {
+    public void setManager(boolean manager) {
+        isManager = manager;
+    }
+
+    @Transient
+    public Trans getTrans() {
+        return trans;
+    }
+
+    public void setTrans(Trans trans) {
+        this.trans = trans;
+    }
+
+    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query, Long me) {
         TransAdmin result = new TransAdmin();
         List<Trans> trans = new ArrayList<>();
         List<TransOP> transAdmins = new ArrayList<>();
@@ -301,5 +258,86 @@ public class Admin {
             queryAdmins.forEach(adm -> result.add(new Trans(adm.userId,adm.user.getUsername() + "(" + adm.user.getName() + ")")));
         }
         return result;
+    }
+
+    public static List<Show> toShows(List<Admin> admins){
+        List<Show> result = new ArrayList<>();
+        if (!admins.isEmpty()){
+            admins.forEach(admin ->{
+                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
+            });
+        }
+        return result;
+    }
+
+    public static List<Long> toKeys(List<Admin> list) {
+        List<Long> result = new ArrayList<>();
+        if (!list.isEmpty()){
+            list.forEach(admin -> result.add(admin.getUserId()));
+        }
+        return result;
+    }
+
+    /**
+     * 管理员管理列表
+     * @param admins
+     * @return
+     */
+    public static List<Admin> toListInIndex(List<Admin> admins) {
+        if (!ListUtils.isEmpty(admins)){
+            admins.forEach(admin ->{
+                User user = new User(admin.getUserId(),admin.getUser().getName());
+                user.setUsername(admin.getUser().getUsername());
+                user.setPhone(admin.getUser().getPhone());
+                user.setAddress(admin.getUser().getAddress());
+                admin.setUser(user);
+                admin.setAdmin(null);
+                admin.setAdmins(null);
+                admin.setAdminAuthorities(null);
+                admin.setAudits(null);
+                admin.setAuthorities(null);
+                admin.setMessages(null);
+                admin.setTaskClassifies(null);
+            });
+        }
+        return admins;
+    }
+
+    public static List<Admin> toListInIndex(List<Admin> admins, Long id) {
+        if (!ListUtils.isEmpty(admins)){
+            admins.forEach(admin ->{
+                User user = new User(admin.getUserId(),admin.getUser().getName());
+                user.setUsername(admin.getUser().getUsername());
+                user.setPhone(admin.getUser().getPhone());
+                user.setAddress(admin.getUser().getAddress());
+                admin.setUser(user);
+                admin.setAdmin(null);
+                admin.setAdmins(null);
+                admin.setAdminAuthorities(null);
+                admin.setAudits(null);
+                admin.setAuthorities(null);
+                admin.setMessages(null);
+                admin.setTaskClassifies(null);
+                admin.setManager(admin.getCreateId().equals(id));
+                admin.setTrans(new Trans(admin.getAdminState().name(),admin.getAdminState().getState()));
+            });
+        }
+        return admins;
+    }
+
+    public static Admin toDetail(Admin admin){
+        if (admin != null){
+            admin.setAdminStates(AdminState.toList());
+            admin.setUser(User.toDetail(admin.getUser()));
+            admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
+            admin.setAdmins(null);
+            admin.setAdminAuthorities(null);
+            admin.setAudits(null);
+            admin.setAuthorities(null);
+            admin.setMessages(null);
+            admin.setTaskClassifies(null);
+            admin.setTrans(new Trans(admin.getAdminState().name(),admin.getAdminState().getState()));
+        }
+        return admin;
     }
 }
