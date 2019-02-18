@@ -1,8 +1,9 @@
 package com.tc.dto.authority;
 
 import com.tc.db.entity.Authority;
+import com.tc.until.FloatHelper;
+import com.tc.until.PageRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -18,6 +19,7 @@ import java.util.List;
  * @author Cyg
  */
 public class QueryAuthority extends PageRequest {
+    private Long id;
     private String authorityName;
     private String info;
     private Timestamp begin;
@@ -39,6 +41,14 @@ public class QueryAuthority extends PageRequest {
 
     public QueryAuthority(int page, int size, Sort sort) {
         super(page, size, sort);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getAuthorityName() {
@@ -93,6 +103,10 @@ public class QueryAuthority extends PageRequest {
 
         List<Predicate> predicates = new ArrayList<>();
 
+        if (FloatHelper.isNotNull(queryAuthority.id)){
+            predicates.add(cb.equal(root.get(Authority.ID),queryAuthority.id));
+        }
+
         if (!StringUtils.isEmpty(queryAuthority.getAuthorityName())){
             predicates.add(cb.like(root.get("name"),"%" + queryAuthority.getAuthorityName() + "%"));
         }
@@ -111,7 +125,9 @@ public class QueryAuthority extends PageRequest {
         if (!StringUtils.isEmpty(queryAuthority.getUsername())){
             predicates.add(cb.equal(root.get("admin").get("user").get("username"),queryAuthority.getUsername()));
         }
-
+        if (FloatHelper.isNotNull(queryAuthority.adminId)){
+            predicates.add(cb.equal(root.get(Authority.CREATION),queryAuthority.adminId));
+        }
         return predicates;
     }
 }

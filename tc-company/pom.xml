@@ -106,6 +106,10 @@
             <artifactId>jpush-client</artifactId>
             <version>3.3.10</version>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
     </dependencies>
 
 

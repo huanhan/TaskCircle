@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
-import com.tc.dto.TransEnum;
+import com.tc.dto.trans.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
@@ -215,6 +215,12 @@ public class User implements Serializable {
      * 用户性别
      */
     private List<TransEnum> genders;
+
+    /**
+     * 用户权限
+     */
+    private List<UserAuthority> userAuthorities;
+
 
     public User() {
     }
@@ -599,7 +605,7 @@ public class User implements Serializable {
         this.tasks = tasksById;
     }
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
     public Collection<UserContact> getUserContacts() {
         return userContacts;
     }
@@ -679,6 +685,15 @@ public class User implements Serializable {
 
     public void setGenders(List<TransEnum> genders) {
         this.genders = genders;
+    }
+
+    @Transient
+    public List<UserAuthority> getUserAuthorities() {
+        return userAuthorities;
+    }
+
+    public void setUserAuthorities(List<UserAuthority> userAuthorities) {
+        this.userAuthorities = userAuthorities;
     }
 
     public interface UserBasicView {}

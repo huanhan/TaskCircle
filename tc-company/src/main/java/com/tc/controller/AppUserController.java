@@ -256,6 +256,7 @@ public class AppUserController {
 
 
     @GetMapping("/{time:\\d+}/code/Image")
+    @ApiOperation(value = "APP获取图片验证码")
     public void validateCode(HttpServletRequest request, HttpServletResponse response, @PathVariable("time") Long time) throws Exception {
         validateCodeProcessorHolder.findValidateCodeProcessor("Image").create(new ServletWebRequest(request, response));
     }

@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AUserOPClassify {
-    List<UserAuthority> inDefault;
-    List<UserAuthority> inDelete;
-    List<UserAuthority> inAdd;
-    List<Long> inAddId;
+    private List<UserAuthority> inDefault;
+    private List<UserAuthority> inDelete;
+    private List<UserAuthority> inAdd;
+    private List<Long> inAddId;
 
     public AUserOPClassify(List<UserAuthority> inDefault, List<UserAuthority> inDelete, List<UserAuthority> inAdd) {
         this.inDefault = inDefault;
@@ -34,6 +34,21 @@ public class AUserOPClassify {
 
     public List<Long> getInAddId() {
         return inAddId;
+    }
+
+    /**
+     * 获取操作之后最新的数据
+     * @return
+     */
+    public List<UserAuthority> getBestNews() {
+        List<UserAuthority> def = new ArrayList<>();
+        if (ListUtils.isNotEmpty(getInDefault())){
+            def.addAll(getInDefault());
+        }
+        if (ListUtils.isNotEmpty(getInAdd())){
+            def.addAll(getInAdd());
+        }
+        return def;
     }
 
     public static AUserOPClassify init(List<UserAuthority> news, List<UserAuthority> oldies){
@@ -72,9 +87,11 @@ public class AUserOPClassify {
         } else if (!news.isEmpty()){
             inAdd = news;
         }
+
         return new AUserOPClassify(inDefault,inDelete,inAdd);
 
     }
+
 
     public static List<UserAuthority> create(UserCategory aid, List<Long> rids){
         List<UserAuthority> userAuthorities = new ArrayList<>();

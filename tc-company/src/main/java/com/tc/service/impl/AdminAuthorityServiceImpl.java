@@ -4,7 +4,11 @@ import com.tc.db.entity.AdminAuthority;
 import com.tc.db.repository.AdminAuthorityRepository;
 import com.tc.dto.LongIds;
 import com.tc.dto.admin.QueryAdmin;
+import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.AdminAuthorityService;
+import com.tc.until.ListUtils;
+import com.tc.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -68,6 +72,34 @@ public class AdminAuthorityServiceImpl extends AbstractBasicServiceImpl<AdminAut
     public boolean deleteByAuthorityIds(List<Long> authorityIds, Long id) {
         int count = adminAuthorityRepository.deleteByAuthorityIdIsInAndUserIdEquals(authorityIds,id);
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<AdminAuthority> findBy(Long id, List<Long> ids) {
+        return adminAuthorityRepository.findByUserIdInAndAuthorityIdEquals(ids,id);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Boolean saveNewsAndRemoveOld(List<AdminAuthority> news, List<Long> old, Long id) {
+        if (ListUtils.isNotEmpty(news)){
+            List<AdminAuthority> result = adminAuthorityRepository.save(news);
+            if (result.size() != news.size()){
+                throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+            }
+        }else {
+            if (ListUtils.isEmpty(old)){
+                throw new ValidException("无意义的操作");
+            }
+        }
+
+        int result = adminAuthorityRepository.deleteByAuthorityIdIsInAndUserIdEquals(old,id);
+        if (result != old.size()){
+            throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
+        }
+
+        return true;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

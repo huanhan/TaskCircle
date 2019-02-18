@@ -33,7 +33,7 @@ public class DemoAuthorizeConfigProvider implements AuthorizeConfigProvider {
                 .permitAll()
                 .antMatchers("/configuration/security")
                 .permitAll()
-        .anyRequest().authenticated();
+        .anyRequest().access("@rbacService.hasPermission(request,authentication)");
 
     }
 }

@@ -11,6 +11,9 @@ import com.tc.dto.Show;
 import com.tc.dto.admin.QueryAdmin;
 import com.tc.dto.authorization.AdminAutRelation;
 import com.tc.dto.authorization.UserAutRelation;
+import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransID;
+import com.tc.dto.trans.TransOP;
 import com.tc.exception.ValidException;
 import com.tc.service.AdminAuthorityService;
 import com.tc.service.AdminService;
@@ -26,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,30 +61,25 @@ public class AuthorizationController {
      */
     @GetMapping("/all/users")
     @ApiOperation(value = "在用户与权限关系管理界面中，一次性获取所有用户类别，所有权限与两者之间的关联关系")
-    public Result allByUser(){
+    public Result allByUser(HttpServletRequest request){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //所有用户类别
         List<UserCategory> queryUserCategories = UserCategory.allByUser();
         //所有权限
         List<Authority> queryAuthorities = authorityService.findAll();
-        //两者关系
-        List<UserAuthority> queryUserAuthorities = userAuthorityService.findAll();
 
         //存放结果内容
-        List<Show> userCategories = new ArrayList<>();
-        List<Show> authorities = new ArrayList<>();
-        List<UserAuthority> userAuthorities = new ArrayList<>();
-
-        if (!ListUtils.isEmpty(queryUserCategories)){
-            userCategories = UserCategory.toShows(queryUserCategories);
+        List<Trans> userCategories;
+        List<TransOP> authorities;
+        List<Trans> userAuthorities = new ArrayList<>();
+        if (ListUtils.isNotEmpty(queryUserCategories) && ListUtils.isNotEmpty(queryAuthorities)){
+            //两者关系
+            List<UserAuthority> queryUserAuthorities = userAuthorityService.findAll();
+            userAuthorities = UserAuthority.toTrans(queryUserAuthorities);
         }
 
-        if (!ListUtils.isEmpty(queryAuthorities)){
-            authorities = Authority.toShows(queryAuthorities);
-        }
-
-        if (!ListUtils.isEmpty(queryUserAuthorities)){
-            userAuthorities = UserAuthority.reset(queryUserAuthorities);
-        }
+        userCategories = UserCategory.toTrans(queryUserCategories);
+        authorities = Authority.toTrans(queryAuthorities,id);
 
         return Result.init(UserAutRelation.init(userCategories,authorities,userAuthorities));
     }
@@ -92,7 +91,7 @@ public class AuthorizationController {
      */
     @PostMapping("/users/{name}")
     @ApiOperation(value = "设置用户类别对应的权限")
-    public void setUserCategoryAuthority(@PathVariable("name") String name, @RequestBody LongIds ids){
+    public Result setUserCategoryAuthority(@PathVariable("name") String name, @RequestBody LongIds ids){
         UserCategory userCategory = UserCategory.findByName(name);
         if (userCategory == null){
             throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_FAILED);
@@ -103,15 +102,13 @@ public class AuthorizationController {
         //将用户选中的内容进行比较
         AUserOPClassify aUserOPClassify = AUserOPClassify.init(news,oldies);
 
-        //保存新的
-        if (!aUserOPClassify.getInAdd().isEmpty()){
-            userAuthorityService.save(aUserOPClassify.getInAdd());
-        }
+        //保存新的，并且删除旧的
+        userAuthorityService.saveNewsAndRemoveOldes(aUserOPClassify.getInAdd(),AUserOPClassify.toAuthorityLong(aUserOPClassify.getInDelete()),userCategory);
 
-        //删除旧的
-        if (!aUserOPClassify.getInDelete().isEmpty()){
-            userAuthorityService.deleteByAuthorityIds(AUserOPClassify.toAuthorityLong(aUserOPClassify.getInDelete()),userCategory);
-        }
+        //重新获取两者关系
+        List<UserAuthority> result = aUserOPClassify.getBestNews();
+
+        return Result.init(UserAuthority.toTrans(result));
     }
 
     /**
@@ -120,8 +117,9 @@ public class AuthorizationController {
      */
     @PostMapping("/admin/query")
     @ApiOperation(value = "在管理员与权限关系管理界面中，一次性获取所有管理员，所有权限与两者之间的关联关系")
-    public Result allByAdmin(@RequestBody QueryAdmin queryAdmin){
-
+    public Result allByAdmin(HttpServletRequest request,@RequestBody QueryAdmin queryAdmin){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        queryAdmin.setCreation(id);
         //根据查询条件获取的管理员
         List<Admin> queryAdmins = adminService.findByQueryAdminAndAuthorityState(queryAdmin);
 
@@ -129,9 +127,9 @@ public class AuthorizationController {
         List<Authority> queryAuthorities = authorityService.findAll();
 
         //存放结果内容
-        List<Show> admins;
-        List<Show> authorities;
-        List<AdminAuthority> adminAuthorities = new ArrayList<>();
+        List<Trans> admins;
+        List<TransOP> authorities;
+        List<TransID> adminAuthorities = new ArrayList<>();
 
         if (!ListUtils.isEmpty(queryAdmins) && !ListUtils.isEmpty(queryAuthorities)) {
             //两者关系
@@ -139,12 +137,11 @@ public class AuthorizationController {
                     Admin.toKeys(queryAdmins),
                     Authority.toKeys(queryAuthorities)
             );
-            adminAuthorities = AdminAuthority.reset(queryUserAuthorities);
-
+            adminAuthorities = AdminAuthority.toTransID(queryUserAuthorities);
         }
 
-        admins = Admin.toShows(queryAdmins);
-        authorities = Authority.toShows(queryAuthorities);
+        admins = Admin.toTrans(queryAdmins);
+        authorities = Authority.toTrans(queryAuthorities,id);
 
         return Result.init(AdminAutRelation.init(admins,authorities,adminAuthorities),queryAdmin);
     }
@@ -156,7 +153,7 @@ public class AuthorizationController {
      */
     @PostMapping("/admin/{id:\\d+}")
     @ApiOperation(value = "设置管理员对应的权限")
-    public void setAdminAuthority(@PathVariable("id") Long id, @RequestBody LongIds ids){
+    public Result setAdminAuthority(@PathVariable("id") Long id, @RequestBody LongIds ids){
 
         List<AdminAuthority> news = AAdminOPClassify.create(id,ids.getIds());
         List<AdminAuthority> oldies = adminAuthorityService.findByAdminId(id);
@@ -164,14 +161,12 @@ public class AuthorizationController {
         //将用户选中的内容进行比较
         AAdminOPClassify aUserOPClassify = AAdminOPClassify.init(news,oldies);
 
-        //保存新的
-        if (!aUserOPClassify.getInAdd().isEmpty()){
-            adminAuthorityService.save(aUserOPClassify.getInAdd());
-        }
+        //删除旧的，保存新的
+        adminAuthorityService.saveNewsAndRemoveOld(aUserOPClassify.getInAdd(),AAdminOPClassify.toAuthorityLong(aUserOPClassify.getInDelete()),id);
 
-        //删除旧的
-        if (!aUserOPClassify.getInDelete().isEmpty()){
-            adminAuthorityService.deleteByAuthorityIds(AAdminOPClassify.toAuthorityLong(aUserOPClassify.getInDelete()),id);
-        }
+        //重新获取两者关系
+        List<AdminAuthority> result = aUserOPClassify.getBestNews();
+
+        return Result.init(AdminAuthority.toTransID(result));
     }
 }

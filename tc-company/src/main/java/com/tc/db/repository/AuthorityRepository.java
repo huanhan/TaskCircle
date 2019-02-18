@@ -2,6 +2,7 @@ package com.tc.db.repository;
 
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.Authority;
+import com.tc.until.ListUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -47,4 +48,18 @@ public interface AuthorityRepository extends JpaRepository<Authority,Long>,JpaSp
             "WHERE r.id = :#{#authority.id}"
     )
     int update(@Param("authority") Authority authority);
+
+    /**
+     * 获取不包括ids的权限列表
+     * @param ids
+     * @return
+     */
+    List<Authority> findByIdNotIn(List<Long> ids);
+
+    /**
+     * 获取包括ids的权限列表
+     * @param ids
+     * @return
+     */
+    List<Authority> findByIdIn(List<Long> ids);
 }

@@ -174,6 +174,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/ws/{id:\\d+}")
+    @ApiOperation(value = "根据用户编号和收支查询条件获取收支列表")
     public Result getUserWithdraw(@PathVariable("id") Long id,@RequestBody QueryFinance queryFinance){
         queryFinance.setUserId(id);
         queryFinance.setSort(new Sort(Sort.Direction.DESC,UserWithdraw.CREATE_TIME));

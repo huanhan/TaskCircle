@@ -45,4 +45,19 @@ public interface AuthorityResourceService extends BasicService<AuthorityResource
      * @return
      */
     List<AuthorityResource> findByKeys(List<Long> resources,List<Long> authorities);
+
+    /**
+     * 保存新资源，删除旧资源
+     * @param inAdd
+     * @param longs
+     * @param aid
+     */
+    void saveNewsAndRemoveOlds(List<AuthorityResource> inAdd, List<Long> longs, Long aid);
+
+    /**
+     * 根据权限编号获取
+     * @param longs
+     * @return
+     */
+    List<AuthorityResource> findByAuthorityIds(List<Long> longs);
 }

@@ -1,7 +1,8 @@
 package com.tc.controller;
 
 import com.tc.db.enums.*;
-import com.tc.dto.TransEnum;
+import com.tc.dto.trans.TransEnum;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RequestMapping(value = "/basic")
 public class BasicController {
     @GetMapping("/enums/{key}")
+    @ApiOperation(value = "根据类别获取系统中的所使用的类别")
     public List<TransEnum> basicEnum(@PathVariable("key") bdState key){
         List<TransEnum> result = new ArrayList<>();
         switch (key){

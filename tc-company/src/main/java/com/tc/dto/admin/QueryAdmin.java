@@ -8,8 +8,9 @@ import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
 import com.tc.dto.enums.AuthorityState;
+import com.tc.until.FloatHelper;
+import com.tc.until.PageRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -375,6 +376,12 @@ public class QueryAdmin extends PageRequest {
         if (queryAdmin.getAdminState() != null){
             predicates.add(cb.equal(root.get(Admin.STATE),queryAdmin.getAdminState()));
         }
+        if (FloatHelper.isNotNull(queryAdmin.creation)){
+            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
+        }
+        if (FloatHelper.isNotNull(queryAdmin.getCreation())){
+            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
+        }
         if (!StringUtils.isEmpty(queryAdmin.getAddress())){
             predicates.add(cb.like(root.get(Admin.USER).get(User.ADDRESS),"%" + queryAdmin.getAddress() + "%"));
         }
@@ -390,9 +397,11 @@ public class QueryAdmin extends PageRequest {
         if (!StringUtils.isEmpty(queryAdmin.getInterest())){
             predicates.add(cb.like(root.get(Admin.USER).get(User.INTEREST),"%" + queryAdmin.getInterest() + "%"));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getInterest())){
-            predicates.add(cb.like(root.get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getInterest() + "%"));
+        if (!StringUtils.isEmpty(queryAdmin.getIntro())){
+            predicates.add(cb.like(root.get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getIntro() + "%"));
         }
+
+
         if (queryAdmin.getLastLoginBegin() != null || queryAdmin.getLastLoginEnd() != null){
             if (queryAdmin.getLastLoginBegin() != null && queryAdmin.getLastLoginEnd() != null){
                 predicates.add(cb.between(root.get(Admin.USER).get(User.LAST_LOGIN),queryAdmin.getLastLoginBegin(),queryAdmin.getLastLoginEnd()));
@@ -482,8 +491,8 @@ public class QueryAdmin extends PageRequest {
         if (!StringUtils.isEmpty(queryAdmin.getInterest())){
             predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTEREST),"%" + queryAdmin.getInterest() + "%"));
         }
-        if (!StringUtils.isEmpty(queryAdmin.getInterest())){
-            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getInterest() + "%"));
+        if (!StringUtils.isEmpty(queryAdmin.getIntro())){
+            predicates.add(cb.like(root.get(AdminAuthority.ADMIN).get(Admin.USER).get(User.INTRO),"%" + queryAdmin.getIntro() + "%"));
         }
         if (queryAdmin.getLastLoginBegin() != null || queryAdmin.getLastLoginEnd() != null){
             if (queryAdmin.getLastLoginBegin() != null && queryAdmin.getLastLoginEnd() != null){

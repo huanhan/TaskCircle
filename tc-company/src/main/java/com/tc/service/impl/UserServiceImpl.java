@@ -59,6 +59,12 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Autowired
     private HunterTaskRepository hunterTaskRepository;
 
+    @Autowired
+    private UserAuthorityRepository userAuthorityRepository;
+
+    @Autowired
+    private AdminAuthorityRepository adminAuthorityRepository;
+
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public boolean isNullByUsername(String username) {
@@ -214,10 +220,20 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return userRepository.loadId(account);
     }
 
+    @Override
+    public User findByUsername(String username) {
+        return getUser(username);
+    }
+
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = getUser(s);
+        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)){
+            user.getAdmin().setAdminAuthorities(adminAuthorityRepository.findByUserIdEquals(user.getId()));
+        }else {
+            user.setUserAuthorities(userAuthorityRepository.findByCategoryEquals(user.getCategory()));
+        }
         return new LoginUser(user);
     }
 
@@ -225,6 +241,11 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Override
     public SocialUserDetails loadUserByUserId(String s) throws UsernameNotFoundException {
         User user = getUser(s);
+        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)){
+            user.getAdmin().setAdminAuthorities(adminAuthorityRepository.findByUserIdEquals(user.getId()));
+        }else {
+            user.setUserAuthorities(userAuthorityRepository.findByCategoryEquals(user.getCategory()));
+        }
         return new LoginUser(user);
     }
 

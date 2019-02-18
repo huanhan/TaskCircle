@@ -38,7 +38,7 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
         return adminRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryAdmin.initPredicates(queryAdmin,root,query,cb);
             predicates.add(cb.equal(root.join(Admin.ADMIN_AUTHORITIES).get(AdminAuthority.AUTHORITY_ID),authority));
-            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
+            //predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryAdmin);
     }
@@ -64,7 +64,6 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
     public Page<Admin> findByQueryAdmin(QueryAdmin queryAdmin) {
         return adminRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryAdmin.initPredicates(queryAdmin,root,query,cb);
-            predicates.add(cb.equal(root.get(Admin.CREATE_ID),queryAdmin.getCreation()));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         },queryAdmin);
     }
@@ -74,6 +73,17 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
     public boolean leaveOffice(Long id) {
         int count = adminRepository.updateByAdminState(AdminState.LEAVE_FOOICE,id);
         return count == 1;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Admin> findByNotAuthority(Long id) {
+        return adminRepository.findByNotAuthority(id);
+    }
+
+    @Override
+    public List<Admin> findByNotAuthority(Long id, Long creation) {
+        return adminRepository.findByNotAuthority(id,creation);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -94,5 +104,11 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
     @Override
     public Admin update(Admin user) {
         return adminRepository.saveAndFlush(user);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Admin> findByIds(List<Long> ids) {
+        return adminRepository.findByUserIdIn(ids);
     }
 }

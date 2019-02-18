@@ -120,4 +120,11 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     Long loadId(String account);
+
+    /**
+     * 根据账户获取
+     * @param username
+     * @return
+     */
+    User findByUsername(String username);
 }

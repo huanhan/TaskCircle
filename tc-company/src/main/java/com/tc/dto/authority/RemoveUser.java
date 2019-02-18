@@ -21,20 +21,12 @@ public class RemoveUser {
     @NotEmpty(message = "集合必须存在元素")
     private List<UserCategory> ids;
 
-    /**
-     * 操作的人
-     */
-    @NotNull
-    @Min(value = 1)
-    private Long opId;
-
     public RemoveUser() {
     }
 
-    public RemoveUser(Long id, List<UserCategory> ids, Long opId) {
+    public RemoveUser(Long id, List<UserCategory> ids) {
         this.id = id;
         this.ids = ids;
-        this.opId = opId;
     }
 
     public Long getId() {
@@ -53,11 +45,4 @@ public class RemoveUser {
         this.ids = ids;
     }
 
-    public Long getOpId() {
-        return opId;
-    }
-
-    public void setOpId(Long opId) {
-        this.opId = opId;
-    }
 }

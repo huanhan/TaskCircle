@@ -2,12 +2,15 @@ package com.tc.service.impl;
 
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.Authority;
+import com.tc.db.entity.AuthorityResource;
 import com.tc.db.entity.Resource;
 import com.tc.db.repository.AuthorityRepository;
+import com.tc.db.repository.AuthorityResourceRepository;
 import com.tc.dto.Show;
 import com.tc.dto.authority.QueryAuthority;
 import com.tc.dto.authority.RemoveUser;
 import com.tc.service.AuthorityService;
+import com.tc.until.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +32,9 @@ public class AuthorityServiceImpl extends AbstractBasicServiceImpl<Authority> im
 
     @Autowired
     private AuthorityRepository authorityRepository;
+
+    @Autowired
+    private AuthorityResourceRepository authorityResourceRepository;
 
     @Override
     public List<Authority> findAll() {
@@ -98,5 +106,20 @@ public class AuthorityServiceImpl extends AbstractBasicServiceImpl<Authority> im
         },queryAuthority);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Authority> findByNotId(Long id) {
+        List<AuthorityResource> queryAr = authorityResourceRepository.findAllByResourceId(id);
+        if (ListUtils.isNotEmpty(queryAr)){
+            return authorityRepository.findByIdNotIn(AuthorityResource.toAuthorityIds(queryAr));
+        }else {
+            return authorityRepository.findAll();
+        }
+    }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<Authority> findByIds(List<Long> ids) {
+        return authorityRepository.findByIdIn(ids);
+    }
 }

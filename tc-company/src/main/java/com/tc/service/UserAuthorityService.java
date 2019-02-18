@@ -42,4 +42,21 @@ public interface UserAuthorityService extends BasicService<UserAuthority> {
      * @return
      */
     boolean deleteByAuthorityIds(List<Long> ids,UserCategory userCategory);
+
+    /**
+     * 根据权限编号与用户使用者分类查询
+     * @param id
+     * @param ids
+     * @return
+     */
+    List<UserAuthority> findBy(Long id, List<UserCategory> ids);
+
+    /**
+     * 删除旧的，并且保存新的,并返回最新的结果
+     * @param news
+     * @param old
+     * @param key
+     * @return
+     */
+    Boolean saveNewsAndRemoveOldes(List<UserAuthority> news, List<Long> old, UserCategory key);
 }

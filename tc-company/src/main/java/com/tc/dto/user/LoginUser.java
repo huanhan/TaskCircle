@@ -1,6 +1,10 @@
 package com.tc.dto.user;
 
+import com.tc.db.entity.AdminAuthority;
+import com.tc.db.entity.Authority;
 import com.tc.db.entity.User;
+import com.tc.db.entity.UserAuthority;
+import com.tc.db.enums.UserCategory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,15 +23,22 @@ public class LoginUser implements UserDetails ,SocialUserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<Authority> getAuthorities() {
 
-        List<SimpleGrantedAuthority> simpleAuthorities = new ArrayList<>();
-//        for(UserAuthority userAuthority : user.getAuthorities()){
-//            Authority authority = userAuthority.getAuthority();
-//            simpleAuthorities.add(new SimpleGrantedAuthority(authority.getAuthority()));
-//        }
-        simpleAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN,ROLE_USER"));
-        return simpleAuthorities;
+        List<Authority> authorities = new ArrayList<>();
+
+        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)){
+            for (AdminAuthority adminAuthority :
+                    user.getAdmin().getAdminAuthorities()) {
+                authorities.add(adminAuthority.getAuthority());
+            }
+        }else {
+            for(UserAuthority userAuthority : user.getUserAuthorities()){
+                authorities.add(userAuthority.getAuthority());
+            }
+        }
+
+        return authorities;
     }
 
     @Override

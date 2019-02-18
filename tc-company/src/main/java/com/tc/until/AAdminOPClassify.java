@@ -37,6 +37,17 @@ public class AAdminOPClassify {
         return inAddId;
     }
 
+    public List<AdminAuthority> getBestNews() {
+        List<AdminAuthority> def = new ArrayList<>();
+        if (ListUtils.isNotEmpty(getInDefault())){
+            def.addAll(getInDefault());
+        }
+        if (ListUtils.isNotEmpty(getInAdd())){
+            def.addAll(getInAdd());
+        }
+        return def;
+    }
+
     public static AAdminOPClassify init(List<AdminAuthority> news, List<AdminAuthority> oldies){
         List<AdminAuthority> inDefault = new ArrayList<>();
         List<AdminAuthority> inDelete = new ArrayList<>();
@@ -88,5 +99,6 @@ public class AAdminOPClassify {
         adminAuthorities.forEach(adminAuthority -> rids.add(adminAuthority.getAuthorityId()));
         return rids;
     }
+
 
 }

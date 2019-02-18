@@ -4,7 +4,11 @@ import com.tc.db.entity.UserAuthority;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.repository.UserAuthorityRepository;
 import com.tc.dto.authority.RemoveUser;
+import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.UserAuthorityService;
+import com.tc.until.ListUtils;
+import com.tc.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -58,6 +62,34 @@ public class UserAuthorityServiceImpl extends AbstractBasicServiceImpl<UserAutho
         return count == ids.size();
     }
 
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<UserAuthority> findBy(Long id, List<UserCategory> ids) {
+        return userAuthorityRepository.findByCategoryInAndAuthorityIdEquals(ids,id);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public Boolean saveNewsAndRemoveOldes(List<UserAuthority> news, List<Long> old, UserCategory key) {
+
+        if (ListUtils.isNotEmpty(news)){
+            List<UserAuthority> result = userAuthorityRepository.save(news);
+            if (result.size() != news.size()){
+                throw new DBException(StringResourceCenter.DB_INSERT_FAILED);
+            }
+        }else {
+            if (ListUtils.isEmpty(old)){
+                throw new ValidException("无意义的操作");
+            }
+        }
+
+        int result = userAuthorityRepository.deleteByAuthorityIdIsInAndCategoryEquals(old,key);
+        if (result != old.size()){
+            throw new DBException(StringResourceCenter.DB_DELETE_FAILED);
+        }
+
+        return true;
+    }
 
 
 }

@@ -2,22 +2,26 @@ package com.tc.dto.admin;
 
 import com.tc.db.entity.Admin;
 import com.tc.db.entity.User;
+import com.tc.db.entity.UserContact;
 import com.tc.db.enums.AdminState;
+import com.tc.db.enums.UserContactName;
 import com.tc.db.enums.UserGender;
+import com.tc.until.ListUtils;
 import com.tc.validator.IDCard;
 import com.tc.validator.NoSpecial;
 import com.tc.validator.Phone;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
-import org.junit.Before;
 
-import javax.persistence.IdClass;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 修改管理员信息需要的内容
@@ -248,7 +252,27 @@ public class ModifyAdmin {
         user.setHeight(modifyAdmin.height == null || modifyAdmin.height < 0 ? user.getHeight() : modifyAdmin.height);
         user.setWeight(modifyAdmin.weight == null || modifyAdmin.weight < 0 ? user.getWeight() : modifyAdmin.weight);
         user.setBirthday(modifyAdmin.birthday == null ? user.getBirthday() : modifyAdmin.birthday);
-        user.setPhone(StringUtils.isEmpty(modifyAdmin.phone) ? user.getPhone() : modifyAdmin.phone);
+        if (StringUtils.isNotEmpty(modifyAdmin.phone)){
+            user.setPhone(modifyAdmin.getPhone());
+            if (ListUtils.isNotEmpty(user.getUserContacts())){
+                AtomicBoolean isSelect = new AtomicBoolean(false);
+                user.getUserContacts().forEach(userContact -> {
+                    if (userContact.getContactName().equals(UserContactName.PHONT)){
+                        isSelect.set(true);
+                        userContact.setContact(user.getPhone());
+                    }
+                });
+                if (!isSelect.get()){
+                    List<UserContact> list = new ArrayList<>();
+                    list.add(new UserContact(user.getId(),UserContactName.PHONT,user.getPhone()));
+                    user.setUserContacts(list);
+                }
+            }else {
+                List<UserContact> list = new ArrayList<>();
+                list.add(new UserContact(user.getId(),UserContactName.PHONT,user.getPhone()));
+                user.setUserContacts(list);
+            }
+        }
         return user;
     }
 }
