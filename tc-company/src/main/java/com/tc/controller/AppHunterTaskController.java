@@ -93,6 +93,10 @@ public class AppHunterTaskController {
                 hunterTaskStates.add(HunterTaskState.EXECUTE);
                 hunterTaskStates.add(HunterTaskState.TASK_COMPLETE);
                 hunterTaskStates.add(HunterTaskState.COMMIT_ADMIN_AUDIT);
+                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.NO_REWORK_NO_COMPENSATE);
+                hunterTaskStates.add(HunterTaskState.NO_REWORK_HAVE_COMPENSATE);
                 break;
             case "AUDIT"://审核中
                 hunterTaskStates.add(HunterTaskState.AWAIT_USER_AUDIT);
@@ -100,6 +104,11 @@ public class AppHunterTaskController {
                 hunterTaskStates.add(HunterTaskState.USER_AUDIT_FAILURE);
                 hunterTaskStates.add(HunterTaskState.ADMIN_AUDIT);
                 hunterTaskStates.add(HunterTaskState.WITH_HUNTER_NEGOTIATE);
+                hunterTaskStates.add(HunterTaskState.WITH_USER_NEGOTIATE);
+                hunterTaskStates.add(HunterTaskState.USER_REPULSE);
+                hunterTaskStates.add(HunterTaskState.HUNTER_REPULSE);
+                hunterTaskStates.add(HunterTaskState.COMMIT_TO_ADMIN);
+                hunterTaskStates.add(HunterTaskState.WITH_ADMIN_NEGOTIATE);
                 break;
             case "FINISH"://已完成
                 hunterTaskStates.add(HunterTaskState.AWAIT_SETTLE_ACCOUNTS);
@@ -107,20 +116,11 @@ public class AppHunterTaskController {
                 hunterTaskStates.add(HunterTaskState.SETTLE_ACCOUNTS_EXCEPTION);
                 hunterTaskStates.add(HunterTaskState.END_OK);
                 hunterTaskStates.add(HunterTaskState.END_NO);
-                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.NO_REWORK_NO_COMPENSATE);
-                hunterTaskStates.add(HunterTaskState.NO_REWORK_HAVE_COMPENSATE);
                 hunterTaskStates.add(HunterTaskState.AWAIT_COMPENSATE);
                 hunterTaskStates.add(HunterTaskState.COMPENSATE_SUCCESS);
                 hunterTaskStates.add(HunterTaskState.COMPENSATE_EXCEPTION);
                 hunterTaskStates.add(HunterTaskState.TASK_ABANDON);
                 hunterTaskStates.add(HunterTaskState.TASK_BE_ABANDON);
-                hunterTaskStates.add(HunterTaskState.WITH_USER_NEGOTIATE);
-                hunterTaskStates.add(HunterTaskState.USER_REPULSE);
-                hunterTaskStates.add(HunterTaskState.HUNTER_REPULSE);
-                hunterTaskStates.add(HunterTaskState.COMMIT_TO_ADMIN);
-                hunterTaskStates.add(HunterTaskState.WITH_ADMIN_NEGOTIATE);
                 break;
             default:
                 break;
@@ -278,7 +278,6 @@ public class AppHunterTaskController {
     /**
      * HunterTask步骤3：猎刃在执行过程中修改步骤内容，此时猎刃任务的状态一定是EXECUTORY("正在执行")
      *
-     * @param id
      * @param modifyHunterTaskStep
      * @param bindingResult
      * @return
@@ -498,7 +497,6 @@ public class AppHunterTaskController {
      * 如果任务完成了但是不通过用户审核而放弃时，将任务状态设置为END_NO（“结束未完成”）
      * 如果不允许直接放弃，则将任务状态置为WITH_USER_NEGOTIATE("与用户协商"),
      *
-     * @param id
      * @param context
      */
     @PostMapping("/abandon")
@@ -611,7 +609,6 @@ public class AppHunterTaskController {
     /**
      * HunterTask步骤5：猎刃点击取消提交管理员审核，取消成功，将任务变回原先状态
      *
-     * @param id
      * @param htId
      */
     @GetMapping("/admin/di/audit/{htId:\\d+}")
