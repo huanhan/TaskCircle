@@ -144,6 +144,7 @@ public class HunterTask implements Serializable {
         hunterTask.setHunterCTask(false);
         hunterTask.setHunterRejectCount(0);
         hunterTask.setUserRejectCount(0);
+        hunterTask.setOldState(HunterTaskState.NONE);
         return hunterTask;
     }
 

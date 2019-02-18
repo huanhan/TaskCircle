@@ -214,7 +214,8 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         Hunter hunter = hunterTask.getHunter();
         //为猎刃发赏金与退回押金
         Float yMoney = task.getCompensateMoney();
-        Float sMoney = FloatHelper.divied(task.getMoney(), task.getPeopleNumber().floatValue());
+        //获取每个猎刃的人均赏金
+        Float sMoney = FloatHelper.divied(task.getOriginalMoney(), task.getPeopleNumber().floatValue());
         Float money = FloatHelper.addToBD(yMoney, sMoney).add(FloatHelper.toBig(hunter.getUser().getMoney())).floatValue();
         count = userRepository.update(money, hunterTask.getHunterId());
         if (count <= 0) {
@@ -573,7 +574,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         this.outMoneyToHunter(task, hunterTask);
 
         //当通过时，判断是否需要放弃用户的任务
-        //判断是否还有猎刃在执行任务
+        //判断是否还有猎刃在执行任务，如果有猎刃被强制放弃了任务，只能退还部分赏金
         List<HunterTask> hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(), HunterTaskState.notAbandon());
         if (ListUtils.isEmpty(hts)) {
             //放弃任务
@@ -583,7 +584,7 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             }
             //获取发布该任务的用户信息
             User user = task.getUser();
-            Float dMoney = FloatHelper.sub(user.getMoney(), task.getMoney());
+            Float dMoney = FloatHelper.add(user.getMoney(), task.getMoney());
             count = userRepository.update(dMoney, task.getUserId());
             if (count <= 0) {
                 throw new DBException("退还用户押金失败");
@@ -692,8 +693,33 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         if (count <= 0) {
             throw new DBException("修改猎刃任务状态失败");
         }
-        //退还猎刃押金 todo 可能要增加赔偿金
+        //退还猎刃押金
         this.outMoneyToHunter(hunterTask.getTask(), hunterTask);
+        //给猎刃项目赔偿金
+        Float yMoney = task.getCompensateMoney();
+        //人均赏金
+        Float sMoney = FloatHelper.divied(task.getOriginalMoney(), task.getPeopleNumber().floatValue());
+        Float money = FloatHelper.addToBD(yMoney, sMoney).add(FloatHelper.toBig(hunterTask.getHunter().getUser().getMoney())).floatValue();
+        count = userRepository.update(money, hunterTask.getHunterId());
+        if (count <= 0) {
+            throw new DBException("设置金额失败");
+        }
+        //添加猎刃的转账记录
+        UserIeRecord record = userIeRecordRepository.save(
+                UserIeRecord.init(
+                        task.getUserId(),
+                        hunterTask.getHunterId(),
+                        "来自任务（" + task.getName() + ")的赔偿",
+                        sMoney));
+        if (record == null) {
+            throw new DBException("添加转账记录失败");
+        }
+        //修改任务剩余赏金
+        Float lMoney = FloatHelper.sub(task.getMoney(), sMoney);
+        count = taskRepository.updateMoney(lMoney, task.getId());
+        if (count <= 0) {
+            throw new DBException("设置任务金额失败");
+        }
 
         //判断是否还有猎刃在执行任务
         List<HunterTask> hts = hunterTaskRepository.findByTaskIdAndStateIn(task.getId(), HunterTaskState.notAbandon());
@@ -703,9 +729,11 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
             if (count <= 0) {
                 throw new DBException("修改用户任务状态失败");
             }
-            //获取发布该任务的用户信息 todo 增加赔偿金
+            //获取发布该任务的用户信息
             User user = task.getUser();
-            Float dMoney = FloatHelper.sub(user.getMoney(), task.getMoney());
+            //把任务的 赏金/人 给猎刃
+            Float dMoney = FloatHelper.add(user.getMoney(), task.getMoney());
+
             count = userRepository.update(dMoney, task.getUserId());
             if (count <= 0) {
                 throw new DBException("退还用户押金失败");

@@ -1,9 +1,5 @@
 package com.tc.until;
 
-import com.tc.security.core.properties.SecurityProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 public class StringResourceCenter {
 
 

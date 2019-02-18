@@ -20,6 +20,7 @@ import com.tc.service.UserWithdrawService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +60,7 @@ public class AppFinanceController {
             @PathVariable("page") int page,
             @PathVariable("size") int size,
             @PathVariable("id") Long id) {
-        QueryIE queryIE = new QueryIE(page, size);
+        QueryIE queryIE = new QueryIE(page, size,new Sort(Sort.Direction.DESC,UserIeRecord.CREATE_TIME));
         queryIE.setMe(id);
         queryIE.setTo(id);
         Page<UserIeRecord> userIeRecords = userIeRecordService.findByQuery(queryIE);
@@ -80,7 +81,7 @@ public class AppFinanceController {
             @PathVariable("page") int page,
             @PathVariable("size") int size,
             @PathVariable("id") Long id) {
-        QueryFinance queryFinance = new QueryFinance(page, size);
+        QueryFinance queryFinance = new QueryFinance(page, size,new Sort(Sort.Direction.DESC,UserWithdraw.CREATE_TIME));
         queryFinance.setUserId(id);
         Page<UserWithdraw> userWithdrawPage = userWithdrawService.findByQueryFinance(queryFinance);
         List<UserWithdraw> content = userWithdrawPage.getContent();

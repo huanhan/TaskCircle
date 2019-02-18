@@ -561,14 +561,8 @@ public class AppHunterTaskController {
                         "任务，点击查看",
                 hunterTask.getTaskId(),
                 hunterTask.getTask().getUserId());
-        String msg;
-        if (isSuccess) {
-            msg = "放弃任务成功";
-        } else {
-            msg = "放弃任务的申请已经提交给用户了";
-        }
 
-        return ResultApp.init(msg);
+        return ResultApp.init("已成功放弃该猎刃任务");
     }
 
     /**
@@ -595,7 +589,7 @@ public class AppHunterTaskController {
         }
 
         //判断与用户协商的次数是否达标
-        if (!(hunterTask.getUserRejectCount() > OK_AUDIT_ADMIN_COUNT || hunterTask.getHunterRejectCount() > OK_AUDIT_ADMIN_COUNT)) {
+        if (!(hunterTask.getUserRejectCount() > OK_AUDIT_ADMIN_COUNT)) {
             throw new ValidException("请先与用户协商" + OK_AUDIT_ADMIN_COUNT + "次后，在提交审核");
         }
 

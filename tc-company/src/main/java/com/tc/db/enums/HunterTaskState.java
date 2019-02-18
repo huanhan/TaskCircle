@@ -224,8 +224,6 @@ public enum HunterTaskState{
                 return true;
             case NO_REWORK_HAVE_COMPENSATE:
                 return true;
-            case WITH_HUNTER_NEGOTIATE:
-                return true;
             default:
                 return false;
         }

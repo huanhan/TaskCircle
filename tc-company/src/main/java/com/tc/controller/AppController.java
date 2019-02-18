@@ -68,7 +68,7 @@ public class AppController {
     }
 
     @GetMapping("/task/{sort}/{lat}/{log}/{id:\\d+}")
-    @ApiOperation(value = "获取距离最近的任务")
+    @ApiOperation(value = "获取不同条件下的任务")
     public List<TaskAppDto> taskByDistance(@PathVariable("sort") String sort,
                                            @PathVariable("lat") Double lat,
                                            @PathVariable("log") Double log,

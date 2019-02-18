@@ -2,6 +2,7 @@ package com.tc.dto.app;
 
 import com.tc.db.entity.HunterTask;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.until.FloatHelper;
 import org.springframework.beans.BeanUtils;
 
 import java.sql.Timestamp;
@@ -217,6 +218,7 @@ public class HunterTaskAppDto {
         hunterTaskAppDto.setTaskContext(task.getTask().getContext());
         hunterTaskAppDto.setCurStep(task.getHunterTaskSteps().size());
         BeanUtils.copyProperties(task, hunterTaskAppDto);
+        hunterTaskAppDto.setMoney(FloatHelper.divied(task.getTask().getOriginalMoney(),task.getTask().getPeopleNumber().floatValue()));
         return hunterTaskAppDto;
     }
 }
