@@ -17,6 +17,7 @@ import com.tc.exception.ValidException;
 import com.tc.service.UserIeRecordService;
 import com.tc.service.UserService;
 import com.tc.service.UserWithdrawService;
+import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +56,13 @@ public class AppFinanceController {
      *
      * @return
      */
-    @GetMapping("/transfer/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/transfer/{page:\\d+}/{size:\\d+}")
     @ApiOperation("获取我的转账记录")
     public AppPage allByTransfer(
             @PathVariable("page") int page,
             @PathVariable("size") int size,
-            @PathVariable("id") Long id) {
+            HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryIE queryIE = new QueryIE(page, size,new Sort(Sort.Direction.DESC,UserIeRecord.CREATE_TIME));
         queryIE.setMe(id);
         queryIE.setTo(id);
@@ -75,12 +78,13 @@ public class AppFinanceController {
      *
      * @return
      */
-    @GetMapping("/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/{page:\\d+}/{size:\\d+}")
     @ApiOperation("获取我的充值或者提现记录")
     public AppPage allByFinance(
             @PathVariable("page") int page,
             @PathVariable("size") int size,
-            @PathVariable("id") Long id) {
+            HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryFinance queryFinance = new QueryFinance(page, size,new Sort(Sort.Direction.DESC,UserWithdraw.CREATE_TIME));
         queryFinance.setUserId(id);
         Page<UserWithdraw> userWithdrawPage = userWithdrawService.findByQueryFinance(queryFinance);
@@ -96,13 +100,12 @@ public class AppFinanceController {
      * 金额使用任务的押金
      * 创建时间使用任务的发布时间
      *
-     * @param id
      * @return
      */
-    @GetMapping("/money/{id:\\d+}")
+    @GetMapping("/money")
     @ApiOperation("获取我的押金列表")
-    public List<CashPledgeAppDto> allByMoney(@PathVariable("id") Long id) {
-
+    public List<CashPledgeAppDto> allByMoney(HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         TimeScope timeScope = new TimeScope();
         timeScope.setPageSize(30);
         timeScope.setId(id);
@@ -153,13 +156,13 @@ public class AppFinanceController {
     /**
      * 新增提现记录，并提交审核
      *
-     * @param id
      * @param addFinance
      * @param bindingResult
      */
-    @PostMapping("/add/{id:\\d+}")
+    @PostMapping("/add")
     @ApiOperation(value = "新增一条提现记录，并提交审核")
-    public void add(@PathVariable("id") Long id, @Valid @RequestBody AddFinance addFinance, BindingResult bindingResult) {
+    public void add(HttpServletRequest request, @Valid @RequestBody AddFinance addFinance, BindingResult bindingResult) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }

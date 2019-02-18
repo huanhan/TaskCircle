@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -37,9 +38,10 @@ public class AppMessageController {
     private UserService userService;
 
     //查询公告
-    @GetMapping("/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "查询所有可见公告")
-    public AppPage all(@PathVariable int page, @PathVariable int size, @PathVariable Long id) {
+    public AppPage all(@PathVariable int page, @PathVariable int size, HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         User user = userService.findOne(id);
         if (user == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);

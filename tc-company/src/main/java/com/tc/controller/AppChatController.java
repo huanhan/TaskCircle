@@ -11,6 +11,7 @@ import com.tc.service.HunterTaskService;
 import com.tc.service.PushMsgService;
 import com.tc.service.UserHunterInterflowService;
 import com.tc.service.UserService;
+import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -66,9 +68,12 @@ public class AppChatController {
         return AppPage.init(data, query);
     }
 
-    @PostMapping("/{id:\\d+}")
+    @PostMapping()
     @ApiOperation(value = "保存聊天记录")
-    public ChatDto saveChat(@PathVariable("id") Long id, @Valid @RequestBody ChatDtoReq addChat, BindingResult bindingResult) {
+    public ChatDto saveChat(HttpServletRequest request, @Valid @RequestBody ChatDtoReq addChat, BindingResult bindingResult) {
+
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }

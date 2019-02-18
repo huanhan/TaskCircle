@@ -67,13 +67,13 @@ public class AppController {
         return homeAppDto;
     }
 
-    @GetMapping("/task/{sort}/{lat}/{log}/{id:\\d+}")
+    @GetMapping("/task/{sort}/{lat}/{log}")
     @ApiOperation(value = "获取不同条件下的任务")
     public List<TaskAppDto> taskByDistance(@PathVariable("sort") String sort,
                                            @PathVariable("lat") Double lat,
-                                           @PathVariable("log") Double log,
-                                           @PathVariable("id") Long id) {
-        List<Task> content=null;
+                                           @PathVariable("log") Double log) {
+
+        List<Task> content = null;
         QueryTask queryTask = new QueryTask(0, 20);
         queryTask.setState(TaskState.ISSUE);
         switch (sort) {

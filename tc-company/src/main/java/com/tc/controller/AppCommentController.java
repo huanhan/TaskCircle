@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +47,10 @@ public class AppCommentController {
     @Autowired
     private HunterTaskService hunterTaskService;
 
-    @PostMapping("/taskAndTask/{id:\\d+}")
+    @PostMapping("/taskAndTask")
     @ApiOperation(value = "猎刃对任务和用户进行评论")
-    public ResultApp taskAndTask(@PathVariable("id") Long id, @Valid @RequestBody HunterCommentDto comment, BindingResult bindingResult) {
+    public ResultApp taskAndTask(HttpServletRequest request, @Valid @RequestBody HunterCommentDto comment, BindingResult bindingResult) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -149,14 +151,14 @@ public class AppCommentController {
     /**
      * 用户评论猎刃
      *
-     * @param id
      * @param hunterComment
      * @param bindingResult
      * @return
      */
-    @PostMapping("/hunter/{id:\\d+}")
+    @PostMapping("/hunter")
     @ApiOperation(value = "用户对猎刃进行评论")
-    public ResultApp toHunter(@PathVariable("id") Long id, @Valid @RequestBody UserCommentDto hunterComment, BindingResult bindingResult) {
+    public ResultApp toHunter(HttpServletRequest request, @Valid @RequestBody UserCommentDto hunterComment, BindingResult bindingResult) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -197,14 +199,14 @@ public class AppCommentController {
     /**
      * 用户获取猎刃对用户的评论
      *
-     * @param id
      * @return
      */
-    @GetMapping("/evaUserByUser/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/evaUserByUser/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "用户获取猎刃对用户的评论")
     public AppPage received(@PathVariable("page") int page,
                             @PathVariable("size") int size,
-                            @PathVariable("id") Long id) {
+                            HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryUserComment queryUserComment = new QueryUserComment(page, size);
         queryUserComment.setUserId(id);
         Page<CommentUser> query = commentUserService.findByQuery(queryUserComment);
@@ -219,14 +221,14 @@ public class AppCommentController {
     /**
      * 用户获取用户对猎刃的评论
      *
-     * @param id
      * @return
      */
-    @GetMapping("/evaHunterByUser/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/evaHunterByUser/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "用户获取用户对猎刃的评论")
     public AppPage issue(@PathVariable("page") int page,
                          @PathVariable("size") int size,
-                         @PathVariable("id") Long id) {
+                         HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryComment queryComment = new QueryComment(page, size);
         queryComment.setType(CommentType.USER_COMMENT_HUNTER);
         queryComment.setCreationId(id);
@@ -243,14 +245,14 @@ public class AppCommentController {
     /**
      * 猎刃获取猎刃对用户的评论
      *
-     * @param id
      * @return
      */
-    @GetMapping("/evaUserByHunter/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/evaUserByHunter/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "猎刃获取猎刃对用户的评论")
     public AppPage hunterReceived(@PathVariable("page") int page,
                                   @PathVariable("size") int size,
-                                  @PathVariable("id") Long id) {
+                                  HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryComment queryComment = new QueryComment(page, size);
         queryComment.setCreationId(id);
         queryComment.setType(CommentType.HUNTER_COMMENT_USER);
@@ -266,14 +268,14 @@ public class AppCommentController {
     /**
      * 猎刃获取用户对猎刃的评论
      *
-     * @param id
      * @return
      */
-    @GetMapping("/evaHunterByHunter/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/evaHunterByHunter/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "猎刃获取用户对猎刃的评论")
     public AppPage hunterIssue(@PathVariable("page") int page,
                                @PathVariable("size") int size,
-                               @PathVariable("id") Long id) {
+                               HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryHunterComment queryHunterComment = new QueryHunterComment(page, size);
         queryHunterComment.setHunterId(id);
         Page<CommentHunter> query = commentHunterService.findByQuery(queryHunterComment);
@@ -291,12 +293,13 @@ public class AppCommentController {
      *
      * @return
      */
-    @GetMapping("/task/{taskid:\\d+}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/task/{taskid:\\d+}/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "根据任务编号获取任务的评论列表")
     public AppPage taskComment(@PathVariable("page") int page,
-                                  @PathVariable("size") int size,
-                                  @PathVariable("taskid") String taskid,
-                                  @PathVariable("id") Long id) {
+                               @PathVariable("size") int size,
+                               @PathVariable("taskid") String taskid,
+                               HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryTaskComment queryTaskComment = new QueryTaskComment(page, size);
         queryTaskComment.setTaskId(taskid);
         Page<CommentTask> query = commentTaskService.findByQuery(queryTaskComment);
@@ -307,7 +310,7 @@ public class AppCommentController {
             commentTaskDtos.add(CommentTaskDto.init(commentTask));
         }
 
-        return AppPage.init(commentTaskDtos,query );
+        return AppPage.init(commentTaskDtos, query);
     }
 
     /**

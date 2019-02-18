@@ -17,6 +17,7 @@ import com.tc.security.core.validate.code.ValidateCodeType;
 import com.tc.service.CommentUserService;
 import com.tc.service.UserImgService;
 import com.tc.service.UserService;
+import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -60,12 +61,12 @@ public class AppUserController {
     /**
      * 用来获取用户详情信息
      *
-     * @param id
      * @return
      */
-    @GetMapping("/{id:\\d+}")
+    @GetMapping()
     @ApiOperation(value = "获取用户详情信息")
-    public UserAppDto detail(@PathVariable("id") Long id) {
+    public UserAppDto detail(HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         User user = userService.findOne(id);
         UserAppDto userAppDto = new UserAppDto();
         BeanUtils.copyProperties(user, userAppDto);
@@ -77,14 +78,14 @@ public class AppUserController {
     /**
      * 修改用户信息
      *
-     * @param id
      * @param modifyUser
      * @param bindingResult
      * @return
      */
-    @PutMapping("/{id:\\d+}")
+    @PutMapping()
     @ApiOperation(value = "修改用户信息")
-    public ResultApp update(@PathVariable("id") Long id, @Valid @RequestBody ModifyUser modifyUser, BindingResult bindingResult) {
+    public ResultApp update(HttpServletRequest request, @Valid @RequestBody ModifyUser modifyUser, BindingResult bindingResult) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -103,13 +104,13 @@ public class AppUserController {
     /**
      * 修改用户头像，需要图片的URL地址
      *
-     * @param id
      * @param modifyUserHeader
      * @param bindingResult
      */
-    @PutMapping("/header/{id:\\d+}")
+    @PutMapping("/header")
     @ApiOperation(value = "修改用户头像")
-    public ResultApp updateHead(@PathVariable("id") Long id, @Valid @RequestBody ModifyUserHeader modifyUserHeader, BindingResult bindingResult) {
+    public ResultApp updateHead(HttpServletRequest request, @Valid @RequestBody ModifyUserHeader modifyUserHeader, BindingResult bindingResult) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -122,11 +123,11 @@ public class AppUserController {
     /**
      * 用户提交猎刃审核申请
      *
-     * @param id
      */
-    @PostMapping("/upAudit/{id:\\d+}")
+    @PostMapping("/upAudit")
     @ApiOperation(value = "提交成为猎刃的申请")
-    public ResultApp upAudit(@RequestBody HunterAuditReq hunterAuditReq, @PathVariable("id") Long id) {
+    public ResultApp upAudit(@RequestBody HunterAuditReq hunterAuditReq,HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //根据编号获取详情信息
         User user = userService.findOne(id);
         //验证用户的准确性
@@ -159,9 +160,10 @@ public class AppUserController {
         return ResultApp.init("提交成功");
     }
 
-    @GetMapping("/hunterAudit/{id:\\d+}")
+    @GetMapping("/hunterAudit")
     @ApiOperation(value = "猎刃审核的数据")
-    public HunterAuditDto hunterAudit(@PathVariable("id") Long id) {
+    public HunterAuditDto hunterAudit(HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         User user = userService.findOne(id);
         List<UserImg> userImgs = userImgService.findByUser(id);
         HunterAuditDto hunterAuditDto = new HunterAuditDto();

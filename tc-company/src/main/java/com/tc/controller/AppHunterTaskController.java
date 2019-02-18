@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.util.ArrayList;
@@ -67,15 +68,15 @@ public class AppHunterTaskController {
     /**
      * 根据状态获取指定猎刃的任务列表
      *
-     * @param id 用户编号
      * @return
      */
-    @GetMapping("/task/{state}/{page:\\d+}/{size:\\d+}/{id:\\d+}")
+    @GetMapping("/task/{state}/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "根据状态获取指定猎刃的任务列表")
     public AppPage taskByHunter(@PathVariable("state") String state,
                                 @PathVariable("page") int page,
                                 @PathVariable("size") int size,
-                                @PathVariable("id") Long id) {
+                                HttpServletRequest request) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         QueryHunterTask queryHunterTask = new QueryHunterTask(page, size);
         queryHunterTask.setSort(new Sort(Sort.Direction.DESC, HunterTask.ACCEPT_TIME));
         queryHunterTask.setHunterId(id);
@@ -144,13 +145,12 @@ public class AppHunterTaskController {
      * 此时新增一条猎刃任务信息
      * 并在猎刃的账户中扣除任务需要的押金
      *
-     * @param id
      * @param taskId
      */
-    @GetMapping("/accept/{taskId:\\d+}/{id:\\d+}")
+    @GetMapping("/accept/{taskId:\\d+}")
     @ApiOperation(value = "猎刃点击按钮接任务")
-    public ResultApp acceptTask(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
-
+    public ResultApp acceptTask(HttpServletRequest request, @PathVariable("taskId") String taskId) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //在service中添加猎刃任务信息，需要做如下判断：任务是否允许被接，接完后是否需要修改任务状态，接完任务猎刃需要缴纳的押金
         String htsId = hunterTaskService.acceptTask(id, taskId);
         if (StringUtils.isEmpty(htsId)) {
@@ -169,14 +169,14 @@ public class AppHunterTaskController {
     /**
      * HunterTask步骤2：猎刃点击开始任务，如果任务成功开始，则设置状态为BEGIN("开始")
      *
-     * @param id
      * @param htId
      */
-    @GetMapping("/begin/{htId:\\d+}/{id:\\d+}")
+    @GetMapping("/begin/{htId:\\d+}")
     @ApiOperation(value = "猎刃点击按钮开始任务")
-    public ResultApp beginTask(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp beginTask(@PathVariable("htId") String htId) {
         //获取猎刃任务详情
         HunterTask hunterTask = hunterTaskService.findOne(htId);
+
         if (hunterTask == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
@@ -220,14 +220,14 @@ public class AppHunterTaskController {
      * 如果是第一次添加步骤，则修改任务的状态为EXECUTORY("正在执行")
      * 如果添加的是最后一次步骤，则修改任务的状态为TASK_COMPLETE("任务完成")
      *
-     * @param id
      * @param addHunterTaskStep
      * @param bindingResult
      * @return
      */
-    @PostMapping("/add/step/{id:\\d+}")
+    @PostMapping("/add/step")
     @ApiOperation(value = "添加猎刃的任务步骤")
-    public ResultApp add(@PathVariable("id") Long id, @Valid @RequestBody AddHunterTaskStep addHunterTaskStep, BindingResult bindingResult) {
+    public ResultApp add(@Valid @RequestBody AddHunterTaskStep addHunterTaskStep, BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -283,9 +283,9 @@ public class AppHunterTaskController {
      * @param bindingResult
      * @return
      */
-    @PostMapping("/update/step/{id:\\d+}")
+    @PostMapping("/update/step")
     @ApiOperation(value = "修改猎刃的任务步骤")
-    public ResultApp update(@PathVariable("id") Long id, @Valid @RequestBody ModifyHunterTaskStep modifyHunterTaskStep, BindingResult bindingResult) {
+    public ResultApp update(@Valid @RequestBody ModifyHunterTaskStep modifyHunterTaskStep, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -332,9 +332,9 @@ public class AppHunterTaskController {
 
     }
 
-    @GetMapping("/query/{htId:\\d+}/{id:\\d+}")
+    @GetMapping("/query/{htId:\\d+}")
     @ApiOperation(value = "根据猎刃任务id获取猎刃任务执行情况")
-    public HunterTaskRunningStateDto query(@PathVariable("htId") String htId, @PathVariable("id") Long id) {
+    public HunterTaskRunningStateDto query(@PathVariable("htId") String htId) {
 
         //获取猎刃任务详情
         HunterTask hunterTask = hunterTaskService.findOne(htId);
@@ -422,12 +422,12 @@ public class AppHunterTaskController {
      * HunterTask步骤4：提交用户审核，当前猎刃任务的状态必须为TASK_COMPLETE("任务完成")
      * 提交成功后，任务状态变为AWAIT_USER_AUDIT("等待用户审核")
      *
-     * @param id
      * @param htId
      */
-    @GetMapping("/user/audit/{htId:\\d+}/{id:\\d+}")
+    @GetMapping("/user/audit/{htId:\\d+}")
     @ApiOperation(value = "猎刃将任务提交用户审核")
-    public ResultApp upAuditToUser(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp upAuditToUser(HttpServletRequest request, @PathVariable("htId") String htId) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //获取猎刃任务信息
         HunterTask hunterTask = hunterTaskService.findOne(htId);
         if (hunterTask == null) {
@@ -461,12 +461,12 @@ public class AppHunterTaskController {
     /**
      * HunterTask步骤5：猎刃点击重做任务，将任务状态修改为TASK_COMPLETE("任务完成")
      *
-     * @param id
      * @param htId
      */
-    @GetMapping("/rework/{htId:\\d+}/{id:\\d+}")
+    @GetMapping("/rework/{htId:\\d+}")
     @ApiOperation(value = "猎刃点击重做任务")
-    public ResultApp reworkTask(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp reworkTask(HttpServletRequest request, @PathVariable("htId") String htId) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //获取猎刃任务信息
         HunterTask hunterTask = hunterTaskService.findOne(htId);
         if (hunterTask == null) {
@@ -501,9 +501,10 @@ public class AppHunterTaskController {
      * @param id
      * @param context
      */
-    @PostMapping("/abandon/{id:\\d+}")
+    @PostMapping("/abandon")
     @ApiOperation(value = "猎刃点击放弃任务")
-    public ResultApp abandonTask(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+    public ResultApp abandonTask(@Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+
         //获取猎刃任务信息
         HunterTask hunterTask = hunterTaskService.findOne(context.getId());
         if (hunterTask == null) {
@@ -542,9 +543,9 @@ public class AppHunterTaskController {
         return ResultApp.init(msg);
     }
 
-    @PostMapping("/forceAbandon/{id:\\d+}")
+    @PostMapping("/forceAbandon")
     @ApiOperation(value = "猎刃点击强行放弃任务")
-    public ResultApp forceAbandonTask(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+    public ResultApp forceAbandonTask(@Valid @RequestBody AuditContext context, BindingResult bindingResult) {
         //获取猎刃任务信息
         HunterTask hunterTask = hunterTaskService.findOne(context.getId());
         if (hunterTask == null) {
@@ -571,12 +572,11 @@ public class AppHunterTaskController {
      * 如果是任务完成的审核则设置状态为COMMIT_ADMIN_AUDIT("任务完成，提交管理员审核")
      * 猎刃需要无条件服从管理员审核
      *
-     * @param id
      * @param htId
      */
-    @GetMapping("/admin/audit/{htId:\\d+}/{id:\\d+}")
+    @GetMapping("/admin/audit/{htId:\\d+}")
     @ApiOperation(value = "猎刃点击提交管理员审核")
-    public ResultApp auditToAdmin(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp auditToAdmin(@PathVariable("htId") String htId) {
         //获取猎刃任务信息
         HunterTask hunterTask = hunterTaskService.findOne(htId);
         if (hunterTask == null) {
@@ -614,9 +614,9 @@ public class AppHunterTaskController {
      * @param id
      * @param htId
      */
-    @GetMapping("/admin/di/audit/{htId:\\d+}/{id:\\d+}")
+    @GetMapping("/admin/di/audit/{htId:\\d+}")
     @ApiOperation(value = "猎刃点击取消提交管理员审核")
-    public ResultApp diAuditToAdmin(@PathVariable("id") Long id, @PathVariable("htId") String htId) {
+    public ResultApp diAuditToAdmin(@PathVariable("htId") String htId) {
         //获取猎刃任务信息
         HunterTask hunterTask = hunterTaskService.findOne(htId);
         if (hunterTask == null) {
@@ -640,12 +640,13 @@ public class AppHunterTaskController {
      * Task步骤5：猎刃同意用户放弃任务,此时会设置猎刃任务的状态为任务被放弃TASK_BE_ABANDON
      * 并且如果放弃任务的猎刃时猎刃中的最后一个，则会将用户的任务设置成放弃状态，并且退回用户押金
      *
-     * @param id
      * @param taskId
      */
-    @GetMapping("/abandon/success/{taskId:\\d+}/{id:\\d+}")
+    @GetMapping("/abandon/success/{taskId:\\d+}")
     @ApiOperation(value = "猎刃同意用户放弃任务")
-    public ResultApp abandonPassByHunter(@PathVariable("id") Long id, @PathVariable("taskId") String taskId) {
+    public ResultApp abandonPassByHunter(HttpServletRequest request, @PathVariable("taskId") String taskId) {
+
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //获取需要猎刃同意的任务
         Task task = taskService.findOne(taskId);
         if (task == null) {
@@ -685,13 +686,13 @@ public class AppHunterTaskController {
     /**
      * Task步骤5：猎刃不同意用户放弃任务，此时将猎刃任务的状态设置成HUNTER_REPULSE("猎刃拒绝用户放弃")，并修改对应次数
      *
-     * @param id
      * @param context
      * @param bindingResult
      */
-    @PostMapping("/abandon/failure/{id:\\d+}")
+    @PostMapping("/abandon/failure")
     @ApiOperation(value = "猎刃点击用户的放弃申请不通过")
-    public ResultApp abandonNotPassByHunter(@PathVariable("id") Long id, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+    public ResultApp abandonNotPassByHunter(HttpServletRequest request, @Valid @RequestBody AuditContext context, BindingResult bindingResult) {
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         //获取需要猎刃不同意的任务
         Task task = taskService.findOne(context.getId());
         if (task == null) {
