@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.tc.db.enums.MessageState;
 import com.tc.db.enums.MessageType;
 import com.tc.dto.LongIds;
+import com.tc.dto.trans.Trans;
 import com.tc.dto.user.QueryUser;
 import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
@@ -48,12 +49,18 @@ public class Message implements Serializable {
     private long sendCount = 0;
     private long lookCount = 0;
 
+    private Trans transState;
+    private Trans transType;
+
+
     public static List<Message> toListByIndex(List<Message> content) {
         if (!ListUtils.isEmpty(content)){
             content.forEach(message -> {
                 if (message.creation != null){
                     message.setCreation(new Admin(message.getCreation().getUserId(),message.getCreation().getUser()));
                 }
+                message.setTransState(new Trans(message.getState().name(),message.getState().getState()));
+                message.setTransType(new Trans(message.getType().name(),message.getType().getType()));
             });
         }
         return content;
@@ -64,6 +71,8 @@ public class Message implements Serializable {
             if (message.getCreation() != null){
                 message.setCreation(new Admin(message.getCreation().getUserId(),message.getCreation().getUser()));
             }
+            message.setTransState(new Trans(message.getState().name(),message.getState().getState()));
+            message.setTransType(new Trans(message.getType().name(),message.getType().getType()));
         }
         return message;
     }
@@ -180,6 +189,24 @@ public class Message implements Serializable {
 
     public void setLookCount(long lookCount) {
         this.lookCount = lookCount;
+    }
+
+    @Transient
+    public Trans getTransState() {
+        return transState;
+    }
+
+    public void setTransState(Trans transState) {
+        this.transState = transState;
+    }
+
+    @Transient
+    public Trans getTransType() {
+        return transType;
+    }
+
+    public void setTransType(Trans transType) {
+        this.transType = transType;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
+import com.tc.dto.trans.Trans;
 import com.tc.dto.trans.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -217,10 +218,19 @@ public class User implements Serializable {
     private List<TransEnum> genders;
 
     /**
+     * 用户状态
+     */
+    private List<TransEnum> states;
+
+    /**
      * 用户权限
      */
     private List<UserAuthority> userAuthorities;
 
+
+    private Trans transCategory;
+    private Trans transGender;
+    private Trans transState;
 
     public User() {
     }
@@ -508,6 +518,33 @@ public class User implements Serializable {
         this.auditTime = auditTime;
     }
 
+    @Transient
+    public Trans getTransCategory() {
+        return transCategory;
+    }
+
+    public void setTransCategory(Trans transCategory) {
+        this.transCategory = transCategory;
+    }
+
+    @Transient
+    public Trans getTransGender() {
+        return transGender;
+    }
+
+    public void setTransGender(Trans transGender) {
+        this.transGender = transGender;
+    }
+
+    @Transient
+    public Trans getTransState() {
+        return transState;
+    }
+
+    public void setTransState(Trans transState) {
+        this.transState = transState;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -641,7 +678,7 @@ public class User implements Serializable {
         this.userExpense = expense;
     }
 
-    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE},fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user",cascade = {CascadeType.MERGE})
     @JsonView(UserBasicView.class)
     public Collection<UserImg> getUserImgs() {
         return userImgs;
@@ -688,6 +725,15 @@ public class User implements Serializable {
     }
 
     @Transient
+    public List<TransEnum> getStates() {
+        return states;
+    }
+
+    public void setStates(List<TransEnum> states) {
+        this.states = states;
+    }
+
+    @Transient
     public List<UserAuthority> getUserAuthorities() {
         return userAuthorities;
     }
@@ -703,6 +749,7 @@ public class User implements Serializable {
     public static User toDetail(User user) {
         user.setGenders(UserGender.toList());
         user.setCategories(UserCategory.toList());
+        user.setStates(UserState.toList());
         user.setPassword(null);
         user.setAdmin(null);
         user.setAuditHunters(null);
@@ -723,12 +770,42 @@ public class User implements Serializable {
         user.setUserOperationLogs(null);
         user.setUserWithdraws(null);
         user.setHunter(null);
+        user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
+        user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
+        user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
+        return user;
+    }
+
+    public static User toDetailByNotEnums(User user) {
+        user.setPassword(null);
+        user.setAdmin(null);
+        user.setAuditHunters(null);
+        user.setComments(null);
+        user.setCommentUsers(null);
+        user.setResources(null);
+        user.setUserContacts(null);
+        user.setTasks(null);
+        user.setUserExpense(null);
+        user.setUserHunterInterflows(null);
+        if (user.getUserImgs() != null){
+            Collection<UserImg> userImgs = new ArrayList<>();
+            user.getUserImgs().forEach(userImg ->
+                    userImgs.add(new UserImg(userImg.getUserId(),userImg.getImgName(),userImg.getUrlLocation())));
+            user.setUserImgs(userImgs);
+        }
+        user.setUserIncome(null);
+        user.setUserOperationLogs(null);
+        user.setUserWithdraws(null);
+        user.setHunter(null);
+        user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
+        user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
+        user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
         return user;
     }
 
     public static List<User> toIndexAsList(List<User> content) {
         if (!ListUtils.isEmpty(content)){
-            content.forEach(User::toDetail);
+            content.forEach(User::toDetailByNotEnums);
         }
         return content;
     }
@@ -739,5 +816,9 @@ public class User implements Serializable {
             users.forEach(user -> result.add(user.id));
         }
         return result;
+    }
+
+    public String toTitle(){
+        return this.username + "(" + this.name + ")";
     }
 }

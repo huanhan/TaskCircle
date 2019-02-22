@@ -10,6 +10,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "audit_hunter_task", schema = "tc-company")
 public class AuditHunterTask {
+    public static final String AUDIT_ID = "auditId";
+    public static final String HUNTER_TASK_ID = "hunterTaskId";
     private String auditId;
     private String hunterTaskId;
     private Audit audit;

@@ -22,14 +22,15 @@ public class TaskClassifyRelationServiceImpl extends AbstractBasicServiceImpl<Ta
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean deleteByIds(LongIds ids) {
-        int count = taskClassifyRelationRepository.deleteByTaskIdIsInAndTaskClassifyIdEquals(ids.getIds(),ids.getId());
+        int count = 0;//taskClassifyRelationRepository.deleteByTaskClassifyIdIsInAndTaskIdEquals(ids.getIds(),ids.getId());
+
         return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean deleteByIds(StringIds ids) {
-        int count = taskClassifyRelationRepository.deleteByTaskClassifyIdIsInAndTaskIdEquals(ids.getIds(),ids.getId());
+        int count = taskClassifyRelationRepository.deleteByTaskIdIsInAndTaskClassifyIdEquals(ids.getIds(),ids.getId());
         return count > 0;
     }
 }

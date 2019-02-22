@@ -4,13 +4,21 @@ package com.tc.dto.user;
 import com.tc.db.entity.Hunter;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
+import com.tc.db.entity.User;
 import com.tc.db.enums.HunterTaskState;
+import com.tc.db.enums.TaskState;
 import com.tc.dto.enums.TaskConditionResult;
 import com.tc.dto.statistics.TaskCondition;
 import com.tc.dto.statistics.TaskStatistics;
+import com.tc.dto.task.statistics.StatisticsCount;
+import com.tc.dto.task.statistics.StatisticsMoney;
+import com.tc.dto.trans.TransData;
+import com.tc.dto.trans.TransEnum;
 import com.tc.until.FloatHelper;
+import com.tc.until.ListUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,7 +33,8 @@ public class HunterTaskStatistics {
     private float incomeAll;
     private float payAll;
     private float moneyAll;
-    private List<TaskStatistics> statistics;
+    private List<TransData> trans;
+    private List<TransEnum> items;
 
     public Hunter getHunter() {
         return hunter;
@@ -51,14 +60,6 @@ public class HunterTaskStatistics {
         this.moneyAll = moneyAll;
     }
 
-    public List<TaskStatistics> getStatistics() {
-        return statistics;
-    }
-
-    public void setStatistics(List<TaskStatistics> statistics) {
-        this.statistics = statistics;
-    }
-
     public float getIncomeAll() {
         return incomeAll;
     }
@@ -75,12 +76,29 @@ public class HunterTaskStatistics {
         this.payAll = payAll;
     }
 
+    public List<TransData> getTrans() {
+        return trans;
+    }
+
+    public void setTrans(List<TransData> trans) {
+        this.trans = trans;
+    }
+
+    public List<TransEnum> getItems() {
+        return items;
+    }
+
+    public void setItems(List<TransEnum> items) {
+        this.items = items;
+    }
+
+
     public static HunterTaskStatistics statistics(List<HunterTask> source, TaskCondition condition){
         HunterTaskStatistics result = new HunterTaskStatistics();
         List<String> items = condition.getItems();
         switch (condition.getSelect()){
             case STATE:
-                List<HunterTaskState> states = HunterTaskState.byStr(items);
+                List<HunterTaskState> states = ListUtils.isNotEmpty(items) ? HunterTaskState.byStr(items) : Arrays.asList(HunterTaskState.values());
                 result = statisticsByState(source,states);
                 break;
             default:
@@ -132,7 +150,13 @@ public class HunterTaskStatistics {
 
     private static HunterTaskStatistics statisticsByState(List<HunterTask> source, List<HunterTaskState> states) {
         HunterTaskStatistics result = new HunterTaskStatistics();
-        List<TaskStatistics> statistics = new ArrayList<>();
+        result.trans = new ArrayList<>();
+        result.items = new ArrayList<>();
+
+        List<StatisticsCount> statisticsCounts = new ArrayList<>();
+        List<StatisticsMoney> statisticsMonies = new ArrayList<>();
+        List<TransEnum> items = new ArrayList<>();
+
         states.forEach(state -> {
             AtomicReference<Float> money = new AtomicReference<>(0f);
             AtomicLong count = new AtomicLong();
@@ -145,9 +169,16 @@ public class HunterTaskStatistics {
                     count.getAndIncrement();
                 }
             });
-            statistics.add(new TaskStatistics(state.name(),money.get(),count.get(),state.getState()));
+            if (money.get() > 0 && count.get() > 0) {
+                statisticsMonies.add(new StatisticsMoney(state.name(), state.getState(), money.get()));
+                statisticsCounts.add(new StatisticsCount(state.name(), state.getState(), count.get()));
+                items.add(new TransEnum(state.name(), state.getState()));
+            }
         });
-        result.statistics = statistics;
+
+        result.trans.add(new TransData(TaskConditionResult.MONEY, TaskConditionResult.MONEY.getResult(), statisticsMonies));
+        result.trans.add(new TransData(TaskConditionResult.NUMBER, TaskConditionResult.NUMBER.getResult(), statisticsCounts));
+        result.setItems(items);
         return result;
     }
 
@@ -158,36 +189,30 @@ public class HunterTaskStatistics {
      * @return
      */
     public static HunterTaskStatistics filter(HunterTaskStatistics hunterTaskStatistics, TaskConditionResult selectResult){
-        List<TaskStatistics> statistics = new ArrayList<>();
+        List<TransData> result = new ArrayList<>();
         switch (selectResult){
             case MONEY:
-                hunterTaskStatistics.getStatistics().forEach(taskStatistics ->
-                        statistics.add(
-                                new TaskStatistics(
-                                        taskStatistics.getKey(),
-                                        taskStatistics.getMoney(),
-                                        taskStatistics.getName()
-                                )
-                        )
-                );
-                hunterTaskStatistics.setStatistics(statistics);
+                hunterTaskStatistics.trans.forEach(transData -> {
+                    if (transData.getKey().equals(TaskConditionResult.MONEY)) {
+                        result.add(transData);
+                    }
+                });
                 break;
             case NUMBER:
-                hunterTaskStatistics.getStatistics().forEach(taskStatistics ->
-                        statistics.add(
-                                new TaskStatistics(
-                                        taskStatistics.getKey(),
-                                        taskStatistics.getCount(),
-                                        taskStatistics.getName()
-                                )
-                        )
-                );
-                hunterTaskStatistics.setStatistics(statistics);
+                hunterTaskStatistics.trans.forEach(transData -> {
+                    if (transData.getKey().equals(TaskConditionResult.NUMBER)) {
+                        result.add(transData);
+                    }
+                });
                 break;
             default:
                 break;
         }
-
         return hunterTaskStatistics;
+    }
+
+    public HunterTaskStatistics append(Hunter hunter) {
+        this.hunter = new Hunter(hunter.getUserId(),hunter.getUser());
+        return this;
     }
 }

@@ -2,6 +2,7 @@ package com.tc.db.entity;
 
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.MoneyType;
+import com.tc.dto.trans.Trans;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,7 +20,7 @@ import java.util.Objects;
  * 猎刃接取的任务
  */
 @Entity
-@Table(name = "hunter_task", schema = "tc-company", catalog = "")
+@Table(name = "hunter_task", schema = "tc-company")
 public class HunterTask implements Serializable {
 
     public static final String ID = "id";
@@ -69,6 +70,11 @@ public class HunterTask implements Serializable {
     private Boolean hunterCUser;
     private Boolean hunterCTask;
 
+    private Trans transState;
+    private Trans transOState;
+    private Trans transMoneyType;
+
+
     public HunterTask() {
     }
 
@@ -83,7 +89,7 @@ public class HunterTask implements Serializable {
         if (!ListUtils.isEmpty(content)) {
             content.forEach(hunterTask -> {
                 if (hunterTask.getTask() != null) {
-                    hunterTask.setTask(new Task(hunterTask.getTask().getId(), hunterTask.getTask().getName()));
+                    hunterTask.setTask(Task.toHunterDetail(hunterTask.getTask()));
                 }
                 if (hunterTask.getHunter() != null) {
                     hunterTask.getHunter().toDetail();
@@ -91,6 +97,17 @@ public class HunterTask implements Serializable {
                 hunterTask.commentHunters = null;
                 hunterTask.hunterTaskSteps = null;
                 hunterTask.auditHunterTasksById = null;
+                hunterTask.setTransState(new Trans(hunterTask.state.name(),hunterTask.state.getState()));
+                if (hunterTask.oldState != null){
+                    hunterTask.setTransOState(new Trans(hunterTask.oldState.name(),hunterTask.oldState.getState()));
+                }else {
+                    hunterTask.setTransOState(new Trans());
+                }
+                if (hunterTask.moneyType != null){
+                    hunterTask.setTransMoneyType(new Trans(hunterTask.moneyType.name(),hunterTask.moneyType.getType()));
+                }else {
+                    hunterTask.setTransMoneyType(new Trans());
+                }
             });
         }
         return content;
@@ -115,7 +132,7 @@ public class HunterTask implements Serializable {
     public static HunterTask toDetail(HunterTask hunterTask) {
         if (hunterTask != null) {
             if (hunterTask.task != null) {
-                hunterTask.task = new Task(hunterTask.taskId, hunterTask.task.getName());
+                hunterTask.task = Task.toHunterDetail(hunterTask.getTask());
             }
             if (hunterTask.hunter != null) {
                 hunterTask.hunter.toDetail();
@@ -123,6 +140,17 @@ public class HunterTask implements Serializable {
             hunterTask.commentHunters = null;
             hunterTask.hunterTaskSteps = null;
             hunterTask.auditHunterTasksById = null;
+            hunterTask.setTransState(new Trans(hunterTask.state.name(),hunterTask.state.getState()));
+            if (hunterTask.oldState != null){
+                hunterTask.setTransOState(new Trans(hunterTask.oldState.name(),hunterTask.oldState.getState()));
+            }else {
+                hunterTask.setTransOState(new Trans());
+            }
+            if (hunterTask.moneyType != null){
+                hunterTask.setTransMoneyType(new Trans(hunterTask.moneyType.name(),hunterTask.moneyType.getType()));
+            }else {
+                hunterTask.setTransMoneyType(new Trans());
+            }
         }
         return hunterTask;
     }
@@ -407,6 +435,33 @@ public class HunterTask implements Serializable {
 
     public void setHunterCTask(Boolean hunterCTask) {
         this.hunterCTask = hunterCTask;
+    }
+
+    @Transient
+    public Trans getTransState() {
+        return transState;
+    }
+
+    public void setTransState(Trans transState) {
+        this.transState = transState;
+    }
+
+    @Transient
+    public Trans getTransOState() {
+        return transOState;
+    }
+
+    public void setTransOState(Trans transOState) {
+        this.transOState = transOState;
+    }
+
+    @Transient
+    public Trans getTransMoneyType() {
+        return transMoneyType;
+    }
+
+    public void setTransMoneyType(Trans transMoneyType) {
+        this.transMoneyType = transMoneyType;
     }
 
     @Override

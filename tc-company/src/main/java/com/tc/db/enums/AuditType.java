@@ -21,6 +21,8 @@ public enum  AuditType {
     ;
     private String type;
 
+
+
     public String getType() {
         return type;
     }

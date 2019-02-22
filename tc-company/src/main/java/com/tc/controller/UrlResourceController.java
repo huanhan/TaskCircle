@@ -70,7 +70,7 @@ public class UrlResourceController {
         List<Resource> controllerList = ControllerHelper.allUrl(applicationContext);
         //与系统资源对比判断哪些有异常（比如原有资源被移动，被删除等）
         list.forEach(dbr -> controllerList.forEach(clr -> {
-            if (dbr.getPath().equals(clr.getPath()) ||
+            if (dbr.getPath().equals(clr.getPath()) &&
                     dbr.getType().equals(clr.getType())){
                 dbr.setResourceState(ResourceState.NORMAL.getState());
                 dbr.setNormal(true);

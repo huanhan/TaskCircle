@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.dto.Show;
+import com.tc.dto.trans.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -53,6 +54,8 @@ public class TaskClassify implements Serializable {
         this.id = id;
         this.name = name;
     }
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -208,12 +211,16 @@ public class TaskClassify implements Serializable {
                 parent.setCreation(null);
                 parent.setInfo(null);
                 parent.setTaskClassifyRelations(null);
+                //如果有parents说明 他是children 要对parents进行重置
                 if (parent.getParents() != null){
                     parent.setParents(new TaskClassify(parent.getParents().getId(),parent.getParents().getName()));
+                    parent.setTaskClassifies(null);
                 }else {
                     if (!ListUtils.isEmpty(parent.getTaskClassifies())) {
                         List<TaskClassify> list = new ArrayList<>(parent.getTaskClassifies());
                         parent.setTaskClassifies(toListInIndex(list));
+                    }else {
+                        parent.setTaskClassifies(new ArrayList<>());
                     }
                 }
             });
@@ -315,6 +322,16 @@ public class TaskClassify implements Serializable {
         List<Show> result = new ArrayList<>();
         if (!ListUtils.isEmpty(queryTcs)){
             queryTcs.forEach(tc -> result.add(new Show(tc.id,tc.name)));
+        }
+        return result;
+    }
+
+    public static List<TransEnum> toTrans(List<TaskClassify> classifies) {
+        List<TransEnum> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(classifies)){
+            classifies.forEach(taskClassify -> {
+                result.add(new TransEnum(taskClassify.getId().toString(),taskClassify.name));
+            });
         }
         return result;
     }

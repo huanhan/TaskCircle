@@ -41,6 +41,13 @@ public interface AdminService extends BasicService<Admin> {
      */
     boolean leaveOffice(Long id);
 
+    /**
+     * 管理员设置复职
+     * @param id
+     * @return
+     */
+    boolean reAddOffice(Long id);
+
 
     /**
      * 获取没有指定权限的管理员

@@ -1,8 +1,10 @@
 package com.tc.db.entity;
 
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +29,8 @@ public class CommentUser {
     private Comment comment;
     private User user;
     private Task task;
+    private List<String> hunterTasks;
+
 
     public CommentUser() {
     }
@@ -122,6 +126,16 @@ public class CommentUser {
         this.task = task;
     }
 
+
+    @Transient
+    public List<String> getHunterTasks() {
+        return hunterTasks;
+    }
+
+    public void setHunterTasks(List<String> hunterTasks) {
+        this.hunterTasks = hunterTasks;
+    }
+
     public static List<CommentUser> toListInIndex(List<CommentUser> content) {
         if (!ListUtils.isEmpty(content)){
             content.forEach(commentUser -> {
@@ -132,6 +146,14 @@ public class CommentUser {
                     commentUser.setUser(new User(commentUser.getUserId(),commentUser.getUser().getName(),commentUser.getUser().getUsername()));
                 }
                 if (commentUser.getTask() != null){
+                    commentUser.setHunterTasks(new ArrayList<>());
+                    if (ListUtils.isNotEmpty(commentUser.getTask().getHunterTasks())){
+                        commentUser.getTask().getHunterTasks().forEach(hunterTask -> {
+                            if (hunterTask.getHunterId().equals(commentUser.getComment().getCreation().getId())){
+                                commentUser.getHunterTasks().add(hunterTask.getId());
+                            }
+                        });
+                    }
                     commentUser.setTask(new Task(commentUser.getTaskId(),commentUser.getTask().getName()));
                 }
             });

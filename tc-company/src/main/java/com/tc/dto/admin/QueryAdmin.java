@@ -25,6 +25,11 @@ import java.util.List;
  * @author Cyg
  */
 public class QueryAdmin extends PageRequest {
+
+    /**
+     * 用户编号
+     */
+    private Long id;
     /**
      * 用户姓名
      */
@@ -147,6 +152,17 @@ public class QueryAdmin extends PageRequest {
         super(page, size, sort);
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean getAuthority() {
+        return isAuthority;
+    }
 
     public String getName() {
         return name;
@@ -358,6 +374,9 @@ public class QueryAdmin extends PageRequest {
 
     public static List<Predicate> initPredicates(QueryAdmin queryAdmin, Root<Admin> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
+        if (FloatHelper.isNotNull(queryAdmin.id)){
+            predicates.add(cb.equal(root.get(Admin.USER_ID),queryAdmin.getId()));
+        }
         if (!StringUtils.isEmpty(queryAdmin.getName())){
             predicates.add(cb.equal(root.get(Admin.USER).get(User.NAME),queryAdmin.getName()));
         }

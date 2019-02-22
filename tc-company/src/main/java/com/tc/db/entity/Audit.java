@@ -2,6 +2,7 @@ package com.tc.db.entity;
 
 import com.tc.db.enums.AuditState;
 import com.tc.db.enums.AuditType;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -44,6 +45,10 @@ public class Audit {
     private AuditHunterTask auditHunterTask;
 
 
+    private Trans transResult;
+    private Trans transType;
+
+    private Trans typeData;
 
     @Id
     @Column(name = "id")
@@ -116,6 +121,34 @@ public class Audit {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+
+    @Transient
+    public Trans getTransResult() {
+        return transResult;
+    }
+
+    public void setTransResult(Trans transResult) {
+        this.transResult = transResult;
+    }
+
+    @Transient
+    public Trans getTransType() {
+        return transType;
+    }
+
+    public void setTransType(Trans transType) {
+        this.transType = transType;
+    }
+
+    @Transient
+    public Trans getTypeData() {
+        return typeData;
+    }
+
+    public void setTypeData(Trans typeData) {
+        this.typeData = typeData;
     }
 
     @Override
@@ -196,20 +229,26 @@ public class Audit {
     public static Audit toDetail(Audit result) {
         if (result != null){
             if (result.getAuditWithdraw() != null){
-                result.setAuditWithdraw(new AuditWithdraw(result.getAuditWithdraw().getWithdrawId()));
+                result.setAuditHunter(new AuditHunter(result.getId(),result.getAuditHunter().getUserId(),result.getAuditHunter().getUser()));
+                result.setTypeData(new Trans(result.getAuditWithdraw().getWithdrawId()));
             }
             if (result.getAuditTask() != null){
                 result.setAuditTask(new AuditTask(result.getAuditTask().getTaskId(),result.getAuditTask().getMoney()));
+                result.setTypeData(new Trans(result.getAuditTask().getTaskId()));
             }
             if (result.getAuditHunter() != null){
                 result.setAuditHunter(new AuditHunter(result.getAuditHunter().getUserId()));
+                result.setTypeData(new Trans(result.getAuditHunter().getUserId()));
             }
             if (result.getAdmin() != null) {
                 result.setAdmin(new Admin(result.getAdminId(), result.getAdmin().getUser().getName(), result.getAdmin().getUser().getUsername()));
             }
             if (result.getAuditHunterTask() != null){
                 result.setAuditHunterTask(new AuditHunterTask(result.getAuditHunterTask().getHunterTaskId()));
+                result.setTypeData(new Trans(result.getAuditHunterTask().getHunterTaskId()));
             }
+            result.setTransResult(new Trans(result.result.name(),result.result.getState()));
+            result.setTransType(new Trans(result.type.name(),result.type.getType()));
         }
         return result;
     }
@@ -223,20 +262,26 @@ public class Audit {
         if (!ListUtils.isEmpty(audits)){
             audits.forEach(audit ->{
                 if (audit.getAuditHunter() != null){
-                    audit.setAuditHunter(new AuditHunter(audit.getAuditHunter().getUserId()));
+                    audit.setAuditHunter(new AuditHunter(audit.getId(),audit.getAuditHunter().getUserId(),audit.getAuditHunter().getUser()));
+                    audit.setTypeData(new Trans(audit.getAuditHunter().getUserId()));
                 }
                 if (audit.getAuditHunterTask() != null){
                     audit.setAuditHunterTask(new AuditHunterTask(audit.getAuditHunterTask().getHunterTaskId()));
+                    audit.setTypeData(new Trans(audit.getAuditHunterTask().getHunterTaskId()));
                 }
                 if (audit.getAuditWithdraw() != null){
                     audit.setAuditWithdraw(new AuditWithdraw(audit.getAuditWithdraw().getWithdrawId()));
+                    audit.setTypeData(new Trans(audit.getAuditWithdraw().getWithdrawId()));
                 }
                 if (audit.getAuditTask() != null){
                     audit.setAuditTask(new AuditTask(audit.getAuditTask().getTaskId(),audit.getAuditTask().getMoney()));
+                    audit.setTypeData(new Trans(audit.getAuditTask().getTaskId(),audit.getAuditTask().getMoney().toString()));
                 }
                 if (audit.getAdmin() != null) {
                     audit.setAdmin(new Admin(audit.getAdminId(), audit.getAdmin().getUser().getName(), audit.getAdmin().getUser().getUsername()));
                 }
+                audit.setTransResult(new Trans(audit.result.name(),audit.result.getState()));
+                audit.setTransType(new Trans(audit.type.name(),audit.type.getType()));
             });
         }
         return audits;

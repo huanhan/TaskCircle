@@ -5,9 +5,12 @@ import com.tc.db.entity.pk.HtsRecordPK;
 import com.tc.db.entity.pk.HunterTaskStepPK;
 import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.db.enums.TaskState;
+import com.tc.db.enums.TaskType;
 import com.tc.dto.Result;
 import com.tc.dto.StringIds;
 import com.tc.dto.task.*;
+import com.tc.dto.trans.TransEnum;
+import com.tc.dto.trans.TransTaskQuery;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.*;
@@ -56,6 +59,21 @@ public class TaskController {
 
     @Autowired
     private HtsRecordService htsRecordService;
+
+    /**
+     *
+     * @return
+     */
+    @GetMapping("/query/setting")
+    @ApiOperation(value = "查询任务时用到的查询条件")
+    public Result querySetting(){
+        List<TransEnum> transStates = TaskState.toList();
+        List<TransEnum> transTypes = TaskType.toList();
+        List<TaskClassify> parents = taskClassifyService.findByParents();
+        List<TaskClassify> resultTaksClassidy = TaskClassify.toListInIndex(parents);
+        TransTaskQuery result = new TransTaskQuery(transStates,transTypes,resultTaksClassidy);
+        return Result.init(result);
+    }
 
     /**
      * 根据查询条件获取任务列表

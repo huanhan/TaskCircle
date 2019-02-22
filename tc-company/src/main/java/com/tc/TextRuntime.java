@@ -8,9 +8,16 @@ import com.tc.dto.admin.ModifyAdmin;
 import com.tc.dto.admin.QueryAdmin;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.*;
+import com.tc.dto.comment.QueryUserComment;
 import com.tc.dto.enums.DateType;
+import com.tc.dto.finance.QueryFinance;
+import com.tc.dto.finance.QueryIE;
 import com.tc.dto.resource.QueryResource;
+import com.tc.dto.task.QueryHunterTask;
+import com.tc.dto.task.QueryTask;
+import com.tc.dto.task.QueryTaskClassify;
 import com.tc.dto.user.DateCondition;
+import com.tc.dto.user.QueryUser;
 import com.tc.until.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -119,11 +126,13 @@ public class TextRuntime {
             System.out.println("ssss");
         }
 
-        String json = printGson(new QueryAdmin());
-
+        String json = printGson(new QueryTaskClassify());
 
         String name = StringUtils.substringAfterLast("com.tc.controller.TaskController",".");
         System.out.println(name);
+
+
+        System.out.println(TimestampHelper.toDay(TimestampHelper.today()));
     }
 
 

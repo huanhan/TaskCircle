@@ -163,16 +163,16 @@ public class QueryIE extends PageRequest {
         if (queryIE.getIeType() != null){
             switch (queryIE.getIeType()){
                 case OUT:
-                    predicates.add(cb.equal(root.get(UserIeRecord.TO), queryIE.to));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.TO), cb,queryIE.to));
                     predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_TO).get(User.NAME),cb,queryIE.toName));
                     predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_TO).get(User.USERNAME),cb,queryIE.toAccount));
-                    predicates.add(cb.equal(root.get(UserIeRecord.ME), queryIE.me));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.ME), cb,queryIE.me));
                     break;
                 case IN:
-                    predicates.add(cb.equal(root.get(UserIeRecord.ME), queryIE.me));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.ME), cb,queryIE.me));
                     predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_ME).get(User.NAME),cb,queryIE.meName));
                     predicates.add(QueryUtils.equals(root.get(UserIeRecord.USER_ME).get(User.USERNAME),cb,queryIE.meAccount));
-                    predicates.add(cb.equal(root.get(UserIeRecord.TO), queryIE.to));
+                    predicates.add(QueryUtils.equals(root.get(UserIeRecord.TO), cb,queryIE.to));
                     break;
                 default:
                     break;
@@ -183,9 +183,9 @@ public class QueryIE extends PageRequest {
             if (!FloatHelper.isNull(queryIE.getMe()) && !FloatHelper.isNull(queryIE.getTo())) {
                 predicates.add(cb.or(cb.equal(root.get(UserIeRecord.ME), queryIE.me), cb.equal(root.get(UserIeRecord.TO), queryIE.to)));
             } else if (!FloatHelper.isNull(queryIE.getMe())) {
-                predicates.add(cb.equal(root.get(UserIeRecord.ME), queryIE.me));
+                predicates.add(QueryUtils.equals(root.get(UserIeRecord.ME), cb,queryIE.me));
             } else {
-                predicates.add(cb.equal(root.get(UserIeRecord.TO), queryIE.to));
+                predicates.add(QueryUtils.equals(root.get(UserIeRecord.TO), cb,queryIE.to));
             }
 
         }

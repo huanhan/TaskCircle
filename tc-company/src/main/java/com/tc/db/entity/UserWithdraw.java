@@ -2,6 +2,8 @@ package com.tc.db.entity;
 
 import com.tc.db.enums.WithdrawState;
 import com.tc.db.enums.WithdrawType;
+import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -47,8 +49,11 @@ public class UserWithdraw implements Serializable {
     private Collection<AuditWithdraw> auditWithdraws;
     private User user;
 
+    private Trans transState;
+    private Trans transType;
 
-
+    private List<TransEnum> transStates;
+    private List<TransEnum> transTypes;
 
     @Id
     @Column(name = "id")
@@ -154,6 +159,42 @@ public class UserWithdraw implements Serializable {
         this.auditPassTime = auditPassTime;
     }
 
+    @Transient
+    public Trans getTransState() {
+        return transState;
+    }
+
+    public void setTransState(Trans transState) {
+        this.transState = transState;
+    }
+
+    @Transient
+    public Trans getTransType() {
+        return transType;
+    }
+
+    public void setTransType(Trans transType) {
+        this.transType = transType;
+    }
+
+    @Transient
+    public List<TransEnum> getTransStates() {
+        return transStates;
+    }
+
+    public void setTransStates(List<TransEnum> transStates) {
+        this.transStates = transStates;
+    }
+
+    @Transient
+    public List<TransEnum> getTransTypes() {
+        return transTypes;
+    }
+
+    public void setTransTypes(List<TransEnum> transTypes) {
+        this.transTypes = transTypes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -198,6 +239,8 @@ public class UserWithdraw implements Serializable {
                 if (userWithdraw.getUser()!= null){
                     userWithdraw.setUser(new User(userWithdraw.userId,userWithdraw.getUser().getName(),userWithdraw.getUser().getUsername()));
                 }
+                userWithdraw.setTransState(new Trans(userWithdraw.state.name(),userWithdraw.state.getState()));
+                userWithdraw.setTransType(new Trans(userWithdraw.type.name(),userWithdraw.type.getType()));
             });
         }
         return content;
@@ -217,10 +260,21 @@ public class UserWithdraw implements Serializable {
                 result.setUser(new User(result.getUserId(),result.getUser().getName(),result.getUser().getUsername()));
             }
             result.setAuditWithdraws(null);
+            result.setTransState(new Trans(result.state.name(),result.state.getState()));
+            result.setTransType(new Trans(result.type.name(),result.type.getType()));
         }
 
         return result;
     }
 
+    public UserWithdraw append(List<TransEnum> transStates, List<TransEnum> transTypes){
+        this.setTransStates(transStates);
+        this.setTransTypes(transTypes);
+        return this;
+    }
 
+    public UserWithdraw append(List<AuditWithdraw> list){
+        this.setAuditWithdraws(list);
+        return this;
+    }
 }

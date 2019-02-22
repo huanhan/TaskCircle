@@ -1,11 +1,15 @@
 package com.tc.db.entity;
 
+import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
+import com.tc.dto.trans.Trans;
+import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -38,8 +42,8 @@ public class Task implements Serializable {
     public static final String PERMIT_ABANDON_MINUTE = "permitAbandonMinute";
     public static final String LONGITUDE = "longitude";
     public static final String LATITUDE = "latitude";
-    public static final String IS_TASK_REWORK = "isTaskRework";
-    public static final String IS_COMPENSATE = "isCompensate";
+    public static final String IS_TASK_REWORK = "taskRework";
+    public static final String IS_COMPENSATE = "compensate";
 
 
     public static final String USER = "user";
@@ -77,6 +81,22 @@ public class Task implements Serializable {
     private Collection<TaskStep> taskSteps;
     private Collection<UserHunterInterflow> userHunterInterflows;
 
+    /**
+     * 猎刃已经完成的数量
+     */
+    private Integer okCount = 0;
+    /**
+     * 正在执行的猎刃数量
+     */
+    private Integer currentCount = 0;
+    /**
+     * 未完成任务的猎刃的总押金
+     */
+    private Float cashCount = 0f;
+
+    private Trans transType;
+    private Trans transState;
+
     public Task() {
     }
 
@@ -85,7 +105,13 @@ public class Task implements Serializable {
         this.name = name;
     }
 
-
+    public Task(String id, String name, User user) {
+        this.id = id;
+        this.name = name;
+        if (user != null){
+            this.user = new User(user.getId(),user.getName(),user.getUsername());
+        }
+    }
 
 
     @Id
@@ -311,6 +337,51 @@ public class Task implements Serializable {
         isCompensate = compensate;
     }
 
+    @Transient
+    public Integer getOkCount() {
+        return okCount;
+    }
+
+    public void setOkCount(Integer okCount) {
+        this.okCount = okCount;
+    }
+
+    @Transient
+    public Float getCashCount() {
+        return cashCount;
+    }
+
+    public void setCashCount(Float cashCount) {
+        this.cashCount = cashCount;
+    }
+
+    @Transient
+    public Integer getCurrentCount() {
+        return currentCount;
+    }
+
+    public void setCurrentCount(Integer currentCount) {
+        this.currentCount = currentCount;
+    }
+
+    @Transient
+    public Trans getTransType() {
+        return transType;
+    }
+
+    public void setTransType(Trans transType) {
+        this.transType = transType;
+    }
+
+    @Transient
+    public Trans getTransState() {
+        return transState;
+    }
+
+    public void setTransState(Trans transState) {
+        this.transState = transState;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -452,8 +523,21 @@ public class Task implements Serializable {
             }
             task.setTaskSteps(null);
             task.setUserHunterInterflows(null);
+            task.transState = new Trans(task.getState().name(),task.getState().getState());
+            task.transType = new Trans(task.getType().name(),task.getType().getType());
         }
         return task;
+    }
+
+    public static Task toHunterDetail(Task task){
+        if (task != null) {
+            Task result = new Task(task.getId(), task.getName(), task.getUser());
+            result.setCompensateMoney(task.compensateMoney);
+            result.setOriginalMoney(task.originalMoney);
+            result.setPeopleNumber(task.peopleNumber);
+            return result;
+        }
+        return null;
     }
 
     public static List<Task> toIndexAsList(List<Task> content) {
@@ -462,13 +546,25 @@ public class Task implements Serializable {
                 if (task.getUser() != null){
                     task.setUser(new User(task.getUser().getId(),task.getUser().getName(),task.getUser().getUsername(),task.getUser().getHeadImg()));
                 }
+                if (ListUtils.isNotEmpty(task.hunterTasks)){
+                    task.getHunterTasks().forEach(hunterTask -> {
+                       if (HunterTaskState.isOk(hunterTask.getState())){
+                           task.setOkCount(task.getOkCount() + 1);
+                       }else{
+                           task.setCurrentCount(task.getCurrentCount() + 1);
+                           task.setCashCount(FloatHelper.add(task.getCashCount(),task.getCompensateMoney()));
+                       }
+                    });
+                    task.setHunterTasks(null);
+                }
                 task.setUserHunterInterflows(null);
                 task.setTaskSteps(null);
                 task.setTaskClassifyRelations(null);
-                task.setHunterTasks(null);
                 task.setCommentUsers(null);
                 task.setCommentTasks(null);
                 task.setAuditTasks(null);
+                task.transState = new Trans(task.getState().name(),task.getState().getState());
+                task.transType = new Trans(task.getType().name(),task.getType().getType());
             });
         }
         return content;

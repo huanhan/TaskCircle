@@ -75,6 +75,13 @@ public class AdminServiceImpl extends AbstractBasicServiceImpl<Admin> implements
         return count == 1;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
+    public boolean reAddOffice(Long id) {
+        int count = adminRepository.updateByAdminState(AdminState.ON_GUARD,id);
+        return count == 1;
+    }
+
     @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
     @Override
     public List<Admin> findByNotAuthority(Long id) {

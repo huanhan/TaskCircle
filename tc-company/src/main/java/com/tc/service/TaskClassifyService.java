@@ -48,4 +48,18 @@ public interface TaskClassifyService extends BasicService<TaskClassify> {
      * @return
      */
     List<TaskClassify> findByParents();
+
+    /**
+     * 获取指定用户任务的所有分类
+     * @param id
+     * @return
+     */
+    List<TaskClassify> findUserTaskAllClassify(Long id);
+
+    /**
+     * 根据查询条件获取所有分类
+     * @param queryTaskClassify
+     * @return
+     */
+    List<TaskClassify> queryByQueryAndNotPage(QueryTaskClassify queryTaskClassify);
 }

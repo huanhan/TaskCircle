@@ -97,4 +97,9 @@ public class PageRequest extends AbstractPageRequest {
         this.pageDto = new Page(count,pages,(long) this.getPageNumber(),(long) this.getPageSize());
         return this;
     }
+
+    public PageRequest clearSort(){
+        this.sort = null;
+        return this;
+    }
 }

@@ -4,6 +4,8 @@ import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
 import com.tc.db.entity.UserWithdraw;
+import com.tc.dto.enums.CashType;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 import org.springframework.data.domain.Page;
 
@@ -22,6 +24,7 @@ public class CashPledge {
     private Float money;
     private Timestamp createTime;
     private String name;
+    private Trans trans;
 
     public CashPledge() {
     }
@@ -35,7 +38,15 @@ public class CashPledge {
         this.name = name;
     }
 
-
+    public CashPledge(String id, Long userId, User user, Float money, Timestamp createTime, String name, Trans trans) {
+        this.id = id;
+        this.userId = userId;
+        this.user = user;
+        this.money = money;
+        this.createTime = createTime;
+        this.name = name;
+        this.trans = trans;
+    }
 
     public String getId() {
         return id;
@@ -85,6 +96,14 @@ public class CashPledge {
         this.name = name;
     }
 
+    public Trans getTrans() {
+        return trans;
+    }
+
+    public void setTrans(Trans trans) {
+        this.trans = trans;
+    }
+
     public static List<CashPledge> create(List<Task> tasks, List<UserWithdraw> userWithdraws, List<HunterTask> hunterTasks) {
         List<CashPledge> result = new ArrayList<>();
         if (ListUtils.isNotEmpty(tasks)){
@@ -94,7 +113,8 @@ public class CashPledge {
                     task.getUser(),
                     task.getMoney(),
                     task.getIssueTime(),
-                    "任务"
+                    CashType.TASK.getType(),
+                    new Trans(CashType.TASK.name(),task.getId())
             )));
         }
         if (ListUtils.isNotEmpty(userWithdraws)){
@@ -104,7 +124,8 @@ public class CashPledge {
                     userWithdraw.getUser(),
                     userWithdraw.getMoney(),
                     userWithdraw.getCreateTime(),
-                    "提现审核"
+                    CashType.AUDIT.getType(),
+                    new Trans(CashType.AUDIT.name(),userWithdraw.getId())
             )));
         }
         if (ListUtils.isNotEmpty(hunterTasks)){
@@ -114,7 +135,8 @@ public class CashPledge {
                     hunterTask.getHunter().getUser(),
                     hunterTask.getTask().getCompensateMoney(),
                     hunterTask.getAcceptTime(),
-                    "猎刃任务"
+                    CashType.HUNTER_TASK.getType(),
+                    new Trans(CashType.HUNTER_TASK.name(),hunterTask.getId())
             )));
         }
         return result;

@@ -5,11 +5,15 @@ import com.tc.db.entity.Audit;
 import com.tc.db.entity.Authority;
 import com.tc.db.entity.User;
 import com.tc.db.enums.AdminState;
+import com.tc.db.enums.AuditState;
+import com.tc.db.enums.AuditType;
 import com.tc.dto.LongIds;
 import com.tc.dto.Result;
 import com.tc.dto.admin.*;
+import com.tc.dto.audit.AuditResult;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.QueryAuthority;
+import com.tc.dto.trans.Trans;
 import com.tc.dto.trans.TransStates;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -127,7 +131,7 @@ public class AdminController {
      */
     @DeleteMapping("/{id:\\d+}")
     @ApiOperation(value = "管理员离职")
-    public void removeAdmin(HttpServletRequest request,@PathVariable("id") Long id){
+    public Admin removeAdmin(HttpServletRequest request,@PathVariable("id") Long id){
         Long me = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         Admin leave = adminService.findOne(id);
         if (leave == null) {
@@ -136,9 +140,42 @@ public class AdminController {
         if (!leave.getCreateId().equals(me)){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
+        if (leave.getAdminState().equals(AdminState.LEAVE_FOOICE)){
+            throw new ValidException("该管理员已经离职");
+        }
         boolean isLeave = adminService.leaveOffice(id);
         if (!isLeave){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }else {
+            leave.setAdminState(AdminState.LEAVE_FOOICE);
+            return Admin.toDetail(leave);
+        }
+    }
+
+    /**
+     * 管理员复职
+     * @param id 管理员编号
+     */
+    @GetMapping("/reAdd/{id:\\d+}")
+    @ApiOperation(value = "管理员复职")
+    public Admin reAddAdmin(HttpServletRequest request,@PathVariable("id") Long id){
+        Long me = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        Admin admin = adminService.findOne(id);
+        if (admin == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
+        }
+        if (!admin.getCreateId().equals(me)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        if (admin.getAdminState().equals(AdminState.ON_GUARD)){
+            throw new ValidException("该管理员已经在岗");
+        }
+        boolean isLeave = adminService.reAddOffice(id);
+        if (!isLeave){
+            throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }else {
+            admin.setAdminState(AdminState.ON_GUARD);
+            return Admin.toDetail(admin);
         }
     }
 
@@ -171,27 +208,34 @@ public class AdminController {
      * @param queryAudit 审核查询条件
      * @return
      */
-    @PostMapping("/audit/query")
+    @PostMapping("/audit/query/{id:\\d+}")
     @ApiOperation(value = "获取管理员审核列表")
-    public Result getAuditByAdmin(@RequestBody QueryAudit queryAudit){
-        if (queryAudit.getAdminId() == null || queryAudit.getAdminId() <= 0){
-            throw new ValidException(StringResourceCenter.VALIDATOR_QUERY_ADMIN_FAILED);
+    public Result getAuditByAdmin(@RequestBody QueryAudit queryAudit, @PathVariable("id") Long id){
+        Admin admin = adminService.findOne(id);
+        if (admin == null) {
+            throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
         }
+        queryAudit.setAdminId(id);
         Page<Audit> queryAudits = auditService.findByQueryAudit(queryAudit);
-        return Result.init(Audit.toListInIndex(queryAudits.getContent()),queryAudit.append(queryAudits.getTotalElements(),(long)queryAudits.getTotalPages()));
+        AuditResult result = new AuditResult(
+                AuditState.toList(),
+                AuditType.toList(),
+                Audit.toListInIndex(queryAudits.getContent()),
+                new Trans(admin.getUserId(),admin.getUser().toTitle()));
+        return Result.init(result,queryAudit.append(queryAudits.getTotalElements(),(long)queryAudits.getTotalPages()));
     }
 
     /**
      * 查看管理员的审核详情信息
-     * @param aid 审核编号
-     * @param id 管理员编号
+     * @param aid 管理员编号
+     * @param id 审核编号
      * @return
      */
-    @GetMapping("/audit/detail/{aid:\\d+}/{id:\\d+}")
+    @GetMapping("/audit/detail/{id}/{aid:\\d+}")
     @ApiOperation(value = "查看我的审核详情信息")
-    public Audit auditDetail(@PathVariable("id") Long id,@PathVariable("aid") String aid){
-        Audit result = auditService.findOne(aid);
-        if (!id.equals(result.getAdminId())){
+    public Audit auditDetail(@PathVariable("id") String id,@PathVariable("aid") Long aid){
+        Audit result = auditService.findOne(id);
+        if (!aid.equals(result.getAdminId())){
             throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
         }
         return Audit.toDetail(result);

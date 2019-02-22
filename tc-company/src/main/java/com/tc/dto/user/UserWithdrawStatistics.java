@@ -4,7 +4,13 @@ import com.tc.db.entity.User;
 import com.tc.db.entity.UserWithdraw;
 import com.tc.db.enums.WithdrawType;
 import com.tc.dto.enums.DateType;
+import com.tc.dto.enums.IEType;
 import com.tc.dto.statistics.Statistics;
+import com.tc.dto.task.statistics.StatisticsMoney;
+import com.tc.dto.task.statistics.StatisticsMoneyAndTime;
+import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransData;
+import com.tc.dto.trans.TransEnum;
 import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import com.tc.until.TimestampHelper;
@@ -41,15 +47,12 @@ public class UserWithdrawStatistics {
     /**
      * 统计的类别
      */
-    private DateType type;
-    /**
-     * 支出统计列表
-     */
-    private List<Statistics> expends;
-    /**
-     * 收入统计列表
-     */
-    private List<Statistics> incomes;
+    private Trans type;
+
+    private List<TransData> trans;
+    private List<Timestamp> items;
+
+
 
     public User getUser() {
         return user;
@@ -75,11 +78,11 @@ public class UserWithdrawStatistics {
         this.incomeAll = incomeAll;
     }
 
-    public DateType getType() {
+    public Trans getType() {
         return type;
     }
 
-    public void setType(DateType type) {
+    public void setType(Trans type) {
         this.type = type;
     }
 
@@ -91,20 +94,21 @@ public class UserWithdrawStatistics {
         this.title = title;
     }
 
-    public List<Statistics> getExpends() {
-        return expends;
+
+    public List<TransData> getTrans() {
+        return trans;
     }
 
-    public void setExpends(List<Statistics> expends) {
-        this.expends = expends;
+    public void setTrans(List<TransData> trans) {
+        this.trans = trans;
     }
 
-    public List<Statistics> getIncomes() {
-        return incomes;
+    public List<Timestamp> getItems() {
+        return items;
     }
 
-    public void setIncomes(List<Statistics> incomes) {
-        this.incomes = incomes;
+    public void setItems(List<Timestamp> items) {
+        this.items = items;
     }
 
     public static UserWithdrawStatistics statistics(List<UserWithdraw> userWithdraws, DateType type){
@@ -127,9 +131,11 @@ public class UserWithdrawStatistics {
                     break;
             }
         }
-        userWithdrawStatistics.setType(type);
+        userWithdrawStatistics.setType(new Trans(type.name(),type.getType()));
         return userWithdrawStatistics;
     }
+
+
 
     /**
      * 根据具体的小时统计结果
@@ -138,12 +144,12 @@ public class UserWithdrawStatistics {
      */
     private static UserWithdrawStatistics statisticsByHours(List<UserWithdraw> userWithdraws){
         UserWithdrawStatistics userWithdrawStatistics = new UserWithdrawStatistics();
-
+        userWithdrawStatistics.trans = new ArrayList<>();
         //初始化统计内容
         Float expendAll = 0F;
         Float incomeAll = 0F;
-        List<Statistics> expends = new ArrayList<>();
-        List<Statistics> incomes = new ArrayList<>();
+        List<StatisticsMoneyAndTime> expends = new ArrayList<>();
+        List<StatisticsMoneyAndTime> incomes = new ArrayList<>();
 
         //遍历数据与统计
         for (UserWithdraw withdraw : userWithdraws) {
@@ -152,34 +158,41 @@ public class UserWithdrawStatistics {
                 expendAll = FloatHelper.add(expendAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 expends.forEach(statistics -> {
-                    if (statistics.getKey().equals(TimestampHelper.toHouseBegin(withdraw.getCreateTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                    if (statistics.getKey().equals(TimestampHelper.toHouseBegin(withdraw.getAuditPassTime()))){
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    expends.add(Statistics.init(TimestampHelper.toHouseBegin(withdraw.getCreateTime()),withdraw.getMoney()));
+                    Timestamp houseBegin = TimestampHelper.toHouseBegin(withdraw.getAuditPassTime());
+                    expends.add(new StatisticsMoneyAndTime(houseBegin,withdraw.getMoney()));
                 }
             }else if (withdraw.getType().equals(WithdrawType.WITHDRAW)){
                 incomeAll = FloatHelper.add(incomeAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 incomes.forEach(statistics -> {
                     if (statistics.getKey().equals(TimestampHelper.toHouseBegin(withdraw.getAuditPassTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    incomes.add(Statistics.init(TimestampHelper.toHouseBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
+                    Timestamp houseBegin = TimestampHelper.toHouseBegin(withdraw.getAuditPassTime());
+                    incomes.add(new StatisticsMoneyAndTime(houseBegin,withdraw.getMoney()));
                 }
             }
         }
+
+
+
+
         //设置统计标题（一般按时间）
-        userWithdrawStatistics.setTitle(TimestampHelper.toDayBegin(userWithdraws.get(0).getAuditPassTime()).toString());
+        userWithdrawStatistics.setTitle(TimestampHelper.toDay(userWithdraws.get(0).getAuditPassTime()));
         userWithdrawStatistics.setExpendAll(expendAll);
         userWithdrawStatistics.setIncomeAll(incomeAll);
-        userWithdrawStatistics.setExpends(expends);
-        userWithdrawStatistics.setIncomes(incomes);
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.PAY,WithdrawType.PAY.getType(),expends));
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.WITHDRAW,WithdrawType.WITHDRAW.getType(),incomes));
+        userWithdrawStatistics.items = createTimestamps(expends,incomes);
         return userWithdrawStatistics;
     }
 
@@ -190,12 +203,12 @@ public class UserWithdrawStatistics {
      */
     private static UserWithdrawStatistics statisticsByDay(List<UserWithdraw> userWithdraws){
         UserWithdrawStatistics userWithdrawStatistics = new UserWithdrawStatistics();
-
+        userWithdrawStatistics.trans = new ArrayList<>();
         //初始化统计内容
         Float expendAll = 0F;
         Float incomeAll = 0F;
-        List<Statistics> expends = new ArrayList<>();
-        List<Statistics> incomes = new ArrayList<>();
+        List<StatisticsMoneyAndTime> expends = new ArrayList<>();
+        List<StatisticsMoneyAndTime> incomes = new ArrayList<>();
 
         //遍历数据与统计
         for (UserWithdraw withdraw : userWithdraws) {
@@ -204,35 +217,38 @@ public class UserWithdrawStatistics {
                 expendAll = FloatHelper.add(expendAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 expends.forEach(statistics -> {
-                    if (statistics.getKey().equals(TimestampHelper.toDayBegin(withdraw.getCreateTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                    if (statistics.getKey().equals(TimestampHelper.toDayBegin(withdraw.getAuditPassTime()))){
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    expends.add(Statistics.init(TimestampHelper.toDayBegin(withdraw.getCreateTime()),withdraw.getMoney()));
+                    Timestamp dayBegin = TimestampHelper.toDayBegin(withdraw.getAuditPassTime());
+                    expends.add(new StatisticsMoneyAndTime(dayBegin,withdraw.getMoney()));
                 }
             }else if (withdraw.getType().equals(WithdrawType.WITHDRAW)){
                 incomeAll = FloatHelper.add(incomeAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 incomes.forEach(statistics -> {
                     if (statistics.getKey().equals(TimestampHelper.toDayBegin(withdraw.getAuditPassTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    incomes.add(Statistics.init(TimestampHelper.toDayBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
+                    Timestamp dayBegin = TimestampHelper.toDayBegin(withdraw.getAuditPassTime());
+                    incomes.add(new StatisticsMoneyAndTime(dayBegin,withdraw.getMoney()));
                 }
             }
         }
 
         //设置统计标题（一般按时间）
-        userWithdrawStatistics.setTitle(TimestampHelper.toMonthBegin(userWithdraws.get(0).getAuditPassTime()).toString());
+        userWithdrawStatistics.setTitle(TimestampHelper.toMonth(userWithdraws.get(0).getAuditPassTime()));
         userWithdrawStatistics.setExpendAll(expendAll);
         userWithdrawStatistics.setIncomeAll(incomeAll);
-        userWithdrawStatistics.setExpends(expends);
-        userWithdrawStatistics.setIncomes(incomes);
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.PAY,WithdrawType.PAY.getType(),expends));
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.WITHDRAW,WithdrawType.WITHDRAW.getType(),incomes));
+        userWithdrawStatistics.items = createTimestamps(expends,incomes);
         return userWithdrawStatistics;
     }
 
@@ -243,12 +259,13 @@ public class UserWithdrawStatistics {
      */
     private static UserWithdrawStatistics statisticsByMonth(List<UserWithdraw> userWithdraws){
         UserWithdrawStatistics userWithdrawStatistics = new UserWithdrawStatistics();
+        userWithdrawStatistics.trans = new ArrayList<>();
 
         //初始化统计内容
         Float expendAll = 0F;
         Float incomeAll = 0F;
-        List<Statistics> expends = new ArrayList<>();
-        List<Statistics> incomes = new ArrayList<>();
+        List<StatisticsMoneyAndTime> expends = new ArrayList<>();
+        List<StatisticsMoneyAndTime> incomes = new ArrayList<>();
 
         //遍历数据与统计
         for (UserWithdraw withdraw : userWithdraws) {
@@ -257,35 +274,36 @@ public class UserWithdrawStatistics {
                 expendAll = FloatHelper.add(expendAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 expends.forEach(statistics -> {
-                    if (statistics.getKey().equals(TimestampHelper.toMonthBegin(withdraw.getCreateTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                    if (statistics.getKey().equals(TimestampHelper.toMonthBegin(withdraw.getAuditPassTime()))){
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    expends.add(Statistics.init(TimestampHelper.toMonthBegin(withdraw.getCreateTime()),withdraw.getMoney()));
+                    expends.add(new StatisticsMoneyAndTime(TimestampHelper.toMonthBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
                 }
             }else if (withdraw.getType().equals(WithdrawType.WITHDRAW)){
                 incomeAll = FloatHelper.add(incomeAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 incomes.forEach(statistics -> {
                     if (statistics.getKey().equals(TimestampHelper.toMonthBegin(withdraw.getAuditPassTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    incomes.add(Statistics.init(TimestampHelper.toMonthBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
+                    incomes.add(new StatisticsMoneyAndTime(TimestampHelper.toMonthBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
                 }
             }
         }
 
         //设置统计标题（一般按时间）
-        userWithdrawStatistics.setTitle(TimestampHelper.toYearBegin(userWithdraws.get(0).getAuditPassTime()).toString());
+        userWithdrawStatistics.setTitle(TimestampHelper.toYear(userWithdraws.get(0).getAuditPassTime()));
         userWithdrawStatistics.setExpendAll(expendAll);
         userWithdrawStatistics.setIncomeAll(incomeAll);
-        userWithdrawStatistics.setExpends(expends);
-        userWithdrawStatistics.setIncomes(incomes);
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.PAY,WithdrawType.PAY.getType(),expends));
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.WITHDRAW,WithdrawType.WITHDRAW.getType(),incomes));
+        userWithdrawStatistics.items = createTimestamps(expends,incomes);
         return userWithdrawStatistics;
     }
 
@@ -296,12 +314,13 @@ public class UserWithdrawStatistics {
      */
     private static UserWithdrawStatistics statisticsByYear(List<UserWithdraw> userWithdraws){
         UserWithdrawStatistics userWithdrawStatistics = new UserWithdrawStatistics();
+        userWithdrawStatistics.trans = new ArrayList<>();
 
         //初始化统计内容
         Float expendAll = 0F;
         Float incomeAll = 0F;
-        List<Statistics> expends = new ArrayList<>();
-        List<Statistics> incomes = new ArrayList<>();
+        List<StatisticsMoneyAndTime> expends = new ArrayList<>();
+        List<StatisticsMoneyAndTime> incomes = new ArrayList<>();
 
         //遍历数据与统计
         for (UserWithdraw withdraw : userWithdraws) {
@@ -310,25 +329,25 @@ public class UserWithdrawStatistics {
                 expendAll = FloatHelper.add(expendAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 expends.forEach(statistics -> {
-                    if (statistics.getKey().equals(TimestampHelper.toYearBegin(withdraw.getCreateTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                    if (statistics.getKey().equals(TimestampHelper.toYearBegin(withdraw.getAuditPassTime()))){
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    expends.add(Statistics.init(TimestampHelper.toYearBegin(withdraw.getCreateTime()),withdraw.getMoney()));
+                    expends.add(new StatisticsMoneyAndTime(TimestampHelper.toYearBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
                 }
             }else if (withdraw.getType().equals(WithdrawType.WITHDRAW)){
                 incomeAll = FloatHelper.add(incomeAll,withdraw.getMoney());
                 AtomicBoolean isSelect = new AtomicBoolean(false);
                 incomes.forEach(statistics -> {
                     if (statistics.getKey().equals(TimestampHelper.toYearBegin(withdraw.getAuditPassTime()))){
-                        statistics.setValue(FloatHelper.add(statistics.getValue(),withdraw.getMoney()));
+                        statistics.setMoney(FloatHelper.add(statistics.getMoney(),withdraw.getMoney()));
                         isSelect.set(true);
                     }
                 });
                 if (!isSelect.get()){
-                    incomes.add(Statistics.init(TimestampHelper.toYearBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
+                    incomes.add(new StatisticsMoneyAndTime(TimestampHelper.toYearBegin(withdraw.getAuditPassTime()),withdraw.getMoney()));
                 }
             }
         }
@@ -344,20 +363,21 @@ public class UserWithdrawStatistics {
         userWithdrawStatistics.setTitle(title);
         userWithdrawStatistics.setExpendAll(expendAll);
         userWithdrawStatistics.setIncomeAll(incomeAll);
-        userWithdrawStatistics.setExpends(expends);
-        userWithdrawStatistics.setIncomes(incomes);
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.PAY,WithdrawType.PAY.getType(),expends));
+        userWithdrawStatistics.trans.add(new TransData(WithdrawType.WITHDRAW,WithdrawType.WITHDRAW.getType(),incomes));
+        userWithdrawStatistics.items = createTimestamps(expends,incomes);
         return userWithdrawStatistics;
     }
 
 
 
-    private static Timestamp[] findMaxAndMin(List<Statistics> statistics){
+    private static Timestamp[] findMaxAndMin(List<StatisticsMoneyAndTime> statistics){
         Timestamp[] t = new Timestamp[2];
 
         if (!ListUtils.isEmpty(statistics)){
             Timestamp min = statistics.get(0).getKey();
             Timestamp max = statistics.get(0).getKey();
-            for (Statistics statistic : statistics) {
+            for (StatisticsMoneyAndTime statistic : statistics) {
                 if (statistic.getKey().after(max)){
                     max = statistic.getKey();
                 }else if (statistic.getKey().before(min)){
@@ -370,6 +390,40 @@ public class UserWithdrawStatistics {
 
         return t;
 
+    }
+
+
+    private static List<Timestamp> createTimestamps(List<StatisticsMoneyAndTime> tExpends,List<StatisticsMoneyAndTime> tIncomes){
+        List<Timestamp> result = new ArrayList<>();
+        List<StatisticsMoneyAndTime> expends = new ArrayList<>(tExpends);
+        List<StatisticsMoneyAndTime> incomes = new ArrayList<>(tIncomes);
+        List<StatisticsMoneyAndTime> center = new ArrayList<>();
+        expends.removeIf(statisticsMoneyAndTime -> {
+            boolean isDel = false;
+            for (StatisticsMoneyAndTime tIncome : tIncomes) {
+                isDel = statisticsMoneyAndTime.getKey().equals(tIncome.getKey());
+                if (isDel){
+                    center.add(statisticsMoneyAndTime);
+                    break;
+                }
+            }
+            return isDel;
+        });
+        incomes.removeIf(statisticsMoneyAndTime -> {
+            boolean isDel = false;
+            for (StatisticsMoneyAndTime tExpend : tExpends) {
+                isDel = statisticsMoneyAndTime.getKey().equals(tExpend.getKey());
+                if (isDel){
+                    break;
+                }
+            }
+            return isDel;
+        });
+        expends.forEach(statisticsMoneyAndTime -> result.add(statisticsMoneyAndTime.getKey()));
+        incomes.forEach(statisticsMoneyAndTime -> result.add(statisticsMoneyAndTime.getKey()));
+        center.forEach(statisticsMoneyAndTime -> result.add(statisticsMoneyAndTime.getKey()));
+        result.sort((o1, o2) -> (int) (o1.getTime() - o2.getTime()));
+        return result;
     }
 
 }

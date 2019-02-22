@@ -40,6 +40,9 @@ public class QueryFinance extends PageRequest {
     private Timestamp auditPassBegin;
     @NotNull
     private Timestamp auditPassEnd;
+    private List<WithdrawState> states;
+
+
     /**
      * 设置查看方式用的
      */
@@ -184,6 +187,14 @@ public class QueryFinance extends PageRequest {
         this.dateType = dateType;
     }
 
+    public List<WithdrawState> getStates() {
+        return states;
+    }
+
+    public void setStates(List<WithdrawState> states) {
+        this.states = states;
+    }
+
     public static List<Predicate> initPredicates(QueryFinance queryFinance, Root<UserWithdraw> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
 
@@ -197,7 +208,7 @@ public class QueryFinance extends PageRequest {
         predicates.add(QueryUtils.between(root,cb,User.MONEY,queryFinance.getMoneyBegin(),queryFinance.getMoneyEnd()));
         predicates.add(QueryUtils.between(root, cb, UserWithdraw.CREATE_TIME, queryFinance.getCreateTimeBegin(), queryFinance.getCreateTimeEnd()));
         predicates.add(QueryUtils.between(root, cb, UserWithdraw.AUDIT_PASS_TIME, queryFinance.getAuditPassBegin(), queryFinance.getAuditPassEnd()));
-
+        predicates.add(QueryUtils.in(root,cb,UserWithdraw.STATE,queryFinance.states));
         predicates.removeIf(Objects::isNull);
 
         return predicates;

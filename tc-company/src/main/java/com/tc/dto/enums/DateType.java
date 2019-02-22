@@ -16,6 +16,10 @@ public enum DateType {
     ;
     private String type;
 
+    public String getType() {
+        return type;
+    }
+
     DateType(String type) {
         this.type = type;
     }

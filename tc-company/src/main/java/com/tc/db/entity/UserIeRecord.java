@@ -1,6 +1,8 @@
 package com.tc.db.entity;
 
 
+import com.tc.dto.enums.IEType;
+import com.tc.dto.trans.Trans;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,6 +41,7 @@ public class UserIeRecord implements Serializable {
     private User userByMe;
     private User userByTo;
 
+    private Trans trans;
 
 
 
@@ -101,6 +104,15 @@ public class UserIeRecord implements Serializable {
 
     public void setTo(Long to) {
         this.to = to;
+    }
+
+    @Transient
+    public Trans getTrans() {
+        return trans;
+    }
+
+    public void setTrans(Trans trans) {
+        this.trans = trans;
     }
 
     @Override
@@ -177,5 +189,14 @@ public class UserIeRecord implements Serializable {
             userIeRecord.setUserByTo(new User(to.getId(),to.getName(),to.getUsername()));
         }
         return userIeRecord;
+    }
+
+    public UserIeRecord append(Long id){
+        if (id.equals(this.to)){
+            this.setTrans(new Trans(IEType.IN,IEType.IN.getType()));
+        }else if (id.equals(this.me)){
+            this.setTrans(new Trans(IEType.OUT,IEType.OUT.getType()));
+        }
+        return this;
     }
 }

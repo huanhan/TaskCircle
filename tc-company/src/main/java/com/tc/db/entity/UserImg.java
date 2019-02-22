@@ -2,6 +2,7 @@ package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserImgPK;
 import com.tc.db.enums.UserIMGName;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
@@ -23,6 +24,8 @@ public class UserImg {
     private UserIMGName imgName;
     private String urlLocation;
     private User user;
+
+    private Trans trans;
 
     public UserImg() {
     }
@@ -77,6 +80,15 @@ public class UserImg {
         this.urlLocation = urlLocation;
     }
 
+    @Transient
+    public Trans getTrans() {
+        return trans;
+    }
+
+    public void setTrans(Trans trans) {
+        this.trans = trans;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -100,6 +112,7 @@ public class UserImg {
                     User user = userImg.user;
                     userImg.setUser(new User(user.getId(),user.getName(),user.getUsername()));
                 }
+                userImg.setTrans(new Trans(userImg.getImgName().name(), userImg.getImgName().getIMGName()));
             });
         }
         return userImgs;
@@ -111,6 +124,7 @@ public class UserImg {
                User user = userImg.user;
                userImg.setUser(new User(user.getId(),user.getName(),user.getUsername()));
            }
+           userImg.setTrans(new Trans(userImg.getImgName().name(), userImg.getImgName().getIMGName()));
        }
        return userImg;
     }

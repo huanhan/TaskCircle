@@ -4,16 +4,14 @@ import com.tc.db.entity.*;
 import com.tc.db.entity.Audit;
 import com.tc.db.enums.AuditState;
 import com.tc.db.enums.AuditType;
+import com.tc.db.enums.UserCategory;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
 import com.tc.until.SpecificationFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +37,7 @@ public class QueryAudit extends PageRequest {
     private Float wdMoneyBegin;
     private Float wdMoneyEnd;
     private Long userId;
+    private UserCategory category;
 
 
     public QueryAudit() {
@@ -183,6 +182,14 @@ public class QueryAudit extends PageRequest {
         this.userId = userId;
     }
 
+    public UserCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(UserCategory category) {
+        this.category = category;
+    }
+
     public static List<Predicate> initPredicates(QueryAudit queryAudit, Root<Audit> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
         if (queryAudit.getAdminId() != null && queryAudit.getAdminId() > 0){
@@ -280,8 +287,55 @@ public class QueryAudit extends PageRequest {
 
     public static List<Predicate> initPredicatesByUser(QueryAudit queryAudit, Root<Audit> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = initPredicates(queryAudit,root,query,cb);
-        predicates.add(QueryUtils.equals(root.get(Audit.AUDIT_TASK).get(AuditTask.TASK).get(Task.USER_ID),cb,queryAudit.userId));
-        predicates.add(QueryUtils.equals(root.get(Audit.AUDIT_WITHDRAW).get(AuditWithdraw.USER_WITHDRAW).get(UserWithdraw.USER_ID),cb,queryAudit.userId));
+
+        //用户与猎刃公共
+        Subquery<Task> task = query.subquery(Task.class);
+        Root<Task> tRoot = task.from(Task.class);
+        task.select(tRoot.get(Task.ID));
+        task.where(QueryUtils.equals(tRoot,cb,Task.USER_ID,queryAudit.userId));
+
+        Subquery<AuditTask> auditTask = query.subquery(AuditTask.class);
+        Root<AuditTask> atRoot = auditTask.from(AuditTask.class);
+        auditTask.select(atRoot.get(AuditTask.AUDIT_ID));
+        auditTask.where(QueryUtils.in(atRoot,cb,AuditTask.TASK_ID,task));
+
+        Subquery<UserWithdraw> userWithdraw = query.subquery(UserWithdraw.class);
+        Root<UserWithdraw> uwRoot = userWithdraw.from(UserWithdraw.class);
+        userWithdraw.select(uwRoot.get(UserWithdraw.ID));
+        userWithdraw.where(QueryUtils.equals(uwRoot,cb,UserWithdraw.USER_ID,queryAudit.userId));
+
+        Subquery<AuditWithdraw> auditWithdraw = query.subquery(AuditWithdraw.class);
+        Root<AuditWithdraw> awRoot = auditWithdraw.from(AuditWithdraw.class);
+        auditWithdraw.select(awRoot.get(AuditWithdraw.AUDIT_ID));
+        auditWithdraw.where(QueryUtils.in(awRoot,cb,AuditWithdraw.WITHDRAW_ID,userWithdraw));
+
+        Predicate p1 = QueryUtils.in(root,cb,Audit.ID, auditTask);
+        Predicate p2 = QueryUtils.in(root,cb,Audit.ID, auditWithdraw);
+
+
+        if (queryAudit.getCategory().equals(UserCategory.HUNTER)){
+            Subquery<AuditHunter> auditHunter = query.subquery(AuditHunter.class);
+            Root<AuditHunter> ahRoot = auditHunter.from(AuditHunter.class);
+            auditHunter.select(ahRoot.get(AuditWithdraw.AUDIT_ID));
+            auditHunter.where(QueryUtils.equals(ahRoot,cb,AuditHunter.USER_ID,queryAudit.userId));
+
+            Subquery<HunterTask> hunterTask = query.subquery(HunterTask.class);
+            Root<HunterTask> htRoot = hunterTask.from(HunterTask.class);
+            hunterTask.select(htRoot.get(HunterTask.ID));
+            hunterTask.where(QueryUtils.equals(htRoot,cb,HunterTask.HUNTER_ID,queryAudit.userId));
+
+            Subquery<AuditHunterTask> auditHunterTask = query.subquery(AuditHunterTask.class);
+            Root<AuditHunterTask> ahtRoot = auditHunterTask.from(AuditHunterTask.class);
+            auditHunterTask.select(ahtRoot.get(AuditHunterTask.AUDIT_ID));
+            auditHunterTask.where(QueryUtils.in(ahtRoot,cb,AuditHunterTask.HUNTER_TASK_ID,hunterTask));
+
+            Predicate p3 = QueryUtils.in(root,cb,Audit.ID, auditHunter);
+            Predicate p4 = QueryUtils.in(root,cb,Audit.ID, auditHunterTask);
+            predicates.add(cb.or(p1,p2,p3,p4));
+        }else {
+            predicates.add(cb.or(p1,p2));
+        }
+
         predicates.removeIf(Objects::isNull);
         return predicates;
     }

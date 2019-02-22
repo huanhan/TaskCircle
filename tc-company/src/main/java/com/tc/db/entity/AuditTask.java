@@ -12,6 +12,8 @@ import java.util.Objects;
 public class AuditTask {
 
     public static final String TASK = "task";
+    public static final String TASK_ID = "taskId";
+    public static final String AUDIT_ID = "auditId";
 
     private String auditId;
     private String taskId;

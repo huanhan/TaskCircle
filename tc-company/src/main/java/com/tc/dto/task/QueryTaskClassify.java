@@ -1,8 +1,11 @@
 package com.tc.dto.task;
 
-import com.tc.db.entity.*;
+import com.tc.db.entity.Admin;
+import com.tc.db.entity.TaskClassify;
+import com.tc.db.entity.TaskClassifyRelation;
+import com.tc.db.entity.User;
+import com.tc.until.PageRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.*;
@@ -20,11 +23,8 @@ public class QueryTaskClassify extends PageRequest {
     private String taskId;
     private String info;
     private String creationName;
-    private String parentName;
-    private Boolean existTask;
     private Timestamp createTimeBegin;
     private Timestamp createTimeEnd;
-    private Boolean children;
 
     public QueryTaskClassify(String taskId) {
         super(0, 100);
@@ -79,21 +79,6 @@ public class QueryTaskClassify extends PageRequest {
         this.creationName = creationName;
     }
 
-    public String getParentName() {
-        return parentName;
-    }
-
-    public void setParentName(String parentName) {
-        this.parentName = parentName;
-    }
-
-    public Boolean getExistTask() {
-        return existTask;
-    }
-
-    public void setExistTask(Boolean existTask) {
-        this.existTask = existTask;
-    }
 
     public Timestamp getCreateTimeBegin() {
         return createTimeBegin;
@@ -111,13 +96,6 @@ public class QueryTaskClassify extends PageRequest {
         this.createTimeEnd = createTimeEnd;
     }
 
-    public Boolean getChildren() {
-        return children;
-    }
-
-    public void setChildren(Boolean children) {
-        this.children = children;
-    }
 
     public static List<Predicate> initPredicates(QueryTaskClassify queryTaskClassify, Root<TaskClassify> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
@@ -142,7 +120,6 @@ public class QueryTaskClassify extends PageRequest {
             predicates.add(cb.equal(root.get(TaskClassify.CREATION).get(Admin.USER).get(User.NAME),queryTaskClassify.creationName));
         }
 
-
         if (queryTaskClassify.getCreateTimeBegin() != null || queryTaskClassify.getCreateTimeEnd() != null){
             if (queryTaskClassify.getCreateTimeBegin() != null && queryTaskClassify.getCreateTimeEnd() != null){
                 predicates.add(cb.between(root.get(TaskClassify.CREATE_TIME),queryTaskClassify.getCreateTimeBegin(),queryTaskClassify.getCreateTimeEnd()));
@@ -150,34 +127,6 @@ public class QueryTaskClassify extends PageRequest {
                 predicates.add(cb.greaterThan(root.get(TaskClassify.CREATE_TIME),queryTaskClassify.getCreateTimeBegin()));
             }else if (queryTaskClassify.getCreateTimeEnd() != null){
                 predicates.add(cb.lessThan(root.get(TaskClassify.CREATE_TIME),queryTaskClassify.getCreateTimeEnd()));
-            }
-        }
-        if (queryTaskClassify.getChildren() != null){
-            if (!queryTaskClassify.getChildren()) {
-                predicates.add(cb.isNull(root.get(TaskClassify.PARENTS)));
-            }else {
-                predicates.add(cb.isNotNull(root.get(TaskClassify.PARENTS)));
-                if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
-                    predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
-                }
-                if (queryTaskClassify.getExistTask() != null){
-                    if (queryTaskClassify.getExistTask()) {
-                        predicates.add(cb.isEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
-                    }else {
-                        predicates.add(cb.isNotEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
-                    }
-                }
-            }
-        }else {
-            if (!StringUtils.isEmpty(queryTaskClassify.parentName)){
-                predicates.add(cb.equal(root.get(TaskClassify.PARENTS).get(TaskClassify.NAME),queryTaskClassify.parentName));
-            }
-            if (queryTaskClassify.getExistTask() != null){
-                if (queryTaskClassify.getExistTask()) {
-                    predicates.add(cb.isEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
-                }else {
-                    predicates.add(cb.isNotEmpty(root.get(TaskClassify.TASK_CLASSIFY_RELATIONS)));
-                }
             }
         }
         return predicates;

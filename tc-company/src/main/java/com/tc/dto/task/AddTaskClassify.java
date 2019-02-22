@@ -1,11 +1,8 @@
 package com.tc.dto.task;
 
-import com.tc.db.entity.Admin;
 import com.tc.db.entity.TaskClassify;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.NotNull;
 
 
 /**
@@ -17,7 +14,7 @@ public class AddTaskClassify {
     @NotBlank
     @Length(max = 6)
     private String name;
-    @NotNull
+    private String tag;
     private Long creation;
     private Long parents;
     @Length(max = 100)
@@ -55,12 +52,21 @@ public class AddTaskClassify {
         this.info = info;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     public static TaskClassify toTaskClassify(AddTaskClassify addTaskClassify){
         TaskClassify taskClassify = new TaskClassify();
         taskClassify.setCreationId(addTaskClassify.creation);
         taskClassify.setParentsId(addTaskClassify.parents);
         taskClassify.setInfo(addTaskClassify.getInfo());
         taskClassify.setName(addTaskClassify.getName());
+        taskClassify.setClassifyImg(addTaskClassify.tag);
         return taskClassify;
     }
 }

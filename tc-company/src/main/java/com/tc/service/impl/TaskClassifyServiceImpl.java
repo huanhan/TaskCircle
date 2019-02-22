@@ -46,6 +46,15 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
 
     @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
+    public List<TaskClassify> queryByQueryAndNotPage(QueryTaskClassify queryTaskClassify) {
+        return taskClassifyRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryTaskClassify.initPredicates(queryTaskClassify, root, query, cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
     public List<TaskClassify> findAll() {
         return taskClassifyRepository.findAll();
     }
@@ -112,6 +121,14 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
 
     @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
+    public List<TaskClassify> findUserTaskAllClassify(Long id) {
+        return taskClassifyRepository.findUserTaskAllClassify(id);
+    }
+
+
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
     public TaskClassify findOne(Long id) {
         TaskClassify result = taskClassifyRepository.findOne(id);
 //        List<TaskClassifyRelation> queryTcrs = taskClassifyRelationRepository.findByTaskClassifyIdEquals(id);
@@ -140,9 +157,13 @@ public class TaskClassifyServiceImpl extends AbstractBasicServiceImpl<TaskClassi
         return taskClassifyRepository.saveAndFlush(taskClassify);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean deleteByIds(LongIds ids) {
         int count = taskClassifyRepository.deleteByIds(ids.getIds());
+        if (count != ids.getIds().size()){
+            throw new DBException("删除数据失败");
+        }
         return count > 0;
     }
 

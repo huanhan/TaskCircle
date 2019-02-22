@@ -28,7 +28,6 @@ public class DateCondition {
     @Past
     private Timestamp begin;
     @NotNull
-    @Past
     private Timestamp end;
     @NotNull
     private DateType type;
@@ -58,12 +57,9 @@ public class DateCondition {
     }
 
     public static DateCondition reset(DateCondition condition){
-        Timestamp begin = condition.getBegin();
-        Timestamp end = condition.getEnd();
-        if (begin.after(end)){
-            begin = condition.getEnd();
-            end = condition.getBegin();
-        }
+        Timestamp[] dc = reset(condition.getBegin(),condition.getEnd());
+        Timestamp begin = dc[0];
+        Timestamp end = dc[1];
         long hours = 0;
         long day = 0;
         long mouth = 0;
@@ -197,5 +193,17 @@ public class DateCondition {
         condition.begin = begin;
         condition.end = end;
         return condition;
+    }
+
+    public static Timestamp[] reset(Timestamp tBegin,Timestamp tEnd){
+        Timestamp begin,end;
+        begin = tBegin == null ? TimestampHelper.toMonthBegin(TimestampHelper.today()) : tBegin;
+        end = tEnd == null ? TimestampHelper.todayEndByTimestamp() : tEnd;
+        if (begin.after(end)){
+            Timestamp center = new Timestamp(begin.getTime());
+            begin = new Timestamp(end.getTime());
+            end = new Timestamp(center.getTime());
+        }
+        return new Timestamp[]{begin,end};
     }
 }

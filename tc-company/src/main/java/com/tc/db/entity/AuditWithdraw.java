@@ -1,6 +1,9 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,6 +15,8 @@ import java.util.Objects;
 public class AuditWithdraw {
 
     public static final String USER_WITHDRAW = "userWithdraw";
+    public static final String WITHDRAW_ID = "withdrawId";
+    public static final String AUDIT_ID = "auditId";
 
     private String auditId;
     private String withdrawId;
@@ -30,6 +35,17 @@ public class AuditWithdraw {
         this.withdrawId = withdrawId;
     }
 
+    public static List<AuditWithdraw> toIndexList(List<AuditWithdraw> awList) {
+        if (ListUtils.isNotEmpty(awList)){
+            awList.forEach(auditWithdraw -> {
+                if (auditWithdraw.audit != null){
+                    auditWithdraw.setAudit(Audit.toDetail(auditWithdraw.audit));
+                }
+                auditWithdraw.setUserWithdraw(null);
+            });
+        }
+        return awList;
+    }
 
     @Id
     @Column(name = "audit_id")

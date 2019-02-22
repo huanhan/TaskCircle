@@ -2,6 +2,7 @@ package com.tc.db.entity;
 
 import com.tc.db.entity.pk.UserContactPK;
 import com.tc.db.enums.UserContactName;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
@@ -24,6 +25,8 @@ public class UserContact implements Serializable {
     private UserContactName contactName;
     private String contact;
     private User user;
+
+    private Trans trans;
 
     public UserContact() {
     }
@@ -76,6 +79,14 @@ public class UserContact implements Serializable {
         this.contact = contact;
     }
 
+    @Transient
+    public Trans getTrans() {
+        return trans;
+    }
+
+    public void setTrans(Trans trans) {
+        this.trans = trans;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -100,6 +111,7 @@ public class UserContact implements Serializable {
                     User user = userContact.user;
                     userContact.setUser(new User(user.getId(),user.getName(),user.getUsername()));
                 }
+                userContact.setTrans(new Trans(userContact.contactName.name(),userContact.contactName.getContactName()));
             });
         }
         return query;
@@ -111,6 +123,7 @@ public class UserContact implements Serializable {
                 User user = userContact.user;
                 userContact.setUser(new User(user.getId(),user.getName(),user.getUsername()));
             }
+            userContact.setTrans(new Trans(userContact.contactName.name(),userContact.contactName.getContactName()));
         }
         return userContact;
     }

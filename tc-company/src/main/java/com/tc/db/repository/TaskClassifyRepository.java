@@ -91,4 +91,24 @@ public interface TaskClassifyRepository extends JpaRepository<TaskClassify,Long>
      * @return
      */
     int deleteByIdEquals(Long id);
+
+    /**
+     * 获取用户所有任务中使用到的分类
+     * @param id
+     * @return
+     */
+    @Query(value =
+            "select tc " +
+            "from TaskClassify as tc " +
+            "where tc.id in ( " +
+                "select tcr.taskClassifyId " +
+                "from TaskClassifyRelation as tcr " +
+                "where tcr.taskId in ( " +
+                    "select t " +
+                    "from Task as t " +
+                    "where t.userId = :id" +
+                ")" +
+            ")"
+    )
+    List<TaskClassify> findUserTaskAllClassify(@Param("id") Long id);
 }

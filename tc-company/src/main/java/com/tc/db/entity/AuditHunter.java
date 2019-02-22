@@ -10,6 +10,9 @@ import java.util.Objects;
 @Entity
 @Table(name = "audit_hunter", schema = "tc-company")
 public class AuditHunter {
+
+    public static final String USER_ID = "userId";
+
     private String auditId;
     private Long userId;
     private Audit audit;
@@ -25,6 +28,14 @@ public class AuditHunter {
 
     public AuditHunter(Long userId) {
         this.userId = userId;
+    }
+
+    public AuditHunter(String id, Long userId, User user) {
+        this.auditId = id;
+        this.userId = userId;
+        if (user != null){
+            this.user = new User(user.getId(),user.getName(),user.getUsername());
+        }
     }
 
 

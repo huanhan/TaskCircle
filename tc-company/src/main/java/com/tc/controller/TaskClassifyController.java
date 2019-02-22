@@ -4,7 +4,10 @@ import com.tc.db.entity.TaskClassify;
 import com.tc.dto.LongIds;
 import com.tc.dto.Result;
 import com.tc.dto.Show;
-import com.tc.dto.task.*;
+import com.tc.dto.StringIds;
+import com.tc.dto.task.AddTaskClassify;
+import com.tc.dto.task.ModifyTaskClassify;
+import com.tc.dto.task.QueryTaskClassify;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.TaskClassifyRelationService;
@@ -13,11 +16,11 @@ import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +47,8 @@ public class TaskClassifyController {
     @PostMapping("/query")
     @ApiOperation(value = "获取任务类别列表")
     public Result all(@RequestBody QueryTaskClassify queryTaskClassify){
-        Page<TaskClassify> queryTcs = taskClassifyService.queryByQueryTaskClassify(queryTaskClassify);
-        return Result.init(TaskClassify.reset(queryTcs.getContent()),queryTaskClassify);
+        List<TaskClassify> queryTcs = taskClassifyService.queryByQueryAndNotPage(queryTaskClassify);
+        return Result.init(TaskClassify.reset(queryTcs),queryTaskClassify);
     }
 
     /**
@@ -66,7 +69,17 @@ public class TaskClassifyController {
      */
     @DeleteMapping("/{id:\\d+}")
     @ApiOperation(value = "删除指定分类")
-    public void delete(@PathVariable("id") Long id){
+    public void delete(HttpServletRequest request,@PathVariable("id") Long id){
+        Long me = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        TaskClassify taskClassify = taskClassifyService.findOne(id);
+        if (!me.equals(taskClassify.getCreationId())){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+        if (taskClassify.getParents() == null){
+            if (ListUtils.isNotEmpty(taskClassify.getTaskClassifies())){
+                throw new ValidException("存在子分类，不允许删除");
+            }
+        }
         boolean delIsSuccess = taskClassifyService.deleteById(id);
         if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
     }
@@ -77,9 +90,42 @@ public class TaskClassifyController {
      */
     @PostMapping("/delete/select")
     @ApiOperation(value = "删除选择的分类")
-    public void delete(@RequestBody LongIds ids){
-        boolean delIsSuccess = taskClassifyService.deleteByIds(ids);
-        if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
+    public List<Long> delete(HttpServletRequest request,@RequestBody LongIds ids){
+        Long me = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        List<TaskClassify> result = taskClassifyService.findByIds(ids.getIds());
+        result.removeIf(taskClassify -> !me.equals(taskClassify.getCreationId()));
+        if (ListUtils.isNotEmpty(result)){
+            List<Long> children = new ArrayList<>();
+            List<Long> parents = new ArrayList<>();
+            result.forEach(taskClassify -> {
+                if (taskClassify.getParents() != null){
+                    children.add(taskClassify.getId());
+                }else {
+                    if (ListUtils.isEmpty(taskClassify.getTaskClassifies())){
+                        parents.add(taskClassify.getId());
+                    }
+                }
+            });
+            List<Long> del = new ArrayList<>();
+            if (ListUtils.isNotEmpty(children)){
+                del.addAll(children);
+            }
+            if (ListUtils.isNotEmpty(parents)){
+                del.addAll(parents);
+            }
+            if (ListUtils.isNotEmpty(del)){
+                boolean delIsSuccess = taskClassifyService.deleteByIds(new LongIds(0L,del));
+                if (!delIsSuccess){throw new DBException(StringResourceCenter.DB_DELETE_ABNORMAL);}
+                else {return del;}
+            }else {
+                throw new ValidException("注意父分类，存在子分类时不允许删除");
+            }
+        }else {
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
+
+
+
     }
 
     /**
@@ -90,11 +136,12 @@ public class TaskClassifyController {
      */
     @PostMapping
     @ApiOperation(value = "添加新分类")
-    public TaskClassify add(@Valid @RequestBody AddTaskClassify addTaskClassify, BindingResult bindingResult){
+    public TaskClassify add(HttpServletRequest request, @Valid @RequestBody AddTaskClassify addTaskClassify, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
-
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        addTaskClassify.setCreation(id);
         boolean whether = taskClassifyService.whether(addTaskClassify.getName(),addTaskClassify.getParents());
         if (!whether){
             throw new ValidException(StringResourceCenter.VALIDATOR_INSERT_ABNORMAL);
@@ -112,7 +159,7 @@ public class TaskClassifyController {
      */
     @PutMapping
     @ApiOperation(value = "修改分类信息")
-    public TaskClassify update(@Valid @RequestBody ModifyTaskClassify modifyTaskClassify, BindingResult bindingResult){
+    public TaskClassify update(HttpServletRequest request, @Valid @RequestBody ModifyTaskClassify modifyTaskClassify, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }
@@ -121,8 +168,10 @@ public class TaskClassifyController {
         if (queryTc == null){
             throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
         }
-
-
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        if (!queryTc.getCreationId().equals(id)){
+            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
+        }
         if (!modifyTaskClassify.getName().equals(queryTc.getName())){
             boolean whether;
             whether = taskClassifyService.whether(modifyTaskClassify.getName(),modifyTaskClassify.getParents());
@@ -167,7 +216,7 @@ public class TaskClassifyController {
      */
     @PostMapping("/delete/select/task")
     @ApiOperation(value = "从分类中移除所属的任务")
-    public void removeTask(@Valid @RequestBody LongIds ids, BindingResult bindingResult){
+    public void removeTask(@Valid @RequestBody StringIds ids, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
             throw new ValidException(bindingResult.getFieldErrors());
         }

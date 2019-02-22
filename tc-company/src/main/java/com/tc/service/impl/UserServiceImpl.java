@@ -3,6 +3,7 @@ package com.tc.service.impl;
 import com.tc.controller.AuditController;
 import com.tc.db.entity.*;
 import com.tc.db.entity.pk.UserImgPK;
+import com.tc.db.enums.AdminState;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserIMGName;
 import com.tc.db.enums.UserState;
@@ -16,6 +17,7 @@ import com.tc.dto.user.LoginUser;
 import com.tc.dto.user.ModifyPassword;
 import com.tc.dto.user.QueryUser;
 import com.tc.exception.DBException;
+import com.tc.exception.ValidException;
 import com.tc.service.UserService;
 import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
@@ -42,7 +44,7 @@ import java.util.List;
  * @author Cyg
  */
 @Service(value = "userService")
-public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements UserService,UserDetailsService,SocialUserDetailsService {
+public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements UserService, UserDetailsService, SocialUserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -65,17 +67,17 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Autowired
     private AdminAuthorityRepository adminAuthorityRepository;
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public boolean isNullByUsername(String username) {
         User user = userRepository.queryFirstByUsername(username);
-        if (user == null){
+        if (user == null) {
             return true;
         }
         return false;
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public User getUserByUsername(String username) {
         User user = userRepository.queryFirstByUsername(username);
@@ -96,22 +98,22 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return user;
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Long getIdByUsername(String username) {
         User user = getUserByUsername(username);
         return user.getId();
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Page<User> findByQueryUser(QueryUser queryUser) {
 
 
         return userRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = QueryUser.initPredicates(queryUser,root,query,cb);
+            List<Predicate> predicates = QueryUser.initPredicates(queryUser, root, query, cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
-        },queryUser);
+        }, queryUser);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -120,42 +122,42 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
         List<User> users = userRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get(User.STATE),UserState.AUDIT_CENTER));
-            predicates.add(cb.lessThan(root.get(User.ADMIN_AUDIT_TIME),new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
+            predicates.add(cb.equal(root.get(User.STATE), UserState.AUDIT_CENTER));
+            predicates.add(cb.lessThan(root.get(User.ADMIN_AUDIT_TIME), new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
-        if (ListUtils.isEmpty(users)){
+        if (ListUtils.isEmpty(users)) {
             return true;
-        }else {
+        } else {
             List<Long> ids = User.toIds(users);
-            int count = userRepository.updateState(ids,state);
+            int count = userRepository.updateState(ids, state);
             return count > 0;
         }
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public User findByIdAndState(Long id, UserState state) {
-        return userRepository.findByIdAndState(id,state);
+        return userRepository.findByIdAndState(id, state);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState(Long id, UserState state, Date now) {
-        int count = userRepository.updateState(id,state,new Timestamp(now.getTime()));
+        int count = userRepository.updateState(id, state, new Timestamp(now.getTime()));
         return count > 0;
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public long countByQuery(QueryUser queryUser) {
         return userRepository.count((root, query, cb) -> {
-            List<Predicate> predicates = QueryUser.initPredicates(queryUser,root,query,cb);
+            List<Predicate> predicates = QueryUser.initPredicates(queryUser, root, query, cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public long countByIds(List<Long> lIds) {
         return userRepository.countByIdIn(lIds);
@@ -171,48 +173,48 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Override
     public boolean updatePassword(Long id, ModifyPassword modifyPassword) {
         modifyPassword.setEncoderPassword(modifyPassword.getNewPassword());
-        int count = userRepository.updatePassword(id,modifyPassword.getNewPassword());
+        int count = userRepository.updatePassword(id, modifyPassword.getNewPassword());
         return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public boolean updateHeader(Long id, String header) {
-        int count = userRepository.updateHeader(id,header);
-        if (count > 0){
-            UserImg query = userImgRepository.findOne(new UserImgPK(id,UserIMGName.VIRTUAL_HEAD));
-            if (query == null){
-                userImgRepository.save(new UserImg(id,UserIMGName.VIRTUAL_HEAD,header));
-            }else {
+        int count = userRepository.updateHeader(id, header);
+        if (count > 0) {
+            UserImg query = userImgRepository.findOne(new UserImgPK(id, UserIMGName.VIRTUAL_HEAD));
+            if (query == null) {
+                userImgRepository.save(new UserImg(id, UserIMGName.VIRTUAL_HEAD, header));
+            } else {
                 count = userImgRepository.update(header, UserIMGName.VIRTUAL_HEAD, id);
             }
         }
         return count > 0;
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<CashPledge> findByCashPledgeAndUser(TimeScope scope) {
         User user = userRepository.findOne(scope.getId());
-        if (user == null){
+        if (user == null) {
             throw new DBException(StringResourceCenter.DB_QUERY_FAILED);
         }
         List<Task> tasks = taskRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = QueryTask.initPredicatesBy(scope,root,query,cb);
+            List<Predicate> predicates = QueryTask.initPredicatesBy(scope, root, query, cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
         List<UserWithdraw> userWithdraws = userWithdrawRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = QueryFinance.initPredicatesBy(scope,root,query,cb);
+            List<Predicate> predicates = QueryFinance.initPredicatesBy(scope, root, query, cb);
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
         List<HunterTask> hunterTasks = null;
-        if (user.getCategory().equals(UserCategory.HUNTER)){
+        if (user.getCategory().equals(UserCategory.HUNTER)) {
             hunterTasks = hunterTaskRepository.findAll((root, query, cb) -> {
-                List<Predicate> predicates = QueryHunterTask.initPredicatesBy(scope,root,query,cb);
+                List<Predicate> predicates = QueryHunterTask.initPredicatesBy(scope, root, query, cb);
                 return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             });
         }
-        return CashPledge.create(tasks,userWithdraws,hunterTasks);
+        return CashPledge.create(tasks, userWithdraws, hunterTasks);
     }
 
     @Override
@@ -225,34 +227,43 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return getUser(username);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+
         User user = getUser(s);
-        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)){
+        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)) {
+            if (user.getAdmin().getAdminState().equals(AdminState.LEAVE_FOOICE)) {
+                throw new ValidException("你已经离职，没有权限继续访问");
+            }
             user.getAdmin().setAdminAuthorities(adminAuthorityRepository.findByUserIdEquals(user.getId()));
-        }else {
+        } else {
             user.setUserAuthorities(userAuthorityRepository.findByCategoryEquals(user.getCategory()));
         }
         return new LoginUser(user);
+
+
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public SocialUserDetails loadUserByUserId(String s) throws UsernameNotFoundException {
         User user = getUser(s);
-        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)){
+        if (user.getCategory().equals(UserCategory.ADMINISTRATOR)) {
+            if (user.getAdmin().getAdminState().equals(AdminState.LEAVE_FOOICE)) {
+                throw new ValidException("你已经离职，没有权限继续访问");
+            }
             user.getAdmin().setAdminAuthorities(adminAuthorityRepository.findByUserIdEquals(user.getId()));
-        }else {
+        } else {
             user.setUserAuthorities(userAuthorityRepository.findByCategoryEquals(user.getCategory()));
         }
         return new LoginUser(user);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
-    User getUser(String username) throws UsernameNotFoundException{
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    User getUser(String username) throws UsernameNotFoundException {
         User user = userRepository.queryFirstByUsername(username);
-        if (user == null){
+        if (user == null) {
             throw new UsernameNotFoundException("账户名有误");
         }
         return user;
@@ -264,25 +275,25 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return userRepository.save(user);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public List<User> findAll(Sort sort) {
         return userRepository.findAll(sort);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public User findOne(Long id) {
         return userRepository.findOne(id);
     }
 
-    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public long count() {
         return userRepository.count();

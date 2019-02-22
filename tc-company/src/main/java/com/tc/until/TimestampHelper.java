@@ -189,6 +189,17 @@ public class TimestampHelper {
     }
 
     /**
+     * 将timestamp转成日期
+     * 格式 2019年11月11日
+     * @param timestamp
+     * @return
+     */
+    public static String toDay(Timestamp timestamp){
+        LocalDateTime localDateTime = timestamp.toLocalDateTime();
+        return localDateTime.getYear() + "年" + localDateTime.getMonth().getValue() + "月" + localDateTime.getDayOfMonth() + "日";
+    }
+
+    /**
      * 将timestamp转成月份
      * 格式 2019年11月
      * @param timestamp

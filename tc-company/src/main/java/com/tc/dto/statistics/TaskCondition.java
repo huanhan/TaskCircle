@@ -15,11 +15,8 @@ import java.util.List;
  */
 public class TaskCondition {
 
-    @NotNull
     @Past
     private Timestamp begin;
-    @NotNull
-    @Past
     private Timestamp end;
     @NotNull
     private TaskConditionResult result;
