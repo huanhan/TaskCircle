@@ -2,7 +2,10 @@ package com.tc.db.entity;
 
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.MoneyType;
+import com.tc.dto.task.step.HTStep;
+import com.tc.dto.task.step.TransHT;
 import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransData;
 import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -62,10 +65,13 @@ public class HunterTask implements Serializable {
     private Boolean isStop;
     private Float money;
     private MoneyType moneyType;
+    private Long adminId;
+    private Admin admin;
 
     private Collection<CommentHunter> commentHunters;
     private Collection<HunterTaskStep> hunterTaskSteps;
     private Collection<AuditHunterTask> auditHunterTasksById;
+    private Collection<UserHunterInterflow> userHunterInterflows;
     private Boolean userCHunter;
     private Boolean hunterCUser;
     private Boolean hunterCTask;
@@ -73,7 +79,7 @@ public class HunterTask implements Serializable {
     private Trans transState;
     private Trans transOState;
     private Trans transMoneyType;
-
+    private Boolean isAudit = false;
 
     public HunterTask() {
     }
@@ -85,7 +91,21 @@ public class HunterTask implements Serializable {
         }
     }
 
-    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
+    public HunterTask(String id, Hunter hunter) {
+        this.id = id;
+        if (hunter != null){
+            this.hunter = new Hunter(hunter.getUserId(),hunter.getUser());
+        }
+    }
+
+    public HunterTask(String id, String taskId, Hunter hunter) {
+        this.id = id;
+        this.taskId = taskId;
+        if (hunter != null){
+            this.hunter = new Hunter(hunter.getUserId(),hunter.getUser());
+        }
+    }
+    public static List<HunterTask> toIndexAsList(List<HunterTask> content, Long me) {
         if (!ListUtils.isEmpty(content)) {
             content.forEach(hunterTask -> {
                 if (hunterTask.getTask() != null) {
@@ -94,9 +114,18 @@ public class HunterTask implements Serializable {
                 if (hunterTask.getHunter() != null) {
                     hunterTask.getHunter().toDetail();
                 }
+                if (hunterTask.getAdmin() != null){
+                    if (me != null){
+                        if (hunterTask.getAdminId().equals(me)){
+                            hunterTask.setAudit(true);
+                        }
+                    }
+                    hunterTask.setAdmin(new Admin(hunterTask.adminId,hunterTask.admin.getUser()));
+                }
                 hunterTask.commentHunters = null;
                 hunterTask.hunterTaskSteps = null;
                 hunterTask.auditHunterTasksById = null;
+                hunterTask.userHunterInterflows = null;
                 hunterTask.setTransState(new Trans(hunterTask.state.name(),hunterTask.state.getState()));
                 if (hunterTask.oldState != null){
                     hunterTask.setTransOState(new Trans(hunterTask.oldState.name(),hunterTask.oldState.getState()));
@@ -111,6 +140,9 @@ public class HunterTask implements Serializable {
             });
         }
         return content;
+    }
+    public static List<HunterTask> toIndexAsList(List<HunterTask> content) {
+        return toIndexAsList(content,null);
     }
 
     public static List<String> toIds(List<HunterTask> tasks) {
@@ -135,7 +167,10 @@ public class HunterTask implements Serializable {
                 hunterTask.task = Task.toHunterDetail(hunterTask.getTask());
             }
             if (hunterTask.hunter != null) {
-                hunterTask.hunter.toDetail();
+                hunterTask.hunter = new Hunter(hunterTask.getHunterId(),hunterTask.getHunter().getUser());
+            }
+            if (hunterTask.getAdmin() != null){
+                hunterTask.setAdmin(new Admin(hunterTask.adminId,hunterTask.admin.getUser()));
             }
             hunterTask.commentHunters = null;
             hunterTask.hunterTaskSteps = null;
@@ -175,6 +210,38 @@ public class HunterTask implements Serializable {
         hunterTask.setOldState(HunterTaskState.NONE);
         return hunterTask;
     }
+
+    public static List<TransHT> toHTStepAsList(List<HunterTask> query,Integer count) {
+        List<TransHT> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(query)){
+            query.forEach(hunterTask -> {
+                User user = hunterTask.getHunter().getUser();
+                TransHT transHT = new TransHT();
+                transHT.setUserId(user.getId());
+                transHT.setName(user.getName());
+                transHT.setUsername(user.getUsername());
+                transHT.setHtId(hunterTask.getId());
+                List<TransData> transData = new ArrayList<>();
+                for (int i = 1; i <= count; i++) {
+                    transData.add(new TransData("NO","未开始",i));
+                }
+                if (ListUtils.isNotEmpty(hunterTask.getHunterTaskSteps())){
+                    Collection<HunterTaskStep> hunterTaskSteps = hunterTask.getHunterTaskSteps();
+                    hunterTaskSteps.forEach(hunterTaskStep -> transData.forEach(trans -> {
+                        if (trans.getData().equals(hunterTaskStep.getStep())){
+                            trans.setValue("OK");
+                            trans.setValue("已完成");
+                        }
+                    }));
+                }
+                transHT.setSteps(transData);
+                result.add(transHT);
+            });
+        }
+        return result;
+    }
+
+
 
     @Id
     @Column(name = "id")
@@ -378,6 +445,15 @@ public class HunterTask implements Serializable {
         this.hunterTaskSteps = hunterTaskSteps;
     }
 
+    @OneToMany(mappedBy = "hunterTask")
+    public Collection<UserHunterInterflow> getUserHunterInterflows() {
+        return userHunterInterflows;
+    }
+
+    public void setUserHunterInterflows(Collection<UserHunterInterflow> userHunterInterflows) {
+        this.userHunterInterflows = userHunterInterflows;
+    }
+
     @ManyToOne
     @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     public Task getTask() {
@@ -464,6 +540,15 @@ public class HunterTask implements Serializable {
         this.transMoneyType = transMoneyType;
     }
 
+    @Transient
+    public Boolean getAudit() {
+        return isAudit;
+    }
+
+    public void setAudit(Boolean audit) {
+        isAudit = audit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -496,9 +581,30 @@ public class HunterTask implements Serializable {
         if (hunter != null) {
             hunter.toDetail();
         }
+        if (admin != null){
+            admin = new Admin(admin.getUserId(),admin.getUser());
+        }
         commentHunters = null;
         hunterTaskSteps = null;
     }
 
+    @Basic
+    @Column(name = "admin_id")
+    public Long getAdminId() {
+        return adminId;
+    }
 
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id", referencedColumnName = "user_id",insertable = false,updatable = false)
+    public Admin getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
+    }
 }

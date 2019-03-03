@@ -31,10 +31,9 @@ public interface UserWithdrawService extends BasicService<UserWithdraw> {
 
     /**
      * 自动更新用户提现状态
-     * @param state
      * @return
      */
-    Boolean updateState(WithdrawState state);
+    Boolean updateState();
 
     /**
      * 根据编号与状态获取提现信息
@@ -51,7 +50,7 @@ public interface UserWithdrawService extends BasicService<UserWithdraw> {
      * @param now
      * @return
      */
-    Boolean updateState(String id, WithdrawState state, Date now);
+    Boolean updateState(String id, WithdrawState state, Date now, Long me);
 
     /**
      * 获取审核列表中的用户押金
@@ -60,4 +59,11 @@ public interface UserWithdrawService extends BasicService<UserWithdraw> {
      * @return
      */
     Page<UserWithdraw> findByCashPledge(Long id, TimeScope scope);
+
+    /**
+     * 获取指定管理员的审核数量
+     * @param me
+     * @return
+     */
+    Integer countByAdmin(Long me);
 }

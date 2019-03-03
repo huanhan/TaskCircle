@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.dto.Show;
+import com.tc.dto.trans.TransChildren;
 import com.tc.dto.trans.TransEnum;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -54,6 +55,7 @@ public class TaskClassify implements Serializable {
         this.id = id;
         this.name = name;
     }
+
 
 
 
@@ -277,16 +279,20 @@ public class TaskClassify implements Serializable {
         if (taskClassify != null){
             if (taskClassify.getParents() != null) {
                 taskClassify.setParents(new TaskClassify(taskClassify.getParents().id, taskClassify.getParents().name));
+                if (!ListUtils.isEmpty(taskClassify.getTaskClassifyRelations())){
+                    taskClassify.setTaskNum(taskClassify.getTaskClassifies().size());
+                    taskClassify.setTaskClassifyRelations(null);
+                }
+            }else {
+                if (!ListUtils.isEmpty(taskClassify.getTaskClassifies())){
+                    taskClassify.setChildNum(taskClassify.getTaskClassifies().size());
+                    taskClassify.getTaskClassifies().forEach(child -> taskClassify.setTaskNum(taskClassify.getTaskNum() + child.getTaskClassifyRelations().size()));
+                    taskClassify.setTaskClassifies(null);
+                }
             }
 
-            if (!ListUtils.isEmpty(taskClassify.getTaskClassifies())){
-                taskClassify.getTaskClassifies().forEach(child -> taskClassify.setChildNum(taskClassify.getChildNum() + 1));
-                taskClassify.setTaskClassifies(null);
-            }
-            if (!ListUtils.isEmpty(taskClassify.getTaskClassifyRelations())){
-                taskClassify.getTaskClassifyRelations().forEach(tcr -> taskClassify.setTaskNum(taskClassify.getTaskNum() + 1));
-                taskClassify.setTaskClassifyRelations(null);
-            }
+
+
             if (taskClassify.getCreation() != null){
                 Admin admin;
                 if (taskClassify.getCreation().getUser() != null){
@@ -334,5 +340,9 @@ public class TaskClassify implements Serializable {
             });
         }
         return result;
+    }
+
+    public static List<TransChildren> toTransChildren(List<TaskClassify> queryTcs) {
+        return null;
     }
 }

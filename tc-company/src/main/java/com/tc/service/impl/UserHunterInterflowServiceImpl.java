@@ -43,7 +43,7 @@ public class UserHunterInterflowServiceImpl extends AbstractBasicServiceImpl<Use
         return userHunterInterflowRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = QueryTaskInterflow.initPredicatesByTask(queryTaskInterflow,root,query,cb);
             List<Expression<?>> exceptions = new ArrayList<>();
-            exceptions.add(root.get(UserHunterInterflow.TASK_ID));
+            exceptions.add(root.get(UserHunterInterflow.HUNTER_TASK_ID));
             exceptions.add(root.get(UserHunterInterflow.HUNTER_ID));
             return query
                     .where(predicates.toArray(new Predicate[predicates.size()]))

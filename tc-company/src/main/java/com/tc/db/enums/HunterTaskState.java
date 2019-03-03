@@ -5,7 +5,7 @@ import com.tc.dto.trans.TransEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum HunterTaskState{
+public enum HunterTaskState {
 
     /**
      * 猎刃点击接取任务
@@ -39,8 +39,7 @@ public enum HunterTaskState{
     HUNTER_REPULSE("猎刃拒绝用户放弃"),
     COMMIT_TO_ADMIN("提交管理员放弃申请"),
     WITH_ADMIN_NEGOTIATE("管理员参与协商"),
-    NONE("无状态")
-    ;
+    NONE("无状态");
 
     private String state;
 
@@ -51,10 +50,12 @@ public enum HunterTaskState{
     public static List<TransEnum> toList() {
         List<TransEnum> result = new ArrayList<>();
         for (HunterTaskState value : HunterTaskState.values()) {
-            result.add(TransEnum.init(value.name(),value.getState()));
+            result.add(TransEnum.init(value.name(), value.getState()));
         }
         return result;
     }
+
+
 
     public String getState() {
         return state;
@@ -62,9 +63,10 @@ public enum HunterTaskState{
 
     /**
      * 当用户放弃任务时，允许猎刃直接放弃的猎刃任务状态
+     *
      * @return
      */
-    public static List<HunterTaskState> isAbandon(){
+    public static List<HunterTaskState> isAbandon() {
         List<HunterTaskState> result = new ArrayList<>();
         result.add(RECEIVE);
         result.add(USER_REPULSE);
@@ -73,7 +75,7 @@ public enum HunterTaskState{
         return result;
     }
 
-    public static List<HunterTaskState> notAbandon(){
+    public static List<HunterTaskState> notAbandon() {
         List<HunterTaskState> result = new ArrayList<>();
         result.add(BEGIN);
         result.add(EXECUTE);
@@ -100,10 +102,11 @@ public enum HunterTaskState{
 
     /**
      * 是否允许提交用户审核
+     *
      * @return
      */
-    public static boolean isUpAuditToUser(HunterTaskState state){
-        switch (state){
+    public static boolean isUpAuditToUser(HunterTaskState state) {
+        switch (state) {
             case TASK_COMPLETE:
                 return true;
             case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
@@ -121,10 +124,11 @@ public enum HunterTaskState{
 
     /**
      * 用户是否能审核
+     *
      * @return
      */
-    public static boolean isAuditToUser(HunterTaskState state){
-        switch (state){
+    public static boolean isAuditToUser(HunterTaskState state) {
+        switch (state) {
             case AWAIT_USER_AUDIT:
                 return true;
             default:
@@ -134,28 +138,30 @@ public enum HunterTaskState{
 
     /**
      * 根据用户任务设置的选项获取对应的猎刃状态
-     * @param isRework 是否可重做
+     *
+     * @param isRework     是否可重做
      * @param isCompensate 是否要赔偿
      * @return 对应的状态
      */
-    public static HunterTaskState getBy(boolean isRework,boolean isCompensate){
-        if (isRework && isCompensate){
+    public static HunterTaskState getBy(boolean isRework, boolean isCompensate) {
+        if (isRework && isCompensate) {
             return HunterTaskState.ALLOW_REWORK_ABANDON_HAVE_COMPENSATE;
-        }else if (isRework){
+        } else if (isRework) {
             return HunterTaskState.ALLOW_REWORK_ABANDON_NO_COMPENSATE;
-        }else if (isCompensate){
+        } else if (isCompensate) {
             return HunterTaskState.NO_REWORK_HAVE_COMPENSATE;
-        }else {
+        } else {
             return HunterTaskState.NO_REWORK_NO_COMPENSATE;
         }
     }
 
     /**
      * 判断猎刃是否可以重做任务
+     *
      * @return
      */
-    public static boolean isRework(HunterTaskState state){
-        switch (state){
+    public static boolean isRework(HunterTaskState state) {
+        switch (state) {
             case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
                 return true;
             case ALLOW_REWORK_ABANDON_NO_COMPENSATE:
@@ -167,12 +173,13 @@ public enum HunterTaskState{
 
     /**
      * 判断哪些状态猎刃是允许放弃任务的
+     *
      * @param state
      * @return
      */
-    public static boolean isAbandon(HunterTaskState state){
+    public static boolean isAbandon(HunterTaskState state) {
         boolean isFailure;
-        switch (state){
+        switch (state) {
             case RECEIVE:
                 isFailure = true;
                 break;
@@ -209,11 +216,12 @@ public enum HunterTaskState{
 
     /**
      * 判断状态是否允许提交管理员审核
+     *
      * @param state
      * @return
      */
-    public static boolean isUpAuditToAdmin(HunterTaskState state){
-        switch (state){
+    public static boolean isUpAuditToAdmin(HunterTaskState state) {
+        switch (state) {
             case USER_REPULSE:
                 return true;
             case ALLOW_REWORK_ABANDON_HAVE_COMPENSATE:
@@ -231,11 +239,12 @@ public enum HunterTaskState{
 
     /**
      * 判断状态是否允许提交管理员审核
+     *
      * @param state
      * @return
      */
-    public static boolean isDiUpAuditToAdmin(HunterTaskState state){
-        switch (state){
+    public static boolean isDiUpAuditToAdmin(HunterTaskState state) {
+        switch (state) {
             case COMMIT_TO_ADMIN:
                 return true;
             case WITH_ADMIN_NEGOTIATE:
@@ -251,11 +260,12 @@ public enum HunterTaskState{
 
     /**
      * 获取非正在执行的猎刃任务状态
+     *
      * @param state
      * @return
      */
     public static boolean isOk(HunterTaskState state) {
-        switch (state){
+        switch (state) {
             case END_NO:
                 return true;
             case END_OK:
@@ -270,10 +280,62 @@ public enum HunterTaskState{
     }
 
     /**
-     * 用户判断猎刃是否都拒绝了用户
+     * 判断查询的时候是被审核的任务
+     *
+     * @param state
      * @return
      */
-    public static List<HunterTaskState> notAbandonState(){
+    public static boolean isAudit(HunterTaskState state) {
+        switch (state) {
+            case COMMIT_TO_ADMIN:
+                return true;
+            case COMMIT_ADMIN_AUDIT:
+                return true;
+            case ADMIN_AUDIT:
+                return true;
+            case WITH_ADMIN_NEGOTIATE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 判断猎刃任务状态 是否允许添加审核结果
+     * @param state
+     * @return
+     */
+    public static boolean isAuditCenter(HunterTaskState state) {
+        switch (state) {
+            case ADMIN_AUDIT:
+                return true;
+            case WITH_ADMIN_NEGOTIATE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 获取允许被审核的状态列表
+     *
+     * @return
+     */
+    public static List<HunterTaskState> getAudit() {
+        List<HunterTaskState> result = new ArrayList<>();
+        result.add(COMMIT_TO_ADMIN);
+        result.add(COMMIT_ADMIN_AUDIT);
+        result.add(ADMIN_AUDIT);
+        result.add(WITH_ADMIN_NEGOTIATE);
+        return result;
+    }
+
+    /**
+     * 用户判断猎刃是否都拒绝了用户
+     *
+     * @return
+     */
+    public static List<HunterTaskState> notAbandonState() {
         List<HunterTaskState> result = new ArrayList<>();
         result.add(END_NO);
         result.add(END_OK);

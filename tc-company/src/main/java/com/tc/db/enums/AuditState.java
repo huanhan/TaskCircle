@@ -11,7 +11,7 @@ public enum AuditState {
     NO_PASS("不通过"),
     REWORK("重做任务"),
     ABANDON_COMPENSATE("放弃任务，并且补偿"),
-    ABANDON_NOT_COMPENSATE("放弃任务，并且不用补偿补偿"),
+    ABANDON_NOT_COMPENSATE("放弃任务，并且不用补偿"),
     TASK_OK("任务直接完成")
     ;
 

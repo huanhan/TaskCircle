@@ -1,6 +1,9 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,6 +39,8 @@ public class AuditTask {
     }
 
 
+
+
     @Id
     @Column(name = "audit_id")
     public String getAuditId() {
@@ -68,8 +73,12 @@ public class AuditTask {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AuditTask auditTask = (AuditTask) o;
         return Double.compare(auditTask.money, money) == 0 &&
                 Objects.equals(auditId, auditTask.auditId) &&
@@ -115,5 +124,17 @@ public class AuditTask {
             result.setAudit(Audit.toDetail(audit));
         }
         return result;
+    }
+
+
+
+    public static List<AuditTask> toIndexAsList(List<AuditTask> query) {
+        if (ListUtils.isNotEmpty(query)){
+            query.forEach(auditTask -> {
+                auditTask.audit = Audit.resetAudit(auditTask.audit);
+                auditTask.task = new Task(auditTask.taskId,auditTask.task.getName(),auditTask.task.getUser());
+            });
+        }
+        return query;
     }
 }

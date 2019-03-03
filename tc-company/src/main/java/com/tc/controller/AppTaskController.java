@@ -24,6 +24,7 @@ import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * APP用户控制器
@@ -174,6 +175,21 @@ public class AppTaskController {
         //判断任务的状态是否允许提交审核
         if (!TaskState.isToAdminAudit(task.getState())) {
             throw new ValidException(StringResourceCenter.VALIDATOR_TASK_STATE_FAILED);
+        }
+
+
+        if (task.getState().equals(TaskState.HUNTER_REJECT)){
+            AtomicInteger count = new AtomicInteger(0);
+
+            task.getHunterTasks().forEach(hunterTask -> {
+                if (hunterTask.getState().equals(HunterTaskState.WITH_HUNTER_NEGOTIATE)){
+                    count.getAndIncrement();
+                }
+            });
+
+            if (count.get() > 0){
+                throw new ValidException("还有：" + count.get() + "位猎刃协商中，不能提交管理员审核");
+            }
         }
 
         //提交审核，即修改状态

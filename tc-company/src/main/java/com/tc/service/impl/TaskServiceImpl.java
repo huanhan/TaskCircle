@@ -5,11 +5,13 @@ import com.tc.controller.AuditController;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
+import com.tc.db.enums.AuditType;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.MoneyType;
 import com.tc.db.enums.TaskState;
 import com.tc.db.repository.*;
 import com.tc.dto.TimeScope;
+import com.tc.dto.audit.AuditResult;
 import com.tc.dto.task.QueryTask;
 import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
@@ -21,6 +23,7 @@ import com.tc.until.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +59,9 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
     @Autowired
     private TaskStepRepository taskStepRepository;
+
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -119,27 +125,42 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean updateState(String id, TaskState state, Date date) {
-        int count = taskRepository.updateStateAndAdminAuditTime(id, state, new Timestamp(date.getTime()));
+    public boolean updateState(String id, TaskState state, Date date,Long adminId) {
+        int count = taskRepository.updateStateAndAdminAuditTime(id, state, new Timestamp(date.getTime()),adminId);
         return count > 0;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public boolean updateState(TaskState state) {
+    public boolean updateState() {
 
         //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
         List<Task> tasks = taskRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get(Task.TASK_STATE), TaskState.AUDIT));
+            predicates.add(cb.or(cb.equal(root.get(Task.TASK_STATE), TaskState.AUDIT), cb.equal(root.get(Task.TASK_STATE), TaskState.ADMIN_NEGOTIATE)));
             predicates.add(cb.lessThan(root.get(Task.ADMIN_AUDIT_TIME), new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
+
         if (ListUtils.isEmpty(tasks)) {
             return true;
         } else {
-            List<String> ids = Task.toIds(tasks);
-            int count = taskRepository.updateState(ids, state);
+            List<String> aIds = new ArrayList<>();
+            List<String> anIds = new ArrayList<>();
+            tasks.forEach(task -> {
+                if (task.getState().equals(TaskState.ADMIN_NEGOTIATE)) {
+                    anIds.add(task.getId());
+                } else if (task.getState().equals(TaskState.AUDIT)) {
+                    aIds.add(task.getId());
+                }
+            });
+            int count = 0;
+            if (ListUtils.isNotEmpty(aIds)) {
+                count += taskRepository.updateState(aIds, TaskState.AWAIT_AUDIT);
+            }
+            if (ListUtils.isNotEmpty(anIds)) {
+                count += taskRepository.updateState(anIds, TaskState.COMMIT_AUDIT);
+            }
             return count > 0;
         }
     }
@@ -460,14 +481,19 @@ public class TaskServiceImpl extends AbstractBasicServiceImpl<Task> implements T
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         }, scope);
     }
-
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Page<Task> search(String key, Pageable pageable) {
         return taskRepository.searchTask(key, pageable);
     }
-
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
-    public List<Task> taskByDistance(Double lat, Double log ) {
-        return taskRepository.taskByDistance(lat, log );
+    public List<Task> taskByDistance(Double lat, Double log) {
+        return taskRepository.taskByDistance(lat, log);
+    }
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
+    public Integer countByAdmin(Long me) {
+        return taskRepository.countByAdminId(me);
     }
 }

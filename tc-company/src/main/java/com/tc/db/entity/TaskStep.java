@@ -2,6 +2,8 @@ package com.tc.db.entity;
 
 import com.tc.db.entity.pk.TaskStepPK;
 import com.tc.dto.task.AddTaskStep;
+import com.tc.dto.task.step.HTStep;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Cyg
@@ -28,6 +31,8 @@ public class TaskStep implements Serializable {
     private String context;
     private String img;
     private Task task;
+
+    private List<HTStep> htSteps;
 
 
     @Id
@@ -91,6 +96,15 @@ public class TaskStep implements Serializable {
         this.img = img;
     }
 
+    @Transient
+    public List<HTStep> getHtSteps() {
+        return htSteps;
+    }
+
+    public void setHtSteps(List<HTStep> htSteps) {
+        this.htSteps = htSteps;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -130,6 +144,56 @@ public class TaskStep implements Serializable {
             });
         }
         return queryTss;
+    }
+
+    public static List<TaskStep> op(List<TaskStep> taskSteps, List<HunterTask> hunterTasks) {
+        if (ListUtils.isNotEmpty(taskSteps)){
+            taskSteps.forEach(taskStep -> {
+                taskStep.htSteps = new ArrayList<>();
+                if (taskStep.getTask() != null) {
+                    taskStep.setTask(new Task(taskStep.getTask().getId(), taskStep.getTask().getName()));
+                }
+            });
+            if (ListUtils.isNotEmpty(hunterTasks)) {
+                hunterTasks.forEach(hunterTask -> {
+                    User user = hunterTask.getHunter().getUser();
+                    if (ListUtils.isNotEmpty(hunterTask.getHunterTaskSteps())) {
+                        taskSteps.forEach(taskStep -> {
+                            AtomicBoolean isExist = new AtomicBoolean(false);
+                            hunterTask.getHunterTaskSteps().forEach(hunterTaskStep -> {
+                                if (hunterTaskStep.getStep().equals(taskStep.step)) {
+                                    taskStep.htSteps.add(new HTStep(
+                                            user.getId(),
+                                            user.getUsername(),
+                                            user.getName(),
+                                            hunterTaskStep.getHunterTaskId(),
+                                            hunterTaskStep.getStep(),
+                                            new Trans("OK","执行完成")
+                                    ));
+                                    isExist.set(true);
+                                }
+                            });
+                            if (!isExist.get()){
+                                taskStep.htSteps.add(new HTStep(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getName(),
+                                        new Trans("NO","未开始执行")
+                                ));
+                            }
+                        });
+                    }else {
+                        taskSteps.forEach(taskStep -> taskStep.htSteps.add(new HTStep(
+                                user.getId(),
+                                user.getUsername(),
+                                user.getName(),
+                                new Trans("NO","未开始执行")
+                        )));
+                    }
+                });
+            }
+        }
+        return taskSteps;
     }
 
     public static Collection<TaskStep> toList(String id, List<AddTaskStep> taskSteps) {

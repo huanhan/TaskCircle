@@ -2,6 +2,7 @@ package com.tc.service.impl;
 
 import com.google.gson.Gson;
 import com.tc.db.entity.Message;
+import com.tc.db.entity.User;
 import com.tc.db.enums.MessageState;
 import com.tc.db.repository.MessageRepository;
 import com.tc.db.repository.UserRepository;
@@ -10,6 +11,7 @@ import com.tc.dto.message.QueryMessage;
 import com.tc.dto.user.QueryUser;
 import com.tc.exception.DBException;
 import com.tc.service.MessageService;
+import com.tc.until.ListUtils;
 import com.tc.until.StringResourceCenter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -106,7 +109,7 @@ public class MessageServiceImpl extends AbstractBasicServiceImpl<Message> implem
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Message save(Message message) {
-        return messageRepository.save(message);
+        return messageRepository.saveAndFlush(message);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

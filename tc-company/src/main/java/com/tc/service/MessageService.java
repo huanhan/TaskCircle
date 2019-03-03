@@ -41,5 +41,4 @@ public interface MessageService extends BasicService<Message> {
      */
     boolean updateState(Long id, MessageState state);
 
-
 }

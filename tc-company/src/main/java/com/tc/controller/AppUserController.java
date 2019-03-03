@@ -156,7 +156,7 @@ public class AppUserController {
 
 
         //修改用户状态为申请状态
-        userService.updateState(id, UserState.AUDIT_HUNTER, new Date());
+        userService.updateStateAndAuditTime(id, UserState.AUDIT_HUNTER, new Date());
         return ResultApp.init("提交成功");
     }
 

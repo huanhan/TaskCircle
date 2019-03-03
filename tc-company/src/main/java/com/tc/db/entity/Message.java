@@ -3,6 +3,7 @@ package com.tc.db.entity;
 import com.google.gson.Gson;
 import com.tc.db.enums.MessageState;
 import com.tc.db.enums.MessageType;
+import com.tc.db.enums.UserState;
 import com.tc.dto.LongIds;
 import com.tc.dto.trans.Trans;
 import com.tc.dto.user.QueryUser;
@@ -46,21 +47,36 @@ public class Message implements Serializable {
     private MessageType type;
     private String lookCondition;
 
+
     private long sendCount = 0;
     private long lookCount = 0;
 
     private Trans transState;
     private Trans transType;
-
+    private Boolean isCondition = false;
+    private Boolean isManager = false;
+    private List<User> users;
 
     public static List<Message> toListByIndex(List<Message> content) {
+        return toListByIndex(content,null);
+    }
+
+    public static List<Message> toListByIndex(List<Message> content, Long me) {
         if (!ListUtils.isEmpty(content)){
             content.forEach(message -> {
                 if (message.creation != null){
+                    if (me != null){
+                        if (message.creationId.equals(me)){
+                            message.setManager(true);
+                        }
+                    }
                     message.setCreation(new Admin(message.getCreation().getUserId(),message.getCreation().getUser()));
                 }
                 message.setTransState(new Trans(message.getState().name(),message.getState().getState()));
                 message.setTransType(new Trans(message.getType().name(),message.getType().getType()));
+                if (StringUtils.isNotEmpty(message.lookCondition)){
+                    message.setCondition(true);
+                }
             });
         }
         return content;
@@ -73,9 +89,13 @@ public class Message implements Serializable {
             }
             message.setTransState(new Trans(message.getState().name(),message.getState().getState()));
             message.setTransType(new Trans(message.getType().name(),message.getType().getType()));
+            if (StringUtils.isNotEmpty(message.lookCondition)){
+                message.setCondition(true);
+            }
         }
         return message;
     }
+
 
 
 
@@ -209,6 +229,33 @@ public class Message implements Serializable {
         this.transType = transType;
     }
 
+    @Transient
+    public Boolean getCondition() {
+        return isCondition;
+    }
+
+    public void setCondition(Boolean condition) {
+        isCondition = condition;
+    }
+
+    @Transient
+    public Boolean getManager() {
+        return isManager;
+    }
+
+    public void setManager(Boolean manager) {
+        isManager = manager;
+    }
+
+    @Transient
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -270,11 +317,30 @@ public class Message implements Serializable {
      */
     private static boolean existQuery(QueryUser queryUser, User user) {
         boolean exist = false;
-        if (queryUser.getState() != null){
-            if (user.getState() == null || !queryUser.getState().equals(user.getState())) {
+
+        if (ListUtils.isNotEmpty(queryUser.getStates())){
+            if (user.getState() == null){
                 return false;
+            }else {
+                boolean isExist = false;
+                for (UserState userState : queryUser.getStates()) {
+                    if (user.getState().equals(userState)){
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist){
+                    return false;
+                }
+            }
+        }else {
+            if (queryUser.getState() != null){
+                if (user.getState() == null || !queryUser.getState().equals(user.getState())) {
+                    return false;
+                }
             }
         }
+
         if (queryUser.getCategory() != null){
             if (user.getCategory() == null || !queryUser.getCategory().equals(user.getCategory())){
                 return false;

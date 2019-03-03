@@ -66,15 +66,14 @@ public interface TaskService extends BasicService<Task> {
      * @param date
      * @return
      */
-    boolean updateState(String id, TaskState state, Date date);
+    boolean updateState(String id, TaskState state, Date date, Long adminId);
 
     /**
      * 自动修改任务状态,根据时长判断，超过时长则修改任务为未审核状态
      *
-     * @param state
      * @return
      */
-    boolean updateState(TaskState state);
+    boolean updateState();
 
     /**
      * 用户将任务提交审核
@@ -174,4 +173,11 @@ public interface TaskService extends BasicService<Task> {
     Page<Task> search(String key, Pageable pageable);
 
     List<Task> taskByDistance(Double lat, Double log );
+
+    /**
+     * 根据管理员编号获取指定管理员当前审核数量
+     * @param me
+     * @return
+     */
+    Integer countByAdmin(Long me);
 }

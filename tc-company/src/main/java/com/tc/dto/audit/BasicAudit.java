@@ -14,9 +14,6 @@ import javax.validation.constraints.NotNull;
  * @author Cyg
  */
 public abstract class BasicAudit {
-
-    @NotNull
-    @Min(value = 1)
     private Long adminId;
     @NotEmpty
     @Length(max = 100)
@@ -26,7 +23,6 @@ public abstract class BasicAudit {
     @NotEmpty
     @Length(max = 100)
     private String reason;
-    @NotNull
     private AuditType type;
 
     public Long getAdminId() {

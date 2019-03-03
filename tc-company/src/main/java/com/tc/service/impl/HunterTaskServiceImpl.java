@@ -2,10 +2,7 @@ package com.tc.service.impl;
 
 import com.tc.controller.AuditController;
 import com.tc.db.entity.*;
-import com.tc.db.enums.CommentType;
-import com.tc.db.enums.HunterTaskState;
-import com.tc.db.enums.MoneyType;
-import com.tc.db.enums.TaskState;
+import com.tc.db.enums.*;
 import com.tc.db.repository.HunterTaskRepository;
 import com.tc.db.repository.TaskRepository;
 import com.tc.db.repository.UserIeRecordRepository;
@@ -21,6 +18,7 @@ import com.tc.until.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +48,9 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
     @Autowired
     private UserIeRecordRepository userIeRecordRepository;
 
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
+
     @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
     public Page<HunterTask> findByQueryHunterTask(QueryHunterTask queryHunterTask) {
@@ -70,20 +71,38 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public Boolean updateState(HunterTaskState state) {
+    public Boolean updateState() {
         //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
         List<HunterTask> tasks = hunterTaskRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE), HunterTaskState.ADMIN_AUDIT));
-            predicates.add(cb.lessThan(root.get(HunterTask.ADMIN_AUDIT_TIME), new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
+            predicates.add(cb.or(cb.equal(root.get(HunterTask.HUNTER_TASK_STATE), HunterTaskState.ADMIN_AUDIT),
+                    cb.equal(root.get(HunterTask.HUNTER_TASK_STATE),HunterTaskState.WITH_ADMIN_NEGOTIATE)));
+            predicates.add(cb.lessThan(root.get(HunterTask.ADMIN_AUDIT_TIME),
+                    new Timestamp(System.currentTimeMillis() - AuditController.AUDIT_LONG)));
             return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         });
         if (ListUtils.isEmpty(tasks)) {
             return true;
         } else {
-            List<String> ids = HunterTask.toIds(tasks);
-            int count = hunterTaskRepository.updateStateAndAdminAuditTime(ids, state);
+
+            List<String> aIds = new ArrayList<>();
+            List<String> wnIds = new ArrayList<>();
+            tasks.forEach(task -> {
+                if (task.getState().equals(HunterTaskState.ADMIN_AUDIT)){
+                    aIds.add(task.getId());
+                }else if (task.getState().equals(HunterTaskState.WITH_ADMIN_NEGOTIATE)){
+                    wnIds.add(task.getId());
+                }
+            });
+            int count = 0;
+            if (ListUtils.isNotEmpty(aIds)){
+                count += hunterTaskRepository.updateStateAndAdminAuditTime(aIds, HunterTaskState.COMMIT_ADMIN_AUDIT);
+            }
+            if (ListUtils.isNotEmpty(wnIds)){
+                count += hunterTaskRepository.updateStateAndAdminAuditTime(wnIds, HunterTaskState.COMMIT_TO_ADMIN);
+            }
             return count > 0;
+
         }
     }
 
@@ -95,8 +114,8 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public Boolean updateState(String id, HunterTaskState state, Date date) {
-        int count = hunterTaskRepository.updateStateAndAdminAuditTime(id, state, new Timestamp(date.getTime()));
+    public Boolean updateState(String id, HunterTaskState state, Date date, Long me) {
+        int count = hunterTaskRepository.updateStateAndAdminAuditTime(id, state, new Timestamp(date.getTime()),me);
         return count > 0;
     }
 
@@ -741,5 +760,17 @@ public class HunterTaskServiceImpl extends AbstractBasicServiceImpl<HunterTask> 
         }
 
         return true;
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public List<HunterTask> findBy(String id, HunterTaskState state) {
+        return hunterTaskRepository.findByTaskIdAndState(id,state);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class,readOnly = true)
+    @Override
+    public Integer countByAdmin(Long me) {
+        return hunterTaskRepository.countByAdminId(me);
     }
 }

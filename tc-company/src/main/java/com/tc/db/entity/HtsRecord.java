@@ -3,6 +3,7 @@ package com.tc.db.entity;
 import com.google.gson.Gson;
 import com.tc.db.entity.pk.HtsRecordPK;
 import com.tc.db.enums.OPType;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -30,6 +31,7 @@ public class HtsRecord {
     private OPType operation;
     private HunterTaskStep hunterTaskStep;
 
+    private Trans transOP;
 
     @Id
     @Column(name = "hunter_task_id")
@@ -93,6 +95,16 @@ public class HtsRecord {
         this.operation = operation;
     }
 
+
+    @Transient
+    public Trans getTransOP() {
+        return transOP;
+    }
+
+    public void setTransOP(Trans transOP) {
+        this.transOP = transOP;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -143,17 +155,19 @@ public class HtsRecord {
         try {
             return new Gson().fromJson(jsonContext, HunterTaskStep.class);
         } catch (Exception e) {
-            return null;
+            return new HunterTaskStep();
         }
     }
 
     public static List<HtsRecord> toListInIndex(List<HtsRecord> records) {
         if (ListUtils.isNotEmpty(records)) {
             records.forEach(htsRecord -> {
-                if (htsRecord.hunterTaskStep != null) {
-                    HunterTaskStep hunterTaskStep = htsRecord.hunterTaskStep;
-                    htsRecord.hunterTaskStep = HunterTaskStep.toDetail(hunterTaskStep);
+                if (htsRecord.getHunterTaskStep() != null) {
+                    htsRecord.hunterTaskStep = new HunterTaskStep(htsRecord.hunterTaskId,htsRecord.step,htsRecord.hunterTaskStep.getHunterTask());
                 }
+                htsRecord.setOriginalContext(null);
+                htsRecord.setAfterContext(null);
+                htsRecord.transOP = new Trans(htsRecord.operation.name(),htsRecord.operation.getType());
             });
         }
         return records;

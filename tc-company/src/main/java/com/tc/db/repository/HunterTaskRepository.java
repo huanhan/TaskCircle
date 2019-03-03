@@ -68,6 +68,14 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask, String>,
     HunterTask findByIdAndState(@Param("id") String taskId, @Param("state") HunterTaskState hunterTaskState);
 
     /**
+     * 根据任务编号与状态获取猎刃任务信息
+     * @param taskId
+     * @param hunterTaskState
+     * @return
+     */
+    List<HunterTask> findByTaskIdAndState(@Param("id") String taskId, @Param("state") HunterTaskState hunterTaskState);
+
+    /**
      * 更新任务状态，并将审核时间制空
      *
      * @param ids
@@ -75,7 +83,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask, String>,
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = NULL where t.id in (:ids)")
+    @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = NULL,t.adminId = NULL where t.id in (:ids)")
     int updateStateAndAdminAuditTime(@Param("ids") List<String> ids, @Param("state") HunterTaskState state);
 
     /**
@@ -132,8 +140,8 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask, String>,
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = :time where t.id = :id")
-    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp timestamp);
+    @Query(value = "update HunterTask t set t.state = :state, t.adminAuditTime = :time, t.adminId = :adminId where t.id = :id")
+    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp timestamp,@Param("adminId") Long adminId);
 
     /**
      * 更新猎刃任务状态与开始时间
@@ -306,4 +314,25 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask, String>,
     @Query(value = "select count(t) from HunterTask t where t.taskId = :taskId and t.state in (:states)")
     int countByTaskIdAndHunterTaskStateNotIn(@Param("taskId") String taskId, @Param("states") List<HunterTaskState> states);
 
+    /**
+     * 根据任务编号与指定状态获取数量
+     * @param taskId
+     * @param state
+     * @return
+     */
+    int countByTaskIdAndState(String taskId,HunterTaskState state);
+
+    /**
+     * 根据管理员编号获取该管理员的审核记录数目
+     * @param id
+     * @return
+     */
+    int countByAdminId(Long id);
+
+    /**
+     * 获取指定状态的猎刃任务数量
+     * @param state
+     * @return
+     */
+    int countByStateEquals(HunterTaskState state);
 }

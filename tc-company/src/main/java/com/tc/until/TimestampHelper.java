@@ -272,6 +272,7 @@ public class TimestampHelper {
             case DAY:
                 //如果结束日期与开始日期不再统一个月,或者开始日期小于结束日期，设置结束日期为开始日期的月末
                 if (!TimestampHelper.isEqualMonth(begin,end)){
+                    //如果结束日期与开始日期不再统一个月
                     result = TimestampHelper.toMonthEnd(begin);
                 }
                 break;

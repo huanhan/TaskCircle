@@ -55,4 +55,10 @@ public interface TaskClassifyRelationRepository extends JpaRepository<TaskClassi
      */
     List<TaskClassifyRelation> findByTaskClassifyIdEquals(Long id);
 
+    /**
+     * 根据任务编号获取
+     * @param id
+     * @return
+     */
+    List<TaskClassifyRelation> findByTaskId(String id);
 }

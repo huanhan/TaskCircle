@@ -1,6 +1,9 @@
 package com.tc.db.entity;
 
+import com.tc.until.ListUtils;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,6 +30,16 @@ public class AuditHunterTask {
 
     public AuditHunterTask(String taskId) {
         this.hunterTaskId = taskId;
+    }
+
+    public static List<AuditHunterTask> toIndexAsList(List<AuditHunterTask> query) {
+        if (ListUtils.isNotEmpty(query)){
+            query.forEach(auditHunterTask -> {
+                auditHunterTask.audit = Audit.resetAudit(auditHunterTask.audit);
+                auditHunterTask.hunterTask = new HunterTask(auditHunterTask.getHunterTaskId(),auditHunterTask.hunterTask.getHunter());
+            });
+        }
+        return query;
     }
 
     @Id

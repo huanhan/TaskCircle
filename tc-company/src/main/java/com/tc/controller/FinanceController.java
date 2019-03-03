@@ -6,6 +6,7 @@ import com.tc.dto.Result;
 import com.tc.dto.finance.CompanyFinance;
 import com.tc.dto.finance.IESource;
 import com.tc.dto.finance.QueryFinance;
+import com.tc.dto.user.DateCondition;
 import com.tc.exception.ValidException;
 import com.tc.service.UserWithdrawService;
 import com.tc.until.FloatHelper;
@@ -74,19 +75,26 @@ public class FinanceController {
      */
     @PostMapping("/source")
     @ApiOperation(value = "查看收支来源")
-    public Result ieSources(@Valid @RequestBody QueryFinance queryFinance,BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            throw new ValidException(bindingResult.getFieldErrors());
+    public Result ieSources(@Valid @RequestBody QueryFinance queryFinance){
+        if (queryFinance.getAuditPassBegin() == null || queryFinance.getAuditPassEnd() == null){
+            throw new ValidException("请设置日期");
         }
-        //验证结束日期的有效性
-        Timestamp end = TimestampHelper.endTimeByDateType(queryFinance.getDateType(),queryFinance.getAuditPassBegin(),queryFinance.getAuditPassEnd());
+
+
+
+
+        Timestamp[] reset = DateCondition.resetByEndAfterBegin(
+                queryFinance.getAuditPassBegin(),
+                queryFinance.getAuditPassEnd());
+
 
         //重新设置查询的结束日期与必要的查询内容
-        queryFinance.setAuditPassEnd(end);
+        queryFinance.setAuditPassBegin(reset[0]);
+        queryFinance.setAuditPassEnd(reset[1]);
         queryFinance.setState(WithdrawState.SUCCESS);
         Page<UserWithdraw> result = userWithdrawService.findByQueryFinance(queryFinance);
 
-        return Result.init(UserWithdraw.toIndexAsList(result.getContent()),queryFinance);
+        return Result.init(UserWithdraw.toIndexAsList(result.getContent()),queryFinance.append(result.getTotalElements(),(long)result.getTotalPages()));
     }
 
     /**

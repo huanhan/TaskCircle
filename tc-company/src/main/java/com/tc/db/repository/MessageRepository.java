@@ -19,7 +19,7 @@ public interface MessageRepository extends JpaRepository<Message,Long>,JpaSpecif
      * @return
      */
     @Modifying
-    @Query("update Message m set m.lookCondition = null,m.type = null where m.id = :id")
+    @Query("update Message m set m.lookCondition = null,m.type = 'IS_NULL' where m.id = :id")
     int deleteCondition(@Param("id") Long id);
 
     /**
@@ -31,4 +31,7 @@ public interface MessageRepository extends JpaRepository<Message,Long>,JpaSpecif
     @Modifying
     @Query("update Message m set m.state = :state where m.id = :id")
     int updateState(@Param("id") Long id, @Param("state") MessageState state);
+
+
+    Message findById(Long id);
 }

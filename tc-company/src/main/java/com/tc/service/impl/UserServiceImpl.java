@@ -3,10 +3,7 @@ package com.tc.service.impl;
 import com.tc.controller.AuditController;
 import com.tc.db.entity.*;
 import com.tc.db.entity.pk.UserImgPK;
-import com.tc.db.enums.AdminState;
-import com.tc.db.enums.UserCategory;
-import com.tc.db.enums.UserIMGName;
-import com.tc.db.enums.UserState;
+import com.tc.db.enums.*;
 import com.tc.db.repository.*;
 import com.tc.dto.TimeScope;
 import com.tc.dto.finance.QueryFinance;
@@ -20,10 +17,13 @@ import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.UserService;
 import com.tc.until.ListUtils;
+import com.tc.until.PageRequest;
+import com.tc.until.QueryUtils;
 import com.tc.until.StringResourceCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -66,6 +66,9 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Autowired
     private AdminAuthorityRepository adminAuthorityRepository;
+
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
     @Override
@@ -118,7 +121,7 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public Boolean updateState(UserState state) {
+    public Boolean updateState() {
         //获取任务状态为审核中的状态，并且审核时长超过设置的审核时长
         List<User> users = userRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -130,7 +133,7 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
             return true;
         } else {
             List<Long> ids = User.toIds(users);
-            int count = userRepository.updateState(ids, state);
+            int count = userRepository.updateState(ids, UserState.AUDIT_HUNTER);
             return count > 0;
         }
     }
@@ -143,8 +146,14 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public Boolean updateState(Long id, UserState state, Date now) {
-        int count = userRepository.updateState(id, state, new Timestamp(now.getTime()));
+    public Boolean updateState(Long id, UserState state, Date now,Long me) {
+        int count = userRepository.updateStateAndAdminAuditTime(id, state, new Timestamp(now.getTime()),me);
+        return count > 0;
+    }
+
+    @Override
+    public Boolean updateStateAndAuditTime(Long id, UserState state, Date date) {
+        int count = userRepository.updateStateAndAuditTime(id, state, new Timestamp(date.getTime()));
         return count > 0;
     }
 
@@ -225,6 +234,22 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
     @Override
     public User findByUsername(String username) {
         return getUser(username);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
+    public Integer countByAdmin(Long me) {
+        return userRepository.countByAdminId(me);
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
+    public Page<User> findByIdsAndPage(List<Long> ids, PageRequest page) {
+        return userRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(QueryUtils.in(root,cb,User.ID,ids));
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        },page);
     }
 
     @Transactional(rollbackFor = RuntimeException.class, readOnly = true)

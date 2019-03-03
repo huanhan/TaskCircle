@@ -16,6 +16,14 @@ public enum DateType {
     ;
     private String type;
 
+    public static DateType find(String type) {
+        try {
+            return DateType.valueOf(type);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
     public String getType() {
         return type;
     }

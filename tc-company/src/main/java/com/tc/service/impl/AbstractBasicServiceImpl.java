@@ -3,12 +3,18 @@ package com.tc.service.impl;
 import com.tc.dto.LongIds;
 import com.tc.dto.StringIds;
 import com.tc.service.BasicService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
+
+
+
 
     @Override
     public T save(T t) {
@@ -83,5 +89,15 @@ public abstract class AbstractBasicServiceImpl<T> implements BasicService<T> {
     @Override
     public long count() {
         return 0;
+    }
+
+    @Override
+    public Object redisGet(String key) {
+        return null;
+    }
+
+    @Override
+    public void redisSave(String key, Object value) {
+
     }
 }

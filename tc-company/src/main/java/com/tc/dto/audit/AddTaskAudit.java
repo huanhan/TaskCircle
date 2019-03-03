@@ -57,12 +57,6 @@ public class AddTaskAudit extends BasicAudit{
             case USER_FAILURE_TASK:
                 audit.setAuditTask(new AuditTask(audit.getId(),taskId,0f));
                 break;
-            case HUNTER_FAILURE_TASK:
-                audit.setAuditHunterTask(new AuditHunterTask(audit.getId(),taskId));
-                break;
-            case HUNTER_OK_TASK:
-                audit.setAuditHunterTask(new AuditHunterTask(audit.getId(),taskId));
-                break;
             default:
                 throw new ValidException(StringResourceCenter.VALIDATOR_INSERT_FAILED);
         }

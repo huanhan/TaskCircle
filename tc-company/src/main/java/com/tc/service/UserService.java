@@ -6,6 +6,7 @@ import com.tc.dto.TimeScope;
 import com.tc.dto.user.CashPledge;
 import com.tc.dto.user.ModifyPassword;
 import com.tc.dto.user.QueryUser;
+import com.tc.until.PageRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
@@ -47,10 +48,9 @@ public interface UserService extends BasicService<User> {
 
     /**
      * 自动更新用户状态
-     * @param state
      * @return
      */
-    Boolean updateState(UserState state);
+    Boolean updateState();
 
     /**
      * 根据编号与状态获取
@@ -67,7 +67,17 @@ public interface UserService extends BasicService<User> {
      * @param now
      * @return
      */
-    Boolean updateState(Long id, UserState state, Date now);
+    Boolean updateState(Long id, UserState state, Date now,Long me);
+
+    /**
+     * 更新用户状态与提交审核的时间
+     * @param id
+     * @param auditHunter
+     * @param date
+     * @return
+     */
+    Boolean updateStateAndAuditTime(Long id, UserState auditHunter, Date date);
+
 
     /**
      * 根据查询条件获取符合该查询条件的用户的数量
@@ -127,4 +137,21 @@ public interface UserService extends BasicService<User> {
      * @return
      */
     User findByUsername(String username);
+
+    /**
+     * 根据管理员编号获取该管理员审核记录数
+     * @param me
+     * @return
+     */
+    Integer countByAdmin(Long me);
+
+
+    /**
+     * 根据编号列表与分页信息获取用户数据
+     * @param ids
+     * @param page
+     * @return
+     */
+    Page<User> findByIdsAndPage(List<Long> ids, PageRequest page);
+
 }

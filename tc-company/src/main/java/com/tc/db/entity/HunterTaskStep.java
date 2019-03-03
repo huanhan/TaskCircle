@@ -1,6 +1,7 @@
 package com.tc.db.entity;
 
 import com.tc.db.entity.pk.HunterTaskStepPK;
+import com.tc.dto.trans.Trans;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -16,7 +17,7 @@ import java.util.Objects;
  * 猎刃接取任务的任务步骤完成详情实体
  */
 @Entity
-@Table(name = "hunter_task_step", schema = "tc-company", catalog = "")
+@Table(name = "hunter_task_step", schema = "tc-company")
 @IdClass(value = HunterTaskStepPK.class)
 public class HunterTaskStep implements Serializable {
     public static final String STEP = "step";
@@ -31,12 +32,34 @@ public class HunterTaskStep implements Serializable {
     private HunterTask hunterTask;
     private Collection<HtsRecord> htsRecords;
 
+    private boolean isChange = false;
+
+    private Trans transState = new Trans("OK","步骤以完成");
+
+    public HunterTaskStep() {
+    }
+
+    public HunterTaskStep(String id, int i, String context, String remake, Trans trans) {
+        this.hunterTaskId = id;
+        this.step = i;
+        this.context = context;
+        this.remake = remake;
+        this.transState = trans;
+    }
+
+    public HunterTaskStep(String id, Integer step, HunterTask hunterTask) {
+        this.hunterTaskId = id;
+        this.step = step;
+        this.hunterTask = new HunterTask(hunterTask.getId(),hunterTask.getHunter());
+    }
+
+
     public static List<HunterTaskStep> toListInIndex(List<HunterTaskStep> query) {
         if (ListUtils.isNotEmpty(query)){
 
             query.forEach(hunterTaskStep -> {
                 if (hunterTaskStep.getHunterTask() != null){
-                    hunterTaskStep.setHunterTask(HunterTask.toDetail(hunterTaskStep.getHunterTask()));
+                    hunterTaskStep.setHunterTask(new HunterTask(hunterTaskStep.getHunterTaskId(),hunterTaskStep.getHunterTask().getHunter()));
                 }
             });
         }
@@ -48,6 +71,7 @@ public class HunterTaskStep implements Serializable {
             if (hunterTaskStep.getHunterTask() != null){
                 hunterTaskStep.hunterTask = new HunterTask(hunterTaskStep.getHunterTaskId(),hunterTaskStep.getHunterTask().getTask());
             }
+            hunterTaskStep.htsRecords = null;
         }
         return hunterTaskStep;
     }
@@ -111,6 +135,24 @@ public class HunterTaskStep implements Serializable {
 
     public void setRemake(String remake) {
         this.remake = remake;
+    }
+
+    @Transient
+    public boolean isChange() {
+        return isChange;
+    }
+
+    public void setChange(boolean change) {
+        isChange = change;
+    }
+
+    @Transient
+    public Trans getTransState() {
+        return transState;
+    }
+
+    public void setTransState(Trans transState) {
+        this.transState = transState;
     }
 
     @Override

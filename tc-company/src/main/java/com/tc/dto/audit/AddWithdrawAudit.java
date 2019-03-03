@@ -7,6 +7,8 @@ import com.tc.until.IdGenerator;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * 添加提现审核
  * @author Cyg
@@ -17,12 +19,33 @@ public class AddWithdrawAudit extends BasicAudit{
     @Length(max = 32)
     private String withdrawId;
 
+    @NotNull
+    private Float adminMoney;
+
+    private Float userMoney;
+
     public String getWithdrawId() {
         return withdrawId;
     }
 
     public void setWithdrawId(String withdrawId) {
         this.withdrawId = withdrawId;
+    }
+
+    public Float getAdminMoney() {
+        return adminMoney;
+    }
+
+    public void setAdminMoney(Float adminMoney) {
+        this.adminMoney = adminMoney;
+    }
+
+    public Float getUserMoney() {
+        return userMoney;
+    }
+
+    public void setUserMoney(Float userMoney) {
+        this.userMoney = userMoney;
     }
 
     @Override
@@ -34,7 +57,7 @@ public class AddWithdrawAudit extends BasicAudit{
         audit.setReason(getReason());
         audit.setResult(getResult());
         audit.setType(AuditType.WITHDRAW);
-        audit.setAuditWithdraw(new AuditWithdraw(audit.getId(),withdrawId));
+        audit.setAuditWithdraw(new AuditWithdraw(audit.getId(),withdrawId,adminMoney,userMoney));
         return audit;
     }
 }

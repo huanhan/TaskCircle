@@ -24,6 +24,7 @@ public class ModifyTaskClassify {
     private Long parents;
     @Length(max = 100)
     private String info;
+    private String tag;
 
     public Long getId() {
         return id;
@@ -57,10 +58,19 @@ public class ModifyTaskClassify {
         this.info = info;
     }
 
-    public static TaskClassify toTaskClassify(TaskClassify taskClassify,ModifyTaskClassify modifyTaskClassify) {
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public static TaskClassify toTaskClassify(TaskClassify taskClassify, ModifyTaskClassify modifyTaskClassify) {
         taskClassify.setName(StringUtils.isEmpty(modifyTaskClassify.name) ? taskClassify.getName() : modifyTaskClassify.getName());
-        taskClassify.setParents((modifyTaskClassify.parents == null) ? taskClassify.getParents() : new TaskClassify(modifyTaskClassify.parents));
+        taskClassify.setParentsId(modifyTaskClassify.getParents());
         taskClassify.setInfo(StringUtils.isEmpty(modifyTaskClassify.info) ? taskClassify.getInfo() : modifyTaskClassify.info);
+        taskClassify.setClassifyImg(StringUtils.isEmpty(modifyTaskClassify.tag) ? taskClassify.getClassifyImg() : modifyTaskClassify.tag);
         return taskClassify;
     }
 }

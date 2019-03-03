@@ -13,19 +13,21 @@ import java.util.Objects;
  * @author Cyg
  */
 public class UserHunterInterflowPK implements Serializable {
-    private String taskId;
+    private String hunterTaskId;
     private Long userId;
     private Long hunterId;
     private Timestamp createTime;
 
-    @Column(name = "task_id")
+
+
+    @Column(name = "hunter_task_id")
     @Id
-    public String getTaskId() {
-        return taskId;
+    public String getHunterTaskId() {
+        return hunterTaskId;
     }
 
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
     }
 
     @Column(name = "user_id")
@@ -66,13 +68,13 @@ public class UserHunterInterflowPK implements Serializable {
         UserHunterInterflowPK that = (UserHunterInterflowPK) o;
         return userId.equals(that.getUserId()) &&
                 hunterId.equals(that.getHunterId()) &&
-                taskId.equals(that.getTaskId()) &&
+                hunterTaskId.equals(that.getHunterTaskId()) &&
                 Objects.equals(createTime, that.getCreateTime());
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(taskId, userId, hunterId, createTime);
+        return Objects.hash(hunterId, userId, hunterId, createTime);
     }
 }

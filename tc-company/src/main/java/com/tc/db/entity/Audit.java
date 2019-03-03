@@ -47,7 +47,6 @@ public class Audit {
 
     private Trans transResult;
     private Trans transType;
-
     private Trans typeData;
 
     @Id
@@ -252,6 +251,22 @@ public class Audit {
         }
         return result;
     }
+
+    public static Audit resetAudit(Audit result){
+        if (result != null){
+            result.setAuditTask(null);
+            result.setAuditWithdraw(null);
+            result.setAuditHunterTask(null);
+            result.setAuditHunter(null);
+            if (result.getAdmin() != null) {
+                result.setAdmin(new Admin(result.getAdminId(), result.getAdmin().getUser().getName(), result.getAdmin().getUser().getUsername()));
+            }
+            result.setTransResult(new Trans(result.result.name(),result.result.getState()));
+            result.setTransType(new Trans(result.type.name(),result.type.getType()));
+        }
+        return result;
+    }
+
 
     /**
      * 权限审核列表

@@ -268,13 +268,13 @@ public class UserController {
      * @return
      */
     @PostMapping("/task/{id:\\d+}")
-    @ApiOperation(value = "获取任务列表")
+    @ApiOperation(value = "获取指定用户的任务列表任务列表")
     public Result all(@RequestBody QueryTask queryTask, @PathVariable("id") Long id) {
         User user = userService.findOne(id);
         if (user == null) {
             throw new ValidException("用户不存在");
         }
-        queryTask.setTaskId(id);
+        queryTask.setUserId(id);
         Page<Task> queryTasks = taskService.findByQueryTask(queryTask);
         List<Task> result = Task.toIndexAsList(queryTasks.getContent());
         TransData trans = new TransData(user.getId(), user.toTitle(), result);

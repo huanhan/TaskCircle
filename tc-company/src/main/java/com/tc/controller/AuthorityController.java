@@ -240,34 +240,27 @@ public class AuthorityController {
     @PostMapping("/{aid:\\d+}")
     @ApiOperation(value = "设置权限对应的资源")
     public void setAuthorityResource(HttpServletRequest request,@PathVariable("aid") Long aid, @RequestBody LongIds ids){
-
         Long creation = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         Authority query = authorityService.findOne(aid);
         if (query != null){
             if (query.getCreation().equals(creation)){
                 List<AuthorityResource> news = AuthorityOPClassify.create(aid,ids.getIds());
                 List<AuthorityResource> oldies = authorityResourceService.findByAuthorityID(aid);
-
                 //将用户选中的内容进行比较
                 AuthorityOPClassify authorityOPClassify = AuthorityOPClassify.init(news,oldies);
-
                 if (authorityOPClassify == null){
                     throw new ValidException("无意义的内容");
                 }
-
                 //保存新的，并且删除旧的
-                authorityResourceService.saveNewsAndRemoveOlds(authorityOPClassify.getInAdd(),AuthorityOPClassify.toResourceLong(authorityOPClassify.getInDelete()),aid);
-
+                authorityResourceService.saveNewsAndRemoveOlds(
+                        authorityOPClassify.getInAdd(),
+                        AuthorityOPClassify.toResourceLong(authorityOPClassify.getInDelete()),aid);
             }else {
                 throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
             }
         }else {
             throw new DBException(StringResourceCenter.DB_QUERY_ABNORMAL);
         }
-
-
-
-
     }
 
     /**

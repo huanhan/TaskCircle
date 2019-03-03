@@ -38,6 +38,7 @@ public class UserWithdraw implements Serializable {
 
     private String id;
     private Long userId;
+    private Long adminId;
     private Float money;
     private Float realityMoney;
     private String context;
@@ -48,12 +49,81 @@ public class UserWithdraw implements Serializable {
     private Timestamp auditPassTime;
     private Collection<AuditWithdraw> auditWithdraws;
     private User user;
+    private Admin admin;
 
     private Trans transState;
     private Trans transType;
 
     private List<TransEnum> transStates;
     private List<TransEnum> transTypes;
+    private Boolean isAudit = false;
+
+    public static List<UserWithdraw> toIndexAsList(List<UserWithdraw> content, Long me) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(userWithdraw -> {
+                userWithdraw.setAuditWithdraws(null);
+                if (userWithdraw.getUser()!= null){
+                    userWithdraw.setUser(new User(userWithdraw.userId,userWithdraw.getUser().getName(),userWithdraw.getUser().getUsername()));
+                }
+                if (userWithdraw.getAdmin() != null){
+                    if (me.equals(userWithdraw.getAdminId())){
+                        userWithdraw.isAudit = true;
+                    }
+                    userWithdraw.setAdmin(new Admin(userWithdraw.adminId,userWithdraw.getAdmin().getUser()));
+                }
+                userWithdraw.setTransState(new Trans(userWithdraw.state.name(),userWithdraw.state.getState()));
+                userWithdraw.setTransType(new Trans(userWithdraw.type.name(),userWithdraw.type.getType()));
+            });
+        }
+        return content;
+    }
+
+    public static List<UserWithdraw> toIndexAsList(List<UserWithdraw> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(userWithdraw -> {
+                userWithdraw.setAuditWithdraws(null);
+                if (userWithdraw.getUser()!= null){
+                    userWithdraw.setUser(new User(
+                            userWithdraw.userId,
+                            userWithdraw.getUser().getName(),
+                            userWithdraw.getUser().getUsername(),
+                            userWithdraw.getUser().getCategory()));
+                }
+                if (userWithdraw.getAdmin() != null){
+                    userWithdraw.setAdmin(new Admin(userWithdraw.adminId,userWithdraw.getAdmin().getUser()));
+                }
+                userWithdraw.setTransState(new Trans(userWithdraw.state.name(),userWithdraw.state.getState()));
+                userWithdraw.setTransType(new Trans(userWithdraw.type.name(),userWithdraw.type.getType()));
+            });
+        }
+        return content;
+    }
+
+    public static List<String> toIds(List<UserWithdraw> uws) {
+        List<String> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(uws)){
+            uws.forEach(task -> result.add(task.id));
+        }
+        return result;
+    }
+
+    public static UserWithdraw toDetail(UserWithdraw result) {
+        if (result != null){
+            if (result.getUser() != null){
+                result.setUser(new User(result.getUserId(),result.getUser().getName(),result.getUser().getUsername()));
+            }
+            if (result.getAdmin() != null){
+                result.setAdmin(new Admin(result.adminId,result.getAdmin().getUser()));
+            }
+            result.setAuditWithdraws(null);
+            result.setTransState(new Trans(result.state.name(),result.state.getState()));
+            result.setTransType(new Trans(result.type.name(),result.type.getType()));
+        }
+
+        return result;
+    }
+
+
 
     @Id
     @Column(name = "id")
@@ -73,6 +143,15 @@ public class UserWithdraw implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+    @Basic
+    @Column(name = "admin_id")
+    public Long getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
 
     @Basic
@@ -126,7 +205,6 @@ public class UserWithdraw implements Serializable {
     public void setType(WithdrawType type) {
         this.type = type;
     }
-
 
     @Basic
     @CreationTimestamp
@@ -195,6 +273,15 @@ public class UserWithdraw implements Serializable {
         this.transTypes = transTypes;
     }
 
+    @Transient
+    public Boolean getAudit() {
+        return isAudit;
+    }
+
+    public void setAudit(Boolean audit) {
+        isAudit = audit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -231,40 +318,14 @@ public class UserWithdraw implements Serializable {
         this.user = userByUserId;
     }
 
-
-    public static List<UserWithdraw> toIndexAsList(List<UserWithdraw> content) {
-        if (!ListUtils.isEmpty(content)){
-            content.forEach(userWithdraw -> {
-                userWithdraw.setAuditWithdraws(null);
-                if (userWithdraw.getUser()!= null){
-                    userWithdraw.setUser(new User(userWithdraw.userId,userWithdraw.getUser().getName(),userWithdraw.getUser().getUsername()));
-                }
-                userWithdraw.setTransState(new Trans(userWithdraw.state.name(),userWithdraw.state.getState()));
-                userWithdraw.setTransType(new Trans(userWithdraw.type.name(),userWithdraw.type.getType()));
-            });
-        }
-        return content;
+    @ManyToOne
+    @JoinColumn(name = "admin_id", referencedColumnName = "user_id",insertable = false,updatable = false)
+    public Admin getAdmin() {
+        return admin;
     }
 
-    public static List<String> toIds(List<UserWithdraw> uws) {
-        List<String> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(uws)){
-            uws.forEach(task -> result.add(task.id));
-        }
-        return result;
-    }
-
-    public static UserWithdraw toDetail(UserWithdraw result) {
-        if (result != null){
-            if (result.getUser() != null){
-                result.setUser(new User(result.getUserId(),result.getUser().getName(),result.getUser().getUsername()));
-            }
-            result.setAuditWithdraws(null);
-            result.setTransState(new Trans(result.state.name(),result.state.getState()));
-            result.setTransType(new Trans(result.type.name(),result.type.getType()));
-        }
-
-        return result;
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 
     public UserWithdraw append(List<TransEnum> transStates, List<TransEnum> transTypes){
@@ -277,4 +338,6 @@ public class UserWithdraw implements Serializable {
         this.setAuditWithdraws(list);
         return this;
     }
+
+
 }

@@ -43,10 +43,16 @@ public class Admin {
     private Collection<Authority> authorities;
     private Collection<Message> messages;
     private Collection<TaskClassify> taskClassifies;
-
+    private Collection<Task> tasks;
+    private Collection<UserWithdraw> userWithdraws;
     private List<TransEnum> adminStates;
     private boolean isManager = false;
     private Trans trans;
+    private Collection<User> users;
+    private Collection<HunterTask> hunterTasks;
+
+
+
 
     public Admin() {
     }
@@ -61,7 +67,6 @@ public class Admin {
         this.setUser(new User(userId,name,username));
     }
 
-
     public Admin(Long userId, User user) {
         this.userId = userId;
         if (user != null){
@@ -69,8 +74,125 @@ public class Admin {
         }
     }
 
+    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query, Long me) {
+        TransAdmin result = new TransAdmin();
+        List<Trans> trans = new ArrayList<>();
+        List<TransOP> transAdmins = new ArrayList<>();
+        if (ListUtils.isNotEmpty(content)){
+            content.forEach(con -> transAdmins.add(new TransOP(con.userId,
+                    con.user.getUsername() + "(" + con.user.getName() + ")",
+                    con.createId.equals(me))));
+        }
+        if (ListUtils.isNotEmpty(notAuthAdmins)){
+            notAuthAdmins.forEach(con -> trans.add(new TransAdmin(con.userId,con.user.getUsername() + "(" + con.user.getName() + ")")));
+        }
+        result.setKey(query.getId());
+        result.setValue(query.getName());
+        result.setAdmins(transAdmins);
+        result.setTrans(trans);
+        return result;
+    }
 
+    public static List<Trans> toTrans(List<Admin> queryAdmins) {
+        List<Trans> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(queryAdmins)){
+            queryAdmins.forEach(adm -> result.add(new Trans(adm.userId,adm.user.getUsername() + "(" + adm.user.getName() + ")")));
+        }
+        return result;
+    }
 
+    public static List<Show> toShows(List<Admin> admins){
+        List<Show> result = new ArrayList<>();
+        if (!admins.isEmpty()){
+            admins.forEach(admin ->{
+                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
+            });
+        }
+        return result;
+    }
+
+    public static List<Long> toKeys(List<Admin> list) {
+        List<Long> result = new ArrayList<>();
+        if (!list.isEmpty()){
+            list.forEach(admin -> result.add(admin.getUserId()));
+        }
+        return result;
+    }
+
+    /**
+     * 管理员管理列表
+     * @param admins
+     * @return
+     */
+    public static List<Admin> toListInIndex(List<Admin> admins) {
+        if (!ListUtils.isEmpty(admins)){
+            admins.forEach(admin ->{
+                User user = new User(admin.getUserId(),admin.getUser().getName());
+                user.setUsername(admin.getUser().getUsername());
+                user.setPhone(admin.getUser().getPhone());
+                user.setAddress(admin.getUser().getAddress());
+                admin.setUser(user);
+                admin.setAdmin(null);
+                admin.setAdmins(null);
+                admin.setAdminAuthorities(null);
+                admin.setAudits(null);
+                admin.setAuthorities(null);
+                admin.setMessages(null);
+                admin.setTaskClassifies(null);
+                admin.setTasks(null);
+                admin.setUsers(null);
+                admin.setUserWithdraws(null);
+                admin.setHunterTasks(null);
+            });
+        }
+        return admins;
+    }
+
+    public static List<Admin> toListInIndex(List<Admin> admins, Long id) {
+        if (!ListUtils.isEmpty(admins)){
+            admins.forEach(admin ->{
+                User user = new User(admin.getUserId(),admin.getUser().getName());
+                user.setUsername(admin.getUser().getUsername());
+                user.setPhone(admin.getUser().getPhone());
+                user.setAddress(admin.getUser().getAddress());
+                admin.setUser(user);
+                admin.setAdmin(null);
+                admin.setAdmins(null);
+                admin.setAdminAuthorities(null);
+                admin.setAudits(null);
+                admin.setAuthorities(null);
+                admin.setMessages(null);
+                admin.setTaskClassifies(null);
+                admin.setTasks(null);
+                admin.setUsers(null);
+                admin.setUserWithdraws(null);
+                admin.setHunterTasks(null);
+                admin.setManager(admin.getCreateId().equals(id));
+                admin.setTrans(new Trans(admin.getAdminState().name(),admin.getAdminState().getState()));
+            });
+        }
+        return admins;
+    }
+
+    public static Admin toDetail(Admin admin){
+        if (admin != null){
+            admin.setAdminStates(AdminState.toList());
+            admin.setUser(User.toDetail(admin.getUser()));
+            admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
+            admin.setAdmins(null);
+            admin.setAdminAuthorities(null);
+            admin.setAudits(null);
+            admin.setAuthorities(null);
+            admin.setMessages(null);
+            admin.setTaskClassifies(null);
+            admin.setTasks(null);
+            admin.setUsers(null);
+            admin.setUserWithdraws(null);
+            admin.setHunterTasks(null);
+            admin.setTrans(new Trans(admin.getAdminState().name(),admin.getAdminState().getState()));
+        }
+        return admin;
+    }
 
     @Id
     @Column(name = "user_id")
@@ -233,111 +355,39 @@ public class Admin {
         this.trans = trans;
     }
 
-    public static TransAdmin toTrans(List<Admin> content, List<Admin> notAuthAdmins, Authority query, Long me) {
-        TransAdmin result = new TransAdmin();
-        List<Trans> trans = new ArrayList<>();
-        List<TransOP> transAdmins = new ArrayList<>();
-        if (ListUtils.isNotEmpty(content)){
-            content.forEach(con -> transAdmins.add(new TransOP(con.userId,
-                    con.user.getUsername() + "(" + con.user.getName() + ")",
-                    con.createId.equals(me))));
-        }
-        if (ListUtils.isNotEmpty(notAuthAdmins)){
-            notAuthAdmins.forEach(con -> trans.add(new TransAdmin(con.userId,con.user.getUsername() + "(" + con.user.getName() + ")")));
-        }
-        result.setKey(query.getId());
-        result.setValue(query.getName());
-        result.setAdmins(transAdmins);
-        result.setTrans(trans);
-        return result;
+    @OneToMany(mappedBy = "admin")
+    public Collection<Task> getTasks() {
+        return tasks;
     }
 
-    public static List<Trans> toTrans(List<Admin> queryAdmins) {
-        List<Trans> result = new ArrayList<>();
-        if (ListUtils.isNotEmpty(queryAdmins)){
-            queryAdmins.forEach(adm -> result.add(new Trans(adm.userId,adm.user.getUsername() + "(" + adm.user.getName() + ")")));
-        }
-        return result;
+    public void setTasks(Collection<Task> tasks) {
+        this.tasks = tasks;
     }
 
-    public static List<Show> toShows(List<Admin> admins){
-        List<Show> result = new ArrayList<>();
-        if (!admins.isEmpty()){
-            admins.forEach(admin ->{
-                result.add(new Show(admin.getUserId(),admin.getUser().getName()));
-            });
-        }
-        return result;
+    @OneToMany(mappedBy = "admin")
+    public Collection<UserWithdraw> getUserWithdraws() {
+        return userWithdraws;
     }
 
-    public static List<Long> toKeys(List<Admin> list) {
-        List<Long> result = new ArrayList<>();
-        if (!list.isEmpty()){
-            list.forEach(admin -> result.add(admin.getUserId()));
-        }
-        return result;
+    public void setUserWithdraws(Collection<UserWithdraw> userWithdraws) {
+        this.userWithdraws = userWithdraws;
     }
 
-    /**
-     * 管理员管理列表
-     * @param admins
-     * @return
-     */
-    public static List<Admin> toListInIndex(List<Admin> admins) {
-        if (!ListUtils.isEmpty(admins)){
-            admins.forEach(admin ->{
-                User user = new User(admin.getUserId(),admin.getUser().getName());
-                user.setUsername(admin.getUser().getUsername());
-                user.setPhone(admin.getUser().getPhone());
-                user.setAddress(admin.getUser().getAddress());
-                admin.setUser(user);
-                admin.setAdmin(null);
-                admin.setAdmins(null);
-                admin.setAdminAuthorities(null);
-                admin.setAudits(null);
-                admin.setAuthorities(null);
-                admin.setMessages(null);
-                admin.setTaskClassifies(null);
-            });
-        }
-        return admins;
+    @OneToMany(mappedBy = "auditAdmin")
+    public Collection<User> getUsers() {
+        return users;
     }
 
-    public static List<Admin> toListInIndex(List<Admin> admins, Long id) {
-        if (!ListUtils.isEmpty(admins)){
-            admins.forEach(admin ->{
-                User user = new User(admin.getUserId(),admin.getUser().getName());
-                user.setUsername(admin.getUser().getUsername());
-                user.setPhone(admin.getUser().getPhone());
-                user.setAddress(admin.getUser().getAddress());
-                admin.setUser(user);
-                admin.setAdmin(null);
-                admin.setAdmins(null);
-                admin.setAdminAuthorities(null);
-                admin.setAudits(null);
-                admin.setAuthorities(null);
-                admin.setMessages(null);
-                admin.setTaskClassifies(null);
-                admin.setManager(admin.getCreateId().equals(id));
-                admin.setTrans(new Trans(admin.getAdminState().name(),admin.getAdminState().getState()));
-            });
-        }
-        return admins;
+    public void setUsers(Collection<User> users) {
+        this.users = users;
     }
 
-    public static Admin toDetail(Admin admin){
-        if (admin != null){
-            admin.setAdminStates(AdminState.toList());
-            admin.setUser(User.toDetail(admin.getUser()));
-            admin.setAdmin(new Admin(admin.getCreateId(),admin.getUser().getName(),admin.getUser().getUsername()));
-            admin.setAdmins(null);
-            admin.setAdminAuthorities(null);
-            admin.setAudits(null);
-            admin.setAuthorities(null);
-            admin.setMessages(null);
-            admin.setTaskClassifies(null);
-            admin.setTrans(new Trans(admin.getAdminState().name(),admin.getAdminState().getState()));
-        }
-        return admin;
+    @OneToMany(mappedBy = "admin")
+    public Collection<HunterTask> getHunterTasks() {
+        return hunterTasks;
+    }
+
+    public void setHunterTasks(Collection<HunterTask> hunterTasks) {
+        this.hunterTasks = hunterTasks;
     }
 }

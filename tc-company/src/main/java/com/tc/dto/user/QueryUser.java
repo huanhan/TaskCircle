@@ -7,6 +7,7 @@ import com.tc.db.entity.User;
 import com.tc.db.enums.UserCategory;
 import com.tc.db.enums.UserGender;
 import com.tc.db.enums.UserState;
+import com.tc.until.ListUtils;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
 import org.springframework.data.domain.Sort;
@@ -35,6 +36,7 @@ public class QueryUser extends PageRequest {
      * 用户分类
      */
     private UserCategory category;
+    private List<UserCategory> categories;
     /**
      * 用户性别
      */
@@ -117,6 +119,8 @@ public class QueryUser extends PageRequest {
      * 用户状态
      */
     private UserState state;
+
+    private List<UserState> states;
 
     private Integer taskCountBegin;
 
@@ -375,6 +379,22 @@ public class QueryUser extends PageRequest {
         this.commentAvgEnd = commentAvgEnd;
     }
 
+    public List<UserState> getStates() {
+        return states;
+    }
+
+    public void setStates(List<UserState> states) {
+        this.states = states;
+    }
+
+    public List<UserCategory> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<UserCategory> categories) {
+        this.categories = categories;
+    }
+
     public static List<Predicate> initPredicates(QueryUser queryUser, Root<User> root, CriteriaQuery<?> query, CriteriaBuilder cb){
         List<Predicate> predicates = new ArrayList<>();
 
@@ -382,8 +402,20 @@ public class QueryUser extends PageRequest {
         predicates.add(QueryUtils.equals(root,cb,User.NAME,queryUser.getName()));
         predicates.add(QueryUtils.equals(root,cb,User.USERNAME,queryUser.getUsername()));
         predicates.add(QueryUtils.equals(root,cb,User.GENDER,queryUser.getGender()));
-        predicates.add(QueryUtils.equals(root,cb,User.CATEGORY,queryUser.getCategory()));
-        predicates.add(QueryUtils.equals(root,cb,User.STATE,queryUser.getState()));
+
+
+        if (queryUser.getState() != null){
+            predicates.add(QueryUtils.equals(root,cb,User.STATE,queryUser.getState()));
+        }else {
+            predicates.add(QueryUtils.in(root,cb,User.STATE,queryUser.getStates()));
+        }
+
+        if (queryUser.getCategory() != null){
+            predicates.add(QueryUtils.equals(root,cb,User.CATEGORY,queryUser.getCategory()));
+        }else {
+            predicates.add(QueryUtils.in(root,cb,User.CATEGORY,queryUser.getCategories()));
+        }
+
 
         predicates.add(QueryUtils.like(root,cb,User.ADDRESS,queryUser.getAddress()));
         predicates.add(QueryUtils.like(root,cb,User.ID_CARD,queryUser.getIdCard()));

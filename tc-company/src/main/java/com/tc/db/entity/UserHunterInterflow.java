@@ -21,11 +21,11 @@ public class UserHunterInterflow implements Serializable {
 
     public static final String HUNTER_ID = "hunterId";
     public static final String USER_ID = "userId";
-    public static final String TASK_ID = "taskId";
+    public static final String HUNTER_TASK_ID = "hunterTaskId";
     public static final String SENDER = "sender";
     public static final String CREATE_TIME = "createTime";
     public static final String CONTEXT = "context";
-    public static final String TASK = "task";
+    public static final String HUNTER_TASK = "hunterTask";
     public static final String USER = "user";
     public static final String HUNTER = "hunter";
     public static final String COUNT = "count";
@@ -35,10 +35,10 @@ public class UserHunterInterflow implements Serializable {
     private Long hunterId;
     private Long userId;
     private Long sender;
-    private String taskId;
+    private String hunterTaskId;
     private Timestamp createTime;
     private String context;
-    private Task task;
+    private HunterTask hunterTask;
     private User user;
     private Hunter hunter;
     private Long count;
@@ -52,11 +52,11 @@ public class UserHunterInterflow implements Serializable {
                 }
                 if (userHunterInterflow.user != null){
                     User user = userHunterInterflow.user;
-                    userHunterInterflow.user = new User(userHunterInterflow.userId,user.getName(),user.getUsername());
+                    userHunterInterflow.user = new User(userHunterInterflow.userId,user.getName(),user.getUsername(),user.getHeadImg());
                 }
-                if (userHunterInterflow.task != null){
-                    Task task = userHunterInterflow.task;
-                    userHunterInterflow.task = new Task(task.getId(),task.getName());
+                if (userHunterInterflow.hunterTask != null){
+                    HunterTask hunterTask = userHunterInterflow.hunterTask;
+                    userHunterInterflow.hunterTask = new HunterTask(hunterTask.getId(),hunterTask.getTask());
                 }
             });
         }
@@ -93,25 +93,25 @@ public class UserHunterInterflow implements Serializable {
     }
 
     @Id
-    @Column(name = "task_id")
-    public String getTaskId() {
-        return taskId;
+    @Column(name = "hunter_task_id")
+    public String getHunterTaskId() {
+        return hunterTaskId;
     }
 
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
     }
-
 
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
-    public Task getTask() {
-        return task;
+    @JoinColumn(name = "hunter_task_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
+    public HunterTask getHunterTask() {
+        return hunterTask;
     }
 
-    public void setTask(Task taskByTaskId) {
-        this.task = taskByTaskId;
+    public void setHunterTask(HunterTask hunterTask) {
+        this.hunterTask = hunterTask;
     }
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false,insertable = false,updatable = false)
@@ -170,7 +170,7 @@ public class UserHunterInterflow implements Serializable {
         UserHunterInterflow that = (UserHunterInterflow) o;
         return user.getId().equals(that.getUser().getId()) &&
                 hunter.getUser().getId().equals(that.getHunter().getUser().getId()) &&
-                taskId.equals(that.getTaskId()) &&
+                hunterTaskId.equals(that.getHunterTaskId()) &&
                 userId.equals(that.getUserId()) &&
                 sender.equals(that.getSender()) &&
                 hunterId.equals(that.getHunterId());
@@ -179,7 +179,7 @@ public class UserHunterInterflow implements Serializable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(task.getId(), user.getId(), hunter.getUser().getId(), createTime, context);
+        return Objects.hash(hunterTask.getId(), user.getId(), hunter.getUser().getId(), createTime, context);
     }
 
 

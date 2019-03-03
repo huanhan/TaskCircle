@@ -97,11 +97,6 @@ public class UrlResourceController {
                 );
             }
             pageList = ListUtils.paging(urls, myPage.getPageNumber(), myPage.getPageSize());
-            System.out.println("getTotalElements:" + pageList.getTotalElements() + "\n" +
-                    "getTotalPages" + pageList.getTotalPages() + "\n" +
-                    "getSize" + pageList.getSize() + "\n" +
-                    "getNumber" + pageList.getNumber() + "\n" +
-                    "getNumberOfElements" + pageList.getNumberOfElements());
         }
         return Result.init(pageList.getContent(),myPage.append(pageList.getTotalElements(),(long)pageList.getTotalPages()));
     }

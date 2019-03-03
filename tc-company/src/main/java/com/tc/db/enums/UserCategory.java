@@ -28,6 +28,12 @@ public enum UserCategory {
         this.category = category;
     }
 
+    public static List<UserCategory> byQueryUsers() {
+        List<UserCategory> result = new ArrayList<>();
+        result.add(HUNTER);
+        result.add(NORMAL);
+        return result;
+    }
 
 
     public String getCategory() {

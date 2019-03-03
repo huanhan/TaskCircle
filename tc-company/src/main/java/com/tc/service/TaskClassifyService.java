@@ -62,4 +62,6 @@ public interface TaskClassifyService extends BasicService<TaskClassify> {
      * @return
      */
     List<TaskClassify> queryByQueryAndNotPage(QueryTaskClassify queryTaskClassify);
+
+
 }

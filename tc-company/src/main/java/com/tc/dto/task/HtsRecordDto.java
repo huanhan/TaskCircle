@@ -3,6 +3,7 @@ package com.tc.dto.task;
 import com.tc.db.entity.HtsRecord;
 import com.tc.db.entity.HunterTaskStep;
 import com.tc.db.enums.OPType;
+import com.tc.dto.trans.Trans;
 
 import java.sql.Timestamp;
 
@@ -17,14 +18,14 @@ public class HtsRecordDto {
     private HunterTaskStep original;
     private HunterTaskStep after;
     private HunterTaskStep current;
-    private OPType operation;
+    private Trans operation;
     public static HtsRecordDto by(HtsRecord record) {
         HtsRecordDto result = new HtsRecordDto();
         if (record != null){
             result.setHunterTaskId(record.getHunterTaskId());
             result.setStep(record.getStep());
             result.setCreateTime(record.getCreateTime());
-            result.setOperation(record.getOperation());
+            result.setOperation(new Trans(record.getOperation().name(),record.getOperation().getType()));
             result.setOriginal(HtsRecord.getContext(record.getOriginalContext()));
             result.setAfter(HtsRecord.getContext(record.getAfterContext()));
             result.setCurrent(HunterTaskStep.toDetail(record.getHunterTaskStep()));
@@ -80,11 +81,11 @@ public class HtsRecordDto {
         this.current = current;
     }
 
-    public OPType getOperation() {
+    public Trans getOperation() {
         return operation;
     }
 
-    public void setOperation(OPType operation) {
+    public void setOperation(Trans operation) {
         this.operation = operation;
     }
 }

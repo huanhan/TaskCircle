@@ -2,6 +2,7 @@ package com.tc.dto.message;
 
 import com.tc.db.entity.Message;
 import com.tc.db.enums.MessageState;
+import com.tc.db.enums.MessageType;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.BeanUtils;
@@ -15,9 +16,6 @@ import javax.validation.constraints.NotNull;
  */
 public class AddMessage {
 
-    @NotNull
-    @Min(1)
-    private Long creationId;
     @NotEmpty
     @Length(max = 255)
     private String context;
@@ -25,15 +23,6 @@ public class AddMessage {
     @Length(max = 30)
     private String title;
 
-
-
-    public Long getCreationId() {
-        return creationId;
-    }
-
-    public void setCreationId(Long creationId) {
-        this.creationId = creationId;
-    }
 
     public String getContext() {
         return context;
@@ -52,10 +41,12 @@ public class AddMessage {
     }
 
 
-    public static Message toMessage(AddMessage addMessage) {
+    public static Message toMessage(AddMessage addMessage, Long me) {
         Message message = new Message();
         BeanUtils.copyProperties(addMessage,message);
         message.setState(MessageState.STOP);
+        message.setCreationId(me);
+        message.setType(MessageType.IS_NULL);
         return message;
     }
 }

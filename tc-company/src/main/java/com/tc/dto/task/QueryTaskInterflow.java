@@ -1,9 +1,6 @@
 package com.tc.dto.task;
 
-import com.tc.db.entity.Hunter;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.User;
-import com.tc.db.entity.UserHunterInterflow;
+import com.tc.db.entity.*;
 import com.tc.until.PageRequest;
 import com.tc.until.QueryUtils;
 import org.hibernate.validator.constraints.Length;
@@ -35,12 +32,12 @@ public class QueryTaskInterflow extends PageRequest {
     @NotNull
     @Min(1)
     private Long userId;
-    @NotEmpty
-    @Length(max = 32)
     private String userAccount;
     private String userName;
+    @NotEmpty
+    @Length(max = 32)
+    private String htId;
     private String taskId;
-    private String taskName;
     private Timestamp createTimeBegin;
     private Timestamp createTimeEnd;
     private String context;
@@ -109,22 +106,6 @@ public class QueryTaskInterflow extends PageRequest {
         this.userName = userName;
     }
 
-    public String getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
-    }
-
-    public String getTaskName() {
-        return taskName;
-    }
-
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
-    }
-
     public Timestamp getCreateTimeBegin() {
         return createTimeBegin;
     }
@@ -149,6 +130,22 @@ public class QueryTaskInterflow extends PageRequest {
         this.context = context;
     }
 
+    public String getHtId() {
+        return htId;
+    }
+
+    public void setHtId(String htId) {
+        this.htId = htId;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
     public static List<Predicate> initPredicatesByTask(QueryTaskInterflow queryTaskInterflow, Root<UserHunterInterflow> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(QueryUtils.equals(root,cb,UserHunterInterflow.HUNTER_ID,queryTaskInterflow.hunterId));
@@ -157,8 +154,8 @@ public class QueryTaskInterflow extends PageRequest {
         predicates.add(QueryUtils.equals(root,cb,UserHunterInterflow.USER_ID,queryTaskInterflow.userId));
         predicates.add(QueryUtils.equals(root.get(UserHunterInterflow.USER).get(User.NAME),cb,queryTaskInterflow.userName));
         predicates.add(QueryUtils.equals(root.get(UserHunterInterflow.USER).get(User.USERNAME),cb,queryTaskInterflow.userAccount));
-        predicates.add(QueryUtils.equals(root,cb,UserHunterInterflow.TASK_ID,queryTaskInterflow.taskId));
-        predicates.add(QueryUtils.equals(root.get(UserHunterInterflow.TASK).get(Task.NAME),cb,queryTaskInterflow.taskName));
+        predicates.add(QueryUtils.equals(root.get(UserHunterInterflow.HUNTER_TASK).get(HunterTask.ID),cb,queryTaskInterflow.htId));
+        predicates.add(QueryUtils.equals(root.get(UserHunterInterflow.HUNTER_TASK).get(HunterTask.TASK).get(Task.ID),cb,queryTaskInterflow.taskId));
         predicates.add(QueryUtils.between(root,cb,UserHunterInterflow.CREATE_TIME,queryTaskInterflow.createTimeBegin,queryTaskInterflow.createTimeEnd));
         predicates.add(QueryUtils.like(root,cb,UserHunterInterflow.CONTEXT,queryTaskInterflow.context));
         predicates.removeIf(Objects::isNull);

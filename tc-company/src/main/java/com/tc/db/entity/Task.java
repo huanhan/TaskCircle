@@ -4,6 +4,7 @@ import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
 import com.tc.dto.trans.Trans;
+import com.tc.dto.trans.TransTaskBasic;
 import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
@@ -53,6 +54,8 @@ public class Task implements Serializable {
     private String id;
     private Long userId;
     private User user;
+    private Long adminId;
+    private Admin admin;
     private String name;
     private Float money;
     private Float originalMoney;
@@ -79,7 +82,6 @@ public class Task implements Serializable {
     private Collection<HunterTask> hunterTasks;
     private Collection<TaskClassifyRelation> taskClassifyRelations;
     private Collection<TaskStep> taskSteps;
-    private Collection<UserHunterInterflow> userHunterInterflows;
 
     /**
      * 猎刃已经完成的数量
@@ -96,9 +98,17 @@ public class Task implements Serializable {
 
     private Trans transType;
     private Trans transState;
+    private List<Trans> classifies;
+    /**
+     * 是否允许被审核（只有在审核中的状态才会用到）
+     */
+    private Boolean isAudit = false;
 
     public Task() {
     }
+
+
+
 
     public Task(String id, String name) {
         this.id = id;
@@ -112,6 +122,7 @@ public class Task implements Serializable {
             this.user = new User(user.getId(),user.getName(),user.getUsername());
         }
     }
+
 
 
     @Id
@@ -382,6 +393,24 @@ public class Task implements Serializable {
         this.transState = transState;
     }
 
+    @Transient
+    public List<Trans> getClassifies() {
+        return classifies;
+    }
+
+    public void setClassifies(List<Trans> classifies) {
+        this.classifies = classifies;
+    }
+
+    @Transient
+    public Boolean getAudit() {
+        return isAudit;
+    }
+
+    public void setAudit(Boolean audit) {
+        isAudit = audit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -475,14 +504,22 @@ public class Task implements Serializable {
         this.taskSteps = taskStepsById;
     }
 
-    @OneToMany(mappedBy = "task")
-    public Collection<UserHunterInterflow> getUserHunterInterflows() {
-        return userHunterInterflows;
+    @Basic
+    @Column(name = "admin_id")
+    public Long getAdminId() {
+        return adminId;
     }
 
-    public void setUserHunterInterflows(Collection<UserHunterInterflow> userHunterInterflowsById) {
-        this.userHunterInterflows = userHunterInterflowsById;
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id", referencedColumnName = "user_id",insertable = false,updatable = false)
+    public Admin getAdmin() {
+        return admin;
+    }
+
 
     public void toDetail(){
         if (user != null){
@@ -499,8 +536,14 @@ public class Task implements Serializable {
             });
         }
         taskSteps = null;
-        userHunterInterflows = null;
     }
+
+
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
+    }
+
 
     public static Task toDetail(Task task){
         if (task != null){
@@ -510,19 +553,21 @@ public class Task implements Serializable {
             task.setAuditTasks(null);
             task.setCommentTasks(null);
             task.setCommentUsers(null);
-            if (task.getHunterTasks() != null){
-                task.getHunterTasks().forEach(hunterTask -> hunterTask.toDetail());
-            }
-            if (task.getTaskClassifyRelations() != null){
+            setHunterTask(task);
+            task.classifies = new ArrayList<>();
+            if (ListUtils.isNotEmpty(task.getTaskClassifyRelations())){
                 task.getTaskClassifyRelations().forEach(tcr ->{
                     tcr.setTask(null);
                     if (tcr.getTaskClassify() != null) {
-                        tcr.setTaskClassify(new TaskClassify(tcr.getTaskClassify().getId(), tcr.getTaskClassify().getName()));
+                        task.classifies.add(new Trans(tcr.getTaskClassify().getId(),tcr.getTaskClassify().getName()));
                     }
                 });
+                task.setTaskClassifyRelations(null);
+            }
+            if (task.getAdmin() != null){
+                task.setAdmin(new Admin(task.getAdminId(),task.getAdmin().getUser()));
             }
             task.setTaskSteps(null);
-            task.setUserHunterInterflows(null);
             task.transState = new Trans(task.getState().name(),task.getState().getState());
             task.transType = new Trans(task.getType().name(),task.getType().getType());
         }
@@ -544,20 +589,16 @@ public class Task implements Serializable {
         if (!ListUtils.isEmpty(content)){
             content.forEach(task -> {
                 if (task.getUser() != null){
-                    task.setUser(new User(task.getUser().getId(),task.getUser().getName(),task.getUser().getUsername(),task.getUser().getHeadImg()));
+                    task.setUser(new User(task.getUser().getId(),
+                            task.getUser().getName(),
+                            task.getUser().getUsername(),
+                            task.getUser().getHeadImg(),
+                            task.getUser().getCategory()));
                 }
-                if (ListUtils.isNotEmpty(task.hunterTasks)){
-                    task.getHunterTasks().forEach(hunterTask -> {
-                       if (HunterTaskState.isOk(hunterTask.getState())){
-                           task.setOkCount(task.getOkCount() + 1);
-                       }else{
-                           task.setCurrentCount(task.getCurrentCount() + 1);
-                           task.setCashCount(FloatHelper.add(task.getCashCount(),task.getCompensateMoney()));
-                       }
-                    });
-                    task.setHunterTasks(null);
+                if (task.getAdmin() != null){
+                    task.setAdmin(new Admin(task.getAdminId(),task.getAdmin().getUser()));
                 }
-                task.setUserHunterInterflows(null);
+                setHunterTask(task);
                 task.setTaskSteps(null);
                 task.setTaskClassifyRelations(null);
                 task.setCommentUsers(null);
@@ -570,11 +611,70 @@ public class Task implements Serializable {
         return content;
     }
 
+
+    public static List<Task> toIndexAsList(List<Task> content,Long me) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(task -> {
+                if (task.getUser() != null){
+                    task.setUser(new User(task.getUser().getId(),
+                            task.getUser().getName(),
+                            task.getUser().getUsername(),
+                            task.getUser().getHeadImg(),
+                            task.getUser().getCategory()));
+                }
+                if (task.getAdmin() != null){
+                    if (me.equals(task.getAdminId())){
+                        task.isAudit = true;
+                    }
+                    task.setAdmin(new Admin(task.getAdminId(),task.getAdmin().getUser()));
+                }
+                setHunterTask(task);
+                task.setTaskSteps(null);
+                task.setTaskClassifyRelations(null);
+                task.setCommentUsers(null);
+                task.setCommentTasks(null);
+                task.setAuditTasks(null);
+                task.transState = new Trans(task.getState().name(),task.getState().getState());
+                task.transType = new Trans(task.getType().name(),task.getType().getType());
+            });
+        }
+        return content;
+    }
+
+    public static List<TransTaskBasic> toClassifyAsList(List<Task> content) {
+        List<TransTaskBasic> result = new ArrayList<>();
+        if (ListUtils.isNotEmpty(content)){
+            content.forEach(task -> {
+                result.add(new TransTaskBasic(
+                        new Trans(task.getState().name(),task.getState().getState()),
+                        task.getId(),
+                        task.getName(),
+                        new Trans(task.getUser().getId(),task.getUser().toTitle())
+                ));
+            });
+        }
+        return result;
+    }
+
     public static List<String> toIds(List<Task> tasks) {
         List<String> result = new ArrayList<>();
         if (!ListUtils.isEmpty(tasks)){
             tasks.forEach(task -> result.add(task.id));
         }
         return result;
+    }
+
+    private static void setHunterTask(Task task){
+        if (ListUtils.isNotEmpty(task.hunterTasks)){
+            task.getHunterTasks().forEach(hunterTask -> {
+                if (HunterTaskState.isOk(hunterTask.getState())){
+                    task.setOkCount(task.getOkCount() + 1);
+                }else{
+                    task.setCurrentCount(task.getCurrentCount() + 1);
+                    task.setCashCount(FloatHelper.add(task.getCashCount(),task.getCompensateMoney()));
+                }
+            });
+            task.setHunterTasks(null);
+        }
     }
 }

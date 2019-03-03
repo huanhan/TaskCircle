@@ -33,20 +33,17 @@ public class RbacServiceImpl implements RbacService {
 
     @Override
     public boolean hasPermission(HttpServletRequest request, Authentication authentication) {
+        //获取当前登陆用户的所有权限
         Collection<? extends GrantedAuthority> account = authentication.getAuthorities();
-
         List<Long> ids = new ArrayList<>();
-
         User user = userService.findByUsername((String)authentication.getPrincipal());
-
         if (user.getCategory().equals(UserCategory.SUPPER_ADMIN)){
             return true;
         }
-
         account.forEach(o -> ids.add(Long.parseLong(o.getAuthority())));
-
+        //获取权限对应得资源
         Collection<Authority> authorities = authorityService.findByIds(ids);
-
+        //判断请求得资源是否包含在权限资源中，true则允许访问，false则拒绝访问
         if (ListUtils.isNotEmpty(authorities)){
             for (Authority authority : authorities) {
                 if (ListUtils.isNotEmpty(authority.getAuthorityResources())){
@@ -58,8 +55,6 @@ public class RbacServiceImpl implements RbacService {
                 }
             }
         }
-
         return false;
-
     }
 }

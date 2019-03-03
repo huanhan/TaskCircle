@@ -6,16 +6,16 @@ import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.admin.ModifyAdmin;
 import com.tc.dto.admin.QueryAdmin;
+import com.tc.dto.audit.AddTaskAudit;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.*;
 import com.tc.dto.comment.QueryUserComment;
 import com.tc.dto.enums.DateType;
 import com.tc.dto.finance.QueryFinance;
 import com.tc.dto.finance.QueryIE;
+import com.tc.dto.message.QueryMessage;
 import com.tc.dto.resource.QueryResource;
-import com.tc.dto.task.QueryHunterTask;
-import com.tc.dto.task.QueryTask;
-import com.tc.dto.task.QueryTaskClassify;
+import com.tc.dto.task.*;
 import com.tc.dto.user.DateCondition;
 import com.tc.dto.user.QueryUser;
 import com.tc.until.*;
@@ -126,7 +126,7 @@ public class TextRuntime {
             System.out.println("ssss");
         }
 
-        String json = printGson(new QueryTaskClassify());
+        String json = printGson(new QueryFinance());
 
         String name = StringUtils.substringAfterLast("com.tc.controller.TaskController",".");
         System.out.println(name);

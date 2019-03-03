@@ -58,7 +58,9 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      */
     @Modifying
     @Query("update User u set u.state = :state ," +
-            "u.category = :category " +
+            "u.category = :category, " +
+            "u.adminId = null, " +
+            "u.adminAuditTime = null " +
             "where u.id = :id")
     int update(@Param("state") UserState state, @Param("category") UserCategory category, @Param("id") Long id);
 
@@ -79,19 +81,30 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      * @return
      */
     @Modifying
-    @Query(value = "update User u set u.state = :state, u.adminAuditTime = NULL where u.id in (:ids)")
-    int updateState(List<Long> ids, UserState state);
+    @Query(value = "update User u set u.state = :state, u.adminAuditTime = NULL, u.adminId = NULL where u.id in (:ids)")
+    int updateState(@Param("ids") List<Long> ids,@Param("state") UserState state);
 
     /**
-     * 更新提现状态与审核时间
+     * 更新提现状态与用户提交审核时间
      * @param id
      * @param state
      * @param timestamp
      * @return
      */
     @Modifying
-    @Query(value = "update User u set u.state = :state, u.adminAuditTime = :time where u.id = :id")
-    int updateState(@Param("id") Long id, @Param("state") UserState state, @Param("time")Timestamp timestamp);
+    @Query(value = "update User u set u.state = :state, u.auditTime = :time where u.id = :id")
+    int updateStateAndAuditTime(@Param("id") Long id, @Param("state") UserState state, @Param("time")Timestamp timestamp);
+
+    /**
+     * 更新提现状态与管理员开始审核时间
+     * @param id
+     * @param state
+     * @param timestamp
+     * @return
+     */
+    @Modifying
+    @Query(value = "update User u set u.state = :state, u.adminAuditTime = :time, u.adminId = :adminId where u.id = :id")
+    int updateStateAndAdminAuditTime(@Param("id") Long id, @Param("state") UserState state, @Param("time")Timestamp timestamp,@Param("adminId") Long adminId);
 
     /**
      * 根据猎刃任务编号与状态查询
@@ -136,4 +149,26 @@ public interface UserRepository extends JpaRepository<User,Long>,JpaSpecificatio
      */
     @Query(value = "select u.id from User u where u.username = :account")
     Long loadId(@Param("account") String account);
+
+    /**
+     * 获取指定管理员的审核数目
+     * @param id
+     * @return
+     */
+    int countByAdminId(Long id);
+
+
+    /**
+     * 根据用户编号列表获取
+     * @param ids
+     * @return
+     */
+    List<User> findByIdIn(List<Long> ids);
+
+    /**
+     * 获取指定状态的用户数量
+     * @param state
+     * @return
+     */
+    int countByStateEquals(UserState state);
 }

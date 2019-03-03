@@ -116,4 +116,19 @@ public interface BasicService<T> {
      * @return
      */
     long count();
+
+    /**
+     * 获取redis中保存的数据
+     * @param key
+     * @return
+     */
+    Object redisGet(String key);
+
+    /**
+     * 将数据保存到redis中
+     * @param key
+     * @param value
+     */
+    void redisSave(String key,Object value);
+
 }

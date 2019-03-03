@@ -40,8 +40,8 @@ public interface TaskRepository extends JpaRepository<Task, String>, JpaSpecific
      * @return
      */
     @Modifying
-    @Query(value = "update Task t set t.state = :state, t.adminAuditTime = :time where t.id = :id")
-    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") TaskState state, @Param("time") Timestamp timestamp);
+    @Query(value = "update Task t set t.state = :state, t.adminAuditTime = :time, t.adminId = :adminId where t.id = :id")
+    int updateStateAndAdminAuditTime(@Param("id") String id, @Param("state") TaskState state, @Param("time") Timestamp timestamp,@Param("adminId") Long adminId);
 
     /**
      * 更新任务状态与用户提交审核时间
@@ -77,7 +77,7 @@ public interface TaskRepository extends JpaRepository<Task, String>, JpaSpecific
      * @return
      */
     @Modifying
-    @Query(value = "update Task t set t.state = :state, t.adminAuditTime = NULL where t.id in (:ids)")
+    @Query(value = "update Task t set t.state = :state, t.adminAuditTime = NULL,t.adminId = NULL where t.id in (:ids)")
     int updateState(@Param("ids") List<String> ids, @Param("state") TaskState state);
 
     /**
@@ -91,10 +91,35 @@ public interface TaskRepository extends JpaRepository<Task, String>, JpaSpecific
     @Query(value = "update Task t set t.money = :money where t.id = :id")
     int updateMoney(@Param("money") Float money, @Param("id") String id);
 
+    /**
+     * 更新任务金额与状态
+     *
+     * @param money
+     * @param id
+     * @return
+     */
+    @Modifying
+    @Query(value = "update Task t set t.money = :money,t.state = :state where t.id = :id")
+    int updateMoneyAndState(@Param("money") Float money,@Param("state") TaskState state, @Param("id") String id);
 
     @Query(value = "from Task t  where ( t.name like %:str% or t.context like %:str% ) and t.state = 'ISSUE'")
     Page<Task> searchTask(@Param("str") String str, @Param("pageable") Pageable pageable);
 
     @Query(value = "select *,6378137*2*ASIN(SQRT(POWER(SIN((:lat-latitude)*ACOS(-1)/360),2) +COS(:lat*ACOS(-1)/180)*COS(latitude*ACOS(-1)/180)*POWER(SIN((:log-longitude)*ACOS(-1)/360),2))) as distance FROM task WHERE state='ISSUE' ORDER BY distance limit 0,30", nativeQuery = true)
     List<Task> taskByDistance(@Param("lat") Double lat, @Param("log") Double log );
+
+    /**
+     * 根据管理员编号获取当前的待审核数量
+     * @param id
+     * @return
+     */
+    int countByAdminId(Long id);
+
+    /**
+     * 获取指定状态的任务的数量
+     * @param state
+     * @return
+     */
+    int countByStateEquals(TaskState state);
+
 }

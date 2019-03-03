@@ -32,6 +32,21 @@ public class DateCondition {
     @NotNull
     private DateType type;
 
+    public DateCondition() {
+    }
+
+    public DateCondition(Timestamp begin, Timestamp end, DateType type) {
+        this.begin = begin;
+        this.end = end;
+        this.type = type;
+    }
+
+    public DateCondition(Timestamp begin, Timestamp end, String type) {
+        this.begin = begin;
+        this.end = end;
+        this.type = DateType.find(type);
+    }
+
     public Timestamp getBegin() {
         return begin;
     }
@@ -206,4 +221,13 @@ public class DateCondition {
         }
         return new Timestamp[]{begin,end};
     }
+
+    public static Timestamp[] resetByEndAfterBegin(Timestamp tBegin,Timestamp tEnd){
+        Timestamp[] reset = reset(tBegin,tEnd);
+        if (reset[0].equals(reset[1])){
+            reset[1] = TimestampHelper.toDayEnd(reset[0]);
+        }
+        return reset;
+    }
+
 }

@@ -22,6 +22,9 @@ public class AuditWithdraw {
     private String withdrawId;
     private Audit audit;
     private UserWithdraw userWithdraw;
+    private Float adminMoney;
+    private Float userMoney;
+
 
     public AuditWithdraw() {
     }
@@ -33,6 +36,13 @@ public class AuditWithdraw {
 
     public AuditWithdraw(String withdrawId) {
         this.withdrawId = withdrawId;
+    }
+
+    public AuditWithdraw(String auditId, String withdrawId, Float adminMoney, Float userMoney) {
+        this.auditId = auditId;
+        this.withdrawId = withdrawId;
+        this.adminMoney = adminMoney;
+        this.userMoney = userMoney;
     }
 
     public static List<AuditWithdraw> toIndexList(List<AuditWithdraw> awList) {
@@ -65,6 +75,26 @@ public class AuditWithdraw {
 
     public void setWithdrawId(String withdrawId) {
         this.withdrawId = withdrawId;
+    }
+
+    @Basic
+    @Column(name = "admin_money")
+    public Float getAdminMoney() {
+        return adminMoney;
+    }
+
+    public void setAdminMoney(Float adminMoney) {
+        this.adminMoney = adminMoney;
+    }
+
+    @Basic
+    @Column(name = "user_money")
+    public Float getUserMoney() {
+        return userMoney;
+    }
+
+    public void setUserMoney(Float userMoney) {
+        this.userMoney = userMoney;
     }
 
     @Override
@@ -104,6 +134,8 @@ public class AuditWithdraw {
     public void setUserWithdraw(UserWithdraw userWithdraw) {
         this.userWithdraw = userWithdraw;
     }
+
+
 
     public static AuditWithdraw getBy(Audit audit) {
         AuditWithdraw result = new AuditWithdraw();

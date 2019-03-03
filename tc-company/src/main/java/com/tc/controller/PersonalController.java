@@ -76,6 +76,7 @@ public class PersonalController {
         return Admin.toDetail(resultAdmin);
     }
 
+
     /**
      * 修改管理员信息
      * @param modifyAdmin 管理员信息

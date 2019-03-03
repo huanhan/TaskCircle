@@ -30,9 +30,8 @@ public interface HunterTaskService extends BasicService<HunterTask> {
 
     /**
      * 自动更新任务状态
-     * @param state
      */
-    Boolean updateState(HunterTaskState state);
+    Boolean updateState();
 
     /**
      * 根据状态和编号查询猎刃任务
@@ -49,7 +48,7 @@ public interface HunterTaskService extends BasicService<HunterTask> {
      * @param date
      * @return
      */
-    Boolean updateState(String id, HunterTaskState state, Date date);
+    Boolean updateState(String id, HunterTaskState state, Date date,Long me);
 
     /**
      * 根据任务编号获取猎刃任务
@@ -176,4 +175,19 @@ public interface HunterTaskService extends BasicService<HunterTask> {
     boolean abandonHunterTask(String hunterTaskId);
 
     boolean forceAbandonHunterTask(HunterTask hunterTaskId);
+
+    /**
+     * 获取指定任务与状态的猎刃任务信息
+     * @param id
+     * @param state
+     * @return
+     */
+    List<HunterTask> findBy(String id, HunterTaskState state);
+
+    /**
+     * 根据指定管理员获取审核记录数
+     * @param me
+     * @return
+     */
+    Integer countByAdmin(Long me);
 }

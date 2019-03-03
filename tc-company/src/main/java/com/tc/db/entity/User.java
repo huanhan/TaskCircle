@@ -226,11 +226,16 @@ public class User implements Serializable {
      * 用户权限
      */
     private List<UserAuthority> userAuthorities;
+    private Long adminId;
+    private Admin auditAdmin;
+
 
 
     private Trans transCategory;
     private Trans transGender;
     private Trans transState;
+
+    private Boolean isAudit = false;
 
     public User() {
     }
@@ -257,6 +262,130 @@ public class User implements Serializable {
         this.headImg = headImg;
     }
 
+    public User(Long id, String name, String username,UserCategory category) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.transCategory = new Trans(category.name(),category.getCategory());
+    }
+
+    public User(Long id, String name, String username,String headImg,UserCategory category) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.headImg = headImg;
+        this.transCategory = new Trans(category.name(),category.getCategory());
+    }
+
+    public static User toDetail(User user) {
+        if (user.getAuditAdmin() != null){
+            user.setAuditAdmin(new Admin(user.getAdminId(),user.getAuditAdmin().getUser()));
+        }
+        user.setGenders(UserGender.toList());
+        user.setCategories(UserCategory.toList());
+        user.setStates(UserState.toList());
+        user.setPassword(null);
+        user.setAdmin(null);
+        user.setAuditHunters(null);
+        user.setComments(null);
+        user.setCommentUsers(null);
+        user.setResources(null);
+        user.setUserContacts(null);
+        user.setTasks(null);
+        user.setUserExpense(null);
+        user.setUserHunterInterflows(null);
+        if (user.getUserImgs() != null){
+            Collection<UserImg> userImgs = new ArrayList<>();
+            user.getUserImgs().forEach(userImg ->
+                    userImgs.add(new UserImg(userImg.getUserId(),userImg.getImgName(),userImg.getUrlLocation())));
+            user.setUserImgs(userImgs);
+        }
+        user.setUserIncome(null);
+        user.setUserOperationLogs(null);
+        user.setUserWithdraws(null);
+        user.setHunter(null);
+        user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
+        user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
+        user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
+        return user;
+    }
+
+    public static User toDetailByNotEnums(User user) {
+        if (user.getAuditAdmin() != null){
+            user.setAuditAdmin(new Admin(user.getAdminId(),user.getAuditAdmin().getUser()));
+        }
+        user.setPassword(null);
+        user.setAdmin(null);
+        user.setAuditHunters(null);
+        user.setComments(null);
+        user.setCommentUsers(null);
+        user.setResources(null);
+        user.setUserContacts(null);
+        user.setTasks(null);
+        user.setUserExpense(null);
+        user.setUserHunterInterflows(null);
+        if (user.getUserImgs() != null){
+            Collection<UserImg> userImgs = new ArrayList<>();
+            user.getUserImgs().forEach(userImg ->
+                    userImgs.add(new UserImg(userImg.getUserId(),userImg.getImgName(),userImg.getUrlLocation())));
+            user.setUserImgs(userImgs);
+        }
+        user.setUserIncome(null);
+        user.setUserOperationLogs(null);
+        user.setUserWithdraws(null);
+        user.setHunter(null);
+        user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
+        user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
+        user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
+        return user;
+    }
+
+    public static List<User> toIndexAsList(List<User> content) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(User::toDetailByNotEnums);
+        }
+        return content;
+    }
+
+    public static List<User> toIndexAsList(List<User> content, Long me) {
+        if (!ListUtils.isEmpty(content)){
+            content.forEach(user -> {
+                if (user.getAuditAdmin() != null){
+                    if (user.getAdminId().equals(me)){
+                        user.setAudit(true);
+                    }
+                    user.setAuditAdmin(new Admin(user.getAdminId(),user.getAuditAdmin().getUser()));
+                }
+                user.setPassword(null);
+                user.setAdmin(null);
+                user.setAuditHunters(null);
+                user.setComments(null);
+                user.setCommentUsers(null);
+                user.setResources(null);
+                user.setUserContacts(null);
+                user.setTasks(null);
+                user.setUserExpense(null);
+                user.setUserHunterInterflows(null);
+                user.setUserImgs(null);
+                user.setUserIncome(null);
+                user.setUserOperationLogs(null);
+                user.setUserWithdraws(null);
+                user.setHunter(null);
+                user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
+                user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
+                user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
+            });
+        }
+        return content;
+    }
+
+    public static List<Long> toIds(List<User> users) {
+        List<Long> result = new ArrayList<>();
+        if (!ListUtils.isEmpty(users)){
+            users.forEach(user -> result.add(user.id));
+        }
+        return result;
+    }
 
 
 
@@ -545,6 +674,15 @@ public class User implements Serializable {
         this.transState = transState;
     }
 
+    @Transient
+    public Boolean getAudit() {
+        return isAudit;
+    }
+
+    public void setAudit(Boolean audit) {
+        isAudit = audit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -742,83 +880,31 @@ public class User implements Serializable {
         this.userAuthorities = userAuthorities;
     }
 
-    public interface UserBasicView {}
-
-    public interface UserBasicDetailView extends UserBasicView{}
-
-    public static User toDetail(User user) {
-        user.setGenders(UserGender.toList());
-        user.setCategories(UserCategory.toList());
-        user.setStates(UserState.toList());
-        user.setPassword(null);
-        user.setAdmin(null);
-        user.setAuditHunters(null);
-        user.setComments(null);
-        user.setCommentUsers(null);
-        user.setResources(null);
-        user.setUserContacts(null);
-        user.setTasks(null);
-        user.setUserExpense(null);
-        user.setUserHunterInterflows(null);
-        if (user.getUserImgs() != null){
-            Collection<UserImg> userImgs = new ArrayList<>();
-            user.getUserImgs().forEach(userImg ->
-                    userImgs.add(new UserImg(userImg.getUserId(),userImg.getImgName(),userImg.getUrlLocation())));
-            user.setUserImgs(userImgs);
-        }
-        user.setUserIncome(null);
-        user.setUserOperationLogs(null);
-        user.setUserWithdraws(null);
-        user.setHunter(null);
-        user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
-        user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
-        user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
-        return user;
-    }
-
-    public static User toDetailByNotEnums(User user) {
-        user.setPassword(null);
-        user.setAdmin(null);
-        user.setAuditHunters(null);
-        user.setComments(null);
-        user.setCommentUsers(null);
-        user.setResources(null);
-        user.setUserContacts(null);
-        user.setTasks(null);
-        user.setUserExpense(null);
-        user.setUserHunterInterflows(null);
-        if (user.getUserImgs() != null){
-            Collection<UserImg> userImgs = new ArrayList<>();
-            user.getUserImgs().forEach(userImg ->
-                    userImgs.add(new UserImg(userImg.getUserId(),userImg.getImgName(),userImg.getUrlLocation())));
-            user.setUserImgs(userImgs);
-        }
-        user.setUserIncome(null);
-        user.setUserOperationLogs(null);
-        user.setUserWithdraws(null);
-        user.setHunter(null);
-        user.setTransCategory(new Trans(user.getCategory().name(),user.getCategory().getCategory()));
-        user.setTransGender(new Trans(user.getGender().name(),user.getGender().getGender()));
-        user.setTransState(new Trans(user.getState().name(),user.getState().getState()));
-        return user;
-    }
-
-    public static List<User> toIndexAsList(List<User> content) {
-        if (!ListUtils.isEmpty(content)){
-            content.forEach(User::toDetailByNotEnums);
-        }
-        return content;
-    }
-
-    public static List<Long> toIds(List<User> users) {
-        List<Long> result = new ArrayList<>();
-        if (!ListUtils.isEmpty(users)){
-            users.forEach(user -> result.add(user.id));
-        }
-        return result;
-    }
-
     public String toTitle(){
         return this.username + "(" + this.name + ")";
     }
+
+    @Basic
+    @Column(name = "admin_id")
+    public Long getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id", referencedColumnName = "user_id",insertable = false,updatable = false)
+    public Admin getAuditAdmin() {
+        return auditAdmin;
+    }
+
+    public void setAuditAdmin(Admin auditAdmin) {
+        this.auditAdmin = auditAdmin;
+    }
+
+    public interface UserBasicView {}
+
+    public interface UserBasicDetailView extends UserBasicView{}
 }

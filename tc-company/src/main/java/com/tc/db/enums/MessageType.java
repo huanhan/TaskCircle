@@ -9,7 +9,7 @@ public enum MessageType {
     CONDITION("条件型"),
     ALL("所有型"),
     APPOINT("指定型"),
-
+    IS_NULL("未设置"),
     ;
 
     private String type;

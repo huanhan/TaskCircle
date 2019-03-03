@@ -1,8 +1,10 @@
 package com.tc.db.entity;
 
+import com.tc.dto.trans.TransData;
 import com.tc.until.ListUtils;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,6 +24,11 @@ public class CommentTask {
     private String taskId;
     private Comment comment;
     private Task task;
+
+    /**
+     * 猎刃评论的依据
+     */
+    private List<TransData> trans;
 
     public CommentTask() {
     }
@@ -52,6 +59,16 @@ public class CommentTask {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+
+    @Transient
+    public List<TransData> getTrans() {
+        return trans;
+    }
+
+    public void setTrans(List<TransData> trans) {
+        this.trans = trans;
     }
 
     @Override
@@ -95,10 +112,19 @@ public class CommentTask {
     public static List<CommentTask> toListInIndex(List<CommentTask> content) {
         if (!ListUtils.isEmpty(content)){
             content.forEach(commentTask -> {
-                if (commentTask.getComment() != null){
-                    commentTask.setComment(Comment.toDetail(commentTask.comment));
-                }
+                commentTask.setComment(Comment.toDetail(commentTask.comment));
                 if (commentTask.getTask() != null){
+                    if (ListUtils.isNotEmpty(commentTask.getTask().getHunterTasks())){
+                        List<TransData> trans = new ArrayList<>();
+                        commentTask.getTask().getHunterTasks().forEach(hunterTask -> {
+                            if (commentTask.comment.getCreationId().equals(hunterTask.getHunterId())){
+                                trans.add(new TransData(hunterTask.getState().name(),
+                                        hunterTask.getState().getState(),
+                                        hunterTask.getId()));
+                            }
+                        });
+                        commentTask.trans = trans;
+                    }
                     commentTask.setTask(new Task(commentTask.getTaskId(),commentTask.getTask().getName()));
                 }
             });

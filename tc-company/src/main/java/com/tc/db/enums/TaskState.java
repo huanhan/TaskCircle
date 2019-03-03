@@ -78,8 +78,7 @@ public enum TaskState {
     /**
      * 查询专用
      */
-    HUNTER_COMMIT("猎刃放弃任务")
-    ;
+    HUNTER_COMMIT("猎刃放弃任务");
 
 
     private String state;
@@ -91,10 +90,13 @@ public enum TaskState {
     public static List<TransEnum> toList() {
         List<TransEnum> result = new ArrayList<>();
         for (TaskState value : TaskState.values()) {
-            result.add(TransEnum.init(value.name(),value.getState()));
+            result.add(TransEnum.init(value.name(), value.getState()));
         }
         return result;
     }
+
+
+
 
     public String getState() {
         return state;
@@ -102,11 +104,12 @@ public enum TaskState {
 
     /**
      * 判断哪些状态时的任务允许发布
+     *
      * @param taskState
      * @return
      */
-    public static boolean isIssue(TaskState taskState){
-        switch (taskState){
+    public static boolean isIssue(TaskState taskState) {
+        switch (taskState) {
             case AUDIT_SUCCESS:
                 return true;
             case OK_ISSUE:
@@ -118,11 +121,12 @@ public enum TaskState {
 
     /**
      * 判断任务是否需要重新发布
+     *
      * @param taskState
      * @return
      */
-    public static boolean isReIssue(TaskState taskState){
-        switch (taskState){
+    public static boolean isReIssue(TaskState taskState) {
+        switch (taskState) {
             case FORBID_RECEIVE:
                 return true;
             default:
@@ -132,11 +136,12 @@ public enum TaskState {
 
     /**
      * 哪些状态允许用户将任务提交管理员审核
+     *
      * @param taskState
      * @return
      */
-    public static boolean isToAdminAudit(TaskState taskState){
-        switch (taskState){
+    public static boolean isToAdminAudit(TaskState taskState) {
+        switch (taskState) {
             case NEW_CREATE:
                 return true;
             case HUNTER_REJECT:
@@ -148,11 +153,12 @@ public enum TaskState {
 
     /**
      * 哪些状态允许用户取消管理员审核
+     *
      * @param state
      * @return
      */
     public static boolean isDiAuditByAdmin(TaskState state) {
-        switch (state){
+        switch (state) {
             case AWAIT_AUDIT:
                 return true;
             case AUDIT:
@@ -166,7 +172,7 @@ public enum TaskState {
         }
     }
 
-    public static List<TaskState> byStrs(List<String> strings){
+    public static List<TaskState> byStrs(List<String> strings) {
         List<TaskState> result = new ArrayList<>();
         strings.forEach(s -> result.add(TaskState.valueOf(s)));
         return result;
@@ -174,11 +180,12 @@ public enum TaskState {
 
     /**
      * 判断任务状态是否允许放弃
+     *
      * @param state
      * @return
      */
-    public static boolean isAbandon(TaskState state){
-        switch (state){
+    public static boolean isAbandon(TaskState state) {
+        switch (state) {
             case FORBID_RECEIVE:
                 return true;
             case OUT:
@@ -186,5 +193,63 @@ public enum TaskState {
             default:
                 return false;
         }
+    }
+
+    /**
+     * 任务状态是否在审核中被允许查询
+     *
+     * @param state
+     * @return
+     */
+    public static boolean isAudit(TaskState state) {
+        switch (state) {
+            case AWAIT_AUDIT:
+                return true;
+            case COMMIT_AUDIT:
+                return true;
+            case AUDIT:
+                return true;
+            case ADMIN_NEGOTIATE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 任务状态是否允许提交审核结果
+     * @param state
+     * @return
+     */
+    public static boolean isAuditCenter(TaskState state) {
+        switch (state) {
+            case AUDIT:
+                return true;
+            case ADMIN_NEGOTIATE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 获取被允许查询的所有状态
+     *
+     * @return
+     */
+    public static List<TaskState> getAudit() {
+        List<TaskState> result = new ArrayList<>();
+        result.add(TaskState.AWAIT_AUDIT);
+        result.add(TaskState.COMMIT_AUDIT);
+        result.add(TaskState.AUDIT);
+        result.add(TaskState.ADMIN_NEGOTIATE);
+        return result;
+    }
+
+    public static List<TaskState> isAuditNotOk() {
+        List<TaskState> result = new ArrayList<>();
+        result.add(TaskState.AWAIT_AUDIT);
+        result.add(TaskState.COMMIT_AUDIT);
+        return result;
     }
 }

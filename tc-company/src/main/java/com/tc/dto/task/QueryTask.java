@@ -4,6 +4,7 @@ import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
+import com.tc.db.enums.UserCategory;
 import com.tc.dto.TimeScope;
 import com.tc.until.FloatHelper;
 import com.tc.until.ListUtils;
@@ -45,6 +46,10 @@ public class QueryTask extends PageRequest {
      * 用户名
      */
     private String username;
+    /**
+     * 用户类别
+     */
+    private UserCategory category;
     private String taskName;
     private Float moneyBegin;
     private Float moneyEnd;
@@ -143,6 +148,14 @@ public class QueryTask extends PageRequest {
         this.userId = userId;
     }
 
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -151,12 +164,12 @@ public class QueryTask extends PageRequest {
         this.username = username;
     }
 
-    public Long getTaskId() {
-        return userId;
+    public UserCategory getCategory() {
+        return category;
     }
 
-    public void setTaskId(Long userId) {
-        this.userId = userId;
+    public void setCategory(UserCategory category) {
+        this.category = category;
     }
 
     public Long getClassifyId() {
@@ -167,21 +180,7 @@ public class QueryTask extends PageRequest {
         this.classifyId = classifyId;
     }
 
-    public String getAccount() {
-        return account;
-    }
 
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getTaskname() {
-        return username;
-    }
-
-    public void setTaskname(String username) {
-        this.username = username;
-    }
 
     public String getTaskName() {
         return taskName;
@@ -382,8 +381,11 @@ public class QueryTask extends PageRequest {
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.ID),cb,queryTask.userId));
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.USERNAME),cb,queryTask.getAccount()));
         predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.NAME),cb,queryTask.getUsername()));
+        predicates.add(QueryUtils.equals(root.get(Task.USER).get(User.CATEGORY),cb,queryTask.getCategory()));
         predicates.add(QueryUtils.equals(root,cb,Task.IS_TASK_REWORK,queryTask.isTaskRework));
         predicates.add(QueryUtils.equals(root,cb,Task.IS_COMPENSATE,queryTask.isCompensate));
+        predicates.add(QueryUtils.like(root,cb,Task.NAME,queryTask.taskName));
+        predicates.add(QueryUtils.like(root,cb,Task.CONTEXT,queryTask.context));
 
         if (FloatHelper.isNotNull(queryTask.classifyId)){
 
@@ -395,9 +397,6 @@ public class QueryTask extends PageRequest {
 
             predicates.add(cb.in(root.get(Task.ID)).value(tcr));
         }
-
-
-        predicates.add(QueryUtils.like(root,cb,Task.CONTEXT,queryTask.context));
 
         if (queryTask.state != null){
             if (queryTask.state.equals(TaskState.HUNTER_COMMIT)){

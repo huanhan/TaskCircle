@@ -40,7 +40,7 @@ public class Hunter implements Serializable {
     public Hunter(Long hunterId, User user) {
         this.userId = hunterId;
         if (user != null){
-            this.user = new User(user.getId(),user.getName(),user.getUsername());
+            this.user = new User(user.getId(),user.getName(),user.getUsername(),user.getHeadImg());
         }
     }
 

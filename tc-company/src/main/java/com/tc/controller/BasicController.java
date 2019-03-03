@@ -1,8 +1,11 @@
 package com.tc.controller;
 
 import com.tc.db.enums.*;
+import com.tc.dto.trans.Trans;
 import com.tc.dto.trans.TransEnum;
+import com.tc.service.AuditService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +16,10 @@ import java.util.List;
 @ResponseStatus(code = HttpStatus.OK)
 @RequestMapping(value = "/basic")
 public class BasicController {
+
+    @Autowired
+    private AuditService auditService;
+
     @GetMapping("/enums/{key}")
     @ApiOperation(value = "根据类别获取系统中的所使用的类别")
     public List<TransEnum> basicEnum(@PathVariable("key") bdState key){
@@ -84,6 +91,12 @@ public class BasicController {
         return result;
     }
 
+
+    @GetMapping("/audit/all")
+    @ApiOperation(value = "统计管理员需要审核的所有信息")
+    public List<Trans> auditState(){
+        return auditService.findByAudit();
+    }
 
 
     private enum bdState{
