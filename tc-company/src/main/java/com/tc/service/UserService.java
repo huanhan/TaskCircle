@@ -47,6 +47,14 @@ public interface UserService extends BasicService<User> {
     Page<User> findByQueryUser(QueryUser queryUser);
 
     /**
+     * 获取符合查询条件的所有用户信息
+     * @param queryUser
+     * @return
+     */
+    List<User> findByAll(QueryUser queryUser);
+
+
+    /**
      * 自动更新用户状态
      * @return
      */

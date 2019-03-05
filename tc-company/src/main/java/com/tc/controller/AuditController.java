@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -53,6 +55,9 @@ public class AuditController {
 
     @Autowired
     private UserWithdrawService userWithdrawService;
+
+    @Autowired
+    private PushMsgService pushMsgService;
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
@@ -542,6 +547,11 @@ public class AuditController {
         }
 
         Audit audit = auditService.save(addTaskAudit.toAudit());
+
+        if (audit != null){
+            pushMsgService.pushTask("任务审核完毕",audit.getResult().getState(),task.getId(),task.getUserId());
+        }
+
         return AuditTask.getBy(audit);
     }
 
@@ -595,6 +605,11 @@ public class AuditController {
         }
 
         Audit audit = auditService.save(addHtAudit.toAudit());
+
+        if (audit != null){
+            pushMsgService.pushHunterTask("接受的任务审核完毕",audit.getResult().getState(),task.getId(),task.getHunterId());
+        }
+
         return AuditTask.getBy(audit);
     }
 
@@ -638,6 +653,13 @@ public class AuditController {
             throw new ValidException("审核结果有误");
         }
         Audit audit = auditService.save(addHunterAudit.toAudit());
+
+        if (audit != null){
+            List<String> ids = new ArrayList<>();
+            ids.add(user.getId().toString());
+            pushMsgService.pushNotice("申请猎刃结果",audit.getResult().getState(),ids);
+        }
+
         return AuditHunter.getBy(audit);
     }
 
@@ -692,6 +714,13 @@ public class AuditController {
         //设置用户设置的金额
         addWithdrawAudit.setUserMoney(withdraw.getMoney());
         Audit audit = auditService.save(addWithdrawAudit.toAudit());
+
+        if (audit != null){
+            List<String> ids = new ArrayList<>();
+            ids.add(withdraw.getUserId().toString());
+            pushMsgService.pushNotice(addWithdrawAudit.getType().getType() + "结果",audit.getResult().getState(),ids);
+        }
+
         return AuditWithdraw.getBy(audit);
     }
 

@@ -18,6 +18,7 @@ import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.AdminService;
 import com.tc.service.MessageService;
+import com.tc.service.PushMsgService;
 import com.tc.service.UserService;
 import com.tc.until.ListUtils;
 import com.tc.until.PageRequest;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,6 +66,8 @@ public class MessageController {
     @Autowired
     private AdminService adminService;
 
+    @Autowired
+    private PushMsgService pushMsgService;
     /**
      * 根据查询条件，获取消息列表
      * @param queryMessage 查询条件
@@ -156,6 +160,45 @@ public class MessageController {
         boolean isSuccess = messageService.updateState(id,MessageState.NORMAL);
         if (!isSuccess){
             throw new DBException(StringResourceCenter.DB_UPDATE_ABNORMAL);
+        }else {
+            List<String> list = new ArrayList<>();
+            //向发布消息的对象推送信息
+            switch (query.getType()){
+                case APPOINT:
+                    LongIds longIds;
+                    try {
+                        longIds = new Gson().fromJson(query.getLookCondition(),LongIds.class);
+                    }catch (Exception ignored){
+                        System.out.println("MessageController.issueMessage:推送信息遇到错误" );
+                        return;
+                    }
+                    longIds.getIds().forEach(aLong -> list.add(aLong.toString()));
+                    pushMsgService.pushNotice("新消息",query.getTitle(),list);
+                    break;
+                case ALL:
+                    pushMsgService.pushNotice("新消息",query.getTitle());
+                    break;
+                case CONDITION:
+                    QueryUser queryUser;
+                    try {
+                        queryUser = new Gson().fromJson(query.getLookCondition(),QueryUser.class);
+                    }catch (Exception e){
+                        System.out.println("MessageController.issueMessage:推送信息遇到错误" );
+                        return;
+                    }
+                    List<User> users = userService.findByAll(queryUser);
+                    if (ListUtils.isNotEmpty(users)){
+                        users.forEach(user -> {
+                            list.add(user.getId().toString());
+                        });
+                        pushMsgService.pushNotice("新消息",query.getTitle(),list);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+
         }
     }
 

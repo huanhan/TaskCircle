@@ -119,6 +119,15 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         }, queryUser);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class, readOnly = true)
+    @Override
+    public List<User> findByAll(QueryUser queryUser) {
+        return userRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = QueryUser.initPredicates(queryUser, root, query, cb);
+            return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        });
+    }
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateState() {
