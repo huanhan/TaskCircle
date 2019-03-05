@@ -1,7 +1,10 @@
 package com.tc.dto.app;
 
+import com.tc.db.entity.AuditHunter;
 import com.tc.db.enums.UserState;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import java.util.Collection;
 
 public class HunterAuditDto {
     private String idCard;
@@ -15,6 +18,8 @@ public class HunterAuditDto {
     private String idCardImgBack;
 
     private UserState state;
+
+    private Collection<AuditDto> audits;
 
     public String getIdCard() {
         return idCard;
@@ -62,5 +67,13 @@ public class HunterAuditDto {
 
     public void setState(UserState state) {
         this.state = state;
+    }
+
+    public Collection<AuditDto> getAudits() {
+        return audits;
+    }
+
+    public void setAudits(Collection<AuditDto> audits) {
+        this.audits = audits;
     }
 }
