@@ -7,7 +7,6 @@ import cn.jpush.api.JPushClient;
 import cn.jpush.api.push.PushResult;
 import cn.jpush.api.push.model.*;
 import cn.jpush.api.push.model.audience.Audience;
-import cn.jpush.api.push.model.notification.Notification;
 import cn.jpush.api.schedule.ScheduleResult;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
@@ -16,7 +15,6 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleRequest;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleResponse;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.tc.dto.app.ChatMsgDto;
 import com.tc.dto.app.PushMsgState;
 import com.tc.dto.app.TaskMsg;
@@ -25,13 +23,6 @@ import com.tc.until.StringResourceCenter;
 import com.tc.until.TimestampHelper;
 import com.tc.until.TranstionHelper;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import static cn.jpush.api.push.model.notification.PlatformNotification.ALERT;
 
 public class TestUntil {
     @Test
@@ -179,7 +170,7 @@ public class TestUntil {
         chatMsgDto.setContent("你看我帅吗你看我我帅吗你看我帅吗");
         chatMsgDto.setCreateTime(TimestampHelper.today());
         chatMsgDto.setHunterId(13l);
-        chatMsgDto.setTaskId("20190201040203278856064");
+        chatMsgDto.setHunterTaskId("20190201040203278856064");
         chatMsgDto.setUserId(6l);
         chatMsgDto.setSender(6l);
 

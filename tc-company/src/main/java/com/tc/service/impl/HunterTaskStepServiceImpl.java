@@ -113,7 +113,7 @@ public class HunterTaskStepServiceImpl extends AbstractBasicServiceImpl<HunterTa
             }
         } else {
             //判断是否最后一次添加,如果最后一次添加，修改猎刃任务的状态未已完成
-//            tsCount = taskStepRepository.countByTaskId(hunterTask.getTaskId());
+//            tsCount = taskStepRepository.countByTaskId(hunterTask.getHunterTaskId());
             if (count + 1 == tsCount) {
                 count = hunterTaskRepository.updateState(hunterTask.getId(), HunterTaskState.TASK_COMPLETE);
                 if (count <= 0) {

@@ -1,5 +1,7 @@
 package com.tc.controller;
 
+import com.tc.db.entity.AuditHunter;
+import com.tc.db.entity.AuditTask;
 import com.tc.db.entity.User;
 import com.tc.db.entity.UserImg;
 import com.tc.db.entity.pk.UserImgPK;
@@ -30,6 +32,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -171,6 +174,12 @@ public class AppUserController {
         hunterAuditDto.setIdCard(user.getIdCard());
         hunterAuditDto.setPhone(user.getPhone());
         hunterAuditDto.setState(user.getState());
+
+        ArrayList<AuditDto> auditDtos = new ArrayList<>();
+        for (AuditHunter auditHunter : user.getAuditHunters()) {
+            auditDtos.add(AuditDto.toDetail(auditHunter.getAudit()));
+        }
+        hunterAuditDto.setAudits(auditDtos);
 
         for (UserImg userImg : userImgs) {
             if (userImg.getImgName() == UserIMGName.IDCARD_FRONT) {

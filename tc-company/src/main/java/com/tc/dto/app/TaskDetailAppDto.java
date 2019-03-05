@@ -1,9 +1,6 @@
 package com.tc.dto.app;
 
-import com.tc.db.entity.Task;
-import com.tc.db.entity.TaskClassify;
-import com.tc.db.entity.TaskClassifyRelation;
-import com.tc.db.entity.TaskStep;
+import com.tc.db.entity.*;
 import com.tc.db.enums.TaskState;
 import com.tc.db.enums.TaskType;
 import com.tc.dto.task.AddTaskStep;
@@ -44,6 +41,7 @@ public class TaskDetailAppDto {
 
     private Collection<TaskClassifyAppDto> taskClassifyAppDtos;
     private Collection<AddTaskStep> taskSteps;
+    private Collection<AuditDto> audits;
 
     public static TaskDetailAppDto toDetail(Task task) {
         TaskDetailAppDto taskDetailAppDto = new TaskDetailAppDto();
@@ -73,6 +71,13 @@ public class TaskDetailAppDto {
         }
         taskDetailAppDto.setTaskClassifyAppDtos(taskClassifyAppDtos);
         taskDetailAppDto.setTaskSteps(taskSteps);
+
+        ArrayList<AuditDto> auditDtos = new ArrayList<>();
+        for (AuditTask auditTask : task.getAuditTasks()) {
+            auditDtos.add(AuditDto.toDetail(auditTask.getAudit()));
+        }
+        taskDetailAppDto.setAudits(auditDtos);
+
         return taskDetailAppDto;
     }
 
@@ -290,5 +295,13 @@ public class TaskDetailAppDto {
 
     public void setPick(Boolean pick) {
         this.pick = pick;
+    }
+
+    public Collection<AuditDto> getAudits() {
+        return audits;
+    }
+
+    public void setAudits(Collection<AuditDto> audits) {
+        this.audits = audits;
     }
 }

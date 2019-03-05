@@ -4,6 +4,7 @@ import com.tc.db.entity.HunterTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.User;
 import com.tc.db.entity.UserHunterInterflow;
+import com.tc.db.enums.HunterTaskState;
 import com.tc.dto.app.*;
 import com.tc.dto.task.QueryTaskInterflow;
 import com.tc.exception.ValidException;
@@ -48,9 +49,9 @@ public class AppChatController {
      *
      * @return
      */
-    @GetMapping("/{taskid:\\d+}/{hunterid:\\d+}/{userid:\\d+}/{page:\\d+}/{size:\\d+}")
+    @GetMapping("/{huntertaskid:\\d+}/{hunterid:\\d+}/{userid:\\d+}/{page:\\d+}/{size:\\d+}")
     @ApiOperation(value = "获取指定任务，指定用户，指定猎刃的聊天内容")
-    public AppPage chatDetail(@PathVariable("taskid") String taskid,
+    public AppPage chatDetail(@PathVariable("huntertaskid") String huntertaskid,
                               @PathVariable("hunterid") Long hunterid,
                               @PathVariable("userid") Long userid,
                               @PathVariable("page") Integer page,
@@ -60,7 +61,7 @@ public class AppChatController {
         queryTaskInterflow.setSort(new Sort(Sort.Direction.DESC, Task.CREATE_TIME));
         queryTaskInterflow.setHunterId(hunterid);
         queryTaskInterflow.setUserId(userid);
-        queryTaskInterflow.setTaskId(taskid);
+        queryTaskInterflow.setHtId(huntertaskid);
         Page<UserHunterInterflow> query = userHunterInterflowService.findByQuery(queryTaskInterflow);
         List<UserHunterInterflow> content = query.getContent();
         List<ChatDto> data = ChatDto.initList(content);
@@ -78,11 +79,11 @@ public class AppChatController {
             throw new ValidException(bindingResult.getFieldErrors());
         }
 
-        HunterTask hunterTask = hunterTaskService.findByTaskIsNotOk(addChat.getTaskId(), addChat.getHunterId());
-        if (hunterTask == null) {
+        HunterTask hunterTask = hunterTaskService.findOne(addChat.getHunterTaskId());
+//        HunterTask hunterTask = hunterTaskService.findByTaskIsNotOk(addChat.getHunterTaskId(), addChat.getHunterId());
+        if (hunterTask == null || HunterTaskState.isOk(hunterTask.getState())) {
             throw new ValidException("任务已结束，不能在于对方沟通了哦！");
         }
-
 
         UserHunterInterflow init = ChatDtoReq.init(addChat);
         init.setSender(id);

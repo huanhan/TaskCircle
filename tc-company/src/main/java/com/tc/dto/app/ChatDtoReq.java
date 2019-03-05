@@ -16,7 +16,7 @@ public class ChatDtoReq {
     @NotNull
     private Long userId;
     @NotEmpty
-    private String taskId;
+    private String hunterTaskId;
     @NotEmpty
     private String context;
 
@@ -42,12 +42,12 @@ public class ChatDtoReq {
         this.userId = userId;
     }
 
-    public String getTaskId() {
-        return taskId;
+    public String getHunterTaskId() {
+        return hunterTaskId;
     }
 
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
     }
 
     public String getContext() {

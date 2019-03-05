@@ -10,7 +10,7 @@ public class ChatMsgDto {
     private Long hunterId;
     private Long userId;
     private Long sender;
-    private String taskId;
+    private String hunterTaskId;
     private Timestamp createTime;
     private String content;
     private String userIcon;
@@ -56,12 +56,12 @@ public class ChatMsgDto {
         this.sender = sender;
     }
 
-    public String getTaskId() {
-        return taskId;
+    public String getHunterTaskId() {
+        return hunterTaskId;
     }
 
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setHunterTaskId(String hunterTaskId) {
+        this.hunterTaskId = hunterTaskId;
     }
 
     public Timestamp getCreateTime() {
