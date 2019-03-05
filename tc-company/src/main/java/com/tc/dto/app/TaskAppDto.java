@@ -1,5 +1,6 @@
 package com.tc.dto.app;
 
+import com.tc.db.entity.AuditTask;
 import com.tc.db.entity.Task;
 import com.tc.db.entity.TaskStep;
 import com.tc.db.enums.TaskState;
@@ -7,6 +8,8 @@ import com.tc.db.enums.TaskType;
 import org.springframework.beans.BeanUtils;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class TaskAppDto {
     private String id;
@@ -24,6 +27,7 @@ public class TaskAppDto {
     private Integer peopleNumber;
     private Timestamp beginTime;
     private Timestamp deadline;
+    private Collection<AuditDto> audits;
 
     public static TaskAppDto toDetail(Task task) {
         TaskStep taskStep = task.getTaskSteps().iterator().next();
@@ -32,6 +36,12 @@ public class TaskAppDto {
         TaskAppDto taskAppDto = new TaskAppDto();
         taskAppDto.setHeadImg(headImg);
         taskAppDto.setUsername(task.getUser().getUsername());
+
+        ArrayList<AuditDto> auditDtos = new ArrayList<>();
+        for (AuditTask auditTask : task.getAuditTasks()) {
+            auditDtos.add(AuditDto.toDetail(auditTask.getAudit()));
+        }
+        taskAppDto.setAudits(auditDtos);
         BeanUtils.copyProperties(task, taskAppDto);
         return taskAppDto;
     }
@@ -154,5 +164,13 @@ public class TaskAppDto {
 
     public void setType(TaskType type) {
         this.type = type;
+    }
+
+    public Collection<AuditDto> getAudits() {
+        return audits;
+    }
+
+    public void setAudits(Collection<AuditDto> audits) {
+        this.audits = audits;
     }
 }

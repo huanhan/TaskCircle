@@ -1,9 +1,6 @@
 package com.tc.dto.app;
 
-import com.tc.db.entity.HunterTask;
-import com.tc.db.entity.HunterTaskStep;
-import com.tc.db.entity.Task;
-import com.tc.db.entity.TaskStep;
+import com.tc.db.entity.*;
 import com.tc.db.enums.HunterTaskState;
 
 import java.sql.Timestamp;
@@ -31,6 +28,7 @@ public class HunterTaskRunningStateDto {
     private Boolean isStop;//是否暂停
 
     private Collection<HunterRunningStepDto> taskSteps;
+    private Collection<AuditDto> audits;
 
     public static HunterTaskRunningStateDto toDetail(Task task, HunterTask hunterTask) {
         HunterTaskRunningStateDto hunterTaskRunningStateDto = new HunterTaskRunningStateDto();
@@ -80,6 +78,13 @@ public class HunterTaskRunningStateDto {
 
         }
         hunterTaskRunningStateDto.setTaskSteps(hunterRunningStepDtos);
+
+        ArrayList<AuditDto> auditDtos = new ArrayList<>();
+        for (AuditHunterTask auditHunterTask : hunterTask.getAuditHunterTasksById()) {
+            auditDtos.add(AuditDto.toDetail(auditHunterTask.getAudit()));
+        }
+        hunterTaskRunningStateDto.setAudits(auditDtos);
+
         return hunterTaskRunningStateDto;
     }
 
@@ -227,5 +232,13 @@ public class HunterTaskRunningStateDto {
 
     public void setStop(Boolean stop) {
         isStop = stop;
+    }
+
+    public Collection<AuditDto> getAudits() {
+        return audits;
+    }
+
+    public void setAudits(Collection<AuditDto> audits) {
+        this.audits = audits;
     }
 }

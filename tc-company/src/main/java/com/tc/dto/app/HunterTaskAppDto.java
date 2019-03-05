@@ -1,11 +1,14 @@
 package com.tc.dto.app;
 
+import com.tc.db.entity.AuditHunterTask;
 import com.tc.db.entity.HunterTask;
 import com.tc.db.enums.HunterTaskState;
 import com.tc.until.FloatHelper;
 import org.springframework.beans.BeanUtils;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class HunterTaskAppDto {
     private String id;
@@ -30,6 +33,7 @@ public class HunterTaskAppDto {
     private Boolean userCHunter;
     private Boolean hunterCUser;
     private Boolean hunterCTask;
+    private Collection<AuditDto> audits;
 
     public String getId() {
         return id;
@@ -207,6 +211,14 @@ public class HunterTaskAppDto {
         this.hunterCTask = hunterCTask;
     }
 
+    public Collection<AuditDto> getAudits() {
+        return audits;
+    }
+
+    public void setAudits(Collection<AuditDto> audits) {
+        this.audits = audits;
+    }
+
     public static HunterTaskAppDto toDetail(HunterTask task) {
         HunterTaskAppDto hunterTaskAppDto = new HunterTaskAppDto();
         hunterTaskAppDto.setUserId(task.getTask().getUserId());
@@ -217,6 +229,11 @@ public class HunterTaskAppDto {
         hunterTaskAppDto.setName(task.getTask().getName());
         hunterTaskAppDto.setTaskContext(task.getTask().getContext());
         hunterTaskAppDto.setCurStep(task.getHunterTaskSteps().size());
+        ArrayList<AuditDto> auditDtos = new ArrayList<>();
+        for (AuditHunterTask auditHunterTask : task.getAuditHunterTasksById()) {
+            auditDtos.add(AuditDto.toDetail(auditHunterTask.getAudit()));
+        }
+        hunterTaskAppDto.setAudits(auditDtos);
         BeanUtils.copyProperties(task, hunterTaskAppDto);
         hunterTaskAppDto.setMoney(FloatHelper.divied(task.getTask().getOriginalMoney(),task.getTask().getPeopleNumber().floatValue()));
         return hunterTaskAppDto;
