@@ -17,6 +17,8 @@ public interface SecurityConstants {
 	 */
 	public static final String DEFAULT_LOGIN_PROCESSING_URL_FORM = "/authentication/form";
 
+	public static final String DEFAULT_REFLASH_TOKEN = "/oauth/token";
+
 	/**
 	 * 默认的图片校验码登陆请求除了
 	 */

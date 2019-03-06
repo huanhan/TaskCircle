@@ -1,5 +1,6 @@
 package com.tc.security.app;
 
+import com.tc.security.app.jwt.OptionsFilter;
 import com.tc.security.app.social.openid.OpenIdAuthenticationSecurityConfig;
 import com.tc.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
 import com.tc.security.core.authorize.AuthorizeConfigManager;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -17,7 +19,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.social.security.SpringSocialConfigurer;
+import org.springframework.web.cors.CorsUtils;
 
 
 @Configuration
@@ -61,19 +65,23 @@ public class TcResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
 
-
     @Autowired
     private OAuth2WebSecurityExpressionHandler expressionHandler;
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 
+
         resources.expressionHandler(expressionHandler);
 
     }
 
+
     @Override
     public void configure(HttpSecurity http) throws Exception {
+
+
+
 
         http.formLogin()
                 .loginPage(SecurityConstants.DEFAULT_UNAUTHENTICATION_URL)
@@ -81,20 +89,27 @@ public class TcResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .successHandler(tcAuthenticationSuccessHandler)
                 .failureHandler(tcAuthenticationFailureHandler);
 
+
         /**
          * apply：执行传入的配置
          */
         http.apply(validateCodeSecurityConfig)
                 .and()
-            .apply(smsCodeAuthenticationSecurityConfig)
+                .apply(smsCodeAuthenticationSecurityConfig)
                 .and()
-            .apply(tcSocialSecurityConfig)
+                .apply(tcSocialSecurityConfig)
                 .and()
-            .apply(openIdAuthenticationSecurityConfig)
+                .apply(openIdAuthenticationSecurityConfig)
+        ;
+
+
+        http.cors()
                 .and()
-            .csrf()
-                .disable();
+                .csrf()
+                .disable().authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest).permitAll();
 
         authorizeConfigManager.config(http.authorizeRequests());
     }
+
+
 }
