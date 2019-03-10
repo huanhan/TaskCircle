@@ -20,13 +20,19 @@ import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurity
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.social.security.SpringSocialConfigurer;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @Configuration
 @EnableResourceServer
 public class TcResourceServerConfig extends ResourceServerConfigurerAdapter {
+
+    private AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @Autowired
     private SecurityProperties securityProperties;
@@ -100,7 +106,11 @@ public class TcResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .apply(tcSocialSecurityConfig)
                 .and()
                 .apply(openIdAuthenticationSecurityConfig)
+                .and()
+//                .csrf()
+//                .disable()
         ;
+
 
 
         http.cors()
@@ -112,4 +122,11 @@ public class TcResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
 
+    private boolean hasOption(HttpServletRequest request){
+        if (antPathMatcher.match("/oauth/**",request.getRequestURI())){
+            return true;
+        }else {
+            return CorsUtils.isPreFlightRequest(request);
+        }
+    }
 }

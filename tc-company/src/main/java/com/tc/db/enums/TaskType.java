@@ -21,6 +21,11 @@ public enum  TaskType {
      * 用户指定某个人去完成
      */
     APPOINT("指定型"),
+
+    /**
+     * 用户未设置
+     */
+    NOT("未设置"),
     ;
 
     private String type;

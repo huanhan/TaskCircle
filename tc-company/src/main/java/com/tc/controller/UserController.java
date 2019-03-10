@@ -110,10 +110,6 @@ public class UserController {
 
         User user = userService.findOne(id);
 
-        if (!user.getCategory().equals(UserCategory.NORMAL)) {
-            throw new ValidException(StringResourceCenter.VALIDATOR_AUTHORITY_FAILED);
-        }
-
         return User.toDetail(user);
 
     }

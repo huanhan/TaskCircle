@@ -58,6 +58,13 @@ public class UserWithdraw implements Serializable {
     private List<TransEnum> transTypes;
     private Boolean isAudit = false;
 
+    public UserWithdraw() {
+    }
+
+    public UserWithdraw(Long userId) {
+        this.userId = userId;
+    }
+
     public static List<UserWithdraw> toIndexAsList(List<UserWithdraw> content, Long me) {
         if (!ListUtils.isEmpty(content)){
             content.forEach(userWithdraw -> {

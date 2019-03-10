@@ -286,8 +286,12 @@ public class TaskClassify implements Serializable {
             }else {
                 if (!ListUtils.isEmpty(taskClassify.getTaskClassifies())){
                     taskClassify.setChildNum(taskClassify.getTaskClassifies().size());
-                    taskClassify.getTaskClassifies().forEach(child -> taskClassify.setTaskNum(taskClassify.getTaskNum() + child.getTaskClassifyRelations().size()));
+                    taskClassify.getTaskClassifies().forEach(
+                            child -> {
+                                taskClassify.setTaskNum(taskClassify.getTaskNum() + child.getTaskClassifyRelations().size());
+                            });
                     taskClassify.setTaskClassifies(null);
+                    taskClassify.setTaskClassifyRelations(null);
                 }
             }
 

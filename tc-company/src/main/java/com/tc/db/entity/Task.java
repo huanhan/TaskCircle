@@ -569,7 +569,11 @@ public class Task implements Serializable {
             }
             task.setTaskSteps(null);
             task.transState = new Trans(task.getState().name(),task.getState().getState());
-            task.transType = new Trans(task.getType().name(),task.getType().getType());
+            if (task.getType() != null){
+                task.transType = new Trans(task.getType().name(),task.getType().getType());
+            }else {
+                task.transType = new Trans(TaskType.NOT.name(),TaskType.NOT.getType());
+            }
         }
         return task;
     }
@@ -605,7 +609,11 @@ public class Task implements Serializable {
                 task.setCommentTasks(null);
                 task.setAuditTasks(null);
                 task.transState = new Trans(task.getState().name(),task.getState().getState());
-                task.transType = new Trans(task.getType().name(),task.getType().getType());
+                if (task.getType() != null){
+                    task.transType = new Trans(task.getType().name(),task.getType().getType());
+                }else {
+                    task.transType = new Trans(TaskType.NOT.name(),TaskType.NOT.getType());
+                }
             });
         }
         return content;
@@ -635,7 +643,11 @@ public class Task implements Serializable {
                 task.setCommentTasks(null);
                 task.setAuditTasks(null);
                 task.transState = new Trans(task.getState().name(),task.getState().getState());
-                task.transType = new Trans(task.getType().name(),task.getType().getType());
+                if (task.getType() != null){
+                    task.transType = new Trans(task.getType().name(),task.getType().getType());
+                }else {
+                    task.transType = new Trans(TaskType.NOT.name(),TaskType.NOT.getType());
+                }
             });
         }
         return content;

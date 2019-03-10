@@ -8,12 +8,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
 @AutoConfigureBefore(TcResourceServerConfig.class)
-public class MvcConfigurer {//extends WebSecurityConfigurerAdapter {
+public class MvcConfigurer {//extends WebMvcConfigurerAdapter {
     private Logger logger = LoggerFactory.getLogger(MvcConfigurer.class);
-
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**");
+//    }
 
     private CorsConfiguration buildConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();

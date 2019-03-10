@@ -45,6 +45,14 @@ public class AuditWithdraw {
         this.userMoney = userMoney;
     }
 
+    public AuditWithdraw(String id, String withdrawId, UserWithdraw userWithdraw) {
+        this.auditId = id;
+        this.withdrawId = withdrawId;
+        if (userWithdraw != null){
+            this.userWithdraw = new UserWithdraw(userWithdraw.getUserId());
+        }
+    }
+
     public static List<AuditWithdraw> toIndexList(List<AuditWithdraw> awList) {
         if (ListUtils.isNotEmpty(awList)){
             awList.forEach(auditWithdraw -> {

@@ -228,7 +228,7 @@ public class Audit {
     public static Audit toDetail(Audit result) {
         if (result != null){
             if (result.getAuditWithdraw() != null){
-                result.setAuditHunter(new AuditHunter(result.getId(),result.getAuditHunter().getUserId(),result.getAuditHunter().getUser()));
+                result.setAuditWithdraw(new AuditWithdraw(result.getAuditWithdraw().getAuditId(),result.getAuditWithdraw().getWithdrawId(),result.getAuditWithdraw().getUserWithdraw()));
                 result.setTypeData(new Trans(result.getAuditWithdraw().getWithdrawId()));
             }
             if (result.getAuditTask() != null){
