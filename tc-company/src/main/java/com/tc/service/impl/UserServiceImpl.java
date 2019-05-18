@@ -160,6 +160,7 @@ public class UserServiceImpl extends AbstractBasicServiceImpl<User> implements U
         return count > 0;
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public Boolean updateStateAndAuditTime(Long id, UserState state, Date date) {
         int count = userRepository.updateStateAndAuditTime(id, state, new Timestamp(date.getTime()));
