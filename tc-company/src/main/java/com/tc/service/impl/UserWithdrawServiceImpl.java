@@ -117,4 +117,10 @@ public class UserWithdrawServiceImpl extends AbstractBasicServiceImpl<UserWithdr
     public UserWithdraw findOne(String id) {
         return userWithdrawRepository.findOne(id);
     }
+
+    @Transactional
+    @Override
+    public UserWithdraw save(UserWithdraw userWithdraw) {
+        return userWithdrawRepository.save(userWithdraw);
+    }
 }

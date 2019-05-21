@@ -4,8 +4,10 @@ import com.tc.db.enums.WithdrawState;
 import com.tc.db.enums.WithdrawType;
 import com.tc.dto.trans.Trans;
 import com.tc.dto.trans.TransEnum;
+import com.tc.until.IdGenerator;
 import com.tc.until.ListUtils;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.cloud.commons.util.IdUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -132,6 +134,7 @@ public class UserWithdraw implements Serializable {
 
     public static UserWithdraw createPay(Long id) {
         UserWithdraw result = new UserWithdraw();
+        result.setId(IdGenerator.INSTANCE.nextId());
         result.setUserId(id);
         result.setState(WithdrawState.PAY_AUDIT);
         result.setType(WithdrawType.PAY);
@@ -141,6 +144,7 @@ public class UserWithdraw implements Serializable {
 
     public static UserWithdraw createWDraw(Long id) {
         UserWithdraw result = new UserWithdraw();
+        result.setId(IdGenerator.INSTANCE.nextId());
         result.setUserId(id);
         result.setState(WithdrawState.AUDIT);
         result.setType(WithdrawType.WITHDRAW);
