@@ -153,6 +153,9 @@ public class TranstionHelper {
             case "UserController":
                 name = "用户信息管理";
                 break;
+            case "HunterTaskController":
+                name = "猎刃任务管理";
+                break;
             default:
                 break;
         }

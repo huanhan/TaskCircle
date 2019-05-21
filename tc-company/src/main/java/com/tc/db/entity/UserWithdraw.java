@@ -130,6 +130,23 @@ public class UserWithdraw implements Serializable {
         return result;
     }
 
+    public static UserWithdraw createPay(Long id) {
+        UserWithdraw result = new UserWithdraw();
+        result.setUserId(id);
+        result.setState(WithdrawState.PAY_AUDIT);
+        result.setType(WithdrawType.PAY);
+        result.setMoney(0f);
+        return result;
+    }
+
+    public static UserWithdraw createWDraw(Long id) {
+        UserWithdraw result = new UserWithdraw();
+        result.setUserId(id);
+        result.setState(WithdrawState.AUDIT);
+        result.setType(WithdrawType.WITHDRAW);
+        result.setMoney(0f);
+        return result;
+    }
 
 
     @Id

@@ -164,7 +164,7 @@ public interface HunterTaskRepository extends JpaRepository<HunterTask, String>,
      * @return
      */
     @Modifying
-    @Query(value = "update HunterTask t set t.state = :state, t.finishTime = :time,t.userRejectCount = 0 where t.id = :id")
+    @Query(value = "update HunterTask t set t.state = :state, t.finishTime = :time where t.id = :id")
     int updateStateAndFinishTime(@Param("id") String id, @Param("state") HunterTaskState state, @Param("time") Timestamp finishTime);
 
     /**

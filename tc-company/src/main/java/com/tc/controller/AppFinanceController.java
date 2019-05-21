@@ -13,6 +13,7 @@ import com.tc.dto.finance.Money;
 import com.tc.dto.finance.QueryFinance;
 import com.tc.dto.finance.QueryIE;
 import com.tc.dto.user.CashPledge;
+import com.tc.exception.DBException;
 import com.tc.exception.ValidException;
 import com.tc.service.UserIeRecordService;
 import com.tc.service.UserService;
@@ -115,58 +116,26 @@ public class AppFinanceController {
     }
 
     /**
-     * 我的转账记录详情
-     * 不需要，因为列表会展示
-     * @param tid
-     * @param id
-     */
-    /*@GetMapping("/transfer/detail/{tid:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "获取我的转账记录详情")
-    public UserIeRecord transferDetail(@PathVariable("tid") String tid, @PathVariable("id") Long id) {
-
-        return new UserIeRecord();
-    }*/
-
-    /**
-     * 我的充值与提现记录详情
-     *不需要，因为列表会展示
-     * @param tid
-     * @param id
-     * @return
-     */
-    /*@GetMapping("/detail/{tid:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "获取我的充值与提现记录详情")
-    public UserWithdraw financeDetail(@PathVariable("tid") String tid, @PathVariable("id") Long id) {
-        return new UserWithdraw();
-    }*/
-
-    /**
-     * 我的押金详情
-     *不需要，因为列表会展示
-     * @param tid
-     * @param id
-     * @return
-     */
-   /* @GetMapping("/money/detail/{tid:\\d+}/{id:\\d+}")
-    @ApiOperation(value = "获取我的充值与提现记录详情")
-    public Money moneyDetail(@PathVariable("tid") String tid, @PathVariable("id") Long id) {
-        return new Money();
-    }*/
-
-    /**
      * 新增提现记录，并提交审核
-     *
-     * @param addFinance
-     * @param bindingResult
      */
-    @PostMapping("/add")
+    @PostMapping("/withdraw/add")
     @ApiOperation(value = "新增一条提现记录，并提交审核")
-    public void add(HttpServletRequest request, @Valid @RequestBody AddFinance addFinance, BindingResult bindingResult) {
+    public void add(HttpServletRequest request) {
         Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
-        if (bindingResult.hasErrors()) {
-            throw new ValidException(bindingResult.getFieldErrors());
+        UserWithdraw result = userWithdrawService.save(UserWithdraw.createWDraw(id));
+        if (result == null) {
+            throw new DBException("添加提现记录失败");
         }
-
         //保存提现记录时，需要扣除用户资金，并设置提现状态为提交审核状态
+    }
+
+    @GetMapping("/pay/add")
+    @ApiOperation(value = "新增一条充值记录，并提交审核")
+    public void addPay(HttpServletRequest request){
+        Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
+        UserWithdraw result = userWithdrawService.save(UserWithdraw.createPay(id));
+        if (result == null) {
+            throw new DBException("添加充值记录失败");
+        }
     }
 }

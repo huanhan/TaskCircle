@@ -6,6 +6,7 @@ import com.tc.db.enums.UserCategory;
 import com.tc.dto.Show;
 import com.tc.dto.admin.ModifyAdmin;
 import com.tc.dto.admin.QueryAdmin;
+import com.tc.dto.app.HunterAuditReq;
 import com.tc.dto.audit.AddTaskAudit;
 import com.tc.dto.audit.QueryAudit;
 import com.tc.dto.authority.*;
@@ -126,7 +127,7 @@ public class TextRuntime {
             System.out.println("ssss");
         }
 
-        String json = printGson(new QueryFinance());
+        String json = printGson(new HunterAuditReq());
 
         String name = StringUtils.substringAfterLast("com.tc.controller.TaskController",".");
         System.out.println(name);
