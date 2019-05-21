@@ -2,19 +2,12 @@ package com.tc.controller;
 
 import com.tc.db.entity.UserIeRecord;
 import com.tc.db.entity.UserWithdraw;
-import com.tc.dto.Result;
 import com.tc.dto.TimeScope;
-import com.tc.dto.app.AppPage;
-import com.tc.dto.app.CashPledgeAppDto;
-import com.tc.dto.app.TransferAppDto;
-import com.tc.dto.app.UserWithdrawAppDto;
-import com.tc.dto.finance.AddFinance;
-import com.tc.dto.finance.Money;
+import com.tc.dto.app.*;
 import com.tc.dto.finance.QueryFinance;
 import com.tc.dto.finance.QueryIE;
 import com.tc.dto.user.CashPledge;
 import com.tc.exception.DBException;
-import com.tc.exception.ValidException;
 import com.tc.service.UserIeRecordService;
 import com.tc.service.UserService;
 import com.tc.service.UserWithdrawService;
@@ -24,12 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -120,22 +110,24 @@ public class AppFinanceController {
      */
     @PostMapping("/withdraw/add")
     @ApiOperation(value = "新增一条提现记录，并提交审核")
-    public void add(HttpServletRequest request) {
+    public ResultApp add(HttpServletRequest request) {
         Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         UserWithdraw result = userWithdrawService.save(UserWithdraw.createWDraw(id));
         if (result == null) {
             throw new DBException("添加提现记录失败");
         }
         //保存提现记录时，需要扣除用户资金，并设置提现状态为提交审核状态
+        return ResultApp.init("已通知管理员，管理员将售后与您联系");
     }
 
     @GetMapping("/pay/add")
     @ApiOperation(value = "新增一条充值记录，并提交审核")
-    public void addPay(HttpServletRequest request){
+    public ResultApp addPay(HttpServletRequest request){
         Long id = Long.parseLong(request.getAttribute(StringResourceCenter.USER_ID).toString());
         UserWithdraw result = userWithdrawService.save(UserWithdraw.createPay(id));
         if (result == null) {
             throw new DBException("添加充值记录失败");
         }
+        return ResultApp.init("已通知管理员，管理员将售后与您联系");
     }
 }
